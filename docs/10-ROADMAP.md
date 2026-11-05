@@ -41,7 +41,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P3.4 About page.** AC: all blocks come from the CMS. Visual QA.
 - [x] **P3.5 Services index + 6 division pages** (sub-services, benefits, deliverables, pricing model display, FAQ, CTA with preselection, coming-soon/inactive behaviour). AC: tests for status behaviour. Visual QA.
 - [x] **P3.6 Our Work** grid + filter + case study pages + empty state. AC: published/draft visibility test.
-- [ ] **P3.7 Products page** (Business Suite "In Development", optional interest form). AC: no purchase/subscribe wording (test greps rendered HTML).
+- [x] **P3.7 Products page** (Business Suite "In Development", optional interest form). AC: no purchase/subscribe wording (test greps rendered HTML).
 - [x] **P3.8 Contact** form + server endpoint (Turnstile, honeypot, rate limit, Zod) → enquiry + notifications + emails + reference shown. AC: integration + e2e tests.
 - [ ] **P3.9 Legal pages** (privacy, terms, cookies) with real draft text. AC: linked from the footer. BLOCKERS.md asks for legal review.
 - [ ] **P3.10 SEO.** Meta/canonical/OG/Twitter, JSON-LD, dynamic sitemap.xml, robots.txt, OG images (Canva or generated SVG→PNG at build), 404/500 pages. AC: public.spec.ts SEO assertions. Lighthouse targets met on mobile.

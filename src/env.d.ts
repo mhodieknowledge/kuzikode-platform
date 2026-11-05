@@ -1,5 +1,5 @@
 /// <reference types="astro/client" />
-/* eslint-disable @typescript-eslint/no-empty-object-type -- empty interfaces are required for declaration merging */
+/* eslint-disable @typescript-eslint/no-empty-object-type, @typescript-eslint/consistent-type-imports -- ambient declaration-merging file */
 
 /** Worker secrets (`wrangler secret put` / `.dev.vars`). Optional: absence is reported by check-env, never by value. */
 interface KuzikodeSecrets {
@@ -14,7 +14,6 @@ interface KuzikodeSecrets {
   PESEPAY_MAIN_INTEGRATION_KEY?: string;
   PESEPAY_MAIN_ENCRYPTION_KEY?: string;
   /** Present only in the vitest worker: migrations to apply. */
-  // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ambient file cannot use import statements
   TEST_MIGRATIONS?: import('cloudflare:test').D1Migration[];
 }
 
@@ -22,3 +21,9 @@ declare namespace Cloudflare {
   interface Env extends KuzikodeSecrets {}
 }
 interface Env extends KuzikodeSecrets {}
+
+declare namespace App {
+  interface Locals {
+    ctx: import('./server/context').RequestContext;
+  }
+}

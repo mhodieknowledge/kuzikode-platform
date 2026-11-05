@@ -12,7 +12,14 @@ export default defineConfig({
     sessionKVBindingName: 'CACHE',
   }),
   integrations: [react()],
-  security: { checkOrigin: false },
+  // CSRF/Origin checks are done by our own middleware (docs/07 §3). Hash-based CSP for Astro's scripts:
+  security: {
+    checkOrigin: false,
+    csp: {
+      scriptDirective: { resources: ["'self'", 'https://challenges.cloudflare.com'] },
+      styleDirective: { resources: ["'self'", "'unsafe-inline'"] },
+    },
+  },
   vite: {
     plugins: [tailwindcss()],
   },

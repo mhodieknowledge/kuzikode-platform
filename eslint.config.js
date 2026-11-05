@@ -48,6 +48,11 @@ export default defineConfig(
     },
   },
   {
+    // Tests inspect loosely-typed JSON payloads; production code keeps the rule.
+    files: ['tests/**/*.ts', 'packages/*/test/**/*.ts'],
+    rules: { '@typescript-eslint/no-explicit-any': 'off' },
+  },
+  {
     files: ['src/**/*.{ts,tsx,astro}'],
     ignores: ['src/server/lib/logger.ts'],
     rules: { 'no-console': 'error' },

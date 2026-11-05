@@ -5,11 +5,17 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phase: 1 — inspection & planning
-- Last completed task: P2.3 (P1.5 pen.dev runs in progress)
-- **Next step:** P2.4 config & core libs (config.ts, errors.ts, logger.ts, ids.ts, context.ts, middleware). Then review P1.5 mockups.
+- Last completed task: P2.4 (P1.5 pen.dev runs in progress)
+- **Next step:** P2.5 money & pricing core (`src/server/lib/money.ts`, `pricing.ts`, unit tests per docs/08 §2). Then review P1.5 mockups.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh (non-exempt calls this month: ~3/15) · CI status: —
 
 ---
+
+## 2026-11-05 19:45 UTC — P2.4 config & core libs
+- Done: config.ts (Zod, fail-closed), errors.ts (AppError + mapping), logger.ts (redaction), ids.ts, context.ts, security-headers.ts,
+  Hono requestContext + apiHeaders middleware + global onError/notFound, Astro middleware (headers, private no-store/noindex, ctx in locals).
+- Tests: unit 38 / integration 7 passed. Checked with wrangler dev: page + /admin headers correct.
+- Next step: P2.5.
 
 ## 2026-11-05 19:30 UTC — P2.1–P2.3 scaffold, worker entry, wrangler config
 - Done: Astro 7 SSR + Cloudflare adapter 14 + React 19 + Tailwind 4, TS 6 strictest, ESLint 9 (ts, astro, jsx-a11y, react-hooks, no-only-tests,

@@ -51,3 +51,7 @@ Things only the owner can do. The agent keeps building around them and records e
   one-time secure window.
 
 ## Raised by the agent
+- [ ] **Legal review of the website drafts (P3.9):** `/legal/privacy`, `/legal/terms`, `/legal/service-terms`, `/legal/cookies`,
+  `/legal/accessibility` are honest drafts marked "awaiting legal review". Have a Zimbabwean lawyer review them (data protection under the
+  Cyber and Data Protection Act [Chapter 12:07], retention periods, liability limits), then edit them in Admin → Website → Legal pages
+  and remove the "draft" line. Enquiry retention (24 months) and application retention (12 months) are defaults you can change.

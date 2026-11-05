@@ -1,0 +1,21 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import { getPage } from '../../server/modules/cms';
+import type { Section } from '../../shared/schemas/cms';
+
+const SLUGS = ['privacy', 'terms', 'service-terms', 'cookies', 'accessibility'];
+const slug = Astro.params.slug ?? '';
+if (!SLUGS.includes(slug)) return new Response(null, { status: 404 });
+const page = await getPage(Astro.locals.ctx, `legal-${slug}`);
+if (!page) return new Response(null, { status: 404 });
+const body = page.sections.find((s) => s.type === 'rich_text') as Section<'rich_text'> | undefined;
+---
+
+<PublicLayout title={page.seoTitle ?? page.title} description={page.seoDescription ?? undefined}>
+  <article class="bg-surface py-14 md:py-20">
+    <div class="container-content">
+      <h1 class="text-4xl font-bold tracking-display md:text-5xl">{body?.content.title ?? page.title}</h1>
+      {body ? <div class="prose-kz mt-8" set:html={body.content.html} /> : null}
+    </div>
+  </article>
+</PublicLayout>

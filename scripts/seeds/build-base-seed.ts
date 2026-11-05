@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { PERMISSIONS, ROLE_DEFINITIONS } from '../../src/shared/permissions.ts';
 import { EXPENSE_CATEGORIES, PAGES, PRODUCTS, SETTINGS } from './content/cms.ts';
 import { DIVISIONS } from './content/services.ts';
+import { LEGAL_PAGES } from './content/legal.ts';
 
 export const sq = (v: string | number | null | undefined): string =>
   v === null || v === undefined ? 'NULL' : typeof v === 'number' ? String(v) : `'${v.replace(/'/g, "''")}'`;
@@ -78,7 +79,7 @@ export function buildBaseSeed(): string {
   });
 
   out.push('', '-- Website pages & sections (published defaults)');
-  for (const page of PAGES) {
+  for (const page of [...PAGES, ...LEGAL_PAGES]) {
     const pageId = `pag_${page.key.replace(/-/g, '_')}`;
     out.push(
       ins(

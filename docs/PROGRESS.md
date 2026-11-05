@@ -5,11 +5,18 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phase: 1 — inspection & planning
-- Last completed task: P2.7
-- **Next step:** review P1.5 mockups (design/mockups/*.png) and tick P1.5; then P2.8 repositories/DB helpers (client wrapper, batch builder, pagination, sequences `nextNumber`, audit helper, outbox enqueue, concurrency test).
+- Last completed task: P2.8
+- **Next step:** P1.5 wrap-up (admin-dashboard pen.dev retry running), then P2.9 auth core (PBKDF2, sessions ×2 audiences, login/logout, CSRF, Origin, rate limit, lockout, reset, verify, invites).
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh (non-exempt calls this month: ~3/15) · CI status: —
 
 ---
+
+## 2026-11-05 21:05 UTC — P2.8 DB helpers
+- Done: `db/client.ts` (Batch with labels, assertChanges, unique detection, chunk), `lib/sequences.ts` (formats, per-year keys, in-batch
+  gap-free numbers, nextNumber, raise-only), `lib/pagination.ts` (allow-listed ORDER BY, LIKE escaping), `lib/dates.ts` (Africa/Harare),
+  `lib/audit.ts` (redacted audit stmt), `jobs/outbox.ts` (enqueue in batch, idempotent; dispatch via waitUntil).
+- Tests: unit 96 / integration 30 — 20 parallel numbers unique + gap-free (standalone and in-batch), failed batch leaves no gap.
+- Next step: P2.9.
 
 ## 2026-11-05 20:45 UTC — P2.7 seeds
 - Done: permissions + role matrix (`src/shared/permissions.ts`), seed generator + real copy (6 divisions, 37 sub-services, home/about/

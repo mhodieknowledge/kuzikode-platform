@@ -2,6 +2,12 @@ import type { AppConfig } from './config';
 import { getConfig } from './config';
 import { createLogger, type Logger } from './lib/logger';
 import { newId } from './lib/ids';
+import type { ActorType } from './lib/audit';
+
+export interface Actor {
+  type: ActorType;
+  userId: string | null;
+}
 
 /** Request-scoped context passed as the first argument to every service function. */
 export interface RequestContext {
@@ -15,6 +21,8 @@ export interface RequestContext {
   now(): Date;
   logger: Logger;
   waitUntil(promise: Promise<unknown>): void;
+  /** Who is acting. Set by the auth middleware; 'public' for anonymous requests, 'system' for cron/queue. */
+  actor: Actor;
 }
 
 export interface ContextInit {
@@ -24,6 +32,7 @@ export interface ContextInit {
   waitUntil?: (p: Promise<unknown>) => void;
   now?: () => Date;
   route?: string;
+  actor?: Actor;
 }
 
 export function newRequestId(): string {
@@ -57,5 +66,6 @@ export function createContext(init: ContextInit): RequestContext {
     now: init.now ?? (() => new Date()),
     logger,
     waitUntil,
+    actor: init.actor ?? { type: 'public', userId: null },
   };
 }

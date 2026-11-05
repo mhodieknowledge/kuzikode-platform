@@ -90,3 +90,13 @@ export function packagePrice(p: PackagePriceInput): PackagePriceDisplay {
 export function startProjectHref(packageSlug: string): string {
   return `/start-a-project?${new URLSearchParams({ package: packageSlug }).toString()}`;
 }
+
+/** "5 November 2026" in the business time zone (Africa/Harare). */
+export function formatLongDate(iso: string): string {
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'Africa/Harare',
+  }).format(new Date(iso));
+}

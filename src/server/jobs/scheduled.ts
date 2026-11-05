@@ -1,4 +1,5 @@
 import { createContext, type RequestContext } from '../context';
+import { publishDuePosts } from '../modules/cms/insights';
 import type { QueueMessageBody } from './outbox';
 
 export const CRON_FREQUENT = '*/5 * * * *';
@@ -65,7 +66,10 @@ export async function pruneOperationalData(ctx: RequestContext): Promise<Record<
 
 /** Task lists per cron. Modules append their tasks (overdue sweep, reminders, reconciliation, billing, retention…). */
 export const SCHEDULE: Record<string, [name: string, task: ScheduledTask][]> = {
-  [CRON_FREQUENT]: [['outbox-sweep', (ctx) => sweepOutbox(ctx)]],
+  [CRON_FREQUENT]: [
+    ['outbox-sweep', (ctx) => sweepOutbox(ctx)],
+    ['publish-due-posts', (ctx) => publishDuePosts(ctx)],
+  ],
   [CRON_NIGHTLY]: [['prune-operational-data', (ctx) => pruneOperationalData(ctx)]],
 };
 

@@ -135,3 +135,10 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Seed `scripts/seeds/content/industries.ts` (8 sectors, challenges, body, linked services checked at build). CMS page `industries`. Service `cms/industries.ts` (`listIndustries`, `getIndustry` with services + packages). Pages `/industries`, `/industries/[slug]`; sitemap entries.
 - Tests: integration `industries.test.ts` (3), e2e `industries.spec.ts` (2: every page's service/package/wizard links resolve, axe, screenshots reviewed).
 - Next step: P3.15 Insights blog (list, post, categories/tags, RSS, Article JSON-LD, scheduled publishing, 4 launch articles).
+
+## 2026-11-05 · P3.15 Insights ✅
+- Content `scripts/seeds/content/insights.ts` (4 categories, 8 tags, 4 launch articles). CMS page `insights`. Service `cms/insights.ts` (listPosts, findPosts, getPost, relatedPosts, publishDuePosts, articleLd, renderRss). Cron task `publish-due-posts` on `*/5`.
+- Pages: `/insights`, `/insights/[slug]`, `/insights/category/[slug]`, `/insights/tag/[slug]`, `/insights/rss.xml`; sitemap entries; components `components/public/insights/{PostCard,PostCover,InsightsListing}.astro`.
+- Tests: integration `insights.test.ts` (4), e2e `insights.spec.ts` (3; RSS parsed with DOMParser, all item links resolve; axe; screenshots reviewed).
+- Hand-off note: `create_session` with permission_mode auto is refused because this session runs in "default" mode, so this session continues the loop itself.
+- Next step: P3.16 How we work, FAQ page (≥ 20 items + FAQPage schema, categories, search filter), testimonials block (hidden when empty), technologies strip, site search. Service terms + accessibility pages already exist (P3.9). 8 pricing FAQs already seeded (`content/faq.ts`).

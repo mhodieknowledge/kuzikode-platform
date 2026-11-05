@@ -4,3 +4,4 @@ export * from './seo';
 export { renderRobots, renderSitemap, sitemapEntries, SITEMAP_SOURCES, type SitemapEntry } from './sitemap';
 export * from './packages';
 export * from './industries';
+export * from './insights';

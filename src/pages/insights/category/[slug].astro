@@ -1,0 +1,20 @@
+---
+import InsightsListing from '../../../components/public/insights/InsightsListing.astro';
+import { listPostCategories } from '../../../server/modules/cms';
+
+const { ctx } = Astro.locals;
+const slug = Astro.params.slug ?? '';
+const category = (await listPostCategories(ctx)).find((c) => c.slug === slug);
+if (!category) return new Response(null, { status: 404, statusText: 'Not found' });
+const n = Number(Astro.url.searchParams.get('page') ?? '1');
+---
+
+<InsightsListing
+  title={category.name}
+  intro={`Articles about ${category.name.toLowerCase()}.`}
+  seoTitle={`${category.name} · Kuzikode Insights`}
+  seoDescription={`Kuzikode Technologies articles about ${category.name.toLowerCase()}.`}
+  filter={{ category: category.slug, page: Number.isFinite(n) ? n : 1 }}
+  basePath={`/insights/category/${category.slug}`}
+  crumbs={[{ name: category.name, path: `/insights/category/${category.slug}` }]}
+/>

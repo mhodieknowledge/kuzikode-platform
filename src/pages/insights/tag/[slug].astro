@@ -1,0 +1,19 @@
+---
+import InsightsListing from '../../../components/public/insights/InsightsListing.astro';
+import { listPostTags } from '../../../server/modules/cms';
+
+const { ctx } = Astro.locals;
+const slug = Astro.params.slug ?? '';
+const tag = (await listPostTags(ctx)).find((t) => t.slug === slug);
+if (!tag) return new Response(null, { status: 404, statusText: 'Not found' });
+const n = Number(Astro.url.searchParams.get('page') ?? '1');
+---
+
+<InsightsListing
+  title={`Tagged “${tag.name}”`}
+  seoTitle={`${tag.name} · Kuzikode Insights`}
+  seoDescription={`Kuzikode Technologies articles tagged ${tag.name}.`}
+  filter={{ tag: tag.slug, page: Number.isFinite(n) ? n : 1 }}
+  basePath={`/insights/tag/${tag.slug}`}
+  crumbs={[{ name: tag.name, path: `/insights/tag/${tag.slug}` }]}
+/>

@@ -1,5 +1,6 @@
 import type { RequestContext } from '../../context';
 import { listIndustries } from './industries';
+import { listPosts } from './insights';
 import { cached, getServiceCatalogue, listPortfolio } from './service';
 
 export interface SitemapEntry {
@@ -28,10 +29,11 @@ const STATIC = [
 
 export function sitemapEntries(ctx: RequestContext): Promise<SitemapEntry[]> {
   return cached(ctx, 'sitemap', async () => {
-    const [catalogue, portfolio, industries, ...extra] = await Promise.all([
+    const [catalogue, portfolio, industries, posts, ...extra] = await Promise.all([
       getServiceCatalogue(ctx),
       listPortfolio(ctx),
       listIndustries(ctx),
+      listPosts(ctx),
       ...SITEMAP_SOURCES.map((f) => f(ctx)),
     ]);
     return [
@@ -39,6 +41,11 @@ export function sitemapEntries(ctx: RequestContext): Promise<SitemapEntry[]> {
       ...catalogue.map((c) => ({ path: `/services/${c.slug}` })),
       { path: '/industries' },
       ...industries.map((i) => ({ path: `/industries/${i.slug}` })),
+      { path: '/insights' },
+      ...posts.map((p) => ({
+        path: `/insights/${p.slug}`,
+        lastmod: p.updatedAt > p.publishedAt ? p.updatedAt : p.publishedAt,
+      })),
       ...portfolio.map((p) => ({ path: `/work/${p.slug}`, lastmod: p.completionDate ?? undefined })),
       ...extra.flat(),
     ];

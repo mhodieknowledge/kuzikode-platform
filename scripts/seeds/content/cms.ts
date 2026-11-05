@@ -332,6 +332,23 @@ export const PAGES: PageSeed[] = [
     ],
   },
   {
+    key: 'insights',
+    title: 'Insights',
+    seoTitle: 'Insights · Kuzikode Technologies',
+    seoDescription:
+      'Practical guides on websites, online payments, business email and software for businesses in Zimbabwe and across Africa.',
+    sections: [
+      {
+        key: 'intro',
+        type: 'rich_text',
+        content: {
+          title: 'Insights',
+          html: '<p>Practical guides on websites, online payments, business email and software, written for growing organisations.</p>',
+        },
+      },
+    ],
+  },
+  {
     key: 'contact',
     title: 'Contact',
     seoTitle: 'Contact Kuzikode Technologies',

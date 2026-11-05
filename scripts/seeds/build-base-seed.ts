@@ -11,6 +11,7 @@ import { LEGAL_PAGES } from './content/legal.ts';
 import { ADDONS, PACKAGES } from './content/packages.ts';
 import { FAQS } from './content/faq.ts';
 import { INDUSTRIES } from './content/industries.ts';
+import { LAUNCH_PUBLISHED_AT, POST_CATEGORIES, POST_TAGS, POSTS } from './content/insights.ts';
 
 export const sq = (v: string | number | null | undefined): string =>
   v === null || v === undefined ? 'NULL' : typeof v === 'number' ? String(v) : `'${v.replace(/'/g, "''")}'`;
@@ -175,6 +176,38 @@ export function buildBaseSeed(): string {
       );
     }
   });
+
+  out.push('', '-- Insights (docs/12 §C.4): launch articles, categories, tags');
+  POST_CATEGORIES.forEach((c, i) =>
+    out.push(ins('post_categories', { id: `pcat_${c.slug.replace(/-/g, '_')}`, slug: c.slug, name: c.name, sort_order: (i + 1) * 10 })),
+  );
+  for (const t of POST_TAGS) out.push(ins('post_tags', { id: `ptag_${t.slug.replace(/-/g, '_')}`, slug: t.slug, name: t.name }));
+  for (const p of POSTS) {
+    if (!POST_CATEGORIES.some((c) => c.slug === p.category)) throw new Error(`post ${p.slug}: unknown category`);
+    const postId = `post_${p.slug.replace(/-/g, '_')}`;
+    const words = p.body.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+    out.push(
+      ins('posts', {
+        id: postId,
+        slug: p.slug,
+        title: p.title,
+        excerpt: p.excerpt,
+        body: p.body,
+        category_id: `pcat_${p.category.replace(/-/g, '_')}`,
+        author_display_name: 'Kuzikode Technologies',
+        reading_minutes: Math.max(1, Math.ceil(words / 200)),
+        status: 'published',
+        publish_at: LAUNCH_PUBLISHED_AT,
+        published_at: LAUNCH_PUBLISHED_AT,
+        seo_title: `${p.title} · Kuzikode Insights`,
+        seo_description: p.seoDescription,
+      }),
+    );
+    for (const tag of p.tags) {
+      if (!POST_TAGS.some((t) => t.slug === tag)) throw new Error(`post ${p.slug}: unknown tag ${tag}`);
+      out.push(ins('post_tag_links', { post_id: postId, tag_id: `ptag_${tag.replace(/-/g, '_')}` }));
+    }
+  }
 
   out.push('', '-- FAQ');
   FAQS.forEach((f, i) =>

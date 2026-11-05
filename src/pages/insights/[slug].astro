@@ -1,0 +1,133 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import PostCard from '../../components/public/insights/PostCard.astro';
+import PostCover from '../../components/public/insights/PostCover.astro';
+import { articleLd, breadcrumbLd, getPost, relatedPosts } from '../../server/modules/cms';
+import { formatLongDate } from '../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const post = await getPost(ctx, Astro.params.slug ?? '');
+if (!post) return new Response(null, { status: 404, statusText: 'Not found' });
+const related = await relatedPosts(ctx, post);
+const url = new URL(`/insights/${post.slug}`, ctx.config.siteUrl).toString();
+const share = [
+  ['LinkedIn', `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`],
+  ['X', `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(post.title)}`],
+  ['Facebook', `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`],
+  ['WhatsApp', `https://wa.me/?text=${encodeURIComponent(`${post.title} ${url}`)}`],
+] as const;
+const ld = [
+  articleLd(ctx, post),
+  breadcrumbLd(ctx, [
+    { name: 'Insights', path: '/insights' },
+    { name: post.title, path: `/insights/${post.slug}` },
+  ]),
+];
+---
+
+<PublicLayout
+  structuredData={ld}
+  title={post.seoTitle ?? `${post.title} · Kuzikode Insights`}
+  description={post.seoDescription ?? post.excerpt}
+>
+  <link slot="head" rel="alternate" type="application/rss+xml" title="Kuzikode Insights" href="/insights/rss.xml" />
+  <article aria-labelledby="post-title">
+    <header class="bg-canvas py-12 md:py-16">
+      <div class="container-content max-w-3xl">
+        <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+          <ol class="flex flex-wrap gap-1.5">
+            <li>
+              <a href="/insights" class="hover:text-ink-950 hover:underline">
+                Insights
+              </a>
+            </li>
+            {post.category ? (
+              <>
+                <li aria-hidden="true">/</li>
+                <li>
+                  <a href={`/insights/category/${post.category.slug}`} class="hover:text-ink-950 hover:underline">
+                    {post.category.name}
+                  </a>
+                </li>
+              </>
+            ) : null}
+          </ol>
+        </nav>
+        <h1 id="post-title" class="mt-5 text-4xl leading-tight font-bold tracking-display md:text-5xl">
+          {post.title}
+        </h1>
+        <p class="mt-4 text-lg leading-8 text-ink-600">{post.excerpt}</p>
+        <p class="mt-6 text-sm text-ink-600">
+          By <span class="font-semibold text-ink-950">{post.author}</span>
+          {' · '}
+          <time datetime={post.publishedAt}>{formatLongDate(post.publishedAt)}</time>
+          {` · ${post.readingMinutes} min read`}
+        </p>
+      </div>
+    </header>
+    <div class="bg-surface py-12 md:py-16">
+      <div class="container-content max-w-3xl">
+        {post.cover ? (
+          <img
+            src={post.cover.src}
+            alt={post.cover.alt}
+            width={post.cover.width ?? undefined}
+            height={post.cover.height ?? undefined}
+            class="mb-10 w-full rounded-lg"
+          />
+        ) : (
+          <PostCover slug={post.slug} class="mb-10 aspect-[5/2] rounded-lg" />
+        )}
+        <div class="prose-kz" set:html={post.body} />
+        {post.tags.length > 0 ? (
+          <ul class="mt-10 flex flex-wrap gap-2" aria-label="Tags">
+            {post.tags.map((t) => (
+              <li>
+                <a
+                  href={`/insights/tag/${t.slug}`}
+                  class="inline-flex h-8 items-center rounded-full bg-ink-950/5 px-3 text-[13px] font-semibold text-ink-800 hover:bg-ink-950/10"
+                >
+                  {t.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <div class="mt-10 border-t border-line pt-6">
+          <p class="text-sm font-semibold text-ink-950">Share this article</p>
+          <ul class="mt-3 flex flex-wrap gap-2">
+            {share.map(([name, href]) => (
+              <li>
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex h-9 items-center rounded-sm border border-line px-3 text-sm font-semibold text-ink-800 hover:border-ink-400"
+                >
+                  {name}
+                  <span class="sr-only"> (opens in a new tab)</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </article>
+  {related.length > 0 ? (
+    <section class="bg-canvas py-14 md:py-20" aria-labelledby="related-title">
+      <div class="container-content">
+        <h2 id="related-title" class="text-3xl font-bold tracking-display">
+          Related articles
+        </h2>
+        <ul class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {related.map((p) => (
+            <li>
+              <PostCard post={p} headingLevel="h3" />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  ) : null}
+</PublicLayout>

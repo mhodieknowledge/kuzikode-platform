@@ -1,0 +1,91 @@
+---
+import PublicLayout from '../../../layouts/PublicLayout.astro';
+import PostCard from './PostCard.astro';
+import { breadcrumbLd, findPosts, listPostCategories, type PostFilter } from '../../../server/modules/cms';
+
+interface Props {
+  title: string;
+  intro?: string | undefined;
+  introHtml?: string | undefined;
+  seoTitle: string;
+  seoDescription?: string | undefined;
+  filter: PostFilter;
+  basePath: string;
+  crumbs?: { name: string; path: string }[];
+}
+const { title, intro, introHtml, seoTitle, seoDescription, filter, basePath, crumbs = [] } = Astro.props;
+const { ctx } = Astro.locals;
+const [result, categories] = await Promise.all([findPosts(ctx, filter), listPostCategories(ctx)]);
+const pageHref = (n: number) => (n === 1 ? basePath : `${basePath}?page=${n}`);
+const ld = [breadcrumbLd(ctx, [{ name: 'Insights', path: '/insights' }, ...crumbs])];
+---
+
+<PublicLayout structuredData={ld} title={seoTitle} description={seoDescription}>
+  <link slot="head" rel="alternate" type="application/rss+xml" title="Kuzikode Insights" href="/insights/rss.xml" />
+  <section class="bg-canvas py-14 md:py-20" aria-labelledby="insights-title">
+    <div class="container-content">
+      <p class="text-[13px] font-semibold tracking-wide text-brand-600 uppercase">Insights</p>
+      <h1 id="insights-title" class="mt-3 max-w-3xl text-4xl font-bold tracking-display md:text-5xl">{title}</h1>
+      {introHtml ? <div class="prose-kz mt-4 max-w-2xl text-lg" set:html={introHtml} /> : intro ? <p class="mt-4 max-w-2xl text-lg text-ink-600">{intro}</p> : null}
+      <nav aria-label="Insight categories" class="mt-8">
+        <ul class="flex flex-wrap gap-2">
+          <li>
+            <a
+              href="/insights"
+              aria-current={!filter.category && !filter.tag ? 'page' : undefined}
+              class="inline-flex h-9 items-center rounded-full border border-line bg-surface px-4 text-sm font-semibold text-ink-800 hover:border-ink-400 aria-[current=page]:border-ink-950 aria-[current=page]:bg-ink-950 aria-[current=page]:text-white"
+            >
+              All
+            </a>
+          </li>
+          {
+            categories
+              .filter((c) => c.count > 0)
+              .map((c) => (
+                <li>
+                  <a
+                    href={`/insights/category/${c.slug}`}
+                    aria-current={filter.category === c.slug ? 'page' : undefined}
+                    class="inline-flex h-9 items-center rounded-full border border-line bg-surface px-4 text-sm font-semibold text-ink-800 hover:border-ink-400 aria-[current=page]:border-ink-950 aria-[current=page]:bg-ink-950 aria-[current=page]:text-white"
+                  >
+                    {c.name}
+                  </a>
+                </li>
+              ))
+          }
+        </ul>
+      </nav>
+    </div>
+  </section>
+  <section class="bg-surface py-14 md:py-20" aria-label="Articles">
+    <div class="container-content">
+      {
+        result.posts.length === 0 ? (
+          <p class="text-ink-600">
+            No articles here yet. <a href="/insights" class="font-semibold text-brand-600 underline underline-offset-2">See all insights</a>.
+          </p>
+        ) : (
+          <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {result.posts.map((p) => (
+              <li>
+                <PostCard post={p} />
+              </li>
+            ))}
+          </ul>
+        )
+      }
+      {
+        result.pages > 1 ? (
+          <nav aria-label="Pagination" class="mt-12 flex items-center justify-between gap-4 text-sm font-semibold">
+            {result.page > 1 ? <a href={pageHref(result.page - 1)} rel="prev" class="text-brand-600 underline underline-offset-2">Newer articles</a> : <span />}
+            <span class="text-ink-600">Page {result.page} of {result.pages}</span>
+            {result.page < result.pages ? <a href={pageHref(result.page + 1)} rel="next" class="text-brand-600 underline underline-offset-2">Older articles</a> : <span />}
+          </nav>
+        ) : null
+      }
+      <p class="mt-12 text-sm text-ink-600">
+        Follow new articles with our <a href="/insights/rss.xml" class="font-semibold text-brand-600 underline underline-offset-2">RSS feed</a>.
+      </p>
+    </div>
+  </section>
+</PublicLayout>

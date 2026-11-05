@@ -1,0 +1,39 @@
+---
+import type { PostSummary } from '../../../server/modules/cms';
+import { formatLongDate } from '../../../shared/service-display';
+import PostCover from './PostCover.astro';
+
+interface Props {
+  post: PostSummary;
+  headingLevel?: 'h2' | 'h3';
+}
+const { post, headingLevel = 'h2' } = Astro.props;
+const Heading = headingLevel;
+---
+
+<article class="group flex h-full flex-col overflow-hidden rounded-lg border border-line bg-surface">
+  {
+    post.cover ? (
+      <img src={post.cover.src} alt="" width={post.cover.width ?? undefined} height={post.cover.height ?? undefined} loading="lazy" class="aspect-[5/3] w-full object-cover" />
+    ) : (
+      <PostCover slug={post.slug} label={post.category?.name} class="aspect-[5/3]" />
+    )
+  }
+  <div class="flex flex-1 flex-col p-6">
+    <p class="text-[13px] text-ink-600">
+      <time datetime={post.publishedAt}>{formatLongDate(post.publishedAt)}</time> · {post.readingMinutes} min read
+    </p>
+    <Heading class="mt-2 font-sans text-lg leading-7 font-semibold text-ink-950">
+      <a href={`/insights/${post.slug}`} class="after:absolute after:inset-0 group-hover:underline">
+        {post.title}
+      </a>
+    </Heading>
+    <p class="mt-2 flex-1 text-[15px] leading-6 text-ink-600">{post.excerpt}</p>
+  </div>
+</article>
+
+<style>
+  article {
+    position: relative;
+  }
+</style>

@@ -1,0 +1,18 @@
+---
+import InsightsListing from '../../components/public/insights/InsightsListing.astro';
+import { getPage, sectionOf } from '../../server/modules/cms';
+
+const { ctx } = Astro.locals;
+const page = await getPage(ctx, 'insights');
+const intro = sectionOf(page, 'intro', 'rich_text');
+const n = Number(Astro.url.searchParams.get('page') ?? '1');
+---
+
+<InsightsListing
+  title={intro?.content.title ?? 'Insights'}
+  introHtml={intro?.content.html}
+  seoTitle={page?.seoTitle ?? 'Insights · Kuzikode Technologies'}
+  seoDescription={page?.seoDescription ?? undefined}
+  filter={{ page: Number.isFinite(n) ? n : 1 }}
+  basePath="/insights"
+/>

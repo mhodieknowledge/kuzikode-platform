@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TIMELINES, WIZARD_FEATURES, type WizardFeature } from '../wizard';
 
 export const GENERAL_CATEGORIES = [
   { value: 'general', label: 'General question' },
@@ -64,3 +65,40 @@ export const enquirySchema = z
   })
   .strict();
 export type EnquiryInput = z.input<typeof enquirySchema>;
+
+/** Start-a-Project wizard submission (docs/12 §C.2). Sent as the `data` field of a multipart form (optional `attachment`). */
+export const projectRequestSchema = z
+  .object({
+    category: slug,
+    service: slug.optional().or(z.literal('').transform(() => undefined)),
+    package: slug.optional().or(z.literal('').transform(() => undefined)),
+    addons: z
+      .array(
+        z
+          .string()
+          .max(60)
+          .regex(/^pad_[a-z0-9_]+$/),
+      )
+      .max(20)
+      .default([]),
+    features: z
+      .array(z.enum(WIZARD_FEATURES.map((f) => f.value) as [WizardFeature, ...WizardFeature[]]))
+      .max(20)
+      .default([]),
+    budgetRange: z.enum(BUDGET_RANGES, { error: 'Choose a budget range.' }),
+    timeline: z.enum(TIMELINES, { error: 'Choose a timeline.' }),
+    websiteUrl: optionalText(300).refine(
+      (v) => !v || /^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(v),
+      'Enter a full web address starting with https://',
+    ),
+    description: z.string().trim().min(10, 'Tell us a little more (at least 10 characters).').max(5000),
+    name: enquirySchema.shape.name,
+    email: enquirySchema.shape.email,
+    phone: enquirySchema.shape.phone,
+    organisation: enquirySchema.shape.organisation,
+    consent: enquirySchema.shape.consent,
+    turnstileToken: enquirySchema.shape.turnstileToken,
+    website: enquirySchema.shape.website,
+  })
+  .strict();
+export type ProjectRequestInput = z.input<typeof projectRequestSchema>;

@@ -298,6 +298,23 @@ export const PAGES: PageSeed[] = [
     ],
   },
   {
+    key: 'start-a-project',
+    title: 'Start a project',
+    seoTitle: 'Start a project · Kuzikode Technologies',
+    seoDescription:
+      'Tell Kuzikode Technologies what you need in five short steps and get a reply with questions or a written quotation.',
+    sections: [
+      {
+        key: 'intro',
+        type: 'rich_text',
+        content: {
+          title: 'Start a project',
+          html: '<p>Five short steps. Tell us what you need, pick a package if one fits, and we will reply with questions or a written quotation, usually within one business day.</p>',
+        },
+      },
+    ],
+  },
+  {
     key: 'contact',
     title: 'Contact',
     seoTitle: 'Contact Kuzikode Technologies',

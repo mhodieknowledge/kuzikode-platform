@@ -30,7 +30,12 @@ export default defineConfig(
     files: ['**/*.tsx'],
     ...jsxA11y.flatConfigs.recommended,
     plugins: { ...jsxA11y.flatConfigs.recommended.plugins, 'react-hooks': reactHooks },
-    rules: { ...jsxA11y.flatConfigs.recommended.rules, ...reactHooks.configs.recommended.rules },
+    rules: {
+      ...jsxA11y.flatConfigs.recommended.rules,
+      ...reactHooks.configs.recommended.rules,
+      // Option cards wrap their radio and put the text in nested spans; look a little deeper for it.
+      'jsx-a11y/label-has-associated-control': ['error', { depth: 4 }],
+    },
   },
   {
     plugins: { 'no-only-tests': noOnlyTests },

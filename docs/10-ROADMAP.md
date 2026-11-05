@@ -47,7 +47,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P3.10 SEO.** Meta/canonical/OG/Twitter, JSON-LD, dynamic sitemap.xml, robots.txt, OG images (Canva or generated SVG→PNG at build), 404/500 pages. AC: public.spec.ts SEO assertions. Lighthouse targets met on mobile.
 - [x] **P3.11 Public cache layer.** Edge cache keyed by content_version, correct headers. AC: header tests. Private paths never cached.
 - [x] **P3.12 Packages & Pricing page.** Seed catalogue (docs/12 §A.2), packages on division pages, `/pricing` with tabs + comparison table (stacked on mobile) + FAQ, show-prices switch. AC: visual QA. Switch test. "Get started" opens the wizard prefilled.
-- [ ] **P3.13 Start-a-Project wizard** (5 steps, indicative range, attachment, brief JSON → enquiry). AC: integration + e2e.
+- [x] **P3.13 Start-a-Project wizard** (5 steps, indicative range, attachment, brief JSON → enquiry). AC: integration + e2e.
 - [ ] **P3.14 Industries** index + 8 pages with real copy. AC: visual QA. Links to services/packages resolve.
 - [ ] **P3.15 Insights blog** (list, post, categories/tags, RSS, Article JSON-LD, scheduled publishing) + 4 launch articles written by you. AC: RSS validates. Articles contain no invented statistics.
 - [ ] **P3.16 How we work, FAQ (≥ 20 items + FAQPage schema), testimonials block (hidden when empty), technologies strip, service terms + accessibility pages, site search.** AC: tests per docs/08 additions.

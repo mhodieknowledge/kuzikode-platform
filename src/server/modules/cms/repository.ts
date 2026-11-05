@@ -62,6 +62,10 @@ export interface PortfolioRow {
   featured: number;
   seo_title: string | null;
   seo_description: string | null;
+  cover_file_id: string | null;
+  cover_alt: string | null;
+  cover_width: number | null;
+  cover_height: number | null;
 }
 export interface ProductRow {
   id: string;
@@ -109,9 +113,13 @@ export const visibleServices = (db: D1Database) =>
 export const publishedPortfolio = (db: D1Database) =>
   all<PortfolioRow>(
     db,
-    `SELECT id, slug, name, client_name, show_client_name, category, summary, description, challenge, solution, technologies,
-       completion_date, external_url, cover_media_id, featured, seo_title, seo_description
-     FROM portfolio_projects WHERE status = 'published' ORDER BY featured DESC, sort_order, completion_date DESC LIMIT 200`,
+    `SELECT p.id, p.slug, p.name, p.client_name, p.show_client_name, p.category, p.summary, p.description, p.challenge, p.solution,
+       p.technologies, p.completion_date, p.external_url, p.cover_media_id, p.featured, p.seo_title, p.seo_description,
+       f.id AS cover_file_id, m.alt_text AS cover_alt, m.width AS cover_width, m.height AS cover_height
+     FROM portfolio_projects p
+     LEFT JOIN media_assets m ON m.id = p.cover_media_id
+     LEFT JOIN files f ON f.id = m.file_id AND f.visibility = 'public'
+     WHERE p.status = 'published' ORDER BY p.featured DESC, p.sort_order, p.completion_date DESC LIMIT 200`,
   );
 
 export const publishedProducts = (db: D1Database) =>

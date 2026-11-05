@@ -244,6 +244,7 @@ export interface PublicPortfolioItem {
   completionDate: string | null;
   externalUrl: string | null;
   coverMediaId: string | null;
+  cover: { src: string; alt: string; width: number | null; height: number | null } | null;
   featured: boolean;
   seoTitle: string | null;
   seoDescription: string | null;
@@ -264,6 +265,9 @@ export function listPortfolio(ctx: RequestContext): Promise<PublicPortfolioItem[
       completionDate: p.completion_date,
       externalUrl: p.external_url && /^https?:\/\//.test(p.external_url) ? p.external_url : null,
       coverMediaId: p.cover_media_id,
+      cover: p.cover_file_id
+        ? { src: `/media/${p.cover_file_id}`, alt: p.cover_alt ?? '', width: p.cover_width, height: p.cover_height }
+        : null,
       featured: p.featured === 1,
       seoTitle: p.seo_title,
       seoDescription: p.seo_description,

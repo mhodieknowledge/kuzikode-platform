@@ -127,3 +127,18 @@ describe('CMS read layer', () => {
     expect(await currentAnnouncement(later)).toBeNull();
   });
 });
+
+describe('portfolio visibility', () => {
+  it('a draft never appears and its slug does not resolve', async () => {
+    const { getPortfolioItem } = await import('../../src/server/modules/cms');
+    await seedBase();
+    await env.DB.batch([
+      env.DB.prepare(
+        "INSERT OR IGNORE INTO portfolio_projects (id, slug, name, category, summary, status) VALUES ('pfo_d2','secret-draft','Draft','web','x','draft')",
+      ),
+      bumpContentVersionStmt(env.DB),
+    ]);
+    resetCmsCache();
+    expect(await getPortfolioItem(ctx(), 'secret-draft')).toBeNull();
+  });
+});

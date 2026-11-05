@@ -1,0 +1,119 @@
+---
+import { ExternalLink } from 'lucide-react';
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import { getPortfolioItem } from '../../server/modules/cms';
+
+const { ctx } = Astro.locals;
+const item = await getPortfolioItem(ctx, Astro.params.slug ?? '');
+if (!item) return new Response(null, { status: 404 });
+const completed = item.completionDate
+  ? new Date(`${item.completionDate}T00:00:00Z`).toLocaleDateString('en-GB', {
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    })
+  : null;
+---
+
+<PublicLayout
+  title={`${item.seoTitle ?? item.name} · Kuzikode Technologies`}
+  description={item.seoDescription ?? item.summary}
+>
+  <article>
+    <header class="bg-canvas py-14 md:py-20">
+      <div class="container-content">
+        <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+          <ol class="flex gap-1.5">
+            <li>
+              <a href="/work" class="hover:underline">
+                Our Work
+              </a>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" class="text-ink-950">
+              {item.name}
+            </li>
+          </ol>
+        </nav>
+        <h1 class="mt-5 max-w-3xl text-4xl font-bold tracking-display md:text-5xl">{item.name}</h1>
+        <p class="mt-4 max-w-2xl text-lg leading-8 text-ink-600">{item.summary}</p>
+        <dl class="mt-8 flex flex-wrap gap-x-10 gap-y-4 text-sm">
+          {item.clientName ? (
+            <div>
+              <dt class="text-ink-600">Client</dt>
+              <dd class="font-semibold text-ink-950">{item.clientName}</dd>
+            </div>
+          ) : null}
+          <div>
+            <dt class="text-ink-600">Category</dt>
+            <dd class="font-semibold text-ink-950">{item.category}</dd>
+          </div>
+          {completed ? (
+            <div>
+              <dt class="text-ink-600">Completed</dt>
+              <dd class="font-semibold text-ink-950">{completed}</dd>
+            </div>
+          ) : null}
+        </dl>
+        {item.externalUrl ? (
+          <a
+            href={item.externalUrl}
+            rel="noopener noreferrer"
+            target="_blank"
+            class="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600"
+          >
+            Visit the live site <ExternalLink size={14} aria-hidden="true" />
+          </a>
+        ) : null}
+      </div>
+    </header>
+    {item.cover ? (
+      <div class="container-content -mt-6">
+        <img
+          src={item.cover.src}
+          alt={item.cover.alt}
+          width={item.cover.width ?? 1600}
+          height={item.cover.height ?? 900}
+          class="w-full rounded-lg border border-line"
+        />
+      </div>
+    ) : null}
+    <div class="container-content grid gap-12 py-14 md:py-20 lg:grid-cols-[2fr_1fr]">
+      <div class="flex flex-col gap-12">
+        {item.description ? (
+          <section>
+            <div class="prose-kz" set:html={item.description} />
+          </section>
+        ) : null}
+        {item.challenge ? (
+          <section aria-labelledby="challenge">
+            <h2 id="challenge" class="text-2xl font-bold tracking-display">
+              The challenge
+            </h2>
+            <div class="prose-kz mt-4" set:html={item.challenge} />
+          </section>
+        ) : null}
+        {item.solution ? (
+          <section aria-labelledby="solution">
+            <h2 id="solution" class="text-2xl font-bold tracking-display">
+              What we built
+            </h2>
+            <div class="prose-kz mt-4" set:html={item.solution} />
+          </section>
+        ) : null}
+      </div>
+      {item.technologies.length > 0 ? (
+        <aside aria-labelledby="tech">
+          <h2 id="tech" class="text-sm font-semibold tracking-wider text-ink-600 uppercase">
+            Technologies
+          </h2>
+          <ul class="mt-4 flex flex-wrap gap-2">
+            {item.technologies.map((t) => (
+              <li class="rounded-full border border-line px-3 py-1 text-sm text-ink-800">{t}</li>
+            ))}
+          </ul>
+        </aside>
+      ) : null}
+    </div>
+  </article>
+</PublicLayout>

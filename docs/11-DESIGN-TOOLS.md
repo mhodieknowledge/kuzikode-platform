@@ -20,7 +20,7 @@ Status of the owner's accounts (checked 2026-11-05):
 - **Figma:** connector working. Account is on the **Starter plan with a View seat**. Figma's MCP rate limit for that seat
   is **20 tool calls per month**. Tools that write to files (`create_new_file`, `generate_figma_design`, …) are exempt from the limit,
   but a View seat may not have edit rights at all. See §3.
-- **pen.dev:** needs `PEN_CLI_KEY` + `ANTHROPIC_API_KEY` in the environment (§1). Until both are set, skip it.
+- **pen.dev:** needs `PEN_CLI_KEY` + `CLAUDE_CODE_OAUTH_TOKEN` (owner's Claude Pro plan) in the environment (§1). Until both are set, skip it.
 
 ---
 
@@ -33,7 +33,15 @@ pen status                                         # must show the CLI key / org
 ```
 Unattended auth is **only** via environment variables (never run `pen login`/`pen signup`: they need the owner's email OTP):
 - `PEN_CLI_KEY`: created by the owner at pen.dev → organization settings → Developer Keys.
-- `ANTHROPIC_API_KEY` (or `PEN_AGENT_API_KEY`): pen.dev's own designer agent calls Claude with this key. **Usage is billed to the owner's Anthropic account.**
+- **Claude auth for pen.dev's designer agent, in this order of preference:**
+  1. `CLAUDE_CODE_OAUTH_TOKEN`: a long-lived token the owner created with `claude setup-token`. It runs on the owner's **Claude Pro
+     subscription** (no API credit). pen.dev's skill says its agent needs "an authenticated Claude Code user … via env var or a user subscription".
+     **Usage counts against the owner's Pro limits, which this build agent may also be using.** So always pass
+     `--model` with a current Sonnet model (check `pen --list-models --agent claude`), keep to the 12-run budget, and stop pen.dev for the
+     session if you hit a usage-limit error.
+  2. `ANTHROPIC_API_KEY` (pay-as-you-go): only if the owner adds one later.
+  3. Neither works → skip pen.dev and go code-first (docs/05 + Playwright screenshots). Log once in DECISIONS.md.
+- First run check: `pen status` (pen.dev key OK?) then one small test design. If the Claude auth fails, record the exact error in BLOCKERS.md.
 
 **Where pen.dev is used (budget: ≤ 12 generations for the whole project, run with a 10-minute timeout each):**
 | Roadmap task | Screen | Iterations |

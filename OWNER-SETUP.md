@@ -33,7 +33,7 @@ Do these in order. About 60–90 minutes in total. When all **Required** steps a
 | **Resend** (email) | resend.com → sign up → API Keys → Create (full access) | `RESEND_API_KEY` |
 | **Paynow** (payments) | Register at paynow.co.zw/Customer/Register → add your bank account → **Other Ways To Get Paid** (paynow.co.zw/Home/Receive) → **Create/Manage Shopping Carts → Create Advanced Integration** → tick EcoCash, OneMoney, InnBucks, O'mari, Visa/Mastercard, Zimswitch → Save → **Email Key To Company Address** | Integration ID → `PAYNOW_USD_INTEGRATION_ID`, Integration Key → `PAYNOW_USD_INTEGRATION_KEY`, your Paynow login email → `PAYNOW_TEST_AUTHEMAIL` |
 | **pen.dev** (mockups) | pen.dev → sign in → **Organization settings → Developer Keys** → Create key | `PEN_CLI_KEY` |
-| **Anthropic API** (pen.dev's designer runs on it) | console.anthropic.com → Billing (add ~$5–10 credit) → API Keys → Create | `ANTHROPIC_API_KEY` |
+| **Claude subscription token** (pen.dev's designer runs on it, uses your Claude Pro plan, no API credit) | On your PC in cmd: `claude setup-token` → sign in with your Claude account in the browser → copy the token it prints | `CLAUDE_CODE_OAUTH_TOKEN` |
 | *Optional:* OpenAI (better hero faces) | platform.openai.com → API keys | `OPENAI_API_KEY` |
 
 ## Step 4: GitHub Actions secrets (Required, 5 min)
@@ -66,10 +66,10 @@ Then **Settings → Environments → New environment** → name `production` →
    PAYNOW_USD_INTEGRATION_KEY=...
    PAYNOW_TEST_AUTHEMAIL=...      (your Paynow merchant login email)
    PEN_CLI_KEY=...
-   ANTHROPIC_API_KEY=...
+   CLAUDE_CODE_OAUTH_TOKEN=...   (from `claude setup-token`, uses your Claude Pro plan)
    OPENAI_API_KEY=...        (optional)
    ```
-   **pen.dev key = `PEN_CLI_KEY` here**, together with `ANTHROPIC_API_KEY`. Leave out any you don't have yet and add them later.
+   **pen.dev key = `PEN_CLI_KEY` here**, together with `CLAUDE_CODE_OAUTH_TOKEN`. Leave out any you don't have yet and add them later.
    New sessions pick them up. The agent copies the right ones into Cloudflare Worker secrets itself.
 5. **Setup script** (runs at the start of each session; it can't read the variables above, so it only installs tools):
    ```bash
@@ -118,7 +118,7 @@ Figma ✓, Canva ✓, Cloudflare Developer Platform ✓, all connected on claude
 | `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` | ✓ | n/a | agent (var / secret) |
 | `RESEND_API_KEY` | ✓ | n/a | agent (secret) |
 | `PAYNOW_USD_INTEGRATION_ID` / `PAYNOW_USD_INTEGRATION_KEY` / `PAYNOW_TEST_AUTHEMAIL` | ✓ (test mode) | n/a | agent for staging. Live keys: same names after Paynow sets you live |
-| `PEN_CLI_KEY` + `ANTHROPIC_API_KEY` | ✓ | n/a | n/a (mockups only) |
+| `PEN_CLI_KEY` + `CLAUDE_CODE_OAUTH_TOKEN` | ✓ | n/a | n/a (mockups only) |
 | `OPENAI_API_KEY` (optional) | ✓ | n/a | n/a (images only) |
 | `HMAC_SECRET`, `DATA_ENCRYPTION_KEY` | n/a | n/a | agent generates and sets these itself |
 

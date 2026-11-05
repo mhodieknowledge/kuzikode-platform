@@ -137,7 +137,7 @@ line (file names, what's half-done), commit, push. The next session resumes from
   still works locally (Miniflare). Log the remote-resource steps in BLOCKERS.md.
 - **Design tools: follow `docs/11-DESIGN-TOOLS.md` exactly.** In short:
   - **pen.dev CLI** (skill in `.claude/skills/pen-design/SKILL.md`): high-fidelity mockups of 6 key screens in P1.5,
-    max 12 generations. Needs `PEN_CLI_KEY` + `ANTHROPIC_API_KEY` env vars. Never run `pen login`.
+    max 12 generations. Needs `PEN_CLI_KEY` + a Claude auth (`CLAUDE_CODE_OAUTH_TOKEN` from the owner's Claude Pro plan) in env vars. Run designs with `--model` set to a Sonnet model to save the owner's plan usage. Never run `pen login`.
   - **Canva connector:** logo exploration (final logo is hand-built SVG), OG images, email header.
   - **Figma connector:** View seat with 20 calls/month. Run a one-time probe, and use it only as a review mirror for the owner if writes work.
   - Any tool failing → log it once, add a BLOCKERS entry, continue code-first. Never block on design tools.

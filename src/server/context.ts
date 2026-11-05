@@ -3,6 +3,7 @@ import { getConfig } from './config';
 import { createLogger, type Logger } from './lib/logger';
 import { newId } from './lib/ids';
 import type { ActorType } from './lib/audit';
+import type { AuthState } from './modules/auth/service';
 
 export interface Actor {
   type: ActorType;
@@ -23,6 +24,8 @@ export interface RequestContext {
   waitUntil(promise: Promise<unknown>): void;
   /** Who is acting. Set by the auth middleware; 'public' for anonymous requests, 'system' for cron/queue. */
   actor: Actor;
+  /** Resolved session (admin or portal), or null. Set by the auth middleware. */
+  auth: AuthState | null;
 }
 
 export interface ContextInit {
@@ -67,5 +70,6 @@ export function createContext(init: ContextInit): RequestContext {
     logger,
     waitUntil,
     actor: init.actor ?? { type: 'public', userId: null },
+    auth: null,
   };
 }

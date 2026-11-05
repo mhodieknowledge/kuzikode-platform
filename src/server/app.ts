@@ -5,6 +5,7 @@ import { createLogger } from './lib/logger';
 import { PRIVATE_HEADERS, securityHeaders } from './lib/security-headers';
 import { apiHeaders } from './middleware/headers';
 import { requestContext, type ApiEnv } from './middleware/request-context';
+import { authRoutes } from './modules/auth';
 
 export function createApp() {
   const app = new Hono<ApiEnv>();
@@ -13,6 +14,7 @@ export function createApp() {
   app.use('*', apiHeaders());
 
   app.get('/api/health', (c) => c.json({ data: { status: 'ok' } }));
+  app.route('/api/v1/auth', authRoutes());
 
   app.notFound((c) => {
     const requestId = c.var.requestId ?? 'unknown';

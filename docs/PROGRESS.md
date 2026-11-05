@@ -5,11 +5,21 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phase: 1 — inspection & planning
-- Last completed task: P2.8
-- **Next step:** P1.5 wrap-up (admin-dashboard pen.dev retry running), then P2.9 auth core (PBKDF2, sessions ×2 audiences, login/logout, CSRF, Origin, rate limit, lockout, reset, verify, invites).
+- Last completed task: P2.9 (P1.5 also done)
+- **Next step:** P2.10 RBAC (role-matrix unit tests, policies helpers, portal client-scope helper, last-super-admin protection).
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh (non-exempt calls this month: ~3/15) · CI status: —
 
 ---
+
+## 2026-11-05 21:40 UTC — P1.5 mockups + P2.9 auth core
+- Done: P1.5 mockups committed (design/mockups/README.md lists state; 7/12 pen.dev runs). P2.9: crypto (PBKDF2 100k, HMAC, AES-GCM,
+  constant-time), password policy, cookies, D1 rate limits, Turnstile verify, auth module (login/logout/logout-all/me/sessions/password
+  change/forgot/reset/verify email/invitations accept + buildInvitation/invite), middleware withAuth/requireAuth/csrfProtect/requirePermission,
+  test helpers (factories, api client, login).
+- Tests: unit 99 / integration 43 (generic errors, audiences, lockout, Turnstile after 3, rate limit 429, CSRF/Origin 403, immediate
+  revocation, idle/absolute expiry, must-change-password, reset single-use + expiry, invite single-use, client invite scoping).
+- CPU: PBKDF2 ≈ 21 ms per login (see DECISIONS).
+- Next step: P2.10.
 
 ## 2026-11-05 21:05 UTC — P2.8 DB helpers
 - Done: `db/client.ts` (Batch with labels, assertChanges, unique detection, chunk), `lib/sequences.ts` (formats, per-year keys, in-batch

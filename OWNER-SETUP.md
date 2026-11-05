@@ -97,9 +97,9 @@ Figma ✓, Canva ✓, Cloudflare Developer Platform ✓, all connected on claude
 ## Step 8: Start the build
 1. New session on `kuzikode-platform`, mode **Auto**, environment from Step 5.
 2. Paste the contents of **`KICKOFF_PROMPT.md`** and send.
-3. **Keep it running unattended:** ask Claude in that session: *"Create a recurring scheduled task every hour that starts a fresh session
-   on this repo with the prompt in KICKOFF_PROMPT.md."* Each run resumes from `docs/PROGRESS.md`. A run that finds another
-   session still working (recent commit on `main`) or a usage limit exits immediately, so hourly is safe.
+3. **Keep it running unattended:** nothing to do. Each build session starts the next one itself (with your connectors) when it
+   runs low on context, pauses and resumes itself when your Pro usage limit is hit, and an hourly **watchdog** scheduled task
+   restarts the chain if it ever breaks. Every build session checks that Figma, Canva and Cloudflare are connected before building.
 
 ## While it builds (your only jobs)
 - Glance at `docs/PROGRESS.md` and `docs/BLOCKERS.md` every day or two.

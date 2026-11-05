@@ -35,11 +35,16 @@ conflict and your resolution in `docs/DECISIONS.md`.
 
 ## 2. The work loop (repeat until the roadmap is done)
 
-0. **Overlap guard (scheduled runs):** sessions are started automatically every hour. Before anything else, run
-   `git fetch origin main` and check `git log -1 --format='%ct %s' origin/main`. If the last commit is less than **40 minutes** old
-   and is not one of the owner's own commits, another session is probably still working: **stop immediately** and do nothing (no
-   commits, no messages). Also stop immediately if your first actions hit a usage-limit error. The next hourly run will continue.
-   While working, commit and push at least every 30 minutes (a PROGRESS.md "heartbeat" update is fine) so the guard stays reliable.
+0. **Session start checks (every build session, before anything else):**
+   a. **Connector check (owner requirement: every build session has the connectors).** Use ToolSearch to confirm tools from
+      **Figma**, **Canva** and **Cloudflare Developer Platform** are available (they can take a few seconds to connect, so retry
+      for up to ~60 s). If any is still missing: append one dated line to `docs/BLOCKERS.md` ("session <id> started without <connector>"),
+      commit + push that line only, set your session title to "Kuzikode build: STOPPED (missing connectors)", and **stop**. Don't build.
+   b. **Overlap guard:** if your prompt says it's a **hand-off** or **owner's manual start**, skip this check. Otherwise run
+      `git fetch origin main` and `git log -1 --format='%ct %s' origin/main`. If the last commit is less than **40 minutes** old,
+      another session is probably working: **stop immediately** (no commits).
+   c. Set your session title to `Kuzikode build: <YYYY-MM-DD HH:MM UTC>` (`set_session_title`) so the watchdog can see you.
+   While working, commit and push at least every 30 minutes (a PROGRESS.md heartbeat line is fine).
 1. **Sync:** `git fetch origin main && git checkout main && git pull --rebase origin main`.
 2. **Orient:** read `docs/PROGRESS.md` and find the first unchecked task in `docs/10-ROADMAP.md`
    whose dependencies are done. If a task is marked `[~]` (in progress), resume it first.
@@ -56,6 +61,21 @@ conflict and your resolution in `docs/DECISIONS.md`.
 **Session end:** if you sense your context is getting long or the session is about to end, finish the
 current sub-step, make sure the tree is green, update `docs/PROGRESS.md` with a precise "Next step"
 line (file names, what's half-done), commit, push. The next session resumes from that line.
+
+**Hand-off (keeps the build going, with connectors):** after that final push, start **exactly one** successor session with
+`create_session` (from the claude-code-remote tools): `source_url` = `https://github.com/mhodieknowledge/kuzikode-platform`,
+`permission_mode` = `auto`, same environment (omit `environment_id`), `title` = `Kuzikode build: <YYYY-MM-DD HH:MM UTC>`, and `prompt` =
+`"Hand-off from session <your session id>: skip the overlap guard (CLAUDE.md §2 step 0b)."` followed by the full text of
+`KICKOFF_PROMPT.md`. Then rename yourself `Kuzikode build: finished (handed off)` and stop. Never start more than one successor.
+Don't hand off if the roadmap is complete. Instead write FINAL-REPORT, rename yourself `Kuzikode build: DONE` and stop.
+
+**Usage limit reached:** don't hand off (the new session would hit the same limit). Push what's green, rename yourself
+`Kuzikode build: paused until <time UTC>` (now + 60 min), and use `send_later` (delay 60 min) to message yourself:
+"Usage window should have reset: continue the work loop from docs/PROGRESS.md." You keep your connectors because you're the same session.
+If you're still limited when you wake, repeat (up to 6 times, then hand off).
+
+**Watchdog:** an hourly scheduled task checks that a build session is alive and starts one if not. It never builds.
+Leave it alone.
 
 ---
 

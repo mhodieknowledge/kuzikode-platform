@@ -1,0 +1,75 @@
+---
+import { ArrowRight } from 'lucide-react';
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import Icon from '../../components/public/Icon.astro';
+import CtaBand from '../../components/public/sections/CtaBand.astro';
+import { getPage, getServiceCatalogue } from '../../server/modules/cms';
+import type { Section } from '../../shared/schemas/cms';
+
+const { ctx } = Astro.locals;
+const [page, categories, home] = await Promise.all([
+  getPage(ctx, 'services'),
+  getServiceCatalogue(ctx),
+  getPage(ctx, 'home'),
+]);
+const intro = page?.sections.find((s) => s.type === 'rich_text') as Section<'rich_text'> | undefined;
+const cta = home?.sections.find((s) => s.type === 'cta') as Section<'cta'> | undefined;
+---
+
+<PublicLayout
+  title={page?.seoTitle ?? 'Services · Kuzikode Technologies'}
+  description={page?.seoDescription ?? undefined}
+>
+  <section class="bg-canvas py-14 md:py-20" aria-labelledby="services-title">
+    <div class="container-content">
+      <h1 id="services-title" class="text-4xl font-bold tracking-display md:text-5xl">
+        {intro?.content.title ?? 'Services'}
+      </h1>
+      {intro ? <div class="prose-kz mt-5 text-lg" set:html={intro.content.html} /> : null}
+    </div>
+  </section>
+  <section class="bg-surface py-14 md:py-20" aria-label="Service divisions">
+    <div class="container-content">
+      <ul class="flex flex-col divide-y divide-line border-y border-line">
+        {categories.map((cat) => (
+          <li class="grid gap-6 py-10 lg:grid-cols-[1.2fr_2fr]">
+            <div>
+              <span class="flex h-11 w-11 items-center justify-center rounded-sm bg-brand-50 text-brand-600">
+                <Icon name={cat.icon} size={22} />
+              </span>
+              <h2 class="mt-4 text-2xl font-bold tracking-display">
+                <a href={`/services/${cat.slug}`} class="hover:text-brand-600">
+                  {cat.name}
+                </a>
+              </h2>
+              <p class="mt-2 text-[15px] leading-6 text-ink-600">{cat.summary}</p>
+              {cat.status === 'coming_soon' ? (
+                <span class="mt-4 inline-flex rounded-full bg-ink-950/5 px-2 py-0.5 text-xs font-semibold text-ink-800">
+                  Coming soon
+                </span>
+              ) : (
+                <a
+                  href={`/services/${cat.slug}`}
+                  class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600"
+                >
+                  Explore {cat.name.split(' & ')[0]?.split(',')[0]} <ArrowRight size={16} aria-hidden="true" />
+                </a>
+              )}
+            </div>
+            <ul class="grid gap-x-8 gap-y-3 self-center sm:grid-cols-2">
+              {cat.services.map((s) => (
+                <li class="text-[15px] text-ink-800">
+                  <span class="font-semibold text-ink-950">{s.name}</span>
+                  {s.status === 'coming_soon' ? (
+                    <span class="ml-2 text-xs font-semibold text-ink-600">(coming soon)</span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+  {cta ? <CtaBand content={cta.content} /> : null}
+</PublicLayout>

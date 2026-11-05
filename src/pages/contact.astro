@@ -1,0 +1,92 @@
+---
+import { Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
+import PublicLayout from '../layouts/PublicLayout.astro';
+import ContactForm from '../components/forms/ContactForm';
+import { getPage, getServiceCatalogue, getSettings, settingText } from '../server/modules/cms';
+import type { Section } from '../shared/schemas/cms';
+
+const { ctx } = Astro.locals;
+const [page, catalogue, settings] = await Promise.all([
+  getPage(ctx, 'contact'),
+  getServiceCatalogue(ctx),
+  getSettings(ctx),
+]);
+const intro = page?.sections.find((s) => s.type === 'rich_text') as Section<'rich_text'> | undefined;
+const divisions = catalogue
+  .filter((c) => c.status === 'active')
+  .map((c) => ({
+    slug: c.slug,
+    name: c.name,
+    services: c.services.filter((s) => s.status === 'active').map((s) => ({ slug: s.slug, name: s.name })),
+  }));
+const email = settingText(settings, 'contact.email');
+const phone = settingText(settings, 'contact.phone');
+const whatsapp = settingText(settings, 'contact.whatsapp_number');
+const whatsappMsg = settingText(settings, 'contact.whatsapp_message') ?? '';
+const location = settingText(settings, 'contact.address') ?? settingText(settings, 'contact.location');
+const hours = settingText(settings, 'contact.hours');
+const category = Astro.url.searchParams.get('category') ?? undefined;
+const service = Astro.url.searchParams.get('service') ?? undefined;
+---
+
+<PublicLayout
+  title={page?.seoTitle ?? 'Contact Kuzikode Technologies'}
+  description={page?.seoDescription ?? undefined}
+  canonicalPath="/contact"
+>
+  <section class="bg-canvas py-14 md:py-20">
+    <div class="container-content grid gap-10 lg:grid-cols-[1fr_1.5fr]">
+      <div>
+        <h1 class="text-4xl font-bold tracking-display md:text-5xl">{intro?.content.title ?? 'Contact us'}</h1>
+        {intro ? <div class="prose-kz mt-5" set:html={intro.content.html} /> : null}
+        <ul class="mt-8 flex flex-col gap-4 text-[15px]">
+          {email ? (
+            <li class="flex items-center gap-3">
+              <Mail size={18} aria-hidden="true" className="text-brand-600" />
+              <a href={`mailto:${email}`} class="text-ink-950 hover:underline">
+                {email}
+              </a>
+            </li>
+          ) : null}
+          {phone ? (
+            <li class="flex items-center gap-3">
+              <Phone size={18} aria-hidden="true" className="text-brand-600" />
+              <a href={`tel:${phone.replace(/[^\d+]/g, '')}`} class="text-ink-950 hover:underline">
+                {phone}
+              </a>
+            </li>
+          ) : null}
+          {whatsapp ? (
+            <li class="flex items-center gap-3">
+              <MessageCircle size={18} aria-hidden="true" className="text-brand-600" />
+              <a
+                href={`https://wa.me/${whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappMsg)}`}
+                rel="noopener noreferrer"
+                target="_blank"
+                class="text-ink-950 hover:underline"
+              >
+                Chat on WhatsApp
+              </a>
+            </li>
+          ) : null}
+          {location ? (
+            <li class="flex items-center gap-3">
+              <MapPin size={18} aria-hidden="true" className="text-brand-600" />
+              <span class="text-ink-950">{location}</span>
+            </li>
+          ) : null}
+          {hours ? <li class="text-ink-600">{hours}</li> : null}
+        </ul>
+      </div>
+      <div class="rounded-lg border border-line bg-surface p-6 md:p-8">
+        <ContactForm
+          client:load
+          divisions={divisions}
+          siteKey={ctx.config.turnstileSiteKey}
+          initialCategory={category}
+          initialService={service}
+        />
+      </div>
+    </div>
+  </section>
+</PublicLayout>

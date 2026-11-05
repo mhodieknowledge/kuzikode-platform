@@ -78,6 +78,16 @@ describe('templates', () => {
       link: 'https://kuzikode.example/portal/accept-invite?token=abc',
       expiresInDays: 7,
     },
+    enquiry_acknowledgement: { name: 'Ann', reference: 'ENQ-2026-0001', kind: 'contact' },
+    enquiry_admin: {
+      reference: 'ENQ-2026-0001',
+      name: 'Ann',
+      email: 'ann@example.com',
+      category: 'web-development',
+      message: 'We need a website.',
+      kind: 'contact',
+      link: 'https://kuzikode.example/admin/enquiries/enq_1',
+    },
   };
 
   it.each(TEMPLATE_NAMES)('%s renders HTML and text with the branded layout', (name) => {

@@ -8,6 +8,7 @@ import { requestContext, type ApiEnv } from './middleware/request-context';
 import { authRoutes } from './modules/auth';
 import { fileRoutes } from './modules/files';
 import { userRoutes } from './modules/users';
+import { publicEnquiryRoutes } from './modules/leads';
 
 export function createApp() {
   const app = new Hono<ApiEnv>();
@@ -19,6 +20,7 @@ export function createApp() {
   app.route('/api/v1/auth', authRoutes());
   app.route('/api/v1', fileRoutes());
   app.route('/api/v1/admin/users', userRoutes());
+  app.route('/api/v1/public', publicEnquiryRoutes());
 
   app.notFound((c) => {
     const requestId = c.var.requestId ?? 'unknown';

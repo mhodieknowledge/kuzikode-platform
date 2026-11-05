@@ -4,6 +4,7 @@ import { brandFor, emailProvider, EmailProviderError } from '../../email';
 import { isTemplate, renderTemplate } from '../../email/templates';
 import { newId } from '../../lib/ids';
 import { PermanentJobError, type JobHandler } from '../types';
+import { EMAIL_RESOLVERS } from './email-resolvers';
 
 export const sendEmailPayload = z.object({
   template: z.string(),
@@ -30,9 +31,11 @@ export const sendEmailHandler: JobHandler = async (ctx: RequestContext, payload,
     .first<{ id: string; status: string }>();
   if (existing && existing.status !== 'queued' && existing.status !== 'failed') return;
 
+  const resolver = EMAIL_RESOLVERS[p.template];
+  const data = resolver ? await resolver(ctx, p.data) : p.data;
   let rendered;
   try {
-    rendered = renderTemplate(p.template, await brandFor(ctx), p.data);
+    rendered = renderTemplate(p.template, await brandFor(ctx), data);
   } catch (err) {
     throw new PermanentJobError(
       `template data invalid for ${p.template}: ${err instanceof Error ? err.message.slice(0, 200) : ''}`,

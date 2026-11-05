@@ -45,7 +45,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P3.8 Contact** form + server endpoint (Turnstile, honeypot, rate limit, Zod) → enquiry + notifications + emails + reference shown. AC: integration + e2e tests.
 - [x] **P3.9 Legal pages** (privacy, terms, cookies) with real draft text. AC: linked from the footer. BLOCKERS.md asks for legal review.
 - [x] **P3.10 SEO.** Meta/canonical/OG/Twitter, JSON-LD, dynamic sitemap.xml, robots.txt, OG images (Canva or generated SVG→PNG at build), 404/500 pages. AC: public.spec.ts SEO assertions. Lighthouse targets met on mobile.
-- [ ] **P3.11 Public cache layer.** Edge cache keyed by content_version, correct headers. AC: header tests. Private paths never cached.
+- [x] **P3.11 Public cache layer.** Edge cache keyed by content_version, correct headers. AC: header tests. Private paths never cached.
 - [ ] **P3.12 Packages & Pricing page.** Seed catalogue (docs/12 §A.2), packages on division pages, `/pricing` with tabs + comparison table (stacked on mobile) + FAQ, show-prices switch. AC: visual QA. Switch test. "Get started" opens the wizard prefilled.
 - [ ] **P3.13 Start-a-Project wizard** (5 steps, indicative range, attachment, brief JSON → enquiry). AC: integration + e2e.
 - [ ] **P3.14 Industries** index + 8 pages with real copy. AC: visual QA. Links to services/packages resolve.

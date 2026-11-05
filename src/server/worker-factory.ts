@@ -1,4 +1,6 @@
 import { createApp } from './app';
+import { createContext } from './context';
+import { withPageCache } from './lib/page-cache';
 import { handleQueueBatch } from './jobs/consumer';
 import { handleScheduled } from './jobs/scheduled';
 
@@ -15,7 +17,8 @@ export function createWorker(pageHandler: PageHandler) {
       if (pathname === '/api' || pathname.startsWith(API_PREFIX)) {
         return app.fetch(request, env, ctx);
       }
-      return pageHandler(request, env, ctx);
+      const pageCtx = createContext({ env, request, waitUntil: (p) => ctx.waitUntil(p) });
+      return withPageCache(pageCtx, request, async () => pageHandler(request, env, ctx));
     },
     async queue(batch: MessageBatch<unknown>, env: Env, ctx: ExecutionContext): Promise<void> {
       await handleQueueBatch(batch, env, ctx);

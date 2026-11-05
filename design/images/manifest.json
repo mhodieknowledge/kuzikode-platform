@@ -1,0 +1,21 @@
+{
+  "images": {
+    "home-hero": {
+      "model": "@cf/leonardo/lucid-origin",
+      "seed": 102,
+      "category": "people",
+      "prompt": "Professional editorial photograph, natural window light, shallow depth of field, 35mm lens, modern clean office or workspace, cool neutral colour grading with subtle blue accents, realistic skin texture, candid authentic moment, high detail, uncluttered background. Three Zimbabwean professionals, two women and one man in smart-casual clothes, collaborating around a laptop and a large wall screen in a bright modern Harare office, one pointing at the screen, natural expressions. No visible text, letters, logos or watermarks. No distorted hands or faces, no plastic skin, no neon, no cyberpunk, no robots, no holograms, no circuit boards, no flags.",
+      "chosen": "home-hero-1",
+      "alt": "Three colleagues discussing figures on a large wall screen in a bright office",
+      "width": 1344,
+      "height": 768,
+      "widths": [
+        640,
+        1024,
+        1344
+      ],
+      "placeholder": "data:image/webp;base64,UklGRoQAAABXRUJQVlA4IHgAAABQBACdASoYAA4APu1iqk2ppaQiMAgBMB2JQBOmUABWgZI9aIwtoy/TerIgAN31NtjtvUM9yi50wiEXV8L8DXWvovRAaHL9CB5v13afkjjIEQzBjjkhWgzJ/AtHgOjKgfD5MmpUUZ/ct7LRIe7lPLzT5ZcpwFkAAAA=",
+      "illustrative": true
+    }
+  }
+}

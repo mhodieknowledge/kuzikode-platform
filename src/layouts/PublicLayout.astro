@@ -1,0 +1,41 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Logo from '../components/Logo.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  canonicalPath?: string;
+  noindex?: boolean;
+}
+const { title, description, canonicalPath, noindex = false } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={title} description={description} canonicalPath={canonicalPath} noindex={noindex} />
+    <slot name="head" />
+  </head>
+  <body class="min-h-screen bg-surface">
+    <a class="skip-link" href="#main">
+      Skip to content
+    </a>
+    <slot name="header">
+      <header class="border-b border-line bg-surface">
+        <div class="container-content flex h-16 items-center">
+          <Logo />
+        </div>
+      </header>
+    </slot>
+    <main id="main" tabindex="-1" class="focus:outline-none">
+      <slot />
+    </main>
+    <slot name="footer">
+      <footer class="border-t border-line bg-ink-950 text-white/70">
+        <div class="container-content py-8 text-sm">© {year} Kuzikode Technologies</div>
+      </footer>
+    </slot>
+  </body>
+</html>

@@ -1,0 +1,15 @@
+---
+/** Development-only component gallery (roadmap P2.15). 404 outside APP_ENV=development. */
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import KitchenSink from '../../components/dev/KitchenSink';
+
+if (Astro.locals.ctx.config.appEnv !== 'development') return new Response('Not found', { status: 404 });
+const nav = [
+  { label: 'Overview', items: [{ label: 'UI kit', href: '/dev/ui', active: true }] },
+  { label: 'Development', items: [{ label: 'Mailbox', href: '/admin/dev/mailbox' }] },
+];
+---
+
+<AdminLayout title="UI kit" nav={nav} userName="Developer">
+  <KitchenSink client:load />
+</AdminLayout>

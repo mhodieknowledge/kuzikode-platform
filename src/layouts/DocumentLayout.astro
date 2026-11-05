@@ -1,0 +1,21 @@
+---
+/** Public document pages (/q/:token, /i/:token): noindex, no site navigation into the portal (docs/07 §6). */
+import AppLayout from './AppLayout.astro';
+import Logo from '../components/Logo.astro';
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<AppLayout title={`${title} · Kuzikode`} bodyClass="bg-canvas">
+  <header class="border-b border-line bg-surface">
+    <div class="container-content flex h-16 items-center">
+      <Logo href={null} height={24} />
+    </div>
+  </header>
+  <main id="main" tabindex="-1" class="container-content py-8 focus:outline-none">
+    <slot />
+  </main>
+</AppLayout>

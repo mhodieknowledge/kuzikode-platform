@@ -1,0 +1,27 @@
+---
+/**
+ * Shell shared by the admin and portal areas: noindex, CSRF meta, skip link. Navigation is passed in by
+ * AdminLayout / PortalLayout so each area keeps its own feel (docs/05 §3).
+ */
+import BaseHead from '../components/BaseHead.astro';
+
+interface Props {
+  title: string;
+  csrfToken?: string | undefined;
+  bodyClass?: string;
+}
+const { title, csrfToken, bodyClass = 'bg-canvas' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={title} noindex csrfToken={csrfToken} />
+  </head>
+  <body class:list={['min-h-screen', bodyClass]}>
+    <a class="skip-link" href="#main">
+      Skip to content
+    </a>
+    <slot />
+  </body>
+</html>

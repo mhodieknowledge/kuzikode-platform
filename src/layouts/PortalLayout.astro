@@ -1,0 +1,51 @@
+---
+import AppLayout from './AppLayout.astro';
+import Logo from '../components/Logo.astro';
+
+interface Props {
+  title: string;
+  active?: 'overview' | 'quotations' | 'invoices' | 'projects' | 'support' | 'profile';
+  csrfToken?: string | undefined;
+  clientName?: string;
+}
+const { title, active, csrfToken, clientName } = Astro.props;
+const items = [
+  { key: 'overview', label: 'Overview', href: '/portal' },
+  { key: 'quotations', label: 'Quotations', href: '/portal/quotations' },
+  { key: 'invoices', label: 'Invoices', href: '/portal/invoices' },
+  { key: 'projects', label: 'Projects', href: '/portal/projects' },
+  { key: 'support', label: 'Support', href: '/portal/support' },
+];
+---
+
+<AppLayout title={`${title} · Kuzikode Client Portal`} csrfToken={csrfToken} bodyClass="bg-surface text-[15px]">
+  <header class="border-b border-line bg-surface">
+    <div class="container-content flex h-16 items-center justify-between gap-6">
+      <Logo href="/portal" height={24} />
+      <nav aria-label="Portal navigation" class="hidden md:block">
+        <ul class="flex gap-1">
+          {items.map((i) => (
+            <li>
+              <a
+                href={i.href}
+                aria-current={active === i.key ? 'page' : undefined}
+                class:list={[
+                  'inline-flex h-16 items-center border-b-2 px-3 text-[15px]',
+                  active === i.key
+                    ? 'border-brand-600 font-semibold text-ink-950'
+                    : 'border-transparent text-ink-600 hover:text-ink-950',
+                ]}
+              >
+                {i.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <slot name="account">{clientName ? <span class="text-sm text-ink-600">{clientName}</span> : null}</slot>
+    </div>
+  </header>
+  <main id="main" tabindex="-1" class="container-content py-8 focus:outline-none md:py-10">
+    <slot />
+  </main>
+</AppLayout>

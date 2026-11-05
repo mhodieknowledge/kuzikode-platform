@@ -1,0 +1,35 @@
+/* Design tokens (docs/05 §2). Components use these via Tailwind theme names; no raw hex in components. */
+:root {
+  --ink-950: #0a0f1c;
+  --ink-800: #1c2333;
+  --ink-600: #475066;
+  --ink-400: #8a93a6;
+  --line: #e4e7ee;
+  --surface: #ffffff;
+  --canvas: #f7f8fa;
+  --brand-600: #2747e8;
+  --brand-500: #3355ff;
+  --brand-50: #eef1ff;
+  --accent-500: #e8a33d;
+  --success-600: #11845b;
+  --success-50: #e7f6ef;
+  /* 700 shades: small text on tinted backgrounds (badges) needs ≥ 4.5:1 */
+  --success-700: #0b6b49;
+  --warning-600: #b25e09;
+  --warning-50: #fdf3e7;
+  --warning-700: #8a4706;
+  --danger-600: #c2362f;
+  --danger-50: #fcecea;
+  --danger-700: #a12a24;
+  --info-600: #2563b0;
+  --info-50: #e9f1fb;
+  --info-700: #1d4f8f;
+
+  --dark-line: #232b3d;
+  --dark-surface: #0e1424;
+  --dark-brand: #5b78ff;
+
+  --shadow-1: 0 1px 2px rgb(10 15 28 / 0.06);
+  --shadow-2: 0 8px 24px rgb(10 15 28 / 0.08);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}

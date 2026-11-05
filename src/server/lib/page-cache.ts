@@ -1,6 +1,6 @@
 /**
  * Edge cache for public pages (docs/03 §6). The cache key includes content_version, so publishing anything in the
- * CMS makes every old entry unreachable — no purge API needed.
+ * CMS makes every old entry unreachable — no purge API needed. It also includes the build ID, so a deploy does the same.
  */
 import type { RequestContext } from '../context';
 import { contentVersion } from '../modules/cms';
@@ -21,9 +21,13 @@ export function isCacheableRequest(req: Request): boolean {
   return !/kz_(admin|portal)/.test(cookie);
 }
 
+/** Build identifier injected by Vite at build time (absent in unit/integration tests). */
+export const BUILD_ID: string = typeof __BUILD_ID__ === 'string' ? __BUILD_ID__.slice(0, 64) : 'dev';
+
 function cacheKey(req: Request, version: number): Request {
   const url = new URL(req.url);
-  return new Request(`${url.origin}/__page-cache/v${version}${url.pathname}${url.search}`, { method: 'GET' });
+  const build = encodeURIComponent(BUILD_ID);
+  return new Request(`${url.origin}/__page-cache/${build}/v${version}${url.pathname}${url.search}`, { method: 'GET' });
 }
 
 /** Serves from / stores into the edge cache around `render`. */

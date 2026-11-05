@@ -349,6 +349,149 @@ export const PAGES: PageSeed[] = [
     ],
   },
   {
+    key: 'how-we-work',
+    title: 'How we work',
+    seoTitle: 'How we work · Kuzikode Technologies',
+    seoDescription:
+      'Our process, engagement models, what clients can expect and the quality and security practices behind every Kuzikode project.',
+    sections: [
+      {
+        key: 'intro',
+        type: 'rich_text',
+        content: {
+          title: 'How we work',
+          html: '<p>Clear scope, steady progress you can see, and software you own. This is how we run every project, from a five-page website to a business platform.</p>',
+        },
+      },
+      {
+        key: 'process',
+        type: 'process',
+        content: {
+          title: 'Our process',
+          steps: [
+            {
+              title: 'Discover',
+              body: 'We learn how your organisation works, who will use the solution and what success looks like, then agree the scope in writing.',
+            },
+            {
+              title: 'Design',
+              body: 'We plan the structure and design the key screens with you before development starts, so there are no surprises.',
+            },
+            {
+              title: 'Build',
+              body: 'We build in milestones, share progress every week in your client portal and ask for your approval at each milestone.',
+            },
+            {
+              title: 'Launch',
+              body: 'We test thoroughly, move your data across, train your team and go live when you are ready.',
+            },
+            {
+              title: 'Support',
+              body: 'We stay on hand after launch to fix issues, make improvements and keep everything secure and up to date.',
+            },
+          ],
+        },
+      },
+      {
+        key: 'engagement',
+        type: 'features',
+        content: {
+          title: 'Ways to work with us',
+          intro: 'Choose the model that fits the work. We will recommend one when we read your brief.',
+          items: [
+            {
+              icon: 'list-checks',
+              title: 'Fixed-price package',
+              body: 'A defined package such as a business website or care plan, with a clear list of what is included.',
+            },
+            {
+              icon: 'layers',
+              title: 'Fixed-scope project',
+              body: 'A custom project scoped in a written quotation, with milestones and a price agreed before we start.',
+            },
+            {
+              icon: 'gauge',
+              title: 'Time and materials',
+              body: 'For evolving or exploratory work, billed by the hour against an agreed budget, with time reports you can see.',
+            },
+            {
+              icon: 'life-buoy',
+              title: 'Retainer',
+              body: 'A monthly block of hours for ongoing improvements, support and maintenance.',
+            },
+          ],
+        },
+      },
+      {
+        key: 'expect',
+        type: 'values',
+        content: {
+          title: 'What you can expect',
+          items: [
+            {
+              title: 'Weekly updates',
+              body: 'Progress, decisions and next steps posted in your client portal every week.',
+            },
+            {
+              title: 'Milestone-based payments',
+              body: 'You pay as agreed milestones are delivered, and can pay invoices online with mobile money or card.',
+            },
+            {
+              title: 'You own what we build for you',
+              body: 'Once paid in full, the code and content created specifically for you are yours, as set out in our service terms.',
+            },
+            {
+              title: 'Straight answers',
+              body: 'If something will take longer or cost more, we tell you early and explain why, before any extra work starts.',
+            },
+          ],
+        },
+      },
+      {
+        key: 'quality',
+        type: 'list',
+        content: {
+          title: 'Quality and security practices',
+          items: [
+            'Code reviewed and tested automatically before every release.',
+            'Accessibility checked against WCAG 2.1 AA.',
+            'Encrypted connections, hashed passwords and role-based access in every system we build.',
+            'Two-factor authentication for administrator accounts.',
+            'Audit logs for sensitive actions such as payments and permission changes.',
+            'Regular backups, with restores tested.',
+            'Personal information handled in line with Zimbabwe\'s Cyber and Data Protection Act.',
+          ],
+        },
+      },
+      {
+        key: 'cta',
+        type: 'cta',
+        content: {
+          title: 'Ready to talk about your project?',
+          body: 'Tell us what you need and we will reply with questions or a written quotation.',
+          primaryCta: { label: 'Start a project', href: '/start-a-project' },
+          secondaryCta: { label: 'See pricing', href: '/pricing' },
+        },
+      },
+    ],
+  },
+  {
+    key: 'faq',
+    title: 'Frequently asked questions',
+    seoTitle: 'FAQ · Kuzikode Technologies',
+    seoDescription: 'Answers to common questions about working with Kuzikode Technologies: projects, pricing, payments, support and careers.',
+    sections: [
+      {
+        key: 'intro',
+        type: 'rich_text',
+        content: {
+          title: 'Frequently asked questions',
+          html: '<p>Answers to the questions we hear most. If yours is not here, <a href="/contact">ask us</a>.</p>',
+        },
+      },
+    ],
+  },
+  {
     key: 'contact',
     title: 'Contact',
     seoTitle: 'Contact Kuzikode Technologies',

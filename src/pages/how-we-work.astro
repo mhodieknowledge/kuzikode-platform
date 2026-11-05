@@ -1,0 +1,55 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro';
+import RichText from '../components/public/sections/RichText.astro';
+import Process from '../components/public/sections/Process.astro';
+import Features from '../components/public/sections/Features.astro';
+import Values from '../components/public/sections/Values.astro';
+import ListSection from '../components/public/sections/ListSection.astro';
+import CtaBand from '../components/public/sections/CtaBand.astro';
+import TechnologiesStrip from '../components/public/sections/TechnologiesStrip.astro';
+import { breadcrumbLd, getPage, listTechnologies } from '../server/modules/cms';
+import type { Section } from '../shared/schemas/cms';
+
+const { ctx } = Astro.locals;
+const [page, technologies] = await Promise.all([getPage(ctx, 'how-we-work'), listTechnologies(ctx)]);
+if (!page) return new Response(null, { status: 404, statusText: 'Not found' });
+const sections = page.sections as Section[];
+const firstRichText = sections.find((s) => s.type === 'rich_text')?.key;
+---
+
+<PublicLayout
+  structuredData={[breadcrumbLd(ctx, [{ name: 'How we work', path: '/how-we-work' }])]}
+  title={page.seoTitle ?? 'How we work · Kuzikode Technologies'}
+  description={page.seoDescription ?? undefined}
+>
+  {sections.map((s) => {
+    switch (s.type) {
+      case 'rich_text':
+        return (
+          <RichText
+            content={s.content as Section<'rich_text'>['content']}
+            anchor={s.key}
+            asPageTitle={s.key === firstRichText}
+            tone={s.key === firstRichText ? 'canvas' : 'surface'}
+          />
+        );
+      case 'process':
+        return <Process content={s.content as Section<'process'>['content']} />;
+      case 'features':
+        return <Features content={s.content as Section<'features'>['content']} anchor={s.key} />;
+      case 'values':
+        return <Values content={s.content as Section<'values'>['content']} anchor={s.key} tone="canvas" />;
+      case 'list':
+        return <ListSection content={s.content as Section<'list'>['content']} anchor={s.key} />;
+      case 'cta':
+        return (
+          <>
+            <TechnologiesStrip technologies={technologies} tone="canvas" />
+            <CtaBand content={s.content as Section<'cta'>['content']} />
+          </>
+        );
+      default:
+        return null;
+    }
+  })}
+</PublicLayout>

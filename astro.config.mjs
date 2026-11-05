@@ -22,5 +22,7 @@ export default defineConfig({
   },
   vite: {
     plugins: [tailwindcss()],
+    // Unique per build: part of the edge page-cache key so a deploy never serves HTML from the previous build.
+    define: { __BUILD_ID__: JSON.stringify(process.env.GITHUB_SHA ?? `local-${Date.now()}`) },
   },
 });

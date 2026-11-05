@@ -11,6 +11,115 @@ export interface FaqSeed {
 
 export const FAQS: FaqSeed[] = [
   {
+    id: 'faq_general_who',
+    category: 'general',
+    question: 'Who do you work with?',
+    answer:
+      'Small and medium businesses, NGOs, schools, clinics and other organisations in Zimbabwe and across Africa that need a website, an app or a business system.',
+  },
+  {
+    id: 'faq_general_remote',
+    category: 'general',
+    question: 'Can you work with us if we are outside Zimbabwe?',
+    answer: 'Yes. We work remotely with video calls, shared documents and the client portal, wherever you are based.',
+  },
+  {
+    id: 'faq_general_start',
+    category: 'general',
+    question: 'How do we get started?',
+    answer:
+      'Use the Start a project form or the contact page to tell us what you need. We reply, usually within one business day, with questions or a written quotation.',
+  },
+  {
+    id: 'faq_general_ownership',
+    category: 'general',
+    question: 'Who owns the website or software you build?',
+    answer:
+      'Once you have paid in full, you own the deliverables we created specifically for you, including the code and content. Third-party software keeps its own licence. Our service terms explain the details.',
+  },
+  {
+    id: 'faq_projects_timeline',
+    category: 'projects',
+    question: 'How long does a project take?',
+    answer:
+      'It depends on the scope. Each package shows a typical delivery time, and every quotation includes a timeline with milestones. Timelines also depend on receiving content and decisions on time.',
+  },
+  {
+    id: 'faq_projects_content',
+    category: 'projects',
+    question: 'Do you write the content and provide images?',
+    answer:
+      'You know your business best, so we usually work from your content. We can also write copy for an extra fee, and help you choose suitable images.',
+  },
+  {
+    id: 'faq_projects_updates',
+    category: 'projects',
+    question: 'How will we know how the project is going?',
+    answer:
+      'We post updates every week in your client portal, where you can also see milestones, files, quotations and invoices.',
+  },
+  {
+    id: 'faq_projects_changes',
+    category: 'projects',
+    question: 'What if we want changes during the project?',
+    answer:
+      'Small changes within the agreed scope are part of the revision rounds. Larger changes are quoted separately before we start them, so the budget never changes without your agreement.',
+  },
+  {
+    id: 'faq_projects_existing',
+    category: 'projects',
+    question: 'Can you improve a system or website we already have?',
+    answer:
+      'Yes. We can review what you have, recommend whether to improve it or replace it, and move your data across if needed.',
+  },
+  {
+    id: 'faq_support_after',
+    category: 'support',
+    question: 'What happens after launch?',
+    answer:
+      'Every project includes a support period. After that, you can choose a care plan, a support retainer or pay for help by the hour.',
+  },
+  {
+    id: 'faq_support_request',
+    category: 'support',
+    question: 'How do I ask for help?',
+    answer:
+      'Clients can open a support request in the client portal and follow it there. You can also contact us by email or phone.',
+  },
+  {
+    id: 'faq_support_hosting',
+    category: 'support',
+    question: 'Do you host websites and applications?',
+    answer:
+      'Yes. Our care plans include hosting, SSL, backups and uptime monitoring. We can also deploy to your own cloud account if you prefer.',
+  },
+  {
+    id: 'faq_support_backups',
+    category: 'support',
+    question: 'Is my data backed up?',
+    answer: 'Systems we host are backed up regularly, and we test that backups can be restored.',
+  },
+  {
+    id: 'faq_careers_open',
+    category: 'careers',
+    question: 'Are you hiring?',
+    answer: 'Open roles are listed on our careers page when we have them. You can apply online for each role.',
+  },
+  {
+    id: 'faq_careers_cv',
+    category: 'careers',
+    question: 'Can I send my CV if there is no open role?',
+    answer:
+      'We only consider applications for advertised roles, so that every applicant gets a proper review. Check the careers page for openings.',
+  },
+  {
+    id: 'faq_careers_privacy',
+    category: 'careers',
+    question: 'What happens to my application data?',
+    answer:
+      'We use it only to consider your application. CVs are deleted 12 months after the role closes, as described in our privacy policy.',
+  },
+  {
     id: 'faq_pricing_quote',
     category: 'pricing',
     question: 'Is the price on a package final?',

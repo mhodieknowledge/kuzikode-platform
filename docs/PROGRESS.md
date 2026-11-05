@@ -142,3 +142,10 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Tests: integration `insights.test.ts` (4), e2e `insights.spec.ts` (3; RSS parsed with DOMParser, all item links resolve; axe; screenshots reviewed).
 - Hand-off note: `create_session` with permission_mode auto is refused because this session runs in "default" mode, so this session continues the loop itself.
 - Next step: P3.16 How we work, FAQ page (≥ 20 items + FAQPage schema, categories, search filter), testimonials block (hidden when empty), technologies strip, site search. Service terms + accessibility pages already exist (P3.9). 8 pricing FAQs already seeded (`content/faq.ts`).
+
+## 2026-11-05 · P3.16 How we work, FAQ, testimonials, technologies, search ✅
+- `/how-we-work` (CMS page with process, engagement models, expectations, quality practices, CTA), `/faq` (24 FAQs in 5 categories, FAQPage JSON-LD, progressive filter, deep links open answers), `/search` (header icon + mobile form), testimonials block on home (renders nothing unless published, consented testimonials exist), technologies strip on home and how-we-work. Service terms + accessibility pages were done in P3.9.
+- Services: `cms/content.ts` (listAllFaqs, listTechnologies, listTestimonials), `cms/search.ts` (searchSite).
+- Fix: edge page-cache key includes the build ID (stale HTML after deploy).
+- Tests: integration `site-content.test.ts` (4), e2e `site-content.spec.ts` (4); screenshots reviewed.
+- Next step: P3.17 Engagement widgets: WhatsApp chat button (`contact.whatsapp_number`, hidden when unset), consultation booking (`booking.cal_url` link, else request form with 3 preferred slots → enquiry kind `consultation`, already supported by `submitEnquiry`), newsletter double opt-in (`newsletter_subscribers` table exists in 0008).

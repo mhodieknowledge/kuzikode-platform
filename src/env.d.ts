@@ -37,3 +37,6 @@ declare module '*.txt?raw' {
   const content: string;
   export default content;
 }
+
+/** Injected by Vite `define` at build time (astro.config.mjs). */
+declare const __BUILD_ID__: string | undefined;

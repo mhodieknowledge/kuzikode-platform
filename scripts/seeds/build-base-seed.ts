@@ -11,6 +11,7 @@ import { LEGAL_PAGES } from './content/legal.ts';
 import { ADDONS, PACKAGES } from './content/packages.ts';
 import { FAQS } from './content/faq.ts';
 import { INDUSTRIES } from './content/industries.ts';
+import { TECHNOLOGIES } from './content/technologies.ts';
 import { LAUNCH_PUBLISHED_AT, POST_CATEGORIES, POST_TAGS, POSTS } from './content/insights.ts';
 
 export const sq = (v: string | number | null | undefined): string =>
@@ -208,6 +209,19 @@ export function buildBaseSeed(): string {
       out.push(ins('post_tag_links', { post_id: postId, tag_id: `ptag_${tag.replace(/-/g, '_')}` }));
     }
   }
+
+  out.push('', '-- Technologies (docs/12 §C.11)');
+  TECHNOLOGIES.forEach((t, i) =>
+    out.push(
+      ins('technologies', {
+        id: `tech_${t.name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`,
+        name: t.name,
+        category: t.category,
+        sort_order: (i + 1) * 10,
+        published: 1,
+      }),
+    ),
+  );
 
   out.push('', '-- FAQ');
   FAQS.forEach((f, i) =>

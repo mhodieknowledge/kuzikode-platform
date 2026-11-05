@@ -1,5 +1,5 @@
 ---
-import { ChevronDown, Menu, X } from 'lucide-react';
+import { ChevronDown, Menu, Search, X } from 'lucide-react';
 import Logo from '../Logo.astro';
 import type { SiteNavigation } from '../../server/modules/cms';
 
@@ -118,6 +118,14 @@ const aboutActive = ['/about', '/products', '/faq', '/how-we-work', ...(nav.care
 
     <div class="hidden items-center gap-2 whitespace-nowrap xl:flex">
       <a
+        href="/search"
+        aria-label="Search"
+        class:list={[
+          'inline-flex h-10 w-10 items-center justify-center rounded-sm',
+          dark ? 'text-white hover:bg-white/10' : 'text-ink-800 hover:bg-ink-950/5',
+        ]}><Search size={18} aria-hidden="true" /></a
+      >
+      <a
         href="/portal/login"
         class:list={[
           'inline-flex h-10 items-center rounded-sm border px-4 text-sm font-semibold',
@@ -181,6 +189,11 @@ const aboutActive = ['/about', '/products', '/faq', '/how-we-work', ...(nav.care
           ))
         }
       </ul>
+      <form action="/search" method="get" role="search" class="mt-6 flex gap-2">
+        <label for="mobile-search" class="sr-only">Search the site</label>
+        <input id="mobile-search" name="q" type="search" maxlength="100" placeholder="Search" class="h-11 min-w-0 flex-1 rounded-sm border border-line px-3 text-[15px] text-ink-950" />
+        <button type="submit" class="inline-flex h-11 w-11 items-center justify-center rounded-sm border border-line text-ink-950" aria-label="Search"><Search size={18} aria-hidden="true" /></button>
+      </form>
       <div class="mt-6 flex flex-col gap-3">
         <a href="/start-a-project" class="inline-flex h-12 items-center justify-center rounded-sm bg-brand-600 text-[15px] font-semibold text-white">Start a project</a>
         <a href="/portal/login" class="inline-flex h-12 items-center justify-center rounded-sm border border-line text-[15px] font-semibold text-ink-950">Client Portal</a>

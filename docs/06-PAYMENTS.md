@@ -249,7 +249,7 @@ adapter with `fetch` + WebCrypto** (Workers-compatible). Don't depend on the SDK
 
 | Item | Value |
 |---|---|
-| Credentials | **Integration ID** + **Integration Key** (Paynow → Receive Payment Links → 3rd Party Site or Link Profile). Possibly one integration per currency (verify, and model as separate accounts) |
+| Credentials | **Integration ID** + **Integration Key** (Paynow → Other Ways To Get Paid → Create/Manage Shopping Carts → Create Advanced Integration; the key is emailed to the company address. Generate a new key when going live). Possibly one integration per currency (verify, and model as separate accounts) |
 | Redirect initiate | `POST https://www.paynow.co.zw/interface/initiatetransaction`, `Content-Type: application/x-www-form-urlencoded` |
 | Express checkout | `POST https://www.paynow.co.zw/interface/remotetransaction`: same fields **plus** `method` (`ecocash`, `onemoney`, `innbucks`, `omari`, `vmc`, `zimswitch`), `phone` (mobile money), `token` + `merchanttrace` (cards, tokenized only). `authemail` **required** for express |
 | Request fields (in this order) | `id`, `reference`, `amount` (2 dp, no symbol), `additionalinfo`, `returnurl`, `resulturl`, optional `authemail`, `authphone`, `authname`, `tokenize`, `merchanttrace`, then `status=Message`, then `hash` |

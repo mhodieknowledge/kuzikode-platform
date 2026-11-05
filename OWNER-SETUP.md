@@ -31,7 +31,7 @@ Do these in order. About 60–90 minutes in total. When all **Required** steps a
 | Service | Where | What to copy |
 |---|---|---|
 | **Resend** (email) | resend.com → sign up → API Keys → Create (full access) | `RESEND_API_KEY` |
-| **Paynow** (payments) | paynow.co.zw → sign up as a merchant → **Receive Payment Links → 3rd Party Site or Link Profile** → create an integration (USD), enable EcoCash, OneMoney, InnBucks | Integration ID → `PAYNOW_USD_INTEGRATION_ID`, Integration Key → `PAYNOW_USD_INTEGRATION_KEY`, your Paynow login email → `PAYNOW_TEST_AUTHEMAIL` |
+| **Paynow** (payments) | Register at paynow.co.zw/Customer/Register → add your bank account → **Other Ways To Get Paid** (paynow.co.zw/Home/Receive) → **Create/Manage Shopping Carts → Create Advanced Integration** → tick EcoCash, OneMoney, InnBucks, O'mari, Visa/Mastercard, Zimswitch → Save → **Email Key To Company Address** | Integration ID → `PAYNOW_USD_INTEGRATION_ID`, Integration Key → `PAYNOW_USD_INTEGRATION_KEY`, your Paynow login email → `PAYNOW_TEST_AUTHEMAIL` |
 | **pen.dev** (mockups) | pen.dev → sign in → **Organization settings → Developer Keys** → Create key | `PEN_CLI_KEY` |
 | **Anthropic API** (pen.dev's designer runs on it) | console.anthropic.com → Billing (add ~$5–10 credit) → API Keys → Create | `ANTHROPIC_API_KEY` |
 | *Optional:* OpenAI (better hero faces) | platform.openai.com → API keys | `OPENAI_API_KEY` |

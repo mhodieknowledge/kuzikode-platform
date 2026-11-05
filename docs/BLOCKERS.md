@@ -9,7 +9,7 @@ Things only the owner can do. The agent keeps building around them and records e
   once the domain is added). Add as `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in **both** GitHub repo secrets and the
   Claude Code cloud environment's environment variables.
 - [ ] **Enable R2** on the Cloudflare account (Dashboard → R2 → requires a payment method on file; free tier is $0).
-- [ ] **Paynow test integration:** register a merchant account at paynow.co.zw → Receive Payment Links → create a 3rd-party integration (USD).
+- [ ] **Paynow test integration:** register at https://www.paynow.co.zw/Customer/Register → add bank account → Other Ways To Get Paid → Create/Manage Shopping Carts → Create Advanced Integration (USD), leave Notification URL blank, then "Email Key To Company Address".
   Copy the Integration ID + Key into the Claude Code environment as `PAYNOW_USD_INTEGRATION_ID` / `PAYNOW_USD_INTEGRATION_KEY`, and set
   `PAYNOW_TEST_AUTHEMAIL` to your Paynow merchant login email (test-mode payments only work for that account). Enable EcoCash/OneMoney/InnBucks on the integration.
 - [ ] **Paynow go-live:** after the agent's test transactions pass, click "Request to be Set Live" in Paynow (merchant KYC is yours to complete).

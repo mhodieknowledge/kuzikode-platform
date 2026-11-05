@@ -7,6 +7,7 @@ import { apiHeaders } from './middleware/headers';
 import { requestContext, type ApiEnv } from './middleware/request-context';
 import { authRoutes } from './modules/auth';
 import { fileRoutes } from './modules/files';
+import { userRoutes } from './modules/users';
 
 export function createApp() {
   const app = new Hono<ApiEnv>();
@@ -17,6 +18,7 @@ export function createApp() {
   app.get('/api/health', (c) => c.json({ data: { status: 'ok' } }));
   app.route('/api/v1/auth', authRoutes());
   app.route('/api/v1', fileRoutes());
+  app.route('/api/v1/admin/users', userRoutes());
 
   app.notFound((c) => {
     const requestId = c.var.requestId ?? 'unknown';

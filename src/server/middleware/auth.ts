@@ -24,6 +24,8 @@ export const withAuth =
 export interface RequireAuthOptions {
   /** Let users who must change their password reach this route (password change, logout, me). */
   allowPasswordChange?: boolean;
+  /** Let users who still need to verify or enrol 2FA reach this route (2FA endpoints, logout, me). */
+  allowMfaPending?: boolean;
 }
 
 /** 401 without a valid session for the audience. Users flagged must_change_password only reach allowed routes. */
@@ -33,7 +35,20 @@ export const requireAuth =
     const auth = c.var.ctx.auth;
     if (!auth || auth.session.audience !== audience) throw unauthenticated();
     if (auth.user.mustChangePassword && !opts.allowPasswordChange) {
-      throw new AppError('FORBIDDEN', 'Change your password to continue.', { detail: 'must_change_password' });
+      throw new AppError('FORBIDDEN', 'Change your password to continue.', {
+        detail: 'must_change_password',
+        reason: 'password_change_required',
+      });
+    }
+    if (!opts.allowMfaPending) {
+      if (auth.mfa.enabled && !auth.session.mfaVerified) {
+        throw new AppError('FORBIDDEN', 'Enter your two-factor code to continue.', { reason: 'mfa_required' });
+      }
+      if (auth.mfa.required && !auth.mfa.enabled) {
+        throw new AppError('FORBIDDEN', 'Set up two-factor authentication to continue.', {
+          reason: 'mfa_enrolment_required',
+        });
+      }
     }
     await next();
   };

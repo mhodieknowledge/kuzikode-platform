@@ -40,11 +40,13 @@ export class AppError extends Error {
   readonly retryAfterSeconds: number | undefined;
   /** Internal detail for logs only (never sent to the client). */
   readonly detail: string | undefined;
+  /** Safe machine-readable reason the UI can act on (e.g. 'mfa_required'). */
+  readonly reason: string | undefined;
 
   constructor(
     code: ErrorCode,
     message?: string,
-    opts: { fields?: FieldErrors; retryAfterSeconds?: number; detail?: string; cause?: unknown } = {},
+    opts: { fields?: FieldErrors; retryAfterSeconds?: number; detail?: string; reason?: string; cause?: unknown } = {},
   ) {
     super(message ?? DEFAULT_MESSAGE[code], opts.cause === undefined ? undefined : { cause: opts.cause });
     this.name = 'AppError';
@@ -53,6 +55,7 @@ export class AppError extends Error {
     this.fields = opts.fields;
     this.retryAfterSeconds = opts.retryAfterSeconds;
     this.detail = opts.detail;
+    this.reason = opts.reason;
   }
 }
 
@@ -70,7 +73,7 @@ export const providerError = (detail: string, cause?: unknown) =>
   new AppError('PROVIDER_ERROR', undefined, { detail, cause });
 
 export interface ErrorBody {
-  error: { code: ErrorCode; message: string; fields?: FieldErrors };
+  error: { code: ErrorCode; message: string; fields?: FieldErrors; reason?: string };
   requestId: string;
 }
 
@@ -82,6 +85,7 @@ export function toErrorResponse(
   const appErr = err instanceof AppError ? err : new AppError('INTERNAL');
   const body: ErrorBody = { error: { code: appErr.code, message: appErr.message }, requestId };
   if (appErr.fields) body.error.fields = appErr.fields;
+  if (appErr.reason) body.error.reason = appErr.reason;
   const headers: Record<string, string> = {};
   if (appErr.retryAfterSeconds !== undefined) headers['Retry-After'] = String(Math.ceil(appErr.retryAfterSeconds));
   return { status: appErr.status, body, headers };

@@ -50,7 +50,11 @@ export interface AuthState {
   permissions: Set<Permission>;
   /** Portal only: clients this user may see (active client_user_access rows). */
   clientIds: string[];
+  /** enabled: the user has 2FA on; required: their role demands it (super admin, finance manager). */
+  mfa: { enabled: boolean; required: boolean };
 }
+
+const MFA_REQUIRED_ROLES = ['super_admin', 'finance_manager'];
 
 export function cookieName(ctx: RequestContext, audience: Audience): string {
   return ctx.config.secureCookies ? `__Host-kz_${audience}` : `kz_${audience}_dev`;
@@ -119,6 +123,10 @@ export async function resolveSession(
         : [],
   );
   const clientIds = audience === 'portal' ? await repo.activeClientIds(ctx.db, user.id) : [];
+  const mfaRow = await ctx.db
+    .prepare('SELECT enabled_at FROM user_mfa WHERE user_id = ?')
+    .bind(user.id)
+    .first<{ enabled_at: string | null }>();
   return {
     user: {
       id: user.id,
@@ -137,6 +145,7 @@ export async function resolveSession(
     roles,
     permissions,
     clientIds,
+    mfa: { enabled: !!mfaRow?.enabled_at, required: roles.some((r) => MFA_REQUIRED_ROLES.includes(r)) },
   };
 }
 
@@ -174,6 +183,10 @@ export interface LoginResult {
   cookie: string;
   user: { id: string; email: string; name: string };
   mustChangePassword: boolean;
+  /** The user must enter a 2FA code before using the app. */
+  mfaRequired: boolean;
+  /** The user's role requires 2FA and it isn't set up yet: enrolment comes first. */
+  mfaEnrolmentRequired: boolean;
 }
 
 export async function login(
@@ -255,11 +268,18 @@ export async function login(
   await batch.run();
   await ctx.db.prepare('DELETE FROM rate_limits WHERE key = ?').bind(failKey).run();
 
+  const mfaRow = await ctx.db
+    .prepare('SELECT enabled_at FROM user_mfa WHERE user_id = ?')
+    .bind(user.id)
+    .first<{ enabled_at: string | null }>();
+  const roles = audience === 'admin' ? await repo.roleKeysForUser(ctx.db, user.id) : [];
   return {
     token: session.token,
     cookie: sessionCookie(ctx, audience, session.token),
     user: { id: user.id, email: user.email, name: user.name },
     mustChangePassword: user.must_change_password === 1,
+    mfaRequired: !!mfaRow?.enabled_at,
+    mfaEnrolmentRequired: !mfaRow?.enabled_at && roles.some((r) => MFA_REQUIRED_ROLES.includes(r)),
   };
 }
 

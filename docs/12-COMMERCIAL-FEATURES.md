@@ -57,7 +57,7 @@ Google Workspace (~$7/user/month) is offered as an upgrade add-on.
 | On-page SEO + Google Search Console | Basic | ✓ | ✓ | ✓ |
 | Google Business Profile setup | ✓ | ✓ | ✓ | n/a |
 | Analytics dashboard | ✕ | ✓ | ✓ | ✓ |
-| Online payments (EcoCash, cards via PesePay) | ✕ | ✕ | ✓ | Optional |
+| Online payments (EcoCash, OneMoney, cards via Paynow) | ✕ | ✕ | ✓ | Optional |
 | Products / catalogue | ✕ | ✕ | Up to 100 | Scoped |
 | Revision rounds | 1 | 3 | 3 | Agreed |
 | Post-launch support | 2 weeks | 1 month | 3 months | Agreed |
@@ -94,7 +94,7 @@ Google Workspace (~$7/user/month) is offered as an upgrade add-on.
 | AI, Data & Intelligence | BI dashboard starter (up to 3 data sources) | $600 |
 | AI, Data & Intelligence | AI assistant / chatbot integration | $900 |
 | AI, Data & Intelligence | Intelligent document processing pilot | $1,200 |
-| Automation & Integration | Payment gateway integration (PesePay, EcoCash, cards) | $400 |
+| Automation & Integration | Payment gateway integration (Paynow, PesePay, EcoCash, cards) | $400 |
 | Automation & Integration | Workflow automation (per workflow) | $500 |
 | Automation & Integration | API development | $25 / hour |
 | Cloud & IT | Cloud deployment & setup | $200 |
@@ -169,7 +169,7 @@ before renewal, and to the client if the asset is billable to them. Shown on the
 | C.9 | **WhatsApp chat button** | Floating button (bottom-right, respects safe areas, hidden on admin/portal) using `contact.whatsapp_number` + prefilled message per page ("Hi Kuzikode, I'm interested in the Business Website plan"). Hidden if not configured. |
 | C.10 | **Newsletter** | Footer signup with **double opt-in** (confirmation email), `newsletter_subscribers` table, unsubscribe link, admin list + CSV export. Sending campaigns is out of scope for now (export to a mailing tool). Note it in the privacy policy. |
 | C.11 | **"Technologies we work with"** strip | Logos of technologies (Cloudflare, React, Flutter, Python, PostgreSQL, etc.), clearly labelled as technologies, never "clients" or "partners". Simple monochrome SVGs, editable in CMS. |
-| C.12 | **"Payments we support"** | On pricing/footer: "Pay invoices online with EcoCash, Visa and Mastercard via PesePay" (shown only once PesePay is enabled in production). |
+| C.12 | **"Payments we support"** | On pricing/footer: "Pay invoices online with EcoCash, OneMoney, InnBucks and cards" (methods come from the routed live payment account; shown only once a live account is routed). |
 | C.13 | **Service terms page** | `/legal/service-terms`: payment terms, milestones, revisions, ownership, support, cancellation. CMS-editable, flagged for legal review. Also an **Accessibility statement** page. |
 | C.14 | **Team page** (optional) | `/about#team` only when the owner adds real team members with real photos (never AI faces). |
 | C.15 | **Site search** | Header search over services, packages, industries, insights, FAQ, portfolio (D1 `LIKE` / FTS5 virtual table if supported by D1. Verify and record). |

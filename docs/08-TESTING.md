@@ -10,7 +10,7 @@ Tests are part of every task's definition of done. `npm run verify` must be gree
 | `npm run test:unit` | Vitest (node env) for pure modules: money, pricing, numbering formats, mappers, validators, permissions |
 | `npm run test:integration` | Vitest with `@cloudflare/vitest-pool-workers`: real workerd, local D1 with migrations applied per test file, R2/KV/Queue bindings, Hono app via `SELF.fetch` |
 | `npm run test:e2e` | Playwright against `wrangler dev` (built app) with a fresh local D1 seeded with base + dev seeds, mock payment + log email providers |
-| `npm run test:sandbox` | PesePay sandbox suite. Runs only if sandbox secrets exist. Never in default CI |
+| `npm run test:payments:live` | Live gateway suite in test mode (Paynow test numbers; PesePay test env if keys exist). Opt-in, never in default CI |
 | `npm run verify` | typecheck + lint + unit + integration + build |
 | `npm run verify:full` | verify + e2e (CI runs this) |
 
@@ -27,7 +27,7 @@ captured outbox/email inspector, mock provider controller.
 - **numbering:** format rendering (`INV-{YYYY}-{SEQ:5}`), year rollover, uniqueness.
 - **permissions:** role matrix resolves expected keys. Super admin has everything. The last super admin can't be removed.
 - **validation:** each Zod schema accepts good input and rejects bad (lengths, emails, unknown keys).
-- **PesePay:** encryption round-trip, mapper for every status in the table, amount minor ↔ major string.
+- **Payments package:** conformance kit for every adapter; Paynow SHA-512 hash vector + inbound validation; PesePay AES round-trip; status mappers; amount minor ↔ major string.
 - **sanitizer:** XSS payload corpus stripped. Allowed tags kept.
 
 ## 3. Integration tests (minimum)
@@ -90,5 +90,5 @@ pages, robots disallows private paths, axe has no serious violations on all publ
 ## 6. Rules
 - No `.skip`, `.only`, or `test.fixme` on `main`. ESLint rule enforces it.
 - A flaky test is a bug. Fix the cause (usually missing await or an unfixed clock).
-- Tests never call real PesePay or Resend except the opt-in sandbox suite.
+- Tests never call real Paynow, PesePay or Resend except the opt-in live suites.
 - Report real numbers (passed/failed/count, duration) in PROGRESS.md and FINAL-REPORT.md.

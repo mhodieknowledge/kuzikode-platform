@@ -29,7 +29,7 @@ Phase 8 and update this file if they've changed.
 | Site imagery (dev-time only) | **Cloudflare Workers AI** REST API from a dev script + **sharp** (devDependency) for optimisation | ~20 images generated once and committed. Not a runtime feature. See `13-IMAGERY.md` |
 | 2FA | TOTP (RFC 6238) via WebCrypto HMAC-SHA1, secrets AES-GCM-encrypted with `DATA_ENCRYPTION_KEY` | No external service |
 | Booking (optional) | Cal.com free link/embed if configured, else built-in request form | |
-| Payments | `PaymentProvider` interface → **PesePay** adapter (hosted redirect) + **Mock** adapter (dev/test only) | See `06-PAYMENTS.md`. |
+| Payments | `@kuzikode/payments` package: `PaymentProvider` interface → **Paynow** adapter (launch: redirect + express checkout), **PesePay** adapter (alternative), **Mock** (dev/test). DB-driven routing per app/currency/method | See `06-PAYMENTS.md`. |
 | Unit/integration tests | **Vitest** + **`@cloudflare/vitest-pool-workers`** (real workerd + local D1/R2/KV/Queues) | |
 | E2E tests | **Playwright** against `wrangler dev` on a seeded local DB | |
 | Lint/format | **ESLint** (typescript-eslint, astro, jsx-a11y) + **Prettier** | |
@@ -54,7 +54,8 @@ newer majors may differ). Record the exact versions in DECISIONS.md.
 | Turnstile | Free | |
 | Workers AI | 10,000 neurons/day (≈ 15 Lucid Origin 1024² images/day) | Enough to produce the ~20 site images over 2 days |
 | Resend | 3,000/month, 100/day, 1 verified domain | Needs a verified sending domain (DNS) → blocked until kuzikode.com exists. Before that, Resend's test sender can only mail the account owner. |
-| PesePay sandbox | Free | Sandbox offers EcoCash, Visa, Mastercard in USD only. |
+| Paynow test mode | Free | New integrations start in test mode. Test phone numbers simulate success, delay, cancel and insufficient funds. Live after "Request to be Set Live" |
+| PesePay test env (optional) | Free | USD only. Only needed if you want to live-test the alternative adapter |
 | GitHub Actions | Free minutes for public repos, 2,000 min/month for private | Keep CI fast. Cache npm. |
 
 ## 3. Why D1 and not MongoDB (owner suggested "Mongo or any other")

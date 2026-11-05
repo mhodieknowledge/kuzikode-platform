@@ -101,7 +101,7 @@ the pay/accept actions only. No other client data, no navigation into the portal
 `Strict-Transport-Security: max-age=63072000; includeSubDomains` (prod only),
 `Content-Security-Policy` with nonces: `default-src 'self'; script-src 'self' 'nonce-…' https://challenges.cloudflare.com;
 frame-src https://challenges.cloudflare.com; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline';
-connect-src 'self'; form-action 'self' <pesepay checkout origin>; frame-ancestors 'none'; base-uri 'self'; object-src 'none'`
+connect-src 'self'; form-action 'self' https://www.paynow.co.zw <pesepay checkout origin if routed>; frame-ancestors 'none'; base-uri 'self'; object-src 'none'`
 (adjust for Cloudflare Web Analytics if enabled), `X-Content-Type-Options: nosniff`,
 `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=()`,
 `Cross-Origin-Opener-Policy: same-origin`, `X-Frame-Options: DENY`.

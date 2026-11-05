@@ -8,8 +8,8 @@ with wrangler and writes the returned real IDs into `wrangler.jsonc`.
 | Env | Worker name | URL | Data | Payments | Email |
 |---|---|---|---|---|---|
 | local | — (`wrangler dev`) | http://localhost:8787 | local D1 (base + dev seed) | mock (+ sandbox if secrets in `.dev.vars`) | log adapter |
-| staging | `kuzikode-staging` | `https://kuzikode-staging.<subdomain>.workers.dev` | `kuzikode-staging-db` (base seed + optional dev seed) | PesePay **sandbox** (mock allowed with banner) | Resend (test sender or verified domain) |
-| production | `kuzikode` | `https://kuzikode.<subdomain>.workers.dev` → later `https://kuzikode.com` + `www` redirect | `kuzikode-prod-db` (base seed only) | PesePay production (only once the owner sets keys) | Resend verified domain |
+| staging | `kuzikode-staging` | `https://kuzikode-staging.<subdomain>.workers.dev` | `kuzikode-staging-db` (base seed + optional dev seed) | Paynow **test mode** account (mock allowed with banner) | Resend (test sender or verified domain) |
+| production | `kuzikode` | `https://kuzikode.<subdomain>.workers.dev` → later `https://kuzikode.com` + `www` redirect | `kuzikode-prod-db` (base seed only) | Paynow **live** account (only once Paynow sets the integration live and the owner sets keys) | Resend verified domain |
 
 ## 2. Cloudflare resources (per env, `-staging` / `-prod` suffix)
 ```bash
@@ -33,7 +33,7 @@ npx wrangler queues create kuzikode-staging-jobs-dlq
   "assets": { "directory": "./dist", "binding": "ASSETS" },
   "observability": { "enabled": true },
   "triggers": { "crons": ["*/5 * * * *", "17 2 * * *"] },   // 5-min sweeps; nightly maintenance (02:17 UTC)
-  "vars": { "APP_ENV": "development", "PUBLIC_SITE_URL": "http://localhost:8787", "PESEPAY_MODE": "sandbox", "PAYMENTS_MOCK_ENABLED": "true",
+  "vars": { "APP_ENV": "development", "PUBLIC_SITE_URL": "http://localhost:8787", "PAYMENTS_MOCK_ENABLED": "true",
             "EMAIL_FROM": "Kuzikode <onboarding@resend.dev>", "EMAIL_REPLY_TO": "", "TURNSTILE_SITE_KEY": "1x00000000000000000000AA" },
   "d1_databases": [{ "binding": "DB", "database_name": "kuzikode-local-db", "database_id": "local", "migrations_dir": "migrations" }],
   "r2_buckets": [{ "binding": "FILES", "bucket_name": "kuzikode-local-files" }, { "binding": "BACKUPS", "bucket_name": "kuzikode-local-backups" }],
@@ -45,13 +45,13 @@ npx wrangler queues create kuzikode-staging-jobs-dlq
   "env": {
     "staging": {
       "name": "kuzikode-staging",
-      "vars": { "APP_ENV": "staging", "PUBLIC_SITE_URL": "https://kuzikode-staging.<SUBDOMAIN>.workers.dev", "PESEPAY_MODE": "sandbox", "PAYMENTS_MOCK_ENABLED": "true", "...": "..." },
+      "vars": { "APP_ENV": "staging", "PUBLIC_SITE_URL": "https://kuzikode-staging.<SUBDOMAIN>.workers.dev", "PAYMENTS_MOCK_ENABLED": "true", "...": "..." },
       "d1_databases": [{ "binding": "DB", "database_name": "kuzikode-staging-db", "database_id": "<STAGING_D1_ID>", "migrations_dir": "migrations" }],
       "...": "r2/kv/queues with staging names and <IDS>"
     },
     "production": {
       "name": "kuzikode",
-      "vars": { "APP_ENV": "production", "PUBLIC_SITE_URL": "https://kuzikode.<SUBDOMAIN>.workers.dev", "PESEPAY_MODE": "production", "PAYMENTS_MOCK_ENABLED": "false", "...": "..." },
+      "vars": { "APP_ENV": "production", "PUBLIC_SITE_URL": "https://kuzikode.<SUBDOMAIN>.workers.dev", "PAYMENTS_MOCK_ENABLED": "false", "...": "..." },
       "routes": [ /* enable after the domain is on Cloudflare:
         { "pattern": "kuzikode.com", "custom_domain": true },
         { "pattern": "www.kuzikode.com", "custom_domain": true } */ ],
@@ -65,8 +65,8 @@ Bindings are **not inherited** into `env.*` blocks. Repeat all of them per env. 
 ## 4. Secrets (`npx wrangler secret put NAME --env staging|production`; local: `.dev.vars`)
 | Secret | Required | Purpose |
 |---|---|---|
-| `PESEPAY_INTEGRATION_KEY` | for payments | PesePay `authorization` header |
-| `PESEPAY_ENCRYPTION_KEY` | for payments | 32-char AES key |
+| `PAYNOW_USD_INTEGRATION_ID` / `PAYNOW_USD_INTEGRATION_KEY` | for payments | Paynow launch account (names follow the account's `secret_prefix`; add `PAYNOW_ZWG_*` if a ZWG integration exists) |
+| `PESEPAY_MAIN_INTEGRATION_KEY` / `PESEPAY_MAIN_ENCRYPTION_KEY` | optional | Only if a PesePay account is routed |
 | `RESEND_API_KEY` | for email | Resend API |
 | `RESEND_WEBHOOK_SECRET` | for delivery status | Verify Resend (Svix) webhook signatures |
 | `TURNSTILE_SECRET_KEY` | yes (staging/prod) | Turnstile siteverify |
@@ -124,7 +124,7 @@ npm run deploy:production                     # wrangler deploy --env production
 3. Set `PUBLIC_SITE_URL=https://kuzikode.com`, redeploy.
 4. Resend: add domain, publish SPF/DKIM (and DMARC `p=none` → later `quarantine`) records, verify, set `EMAIL_FROM=Kuzikode <hello@kuzikode.com>`.
 5. Business email (inbound): Cloudflare Email Routing (free) to forward `hello@`/`billing@` to the owner's inbox, or a paid mailbox provider.
-6. PesePay: register the production `resultUrl`/`returnUrl` domain if the merchant dashboard requires it.
+6. Paynow: update the integration's site details to the new domain if required, and confirm result URLs reach `https://kuzikode.com/api/payments/callbacks/paynow/<accountId>`.
 7. Turnstile: add the hostname to the widget.
 
 ## 9. Post-deploy verification checklist (`docs/RUNBOOK.md`)

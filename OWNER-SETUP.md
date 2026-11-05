@@ -31,7 +31,7 @@ Do these in order. About 60–90 minutes in total. When all **Required** steps a
 | Service | Where | What to copy |
 |---|---|---|
 | **Resend** (email) | resend.com → sign up → API Keys → Create (full access) | `RESEND_API_KEY` |
-| **PesePay sandbox** (payments) | pesepay.com → register as a merchant/developer → create an application (sandbox) | Integration key → `PESEPAY_INTEGRATION_KEY`, Encryption key → `PESEPAY_ENCRYPTION_KEY` |
+| **Paynow** (payments) | paynow.co.zw → sign up as a merchant → **Receive Payment Links → 3rd Party Site or Link Profile** → create an integration (USD), enable EcoCash, OneMoney, InnBucks | Integration ID → `PAYNOW_USD_INTEGRATION_ID`, Integration Key → `PAYNOW_USD_INTEGRATION_KEY`, your Paynow login email → `PAYNOW_TEST_AUTHEMAIL` |
 | **pen.dev** (mockups) | pen.dev → sign in → **Organization settings → Developer Keys** → Create key | `PEN_CLI_KEY` |
 | **Anthropic API** (pen.dev's designer runs on it) | console.anthropic.com → Billing (add ~$5–10 credit) → API Keys → Create | `ANTHROPIC_API_KEY` |
 | *Optional:* OpenAI (better hero faces) | platform.openai.com → API keys | `OPENAI_API_KEY` |
@@ -50,9 +50,9 @@ Then **Settings → Environments → New environment** → name `production` →
 ## Step 5: Claude Code cloud environment (Required, 10 min). This is where the pen.dev key goes.
 1. Open **claude.ai/code** → start a session → select the repo `kuzikode-platform`.
 2. In the session's title bar, open the **cloud environment menu → Edit** (or create a new environment named "kuzikode").
-3. **Network access:** choose **Full** (simplest: the agent needs npm, Cloudflare, PesePay, Resend, pen.dev, unpkg and docs sites).
-   If you prefer *Limited*, keep "Allow package managers" ticked and add: `api.cloudflare.com`, `*.workers.dev`, `api.pesepay.com`,
-   `api.test.sandbox.pesepay.com`, `developers.pesepay.com`, `api.resend.com`, `challenges.cloudflare.com`, `*.pen.dev`, `pen.dev`,
+3. **Network access:** choose **Full** (simplest: the agent needs npm, Cloudflare, Paynow, Resend, pen.dev, unpkg and docs sites).
+   If you prefer *Limited*, keep "Allow package managers" ticked and add: `api.cloudflare.com`, `*.workers.dev`, `www.paynow.co.zw`, `developers.paynow.co.zw`,
+   `api.pesepay.com`, `api.test.sandbox.pesepay.com`, `developers.pesepay.com`, `api.resend.com`, `challenges.cloudflare.com`, `*.pen.dev`, `pen.dev`,
    `api.anthropic.com`, `unpkg.com`, `cdn.jsdelivr.net`, `developers.cloudflare.com`, `docs.astro.build`, `github.com`.
 4. **Environment variables.** Add one per line as `NAME=value`. If your app shows a **Network secrets** / **API credentials** section,
    still put these as environment variables, because the tools read them by these exact names:
@@ -62,8 +62,9 @@ Then **Settings → Environments → New environment** → name `production` →
    TURNSTILE_SITE_KEY=...
    TURNSTILE_SECRET_KEY=...
    RESEND_API_KEY=...
-   PESEPAY_INTEGRATION_KEY=...
-   PESEPAY_ENCRYPTION_KEY=...
+   PAYNOW_USD_INTEGRATION_ID=...
+   PAYNOW_USD_INTEGRATION_KEY=...
+   PAYNOW_TEST_AUTHEMAIL=...      (your Paynow merchant login email)
    PEN_CLI_KEY=...
    ANTHROPIC_API_KEY=...
    OPENAI_API_KEY=...        (optional)
@@ -102,7 +103,7 @@ Figma ✓, Canva ✓, Cloudflare Developer Platform ✓, all connected on claude
 ## While it builds (your only jobs)
 - Glance at `docs/PROGRESS.md` and `docs/BLOCKERS.md` every day or two.
 - When the staging site is up, open the one-time admin link the agent gives you and set your password.
-- Later: review package prices (then switch on "Show prices"), register **kuzikode.com**, get PesePay **production** approval,
+- Later: review package prices (then switch on "Show prices"), register **kuzikode.com**, click **"Request to be Set Live"** in Paynow once the agent's test payments pass,
   pick Zoho or Google for client mailboxes, legal review of policies, Workers Paid ($5/month) before real payments,
   approve production deploys in GitHub Actions.
 
@@ -116,12 +117,12 @@ Figma ✓, Canva ✓, Cloudflare Developer Platform ✓, all connected on claude
 | `BACKUP_ENCRYPTION_PASSPHRASE` | n/a | ✓ | n/a |
 | `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` | ✓ | n/a | agent (var / secret) |
 | `RESEND_API_KEY` | ✓ | n/a | agent (secret) |
-| `PESEPAY_INTEGRATION_KEY` / `PESEPAY_ENCRYPTION_KEY` | ✓ (sandbox) | n/a | agent for staging. **You** set production keys later |
+| `PAYNOW_USD_INTEGRATION_ID` / `PAYNOW_USD_INTEGRATION_KEY` / `PAYNOW_TEST_AUTHEMAIL` | ✓ (test mode) | n/a | agent for staging. Live keys: same names after Paynow sets you live |
 | `PEN_CLI_KEY` + `ANTHROPIC_API_KEY` | ✓ | n/a | n/a (mockups only) |
 | `OPENAI_API_KEY` (optional) | ✓ | n/a | n/a (images only) |
 | `HMAC_SECRET`, `DATA_ENCRYPTION_KEY` | n/a | n/a | agent generates and sets these itself |
 
 ## Files in the pack
 `CLAUDE.md` (agent rules) · `KICKOFF_PROMPT.md` · `OWNER-SETUP.md` (this file) · `KANSO-NOTE.md` (snapshot) ·
-`docs/01–13` (requirements, tech, architecture, database, design, payments, security, testing, deployment, roadmap with 94 tasks,
+`docs/01–13` (requirements, tech, architecture, database, design, payments, security, testing, deployment, roadmap with 97 tasks,
 design tools, commercial features, imagery) · `docs/PROGRESS.md`, `DECISIONS.md`, `BLOCKERS.md` · `.claude/skills/pen-design/`.

@@ -8,7 +8,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 
 ## Phase 1 — Inspection & planning
 - [ ] **P1.1 Inspect repo.** List existing files and tooling. Keep useful work, and note what you keep or replace in DECISIONS.md. AC: PROGRESS.md entry with findings.
-- [ ] **P1.2 Verify external facts.** Re-check (WebFetch) current Astro + `@astrojs/cloudflare` major + custom entry/queue/scheduled pattern, Tailwind v4 + Astro setup, vitest-pool-workers setup, PesePay llms-full.txt (encryption, callback, statuses), Resend API + idempotency + webhooks, Turnstile test keys, Workers free limits. AC: DECISIONS.md lists versions and any deviation from docs/02.
+- [ ] **P1.2 Verify external facts.** Re-check (WebFetch) current Astro + `@astrojs/cloudflare` major + custom entry/queue/scheduled pattern, Tailwind v4 + Astro setup, vitest-pool-workers setup, Paynow developer docs (initiate, express checkout, status update, hash, polling, test mode) + PesePay llms-full.txt, Resend API + idempotency + webhooks, Turnstile test keys, Workers free limits. AC: DECISIONS.md lists versions and any deviation from docs/02.
 - [ ] **P1.3 Coding conventions.** Create `docs/CONVENTIONS.md` (naming, module layout, error codes, commit style, test naming). AC: file exists and matches docs/03.
 - [ ] **P1.4 Brand & tool probe.** Canva logo exploration → chosen direction → hand-built SVG logo set + favicons. Figma capability probe (docs/11 §3). pen.dev auth check (`pen status`). AC: logo SVGs committed. Each tool's status recorded in DECISIONS.md. BLOCKERS entries for any unavailable tool.
 - [ ] **P1.5 Mockups (pen.dev).** Write briefs in `design/briefs/` from PRD content, then generate the 6 key screens (docs/11 §1, ≤ 12 runs), review each PNG against docs/05. AC: `design/mockups/*.png` committed and referenced in PROGRESS.md. If pen.dev is unavailable → `[!]` and continue (Phase 2 doesn't depend on it).
@@ -91,11 +91,14 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [ ] **P5.8 Public document pages** `/q/:token`, `/i/:token`, `/pay/return`. AC: token tests, noindex/no-store.
 
 ## Phase 6 — Payments & email integrations
-- [ ] **P6.1 `packages/payments` workspace package** (interface, types, money helpers, mock provider, README + extraction guide, own tests in CI) + app registry + mock checkout page. AC: mock unreachable in production config (test).
+- [ ] **P6.1 `packages/payments` workspace package** (interface, types, money helpers, adapter conformance kit, mock provider, README + extraction guide + "writing a new adapter" guide, own tests in CI) + app router (accounts + routes) + mock checkout page. AC: mock unreachable in production config (test).
 - [ ] **P6.2 Payments service** (initiate, attempts reuse, callback endpoint, verify, apply, state machine, reversal, overpayment, idempotency). AC: all docs/06 §5 tests.
-- [ ] **P6.3 PesePay adapter inside `packages/payments`** (crypto, client, mapper, currencies/methods lookup, redaction). AC: unit tests + mocked-HTTP integration tests.
+- [ ] **P6.3 Paynow adapter (launch)**: redirect + express (EcoCash, OneMoney, InnBucks, O'mari OTP), SHA-512 hash in/out, polling, mapper, redaction. AC: docs' hash vectors pass, conformance kit passes, mocked-HTTP integration tests.
+- [ ] **P6.3b PesePay adapter (alternative)**: AES-256-CBC, initiate, check, mapper. AC: conformance kit passes. Test that switching the route from Paynow to PesePay changes only new attempts.
+- [ ] **P6.3c Admin: payment accounts & routing** (Super Admin): accounts list with credentials found/missing, mode, methods; routes editor per app/currency/method; audited. Portal "Pay now" shows the methods for the routed account.
+- [ ] **P6.3d Custom checkout page** (docs/06 §3b): our branded page for all methods (EcoCash/OneMoney prompt, InnBucks code + QR + deep link, O'mari OTP, bank transfer, card hand-off that returns to our page), live status, receipt download, no provider-specific code in the page. AC: §3b Playwright tests, axe clean, 375 px screenshots reviewed.
 - [ ] **P6.4 Reconciliation** (cron + admin button + backoff + expiry). AC: missed-callback test.
-- [ ] **P6.5 PesePay sandbox verification** (`npm run test:sandbox` + manual hosted flow on staging). AC: results recorded. `[!]` if no sandbox credentials, with BLOCKERS entry.
+- [ ] **P6.5 Paynow test-mode verification** (`npm run test:payments:live` with test numbers 0771111111 / 0773333333 / 0774444444 against staging + one manual redirect payment with "Faked Success"). AC: results recorded. `[!]` if no Paynow test credentials, with BLOCKERS entry.
 - [ ] **P6.6 All email templates** (PRD §7) HTML + text, rendered preview page (dev), snapshot tests. AC: every template has a test.
 - [ ] **P6.7 Resend webhooks** (signature verification, status updates). AC: tests with signed fixtures.
 - [ ] **P6.8 Live email verification** with a real Resend key on staging. AC: delivered email recorded. `[!]` if no key.
@@ -113,6 +116,6 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [ ] **P8.2 Deploy staging** via CI + migrations + base seed + bootstrap admin (credentials go to the owner via BLOCKERS.md instructions, never committed) + smoke tests.
 - [ ] **P8.3 deploy-production + backup workflows** (manual production, nightly encrypted backup).
 - [ ] **P8.4 Backup/restore drill** executed and recorded.
-- [ ] **P8.5 Docs:** `README.md` (overview, local setup), `docs/RUNBOOK.md` (deploy, migrate, rollback, restore, rotate secrets, incident basics), `docs/ADMIN-GUIDE.md` (owner onboarding: first login, settings, inviting staff/clients, invoicing, payments), `docs/PAYMENTS-ONBOARDING.md` (PesePay merchant account, sandbox → production keys, URLs to register), `docs/EMAIL-SETUP.md` (Resend domain + DNS), `docs/PRODUCTION-CHECKLIST.md`.
+- [ ] **P8.5 Docs:** `README.md` (overview, local setup), `docs/RUNBOOK.md` (deploy, migrate, rollback, restore, rotate secrets, incident basics), `docs/ADMIN-GUIDE.md` (owner onboarding: first login, settings, inviting staff/clients, invoicing, payments), `docs/PAYMENTS-ONBOARDING.md` (Paynow merchant account, integration keys, test mode → "Request to be Set Live", per-currency integrations, how to switch to or add PesePay by adding an account + route), `docs/EMAIL-SETUP.md` (Resend domain + DNS), `docs/PRODUCTION-CHECKLIST.md`.
 - [ ] **P8.6 Figma sync** of final screens for owner review (only if the P1.4 probe succeeded; docs/11 §3). Otherwise put the final Playwright screenshots in `docs/screenshots/`.
 - [ ] **P8.7 FINAL-REPORT.md** per PRD §19, with real test numbers and an honest status of what's live/blocked.

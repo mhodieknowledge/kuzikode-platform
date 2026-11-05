@@ -27,7 +27,7 @@ How to work: `CLAUDE.md`. Stack: `02-TECH-DECISIONS.md`.
 **In scope (one integrated platform):**
 1. Public company website · 2. Admin portal (`/admin`) · 3. Client portal (`/portal`) ·
 4. Clients & leads · 5. Service catalogue · 6. Quotations & proposals · 7. Invoicing ·
-8. Payments with reusable provider abstraction (PesePay first) · 9. Projects & milestones ·
+8. Gateway-independent payments (Paynow at launch, PesePay ready, per-product gateway routing) · 9. Projects & milestones ·
 10. Expenses · 11. Website CMS · 12. Notifications & email · 13. Reports & analytics ·
 14. **Priced packages, care plans & subscriptions** · 15. **Careers & recruitment** · 16. **Extended website** (pricing page,
 start-a-project wizard, industries, insights/blog, how we work, FAQ, consultation booking, WhatsApp chat, newsletter) ·
@@ -190,8 +190,8 @@ statutory accounting system."
 **H. Payments.** All payment transactions across providers + manual. Filters: status, provider,
 method, currency, date range, client, invoice. Detail: attempts, provider reference, events timeline
 (redacted raw payloads), failure reason, linked invoice(s). **Reconcile** button (re-check status
-with provider). Refunds: record manual refunds and use provider refund API where supported (PesePay
-has none documented, so record manually and adjust via credit note). Unmatched/uncertain queue.
+with provider). Refunds: record manual refunds and use provider refund API where supported (Paynow and PesePay
+have none documented, so record manually and adjust via credit note). Unmatched/uncertain queue.
 
 **I. Website CMS.** Homepage sections, About content, mission/vision/values/objectives, services,
 portfolio, products, announcements (site-wide banner with start/end dates), contact details, social
@@ -237,8 +237,8 @@ creates an *unlinked* account that sees nothing until an admin approves the link
 never auto-link.
 
 ## 6. Payments
-See `06-PAYMENTS.md` (normative). Hosted redirect checkout via PesePay first, behind a provider
-interface, plus a mock provider that only works in development/test and is visibly labelled
+See `06-PAYMENTS.md` (normative). Customers always pay on Kuzikode's **own custom checkout page** (docs/06 §3b), never on a gateway's checkout page. Gateway-independent: Paynow is the launch gateway (redirect checkout + EcoCash/OneMoney/InnBucks express checkout),
+PesePay is a fully built alternative, and each product/currency is routed to a gateway account by settings, plus a mock provider that only works in development/test and is visibly labelled
 "TEST PAYMENT" everywhere.
 
 ## 7. Email & documents
@@ -301,8 +301,8 @@ prepared for kuzikode.com.
 ## 19. Definition of done & final report
 Done when: public site fully functional with all six divisions; About/mission/vision editable;
 portfolio & products work; enquiries work; admin auth & permissions; clients; quotations; invoices
-+ PDFs; secure public invoice links; client portal; projects; expenses; payment abstraction; PesePay
-sandbox tested **if credentials exist** (otherwise fully built + mock-tested + documented as blocked);
++ PDFs; secure public invoice links; client portal; projects; expenses; gateway-independent payments; Paynow
+test-mode tested **if credentials exist** (otherwise fully built + mock-tested + documented as blocked);
 callbacks secure & idempotent; email integrated (tested with Resend if a key exists); audit logs;
 all tests pass; production build succeeds; Cloudflare config complete; docs complete; no critical
 security issues; no unfinished core features.

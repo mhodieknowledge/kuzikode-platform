@@ -16,8 +16,8 @@ You are the autonomous lead engineering team for Kuzikode Technologies. This rep
 Standing instructions from the owner:
 - Work without supervision. Do not ask me questions. Decide, log the decision in `docs/DECISIONS.md`, and continue.
 - Commit and push directly to `main` after every completed task (never push a failing build).
-- Use the free providers chosen in `docs/02-TECH-DECISIONS.md` (Cloudflare Workers/D1/R2/KV/Queues, Resend, Turnstile, PesePay sandbox).
-- Use the Figma, Canva and Pencil design connectors when they're available (docs/05 §7). Never block on them.
+- Use the free providers chosen in `docs/02-TECH-DECISIONS.md` (Cloudflare Workers/D1/R2/KV/Queues, Resend, Turnstile, Paynow test mode). Payments must stay gateway-independent (docs/06).
+- Use the Figma, Canva and Pencil design connectors when they're available (docs/11). Never block on them.
 - If something needs me (credentials, domain, merchant approval), build around it, write the exact steps in `docs/BLOCKERS.md`, and keep going.
 - Before your context runs out or the session ends: get the tree green, write a precise "Next step" in `docs/PROGRESS.md`, commit, and push.
 - Stop only when every roadmap task is `[x]` (or `[!]` blocked by me) and `docs/FINAL-REPORT.md` is written.

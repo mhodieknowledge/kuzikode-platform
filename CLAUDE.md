@@ -21,7 +21,7 @@ The other docs tell you WHAT to build. Read this file in full at the start of ev
 | `docs/04-DATABASE.md` | Schema design | Before any migration |
 | `docs/05-DESIGN-SYSTEM.md` | Brand, tokens, UI rules | Before any UI work |
 | `docs/11-DESIGN-TOOLS.md` | How to use pen.dev, Canva, Figma (budgets, fallbacks) | P1.4, P1.5, UI tasks |
-| `docs/06-PAYMENTS.md` | Payment abstraction + PesePay protocol | Before any payment work |
+| `docs/06-PAYMENTS.md` | Gateway-independent payments: Paynow (launch) + PesePay adapters, routing | Before any payment work |
 | `docs/07-SECURITY.md` | Auth, sessions, RBAC, headers, uploads | Before auth/portal/API work |
 | `docs/08-TESTING.md` | Test strategy and required test cases | Every task (tests are part of done) |
 | `docs/09-DEPLOYMENT.md` | Cloudflare resources, CI/CD, secrets, backups | Phase 2 and Phase 8 |
@@ -67,9 +67,10 @@ line (file names, what's half-done), commit, push. The next session resumes from
 - **No fabrication.** Never invent clients, testimonials, projects, team members, statistics, awards,
   partner logos, or "trusted by" claims. Do not say the company is legally registered. The portfolio
   ships empty with a tasteful empty state until the owner adds real entries via the CMS.
-- **No invented third-party behaviour.** For PesePay, Resend, Cloudflare and Astro, check current
+- **No invented third-party behaviour.** For Paynow, PesePay, Resend, Cloudflare and Astro, check current
   official docs (WebFetch) before writing integration code. `docs/06-PAYMENTS.md` already contains
-  verified PesePay facts; re-verify anything you're unsure of at `https://developers.pesepay.com/llms-full.txt`.
+  verified Paynow and PesePay facts; re-verify anything you're unsure of at `https://developers.paynow.co.zw/docs/paynow/quickstart/`
+  and `https://developers.pesepay.com/llms-full.txt`.
 - **Secrets:** never commit secrets, never print them in logs, never put them in client bundles.
   `.dev.vars` is git-ignored; `.dev.vars.example` holds names only.
 - **Production safety:** you may create Cloudflare resources and deploy to **staging** freely. Do
@@ -84,7 +85,7 @@ line (file names, what's half-done), commit, push. The next session resumes from
 - Before every push: `npm run verify` must pass. **Never push a red `main`.** If you can't get it green,
   don't push the broken part. Revert or isolate it and log it in PROGRESS.md.
 - Commit style: Conventional Commits — `feat(invoices): issue invoice with client snapshot`,
-  `fix(payments): ignore duplicate PesePay callback`, `docs:`, `test:`, `chore:`, `refactor:`.
+  `fix(payments): ignore duplicate Paynow status update`, `docs:`, `test:`, `chore:`, `refactor:`.
 - Push with `git push -u origin main`. If rejected (non-fast-forward): `git pull --rebase origin main`,
   re-run `npm run verify`, push again. On network errors retry up to 4 times with backoff (2s, 4s, 8s, 16s).
 - If the session environment forces you onto a different branch (e.g. `claude/...`), push your work

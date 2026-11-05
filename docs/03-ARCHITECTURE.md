@@ -16,7 +16,7 @@ Modular monolith. One repository, one Cloudflare Worker. Clear module boundaries
                        │           │          │           │              │
                     D1 (DB)    R2 (FILES)  KV (CACHE)  Queue (JOBS)   Static Assets
                                                          │ DLQ (JOBS_DLQ)
- External: PesePay API (outbound + result callback → /api/payments/callbacks/pesepay)
+ External: Paynow / PesePay (outbound + result callbacks → /api/payments/callbacks/:provider/:accountId)
            Resend API (outbound + webhook → /api/webhooks/resend), Turnstile siteverify
 ```
 
@@ -49,7 +49,8 @@ Modular monolith. One repository, one Cloudflare Worker. Clear module boundaries
 │   └── payments/                 # @kuzikode/payments: REUSABLE gateway library (npm workspace), see 06-PAYMENTS.md §0
 │       ├── package.json  README.md  CHANGELOG.md  tsconfig.json  vitest.config.ts
 │       ├── src/index.ts  src/types.ts (PaymentProvider, NormalizedStatus, …)  src/money.ts (minor↔major helpers)
-│       ├── src/providers/pesepay/{client.ts, crypto.ts, mapper.ts, callback.ts, index.ts}
+│       ├── src/providers/paynow/{client.ts, hash.ts, mapper.ts, callback.ts, index.ts}   # launch gateway
+│       ├── src/providers/pesepay/{client.ts, crypto.ts, mapper.ts, callback.ts, index.ts} # alternative
 │       ├── src/providers/mock/index.ts
 │       └── test/                 # unit tests (crypto vectors, status mapping, request building, callback parsing)
 ├── public/                       # static assets: brand/, fonts/, favicon, robots handled dynamically
@@ -114,7 +115,7 @@ Modular monolith. One repository, one Cloudflare Worker. Clear module boundaries
 │       │   ├── timetracking/     # time entries, timers, billing to invoices
 │       │   └── mfa/              # TOTP + backup codes
 │       │   (each module: routes.ts · service.ts · repository.ts · policies.ts · index.ts)
-│       ├── payments/             # thin app glue only: registry.ts (which providers are enabled, from DB + env)
+│       ├── payments/             # thin app glue: router.ts (app/currency/method → provider account), config-from-secrets.ts
 │       ├── email/
 │       │   ├── provider.ts  providers/resend.ts  providers/log.ts
 │       │   └── templates/        # one file per template → { subject, html, text } (typed props)
@@ -191,7 +192,7 @@ D1 / R2 / providers (behind interfaces)
 ## 7. Configuration
 
 - `vars` in `wrangler.jsonc` per env: `APP_ENV` (`development`|`staging`|`production`), `PUBLIC_SITE_URL`,
-  `TURNSTILE_SITE_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO`, `PESEPAY_MODE` (`sandbox`|`production`), `PAYMENTS_MOCK_ENABLED` (`false` in staging/prod).
+  `TURNSTILE_SITE_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO`, `PAYMENTS_MOCK_ENABLED` (`false` in staging/prod).
 - Secrets (`wrangler secret put`): see `09-DEPLOYMENT.md` §4.
 - `src/server/config.ts` validates the env with Zod at startup per request (cheap) and fails closed:
   for example, the mock provider is never selectable when `APP_ENV=production`.

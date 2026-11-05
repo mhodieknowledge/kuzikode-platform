@@ -10,7 +10,8 @@ One line per decision (newest at the bottom). Format:
 - 2026-11-05 · jobs · D1 outbox + Cloudflare Queues + cron sweep · Queues free since Feb 2026 but 24h retention; outbox makes it durable · Queues alone
 - 2026-11-05 · hashing · PBKDF2-SHA256 100k iterations (WebCrypto) · fastest secure option under the Workers CPU limits · argon2/bcrypt WASM (CPU heavy)
 - 2026-11-05 · numbering · numbers assigned at issue/send, not at draft · avoids gaps from deleted drafts
-- 2026-11-05 · payments · PesePay hosted redirect + check-payment verification + reconciliation cron · callbacks are unsigned and never retried (per PesePay docs)
+- 2026-11-05 · payments · gateway-independent design: @kuzikode/payments adapters + DB accounts/routes per app/currency/method; Paynow is the launch gateway, PesePay a fully built alternative · owner chose Paynow but wants to switch gateways without code changes · hard-wiring one gateway
+- 2026-11-05 · payments-verification · every callback confirmed by polling the gateway before applying; Paynow SHA-512 hash validated both ways; reconciliation cron · return URLs and callbacks alone are never proof
 - 2026-11-05 · tax · VAT seeded inactive · owner must confirm ZIMRA registration and current rate
 - 2026-11-05 · deploys · main → staging auto; production manual workflow with owner approval · safety for real financial data
 - 2026-11-05 · design-tools · pen.dev for mockups, Canva for brand assets, Figma as optional review mirror (View seat, 20 calls/month) · see docs/11 · Figma as primary design source (seat too limited)
@@ -20,5 +21,6 @@ One line per decision (newest at the bottom). Format:
 - 2026-11-05 · imagery-ethics · AI-generated people are illustrative only, never staff/clients/testimonials · honesty rule from the PRD
 - 2026-11-05 · package-sales · packages lead to the wizard/quotation, no direct checkout · scope must be confirmed before work; invoices are paid online
 - 2026-11-05 · payments-packaging · gateway code in reusable workspace package `packages/payments` (@kuzikode/payments), extractable to its own repo via git subtree · reuse later without multi-repo overhead now · separate repo from day one
+- 2026-11-05 · checkout · custom Kuzikode checkout page for all methods; gateway pages are never the checkout UI. Card entry is a short hand-off to the gateway's secure card form (or saved-card tokens when approved) · owner requirement + PCI DSS (never handle raw card data) · building our own card form
 
 ## Agent decisions

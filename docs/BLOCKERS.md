@@ -9,9 +9,12 @@ Things only the owner can do. The agent keeps building around them and records e
   once the domain is added). Add as `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in **both** GitHub repo secrets and the
   Claude Code cloud environment's environment variables.
 - [ ] **Enable R2** on the Cloudflare account (Dashboard → R2 → requires a payment method on file; free tier is $0).
-- [ ] **PesePay sandbox credentials:** sign up at pesepay.com, create an application, copy the integration key + encryption key.
-  Add as `PESEPAY_INTEGRATION_KEY` / `PESEPAY_ENCRYPTION_KEY` to the Claude Code environment (for the sandbox test suite) — the agent will set them as staging Worker secrets.
-- [ ] **PesePay production merchant approval** + production keys (only the owner can complete KYC). Set via `wrangler secret put … --env production`.
+- [ ] **Paynow test integration:** register a merchant account at paynow.co.zw → Receive Payment Links → create a 3rd-party integration (USD).
+  Copy the Integration ID + Key into the Claude Code environment as `PAYNOW_USD_INTEGRATION_ID` / `PAYNOW_USD_INTEGRATION_KEY`, and set
+  `PAYNOW_TEST_AUTHEMAIL` to your Paynow merchant login email (test-mode payments only work for that account). Enable EcoCash/OneMoney/InnBucks on the integration.
+- [ ] **Paynow go-live:** after the agent's test transactions pass, click "Request to be Set Live" in Paynow (merchant KYC is yours to complete).
+  If ZWG payments are wanted, create a second integration for ZWG (`PAYNOW_ZWG_*`).
+- [ ] *Optional:* PesePay keys (`PESEPAY_MAIN_INTEGRATION_KEY` / `PESEPAY_MAIN_ENCRYPTION_KEY`) only if you want the alternative adapter live-tested.
 - [ ] **Resend account + API key** (`RESEND_API_KEY`). Free plan. Until a domain is verified, mail only goes to the Resend account owner's address.
 - [ ] **Domain kuzikode.com:** register it, add to Cloudflare, then follow docs/09 §8 (custom domain, Resend DNS, Email Routing, Turnstile hostname).
 - [ ] **Turnstile widget:** Cloudflare Dashboard → Turnstile → add site (workers.dev hostnames now, kuzikode.com later). Give the site key (var) and secret key (`TURNSTILE_SECRET_KEY`).

@@ -18,7 +18,7 @@ One integrated platform, one codebase, deployed as a single Cloudflare Worker:
 
 **Modules:** clients & leads · enquiries · service catalogue · **priced packages & care plans** ·
 quotations · invoicing (partial payments, credit notes, reminders) · **subscriptions / recurring billing** ·
-PesePay payments · projects & milestones · **time tracking** · expenses · **careers & recruitment** ·
+gateway-independent payments (Paynow at launch) · projects & milestones · **time tracking** · expenses · **careers & recruitment** ·
 website CMS · **insights blog** · notifications & email · reports · audit logs · **2FA**.
 
 **Extra website pages:** Pricing · Start-a-Project wizard · Industries (8) · Insights (blog) · How we work ·
@@ -42,7 +42,7 @@ AI & Data · Automation & Integration · Cloud & IT.
 | Background jobs | **Cloudflare Queues** + cron | 10k ops/day | Emails, PDFs, reminders, payment checks |
 | Email | **Resend** | 3,000/month · 100/day | Needs domain DNS verification to send from @kuzikode.com |
 | Spam protection | **Cloudflare Turnstile** | Free | Contact, login, reset forms |
-| Payments | **PesePay** (hosted checkout) | Sandbox free | EcoCash, Visa, Mastercard. Built behind a provider interface so other gateways can be added |
+| Payments | **Paynow** (launch) · PesePay ready | Test mode free | EcoCash, OneMoney, InnBucks, cards. Gateway-independent: switching or adding a gateway = settings change |
 | PDFs | **pdf-lib** (in code) | Free | Quotes, invoices, receipts, credit notes |
 | Site images | **Cloudflare Workers AI** (Leonardo / FLUX models) | Free | ~20 AI images (people, offices, objects) generated once during development, Cassava-style. Canva as backup |
 | Code & CI/CD | **GitHub + Actions** | Free / 2,000 min | Push to `main` → auto-deploy to staging |
@@ -70,7 +70,7 @@ flowchart LR
         C((Cron)) --> W
     end
 
-    W <--> P[PesePay]
+    W <--> P[Paynow · PesePay]
     W --> E[Resend email]
     W --> T[Turnstile]
 ```
@@ -83,18 +83,18 @@ flowchart LR
 sequenceDiagram
     participant C as Client
     participant K as Kuzikode
-    participant P as PesePay
+    participant P as Paynow
     C->>K: Pay now (invoice)
     K->>K: Check balance, create payment attempt
-    K->>P: Initiate (encrypted AES-256-CBC)
+    K->>P: Initiate (SHA-512 signed)
     P-->>K: redirectUrl + reference
-    K-->>C: Redirect to PesePay checkout
+    K-->>C: Redirect to Paynow, or EcoCash prompt on phone
     C->>P: Pays (EcoCash / card)
-    P->>K: Result callback (unsigned)
+    P->>K: Status update (hash verified)
     K->>P: Check payment status (the real proof)
-    P-->>K: SUCCESS
+    P-->>K: Paid
     K->>K: Record payment, update invoice, queue receipt + emails
-    Note over K,P: Cron re-checks pending payments every 10 min,<br/>because PesePay never resends callbacks
+    Note over K,P: Cron re-checks pending payments every 10 min.<br/>Gateway is chosen per product/currency in settings
 ```
 
 Safety rules: the browser's return page never counts as proof of payment. Duplicate callbacks produce
@@ -120,16 +120,16 @@ flowchart TD
 
 - It never asks you questions. It decides and records each decision in `docs/DECISIONS.md`.
 - Before a session ends it writes a precise "Next step" so the next session resumes.
-- It stops only when all 94 tasks are done and `docs/FINAL-REPORT.md` is written.
+- It stops only when all 97 tasks are done and `docs/FINAL-REPORT.md` is written.
 
-### Roadmap: 94 tasks in 8 phases
+### Roadmap: 97 tasks in 8 phases
 
 ```mermaid
 xychart-beta
     title "Tasks per phase"
     x-axis ["1 Plan", "2 Foundation", "3 Website", "4 Admin", "5 Portal", "6 Payments+Email", "7 QA", "8 Production"]
     y-axis "Tasks" 0 --> 25
-    bar [6, 17, 19, 23, 8, 8, 6, 7]
+    bar [6, 17, 19, 23, 8, 11, 6, 7]
 ```
 
 ### Design tools
@@ -181,7 +181,7 @@ Where to check progress:
 
 ### When convenient (the agent builds around these)
 - [ ] Resend account → `RESEND_API_KEY`
-- [ ] PesePay sandbox app → `PESEPAY_INTEGRATION_KEY`, `PESEPAY_ENCRYPTION_KEY`
+- [ ] Paynow merchant + test integration → `PAYNOW_USD_INTEGRATION_ID`, `PAYNOW_USD_INTEGRATION_KEY`, `PAYNOW_TEST_AUTHEMAIL`
 - [ ] Turnstile site → site key + `TURNSTILE_SECRET_KEY`
 - [ ] pen.dev developer key + Anthropic API key (optional, for mockups)
 - [ ] Add **Workers AI** permission to the Cloudflare token (for free image generation)
@@ -189,7 +189,7 @@ Where to check progress:
 
 ### Later
 - [ ] Register **kuzikode.com**, add it to Cloudflare, verify it in Resend
-- [ ] PesePay **merchant approval** + production keys
+- [ ] Paynow **"Request to be Set Live"** after test payments pass
 - [ ] Legal review of privacy policy and terms. Confirm company registration and VAT status
 - [ ] **Review package prices**, then switch on "Show prices"
 - [ ] Choose the business email provider (Zoho or Google) for client mailboxes

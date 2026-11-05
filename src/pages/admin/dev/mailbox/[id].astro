@@ -1,0 +1,11 @@
+---
+/** Development-only: renders one stored email (HTML produced by our own escaped templates). */
+const { ctx } = Astro.locals;
+if (ctx.config.appEnv !== 'development') return new Response('Not found', { status: 404 });
+const row = await ctx.db
+  .prepare('SELECT html, text, subject FROM email_logs WHERE id = ?')
+  .bind(Astro.params.id ?? '')
+  .first<{ html: string | null; text: string | null; subject: string }>();
+if (!row?.html) return new Response('Not found', { status: 404 });
+return new Response(row.html, { headers: { 'content-type': 'text/html; charset=utf-8' } });
+---

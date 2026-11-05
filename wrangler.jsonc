@@ -20,6 +20,7 @@
   },
   "vars": {
     "APP_ENV": "development",
+    "EMAIL_PROVIDER": "log",
     "PUBLIC_SITE_URL": "http://localhost:8787",
     "PAYMENTS_MOCK_ENABLED": "true",
     "EMAIL_FROM": "Kuzikode <onboarding@resend.dev>",
@@ -76,6 +77,7 @@
       "name": "kuzikode-staging",
       "vars": {
         "APP_ENV": "staging",
+        "EMAIL_PROVIDER": "resend",
         "PUBLIC_SITE_URL": "https://kuzikode-staging.mhodieknowledge.workers.dev",
         "PAYMENTS_MOCK_ENABLED": "true",
         "EMAIL_FROM": "Kuzikode <onboarding@resend.dev>",
@@ -135,6 +137,7 @@
       "name": "kuzikode",
       "vars": {
         "APP_ENV": "production",
+        "EMAIL_PROVIDER": "resend",
         "PUBLIC_SITE_URL": "https://kuzikode.mhodieknowledge.workers.dev",
         "PAYMENTS_MOCK_ENABLED": "false",
         "EMAIL_FROM": "Kuzikode <onboarding@resend.dev>",

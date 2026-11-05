@@ -14,6 +14,7 @@ const envSchema = z.object({
   EMAIL_REPLY_TO: z.string().optional().default(''),
   TURNSTILE_SITE_KEY: z.string().min(1),
   ADMIN_ALERT_EMAIL: z.string().optional().default(''),
+  EMAIL_PROVIDER: z.enum(['log', 'resend']).default('log'),
   HMAC_SECRET: optionalSecret,
   DATA_ENCRYPTION_KEY: optionalSecret,
   TURNSTILE_SECRET_KEY: optionalSecret,
@@ -50,6 +51,7 @@ export interface AppConfig {
   /** The mock payment provider is never available in production, whatever the flag says. */
   mockPaymentsEnabled: boolean;
   emailFrom: string;
+  emailProvider: 'log' | 'resend';
   emailReplyTo: string;
   adminAlertEmail: string;
   turnstileSiteKey: string;
@@ -99,6 +101,7 @@ export function getConfig(env: Env): AppConfig {
     secureCookies: siteUrl.protocol === 'https:',
     mockPaymentsEnabled: e.APP_ENV !== 'production' && e.PAYMENTS_MOCK_ENABLED === 'true',
     emailFrom: e.EMAIL_FROM,
+    emailProvider: e.EMAIL_PROVIDER,
     emailReplyTo: e.EMAIL_REPLY_TO,
     adminAlertEmail: e.ADMIN_ALERT_EMAIL,
     turnstileSiteKey: e.TURNSTILE_SITE_KEY,

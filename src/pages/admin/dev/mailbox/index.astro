@@ -1,0 +1,73 @@
+---
+/**
+ * Development-only mailbox: lists emails written by the log provider (and any other email_logs rows).
+ * 404 outside APP_ENV=development.
+ */
+const { ctx } = Astro.locals;
+if (ctx.config.appEnv !== 'development') return new Response('Not found', { status: 404 });
+const { results } = await ctx.db
+  .prepare(
+    'SELECT id, to_email, template, subject, provider, status, created_at FROM email_logs ORDER BY created_at DESC LIMIT 100',
+  )
+  .all<{
+    id: string;
+    to_email: string;
+    template: string;
+    subject: string;
+    provider: string;
+    status: string;
+    created_at: string;
+  }>();
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <title>Dev mailbox</title>
+  </head>
+  <body style="font-family: system-ui, sans-serif; margin: 2rem">
+    <main>
+      <h1>Dev mailbox</h1>
+      <p>Development only. Emails sent through the log provider appear here.</p>
+      {results.length === 0 ? (
+        <p>No emails yet.</p>
+      ) : (
+        <table style="border-collapse: collapse; width: 100%">
+          <thead>
+            <tr>
+              <th scope="col" style="text-align: left">
+                When
+              </th>
+              <th scope="col" style="text-align: left">
+                To
+              </th>
+              <th scope="col" style="text-align: left">
+                Subject
+              </th>
+              <th scope="col" style="text-align: left">
+                Template
+              </th>
+              <th scope="col" style="text-align: left">
+                Status
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {results.map((m) => (
+              <tr>
+                <td>{m.created_at}</td>
+                <td>{m.to_email}</td>
+                <td>
+                  <a href={`/admin/dev/mailbox/${m.id}`}>{m.subject}</a>
+                </td>
+                <td>{m.template}</td>
+                <td>{m.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </main>
+  </body>
+</html>

@@ -88,6 +88,7 @@ describe('templates', () => {
       kind: 'contact',
       link: 'https://kuzikode.example/admin/enquiries/enq_1',
     },
+    newsletter_confirmation: { link: 'https://kuzikode.example/newsletter/confirm?token=abc' },
   };
 
   it.each(TEMPLATE_NAMES)('%s renders HTML and text with the branded layout', (name) => {

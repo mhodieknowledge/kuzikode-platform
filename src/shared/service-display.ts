@@ -100,3 +100,10 @@ export function formatLongDate(iso: string): string {
     timeZone: 'Africa/Harare',
   }).format(new Date(iso));
 }
+
+/** wa.me link with a prefilled message, or null when the number is missing or too short to be real. */
+export function whatsappHref(number: string | undefined | null, message: string): string | null {
+  const digits = number?.replace(/\D/g, '') ?? '';
+  if (digits.length < 8 || digits.length > 15) return null;
+  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+}

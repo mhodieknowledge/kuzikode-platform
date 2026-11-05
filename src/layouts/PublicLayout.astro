@@ -4,7 +4,15 @@ import AnnouncementBar from '../components/public/AnnouncementBar.astro';
 import SiteFooter from '../components/public/SiteFooter.astro';
 import SiteHeader from '../components/public/SiteHeader.astro';
 import JsonLd from '../components/JsonLd.astro';
-import { currentAnnouncement, organizationLd, siteNavigation, websiteLd } from '../server/modules/cms';
+import WhatsAppButton from '../components/public/WhatsAppButton.astro';
+import {
+  currentAnnouncement,
+  getSettings,
+  organizationLd,
+  settingText,
+  siteNavigation,
+  websiteLd,
+} from '../server/modules/cms';
 
 interface Props {
   title: string;
@@ -16,6 +24,8 @@ interface Props {
   ogType?: 'website' | 'article';
   /** Page-specific schema.org objects; Organization is always included, WebSite on the home page. */
   structuredData?: Record<string, unknown>[];
+  /** Prefilled WhatsApp message for this page, e.g. "Hi Kuzikode, I'm interested in the Business Website plan." */
+  whatsappMessage?: string;
 }
 const {
   title,
@@ -26,13 +36,20 @@ const {
   ogImage,
   ogType,
   structuredData = [],
+  whatsappMessage,
 } = Astro.props;
 const { ctx } = Astro.locals;
-const [nav, announcement, org] = await Promise.all([
+const [nav, announcement, org, settings] = await Promise.all([
   siteNavigation(ctx),
   currentAnnouncement(ctx),
   organizationLd(ctx),
+  getSettings(ctx),
 ]);
+const whatsappNumber = settingText(settings, 'contact.whatsapp_number');
+const whatsappText =
+  whatsappMessage ??
+  settingText(settings, 'contact.whatsapp_message') ??
+  'Hi Kuzikode, I would like to talk about a project.';
 const ld = [org, ...(Astro.url.pathname === '/' ? [websiteLd(ctx)] : []), ...structuredData];
 ---
 
@@ -60,5 +77,6 @@ const ld = [org, ...(Astro.url.pathname === '/' ? [websiteLd(ctx)] : []), ...str
       <slot />
     </main>
     <SiteFooter nav={nav} />
+    <WhatsAppButton number={whatsappNumber} message={whatsappText} />
   </body>
 </html>

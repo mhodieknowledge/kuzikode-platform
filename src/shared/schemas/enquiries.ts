@@ -102,3 +102,16 @@ export const projectRequestSchema = z
   })
   .strict();
 export type ProjectRequestInput = z.input<typeof projectRequestSchema>;
+
+export const newsletterSignupSchema = z
+  .object({
+    email: enquirySchema.shape.email,
+    source: z
+      .string()
+      .trim()
+      .max(60)
+      .regex(/^[a-z0-9/_-]*$/)
+      .optional(),
+    website: enquirySchema.shape.website,
+  })
+  .strict();

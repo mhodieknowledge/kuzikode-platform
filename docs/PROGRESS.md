@@ -149,3 +149,11 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Fix: edge page-cache key includes the build ID (stale HTML after deploy).
 - Tests: integration `site-content.test.ts` (4), e2e `site-content.spec.ts` (4); screenshots reviewed.
 - Next step: P3.17 Engagement widgets: WhatsApp chat button (`contact.whatsapp_number`, hidden when unset), consultation booking (`booking.cal_url` link, else request form with 3 preferred slots → enquiry kind `consultation`, already supported by `submitEnquiry`), newsletter double opt-in (`newsletter_subscribers` table exists in 0008).
+
+## 2026-11-05 · P3.17 Engagement widgets ✅
+- WhatsApp: `components/public/WhatsAppButton.astro` + `whatsappHref` (shared), `whatsappMessage` prop on PublicLayout.
+- Consultation: `/consultation` (Cal link when `booking.cal_url` set, else `ConsultationForm` island → enquiry kind `consultation` with preferredTimes); linked from /contact.
+- Newsletter: module `server/modules/newsletter` (subscribe, confirmSubscription, unsubscribeUrl/unsubscribe, pruneUnconfirmed nightly), `POST /api/v1/public/newsletter`, pages `/newsletter/confirm`, `/newsletter/unsubscribe`, footer `NewsletterForm` island (client:idle), email template `newsletter_confirmation`, `lib/same-origin.ts`.
+- Admin subscriber list + CSV export (with unsubscribe URLs via `unsubscribeUrl`) belongs to the Phase 4 CMS/admin tasks.
+- Tests: unit (whatsappHref), integration `newsletter.test.ts` (5), e2e `engagement.spec.ts` (4). Full e2e suite: 42 passed.
+- Next step: P3.18 Site imagery (docs/13 §4 shot list; Workers AI daily neuron limit was hit earlier, so check the limit has reset, else use the OPENAI_API_KEY fallback noted in DECISIONS), then P3.19 Careers (public).

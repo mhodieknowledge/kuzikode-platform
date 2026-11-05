@@ -78,6 +78,16 @@ const service = Astro.url.searchParams.get('service') ?? undefined;
           ) : null}
           {hours ? <li class="text-ink-600">{hours}</li> : null}
         </ul>
+        <div class="mt-8 rounded-md bg-surface p-5">
+          <p class="font-semibold text-ink-950">Prefer to talk it through?</p>
+          <p class="mt-1 text-[15px] text-ink-600">Book a free 30-minute call by video or phone.</p>
+          <a
+            href="/consultation"
+            class="mt-3 inline-flex text-sm font-semibold text-brand-600 underline underline-offset-2"
+          >
+            Book a free consultation
+          </a>
+        </div>
       </div>
       <div class="rounded-lg border border-line bg-surface p-6 md:p-8">
         <ContactForm

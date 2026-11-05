@@ -1,0 +1,28 @@
+---
+/** Floating WhatsApp chat button (docs/12 §C.9). Public pages only; hidden when no number is configured. */
+import { MessageCircle } from 'lucide-react';
+import { whatsappHref } from '../../shared/service-display';
+
+interface Props {
+  number: string | undefined;
+  message: string;
+}
+const { number, message } = Astro.props;
+const href = whatsappHref(number, message);
+---
+
+{
+  href ? (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-whatsapp
+      class="fixed right-[max(1rem,env(safe-area-inset-right))] bottom-[max(1rem,env(safe-area-inset-bottom))] z-30 inline-flex h-14 items-center gap-2 rounded-full bg-[#128c4a] px-5 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgb(0_0_0/0.18)] hover:bg-[#0f7a40] print:hidden"
+    >
+      <MessageCircle size={22} aria-hidden="true" />
+      <span class="max-sm:sr-only">Chat on WhatsApp</span>
+      <span class="sr-only"> (opens in a new tab)</span>
+    </a>
+  ) : null
+}

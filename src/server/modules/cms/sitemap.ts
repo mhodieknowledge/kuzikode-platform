@@ -20,6 +20,7 @@ const STATIC = [
   '/pricing',
   '/start-a-project',
   '/how-we-work',
+  '/consultation',
   '/faq',
   '/contact',
   '/legal/privacy',

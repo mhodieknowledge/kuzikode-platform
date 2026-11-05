@@ -183,6 +183,26 @@ const defs = {
         ],
       }),
   },
+  newsletter_confirmation: {
+    schema: z.object({ link: url }),
+    render: (b: Brand, d: { link: string }) =>
+      renderEmail(b, {
+        subject: 'Confirm your newsletter subscription',
+        preheader: 'One click to confirm your subscription.',
+        heading: 'Confirm your subscription',
+        blocks: [
+          {
+            kind: 'p',
+            text: `Please confirm that you would like to receive occasional updates and articles from ${b.companyName}.`,
+          },
+          { kind: 'button', text: 'Confirm subscription', href: d.link },
+          {
+            kind: 'small',
+            text: 'The link expires in 7 days. If you did not sign up, ignore this email and you will not be subscribed. Every newsletter includes an unsubscribe link.',
+          },
+        ],
+      }),
+  },
 } as const;
 
 export type TemplateName = keyof typeof defs;

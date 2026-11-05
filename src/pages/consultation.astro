@@ -1,0 +1,62 @@
+---
+import { CalendarClock } from 'lucide-react';
+import PublicLayout from '../layouts/PublicLayout.astro';
+import ConsultationForm from '../components/forms/ConsultationForm';
+import { breadcrumbLd, getSettings, settingText } from '../server/modules/cms';
+
+const { ctx } = Astro.locals;
+const settings = await getSettings(ctx);
+const raw = settingText(settings, 'booking.cal_url');
+// Only an https link is used; anything else falls back to the request form.
+const calUrl = raw && /^https:\/\/[^\s"'<>]+$/.test(raw) ? raw : null;
+---
+
+<PublicLayout
+  structuredData={[breadcrumbLd(ctx, [{ name: 'Consultation', path: '/consultation' }])]}
+  title="Book a free consultation · Kuzikode Technologies"
+  description="Book a free 30-minute consultation with Kuzikode Technologies to talk through your website, app or system."
+  whatsappMessage="Hi Kuzikode, I'd like to book a free consultation."
+>
+  <section class="bg-canvas py-14 md:py-20" aria-labelledby="consult-title">
+    <div class="container-content grid gap-10 lg:grid-cols-[1fr_1.3fr]">
+      <div>
+        <span class="flex h-11 w-11 items-center justify-center rounded-sm bg-brand-50 text-brand-600">
+          <CalendarClock size={22} aria-hidden="true" />
+        </span>
+        <h1 id="consult-title" class="mt-5 text-4xl font-bold tracking-display md:text-5xl">
+          Book a free 30-minute consultation
+        </h1>
+        <p class="mt-4 text-lg leading-8 text-ink-600">
+          Talk through what you need with us by video or phone. We will ask about your goals, suggest options and
+          explain the next steps. There is no charge and no obligation.
+        </p>
+        <ul class="mt-6 flex flex-col gap-2 text-[15px] text-ink-800">
+          <li>· A clear picture of what your project involves</li>
+          <li>· Which package or approach fits, and why</li>
+          <li>· What a quotation will cover</li>
+        </ul>
+      </div>
+      <div class="rounded-lg border border-line bg-surface p-6 md:p-8">
+        {calUrl ? (
+          <div data-booking-link>
+            <h2 class="text-2xl font-bold tracking-display">Choose a time</h2>
+            <p class="mt-2 text-ink-600">Pick a slot in our online calendar. You will get a confirmation by email.</p>
+            <a
+              href={calUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="mt-6 inline-flex h-12 items-center rounded-sm bg-brand-600 px-6 text-[15px] font-semibold text-white hover:bg-brand-500"
+            >
+              Open the booking calendar<span class="sr-only"> (opens in a new tab)</span>
+            </a>
+          </div>
+        ) : (
+          <>
+            <h2 class="mb-6 text-2xl font-bold tracking-display">Request a time</h2>
+            <ConsultationForm client:load siteKey={ctx.config.turnstileSiteKey} />
+          </>
+        )}
+      </div>
+    </div>
+  </section>
+</PublicLayout>

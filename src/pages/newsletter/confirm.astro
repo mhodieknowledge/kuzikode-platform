@@ -1,0 +1,63 @@
+---
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import { confirmSubscription, type ConfirmOutcome } from '../../server/modules/newsletter';
+import { isSameOriginPost } from '../../server/lib/same-origin';
+
+// GET shows a button; POST confirms. Email link scanners only GET, so they never confirm on someone's behalf.
+const { ctx } = Astro.locals;
+let outcome: ConfirmOutcome | null = null;
+let token = (Astro.url.searchParams.get('token') ?? '').slice(0, 200);
+if (Astro.request.method === 'POST') {
+  if (!isSameOriginPost(Astro.request, ctx.config.siteUrl)) return new Response('Forbidden', { status: 403 });
+  const form = await Astro.request.formData();
+  token = String(form.get('token') ?? '').slice(0, 200);
+  outcome = await confirmSubscription(ctx, token);
+}
+Astro.response.headers.set('cache-control', 'private, no-store');
+---
+
+<PublicLayout title="Confirm your subscription · Kuzikode Technologies" noindex>
+  <section class="bg-canvas py-16 md:py-24">
+    <div class="container-content max-w-xl">
+      {outcome === 'confirmed' ? (
+        <div role="status">
+          <h1 class="text-3xl font-bold tracking-display">You are subscribed</h1>
+          <p class="mt-3 text-ink-600">
+            Thank you. You will receive occasional updates and new articles. Every email has an unsubscribe link.
+          </p>
+          <a href="/insights" class="mt-6 inline-flex font-semibold text-brand-600 underline underline-offset-2">
+            Read our latest insights
+          </a>
+        </div>
+      ) : outcome === 'expired' || outcome === 'invalid' ? (
+        <div role="alert">
+          <h1 class="text-3xl font-bold tracking-display">
+            This link has {outcome === 'expired' ? 'expired' : 'already been used or is not valid'}
+          </h1>
+          <p class="mt-3 text-ink-600">
+            Sign up again from the form at the bottom of any page and we will send a new confirmation email.
+          </p>
+        </div>
+      ) : token ? (
+        <form method="post">
+          <h1 class="text-3xl font-bold tracking-display">Confirm your subscription</h1>
+          <p class="mt-3 text-ink-600">
+            Press the button to start receiving occasional updates and new articles from Kuzikode Technologies.
+          </p>
+          <input type="hidden" name="token" value={token} />
+          <button
+            type="submit"
+            class="mt-6 inline-flex h-12 items-center rounded-sm bg-brand-600 px-6 text-[15px] font-semibold text-white hover:bg-brand-500"
+          >
+            Confirm subscription
+          </button>
+        </form>
+      ) : (
+        <div>
+          <h1 class="text-3xl font-bold tracking-display">Confirm your subscription</h1>
+          <p class="mt-3 text-ink-600">Open the link in the confirmation email we sent you.</p>
+        </div>
+      )}
+    </div>
+  </section>
+</PublicLayout>

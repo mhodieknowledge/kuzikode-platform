@@ -40,11 +40,13 @@ const packages = pricing.packages
 const url = Astro.url;
 const initialPackage = url.searchParams.get('package')?.slice(0, 80) ?? undefined;
 const initialCategory = url.searchParams.get('category')?.slice(0, 80) ?? undefined;
+const chosen = packages.find((p) => p.slug === initialPackage);
 ---
 
 <PublicLayout
   title={page?.seoTitle ?? 'Start a project · Kuzikode Technologies'}
   description={page?.seoDescription ?? undefined}
+  whatsappMessage={chosen ? `Hi Kuzikode, I'm interested in the ${chosen.name} plan.` : undefined}
 >
   <section class="bg-canvas py-12 md:py-16" aria-labelledby="start-title">
     <div class="container-content">

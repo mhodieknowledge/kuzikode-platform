@@ -60,9 +60,7 @@ export async function sha256Bytes(input: Bytes): Promise<Bytes> {
 }
 
 export async function hmacSha256(secret: string, message: string): Promise<Bytes> {
-  const key = await crypto.subtle.importKey('raw', utf8(secret), { name: 'HMAC', hash: 'SHA-256' }, false, [
-    'sign',
-  ]);
+  const key = await crypto.subtle.importKey('raw', utf8(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
   return new Uint8Array(await crypto.subtle.sign('HMAC', key, utf8(message)));
 }
 
@@ -81,9 +79,7 @@ export const PBKDF2_ITERATIONS = 100_000; // Workers' maximum for PBKDF2
 const PBKDF2_PREFIX = 'pbkdf2_sha256';
 
 async function pbkdf2(password: string, salt: Bytes, iterations: number): Promise<Bytes> {
-  const key = await crypto.subtle.importKey('raw', utf8(password.normalize('NFKC')), 'PBKDF2', false, [
-    'deriveBits',
-  ]);
+  const key = await crypto.subtle.importKey('raw', utf8(password.normalize('NFKC')), 'PBKDF2', false, ['deriveBits']);
   const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations }, key, 256);
   return new Uint8Array(bits);
 }

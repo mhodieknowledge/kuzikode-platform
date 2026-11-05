@@ -26,7 +26,7 @@ Things only the owner can do. The agent keeps building around them and records e
   (valid 24 h). The agent gives it to you in the session chat, or you run `npm run bootstrap:admin` yourself (see docs/09 §5).
 
 - [ ] **pen.dev (optional, for mockups):** pen.dev → organization settings → Developer Keys → create key. Add `PEN_CLI_KEY`
-  and `CLAUDE_CODE_OAUTH_TOKEN` (run `claude setup-token` on your PC; it uses your Claude Pro plan, no API credit) to the Claude Code cloud
+  and `PEN_CLAUDE_OAUTH_TOKEN` (run `claude setup-token` on your PC; it uses your Claude Pro plan, no API credit) to the Claude Code cloud
   environment's variables. Note: pen.dev runs then share your Pro usage limits with the build agent.
 - [ ] **Figma (optional):** your seat is View on the Starter plan (20 MCP calls/month, edit rights uncertain). If the agent's probe fails
   and you want a Figma design file, upgrade to a Full/Dev seat. The build doesn't need it.

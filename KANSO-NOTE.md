@@ -135,7 +135,7 @@ xychart-beta
 ### Design tools
 | Tool | Used for | Status |
 |---|---|---|
-| pen.dev | Mockups of 6 key screens before coding (max 12 runs) | Needs `PEN_CLI_KEY` + `CLAUDE_CODE_OAUTH_TOKEN` (Claude Pro plan) |
+| pen.dev | Mockups of 6 key screens before coding (max 12 runs) | Needs `PEN_CLI_KEY` + `PEN_CLAUDE_OAUTH_TOKEN` (Claude Pro plan) |
 | Canva | Logo ideas, social share images, email header | ✅ Connected |
 | Figma | Review copy of screens for you | ⚠️ View seat: 20 calls/month, may not be able to edit |
 

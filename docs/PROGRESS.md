@@ -5,11 +5,17 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phase: 1 — inspection & planning
-- Last completed task: P1.3
-- **Next step:** P1.4 brand & tool probe (Canva logo exploration → hand-built SVG logo set; Figma probe; `pen status`).
-- Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: — · CI status: —
+- Last completed task: P1.4
+- **Next step:** P1.5 mockups with pen.dev (briefs in design/briefs/, ≤ 12 runs, Sonnet model).
+- Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh (non-exempt calls this month: ~3/15) · CI status: —
 
 ---
+
+## 2026-11-05 18:55 UTC — P1.4 brand & tool probe
+- Done: Canva logo exploration (1 candidate, chosen), hand-built `public/brand/logo.svg`, `logo-white.svg`, `logo-mark.svg`, `favicon.svg`;
+  `public/favicon.svg`, `favicon-32.png`, `apple-touch-icon.png`, `icon-512.png`, `icon-512-maskable.png`. Figma probe succeeded (file + colour variables).
+  pen.dev authenticated.
+- Next step: P1.5.
 
 ## 2026-11-05 18:40 UTC — P1.1–P1.3 inspection, external facts, conventions
 - Done: P1.1 repo inspected: docs + CLAUDE.md + owner notes + `.claude/skills/pen-design`, empty `design/` folders, no code, no tooling,

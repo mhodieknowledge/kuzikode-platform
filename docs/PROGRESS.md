@@ -5,11 +5,24 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phase: 1 — inspection & planning
-- Last completed task: P2.13
-- **Next step:** P2.14 files/R2 (upload pipeline: size, magic bytes, allow-list, random keys; authorised download route; signed short-lived URLs; image metadata).
-- Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh (non-exempt calls this month: ~3/15) · CI status: —
+- Phase: 2 complete → starting Phase 3 (public website)
+- Last completed task: P2.17
+- **Next step:** P3.1 CMS read layer: `src/server/modules/cms/{repository,service,index}.ts` with published-content reads for pages/sections (website_pages, website_sections.published_content), service_categories/services, portfolio (published only), products (published), announcements (active window), settings (application_settings, per-isolate 60 s cache) and a content_version-keyed cache (KV `CACHE`, key `cms:v<version>:<name>`); test that bumping `content_version` invalidates. Then P3.2 public layout (header/mega-menu/mobile sheet/footer from settings). P1.6 imagery pipeline is still open (do it before P3.18).
+- Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh (non-exempt calls this month: ~3/15) · CI status: green (GitHub Actions run #1, verify + e2e, ~3 min)
 
 ---
+
+## 2026-11-05 22:40 UTC — P2.14–P2.17 files, UI kit, CI, 2FA
+- P2.14: `lib/uploads.ts` (magic bytes incl. OOXML via ZIP central directory, SVG/HTML refused, per-purpose size caps, image dims),
+  `modules/files` (random R2 keys, owner-based read auth → 404, portal scoping, signed 5–15 min links, financial download audit).
+- P2.15: tokens + Tailwind theme, self-hosted fonts, React kit in `src/components/ui` (index.ts exports), Public/App/Admin/Portal/Document
+  layouts, `/dev/ui` gallery (dev only). Playwright: axe clean, no horizontal scroll at 375/768/1440, screenshots reviewed. Added 700 text
+  shades for badge contrast.
+- P2.16: `.github/workflows/ci.yml` (verify + Playwright). First run green.
+- P2.17: TOTP (RFC 6238 vectors), enrol/confirm/verify/disable/backup codes/admin reset, enforced in requireAuth with error `reason`
+  (`password_change_required`, `mfa_required`, `mfa_enrolment_required`), login returns mfaRequired/mfaEnrolmentRequired.
+- Tests: unit 151 / integration 65 / e2e 5. verify green.
+- Notes: worker restarted mid-P2.17 once; no work lost. Ship with the scratchpad `ship.sh` (verify-gated).
 
 ## 2026-11-05 22:10 UTC — P2.10–P2.13 RBAC, bootstrap, jobs, email
 - P2.10: `lib/policies.ts` (can/assertCan, portal scope → 404, clientScope SQL), users service (setUserRoles, disable/enable) with

@@ -5,11 +5,17 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phase: 1 — inspection & planning
-- Last completed task: P2.5 (P1.5 pen.dev runs in progress)
-- **Next step:** P2.6 initial migrations (all docs/04 tables split into logical files, audit trigger, indexes) + constraint tests. Then review P1.5 mockups.
+- Last completed task: P2.6 (P1.5 pen.dev runs in progress)
+- **Next step:** P2.7 seeds (`seeds/base.sql` real content, `seeds/dev.sql` fictional, `scripts/seed.ts` with production guard).
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh (non-exempt calls this month: ~3/15) · CI status: —
 
 ---
+
+## 2026-11-05 20:20 UTC — P2.6 initial migrations
+- Done: migrations/0001–0009 covering every docs/04 table (+10b), indexes on FKs/filters, append-only audit trigger, financial guards.
+- Tests: unit 80 / integration 17 (table inventory, unique, FK, CHECK, partial unique, audit trigger, line immutability, convert-once,
+  testimonial consent, payment guards). Applies cleanly with `wrangler d1 migrations apply DB --local`.
+- Next step: P2.7.
 
 ## 2026-11-05 20:00 UTC — P2.5 money & pricing core
 - Done: shared money (minor units, half-even BigInt mul/div, allocation, parsing/formatting) + pricing engine (lines, discounts, doc discount

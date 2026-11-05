@@ -1,15 +1,20 @@
 ---
 import BaseHead from '../components/BaseHead.astro';
-import Logo from '../components/Logo.astro';
+import AnnouncementBar from '../components/public/AnnouncementBar.astro';
+import SiteFooter from '../components/public/SiteFooter.astro';
+import SiteHeader from '../components/public/SiteHeader.astro';
+import { currentAnnouncement, siteNavigation } from '../server/modules/cms';
 
 interface Props {
   title: string;
   description?: string;
   canonicalPath?: string;
   noindex?: boolean;
+  headerTone?: 'light' | 'dark';
 }
-const { title, description, canonicalPath, noindex = false } = Astro.props;
-const year = new Date().getFullYear();
+const { title, description, canonicalPath = Astro.url.pathname, noindex = false, headerTone = 'light' } = Astro.props;
+const { ctx } = Astro.locals;
+const [nav, announcement] = await Promise.all([siteNavigation(ctx), currentAnnouncement(ctx)]);
 ---
 
 <!doctype html>
@@ -18,24 +23,15 @@ const year = new Date().getFullYear();
     <BaseHead title={title} description={description} canonicalPath={canonicalPath} noindex={noindex} />
     <slot name="head" />
   </head>
-  <body class="min-h-screen bg-surface">
+  <body class="flex min-h-screen flex-col bg-surface">
     <a class="skip-link" href="#main">
       Skip to content
     </a>
-    <slot name="header">
-      <header class="border-b border-line bg-surface">
-        <div class="container-content flex h-16 items-center">
-          <Logo />
-        </div>
-      </header>
-    </slot>
-    <main id="main" tabindex="-1" class="focus:outline-none">
+    <AnnouncementBar announcement={announcement} />
+    <SiteHeader nav={nav} tone={headerTone} />
+    <main id="main" tabindex="-1" class="flex-1 focus:outline-none">
       <slot />
     </main>
-    <slot name="footer">
-      <footer class="border-t border-line bg-ink-950 text-white/70">
-        <div class="container-content py-8 text-sm">© {year} Kuzikode Technologies</div>
-      </footer>
-    </slot>
+    <SiteFooter nav={nav} />
   </body>
 </html>

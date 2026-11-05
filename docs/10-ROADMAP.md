@@ -36,7 +36,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 
 ## Phase 3 — Public website
 - [x] **P3.1 CMS read layer.** Services for pages/sections/services/portfolio/products/announcements/settings with published-content reads + content_version cache. AC: cache invalidation test on version bump.
-- [ ] **P3.2 Public layout.** Header nav (+ mobile sheet), announcement banner, footer from settings (hidden blanks), skip link. AC: Playwright nav test at 3 widths.
+- [x] **P3.2 Public layout.** Header nav (+ mobile sheet), announcement banner, footer from settings (hidden blanks), skip link. AC: Playwright nav test at 3 widths.
 - [ ] **P3.3 Home page** with all sections from PRD §3.1 (Selected Work hidden when empty). AC: visual QA gate (docs/05 §8).
 - [ ] **P3.4 About page.** AC: all blocks come from the CMS. Visual QA.
 - [ ] **P3.5 Services index + 6 division pages** (sub-services, benefits, deliverables, pricing model display, FAQ, CTA with preselection, coming-soon/inactive behaviour). AC: tests for status behaviour. Visual QA.

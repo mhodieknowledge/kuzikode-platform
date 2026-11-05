@@ -1,18 +1,11 @@
 ---
-import '../styles/global.css';
+import PublicLayout from '../layouts/PublicLayout.astro';
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <title>Kuzikode Technologies</title>
-  </head>
-  <body class="p-8 font-sans">
-    <main>
-      <h1 class="text-3xl font-semibold">Kuzikode Technologies</h1>
-      <p>Building intelligent digital solutions.</p>
-    </main>
-  </body>
-</html>
+<PublicLayout title="Kuzikode Technologies" headerTone="dark">
+  <section class="bg-ink-950 py-24 text-white">
+    <div class="container-content">
+      <h1 class="text-4xl font-bold tracking-display text-white">Building intelligent digital solutions.</h1>
+    </div>
+  </section>
+</PublicLayout>

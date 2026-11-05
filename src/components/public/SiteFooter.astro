@@ -1,0 +1,89 @@
+---
+import Logo from '../Logo.astro';
+import type { SiteNavigation } from '../../server/modules/cms';
+
+interface Props {
+  nav: SiteNavigation;
+}
+const { footer } = Astro.props.nav;
+const year = new Date().getFullYear();
+const c = footer.contact;
+const hasContact = !!(c.email || c.phone || c.whatsapp || c.location || c.address);
+---
+
+<footer class="bg-ink-950 text-white/70" aria-labelledby="footer-heading">
+  <h2 id="footer-heading" class="sr-only">Footer</h2>
+  <div class="container-content grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:py-16">
+    <div class="max-w-sm">
+      <Logo variant="light" height={26} />
+      {footer.blurb ? <p class="mt-4 text-sm leading-6">{footer.blurb}</p> : null}
+      {
+        footer.social.length > 0 ? (
+          <ul class="mt-5 flex flex-wrap gap-2" aria-label="Social media">
+            {footer.social.map((s) => (
+              <li>
+                <a href={s.href} rel="noopener noreferrer" target="_blank" class="inline-flex h-10 items-center rounded-sm border border-white/15 px-3 text-sm text-white hover:border-white/40">
+                  {s.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : null
+      }
+    </div>
+    <div>
+      <h3 class="font-sans text-sm font-semibold text-white">Services</h3>
+      <ul class="mt-4 flex flex-col gap-2.5 text-sm">
+        {
+          footer.services.map((l) => (
+            <li>
+              <a href={l.href} class="hover:text-white">
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <div>
+      <h3 class="font-sans text-sm font-semibold text-white">Company</h3>
+      <ul class="mt-4 flex flex-col gap-2.5 text-sm">
+        {
+          footer.company.map((l) => (
+            <li>
+              <a href={l.href} class="hover:text-white">
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <div>
+      <h3 class="font-sans text-sm font-semibold text-white">Contact</h3>
+      <ul class="mt-4 flex flex-col gap-2.5 text-sm">
+        {c.email ? <li><a href={`mailto:${c.email}`} class="hover:text-white">{c.email}</a></li> : null}
+        {c.phone ? <li><a href={`tel:${c.phone.replace(/[^\d+]/g, '')}`} class="hover:text-white">{c.phone}</a></li> : null}
+        {c.whatsapp ? <li><a href={c.whatsapp} rel="noopener noreferrer" target="_blank" class="hover:text-white">WhatsApp</a></li> : null}
+        {c.address ? <li>{c.address}</li> : c.location ? <li>{c.location}</li> : null}
+        <li><a href="/contact" class="hover:text-white">{hasContact ? 'Contact form' : 'Send us a message'}</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-white/10">
+    <div class="container-content flex flex-col gap-4 py-6 text-[13px] md:flex-row md:items-center md:justify-between">
+      <p>© {year} {footer.companyName}{footer.registration ? ` · ${footer.registration}` : ''}</p>
+      <ul class="flex flex-wrap gap-x-5 gap-y-2">
+        {
+          footer.legal.map((l) => (
+            <li>
+              <a href={l.href} class="hover:text-white">
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</footer>

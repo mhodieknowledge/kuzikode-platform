@@ -295,3 +295,30 @@ export async function currentAnnouncement(ctx: RequestContext) {
   const a = rows.find((r) => (!r.starts_at || r.starts_at <= now) && (!r.ends_at || r.ends_at > now));
   return a ? { id: a.id, message: a.message, linkUrl: a.link_url, linkLabel: a.link_label, level: a.level } : null;
 }
+
+/** Team members with a real photo, only when the owner has published them (never AI faces). */
+export function listTeam(ctx: RequestContext) {
+  return cached(ctx, 'team', async () => {
+    const { results } = await ctx.db
+      .prepare(
+        `SELECT t.name, t.role, t.bio, t.photo_media_id, m.alt_text, f.id AS file_id, m.width, m.height
+         FROM team_members t JOIN media_assets m ON m.id = t.photo_media_id JOIN files f ON f.id = m.file_id
+         WHERE t.published = 1 AND f.visibility = 'public' ORDER BY t.sort_order, t.name`,
+      )
+      .all<{
+        name: string;
+        role: string;
+        bio: string | null;
+        alt_text: string;
+        file_id: string;
+        width: number | null;
+        height: number | null;
+      }>();
+    return results.map((r) => ({
+      name: r.name,
+      role: r.role,
+      bio: r.bio,
+      photo: { src: `/media/${r.file_id}`, alt: r.alt_text, width: r.width, height: r.height },
+    }));
+  });
+}

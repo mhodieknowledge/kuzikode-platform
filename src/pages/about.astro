@@ -1,0 +1,80 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro';
+import RichText from '../components/public/sections/RichText.astro';
+import Statement from '../components/public/sections/Statement.astro';
+import Values from '../components/public/sections/Values.astro';
+import ListSection from '../components/public/sections/ListSection.astro';
+import CtaBand from '../components/public/sections/CtaBand.astro';
+import { getPage, listTeam } from '../server/modules/cms';
+import type { Section } from '../shared/schemas/cms';
+
+const { ctx } = Astro.locals;
+const [page, team] = await Promise.all([getPage(ctx, 'about'), listTeam(ctx)]);
+if (!page) return new Response('Not found', { status: 404 });
+const sections = page.sections as Section[];
+const statements = sections.filter((s) => s.type === 'statement') as Section<'statement'>[];
+const firstRichText = sections.find((s) => s.type === 'rich_text')?.key;
+const home = await getPage(ctx, 'home');
+const cta = home?.sections.find((s) => s.type === 'cta') as Section<'cta'> | undefined;
+let statementsRendered = false;
+---
+
+<PublicLayout title={page.seoTitle ?? 'About Kuzikode Technologies'} description={page.seoDescription ?? undefined}>
+  {sections.map((s) => {
+    switch (s.type) {
+      case 'rich_text':
+        return (
+          <RichText
+            content={s.content as Section<'rich_text'>['content']}
+            anchor={s.key}
+            asPageTitle={s.key === firstRichText}
+            tone={s.key === firstRichText ? 'canvas' : 'surface'}
+          />
+        );
+      case 'statement':
+        if (statementsRendered) return null;
+        statementsRendered = true;
+        return (
+          <section class="bg-canvas py-14 md:py-20" aria-label="Mission and vision">
+            <div class="container-content grid gap-4 md:grid-cols-2">
+              {statements.map((st) => (
+                <Statement content={st.content} anchor={st.key} />
+              ))}
+            </div>
+          </section>
+        );
+      case 'values':
+        return <Values content={s.content as Section<'values'>['content']} anchor={s.key} tone="surface" />;
+      case 'list':
+        return <ListSection content={s.content as Section<'list'>['content']} anchor={s.key} />;
+      default:
+        return null;
+    }
+  })}
+  {team.length > 0 ? (
+    <section id="team" class="bg-canvas py-14 md:py-20" aria-labelledby="team-title">
+      <div class="container-content">
+        <h2 id="team-title" class="mb-10 text-3xl font-bold tracking-display">
+          Team
+        </h2>
+        <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {team.map((m) => (
+            <li>
+              <img
+                src={m.photo.src}
+                alt={m.photo.alt}
+                width={m.photo.width ?? 400}
+                height={m.photo.height ?? 400}
+                loading="lazy"
+                class="aspect-square w-full rounded-md object-cover"
+              />
+              <p class="mt-3 font-semibold text-ink-950">{m.name}</p>
+              <p class="text-sm text-ink-600">{m.role}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  ) : null}
+  {cta ? <CtaBand content={cta.content} /> : null}
+</PublicLayout>

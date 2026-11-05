@@ -80,13 +80,15 @@
   }
 }
 
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility tracking-display {
+  letter-spacing: -0.02em;
+}
+
 @layer utilities {
-  .tnum {
-    font-variant-numeric: tabular-nums;
-  }
-  .tracking-display {
-    letter-spacing: -0.02em;
-  }
   .container-content {
     @apply mx-auto w-full max-w-[var(--container-content)] px-4 sm:px-6 lg:px-8;
   }
@@ -106,5 +108,58 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Typography for sanitized CMS rich text. */
+@layer components {
+  .prose-kz {
+    @apply max-w-[var(--container-prose)] text-[17px] leading-8 text-ink-800;
+  }
+  .prose-kz > * + * {
+    margin-top: 1.1em;
+  }
+  .prose-kz h2 {
+    @apply mt-12 text-2xl font-bold tracking-display text-ink-950;
+  }
+  .prose-kz h3 {
+    @apply mt-9 font-sans text-xl font-semibold text-ink-950;
+  }
+  .prose-kz h4 {
+    @apply mt-7 font-sans text-lg font-semibold text-ink-950;
+  }
+  .prose-kz a {
+    @apply font-medium text-brand-600 underline underline-offset-2 hover:text-brand-500;
+  }
+  .prose-kz ul {
+    @apply list-disc pl-6;
+  }
+  .prose-kz ol {
+    @apply list-decimal pl-6;
+  }
+  .prose-kz li + li {
+    margin-top: 0.4em;
+  }
+  .prose-kz blockquote {
+    @apply border-l-2 border-brand-600 pl-5 text-ink-600 italic;
+  }
+  .prose-kz code {
+    @apply rounded-[4px] bg-canvas px-1.5 py-0.5 font-mono text-[0.9em];
+  }
+  .prose-kz pre {
+    @apply overflow-x-auto rounded-md bg-ink-950 p-4 text-sm text-white;
+  }
+  .prose-kz pre code {
+    @apply bg-transparent p-0;
+  }
+  .prose-kz table {
+    @apply w-full border-collapse text-[15px];
+  }
+  .prose-kz th,
+  .prose-kz td {
+    @apply border-b border-line px-3 py-2 text-left;
+  }
+  .prose-kz strong {
+    @apply font-semibold text-ink-950;
   }
 }

@@ -30,7 +30,9 @@
     "deploy:staging:dry": "npm run build:staging && wrangler deploy --dry-run",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "db:migrate:staging": "wrangler d1 migrations apply DB --remote --env staging",
-    "db:migrate:production": "wrangler d1 migrations apply DB --remote --env production"
+    "db:migrate:production": "wrangler d1 migrations apply DB --remote --env production",
+    "seed:build": "node scripts/seeds/build-base-seed.ts",
+    "db:seed:local": "node scripts/seed.ts --env local"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",

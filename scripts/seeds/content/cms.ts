@@ -1,0 +1,385 @@
+/** Default website content (PRD §3). Published on first seed; the owner edits everything in Admin → Website. */
+
+export interface SectionSeed {
+  key: string;
+  type: string;
+  content: Record<string, unknown>;
+}
+
+export interface PageSeed {
+  key: string;
+  title: string;
+  seoTitle: string;
+  seoDescription: string;
+  sections: SectionSeed[];
+}
+
+const startProject = { label: 'Start a project', href: '/start-a-project' };
+
+export const PAGES: PageSeed[] = [
+  {
+    key: 'home',
+    title: 'Home',
+    seoTitle: 'Kuzikode Technologies · Building intelligent digital solutions',
+    seoDescription:
+      'Kuzikode designs, builds and runs websites, apps and business software for organisations in Zimbabwe and across Africa.',
+    sections: [
+      {
+        key: 'hero',
+        type: 'hero',
+        content: {
+          eyebrow: 'Technology partner for growing organisations',
+          title: 'Building intelligent digital solutions.',
+          body: 'Kuzikode designs, builds and runs websites, apps and business software for organisations in Zimbabwe and across Africa.',
+          primaryCta: startProject,
+          secondaryCta: { label: 'Explore services', href: '/services' },
+        },
+      },
+      {
+        key: 'services',
+        type: 'services_grid',
+        content: {
+          title: 'What we do',
+          intro: 'Six areas of work, one team. Start with what you need now and add more as you grow.',
+        },
+      },
+      {
+        key: 'why',
+        type: 'features',
+        content: {
+          title: 'Why Kuzikode',
+          intro: 'How we approach every project, whatever its size.',
+          items: [
+            {
+              icon: 'wallet',
+              title: 'Built for local rails',
+              body: 'EcoCash, OneMoney, InnBucks and cards through Paynow, with every payment confirmed before it is recorded.',
+            },
+            {
+              icon: 'gauge',
+              title: 'Fast on real networks',
+              body: 'Pages and apps are built to load quickly on mobile data and mid-range phones.',
+            },
+            {
+              icon: 'list-checks',
+              title: 'Clear scope, fixed milestones',
+              body: 'A written quotation, agreed milestones and weekly updates in your client portal.',
+            },
+            {
+              icon: 'life-buoy',
+              title: 'Support after launch',
+              body: 'A support period on every project, with care plans for ongoing updates and monitoring.',
+            },
+          ],
+        },
+      },
+      {
+        key: 'work',
+        type: 'work_grid',
+        content: { title: 'Selected work', intro: 'A few projects we have delivered.' },
+      },
+      {
+        key: 'process',
+        type: 'process',
+        content: {
+          title: 'How we work',
+          steps: [
+            { title: 'Discover', body: 'We learn how your organisation works and agree what success looks like.' },
+            { title: 'Design', body: 'We plan the structure and design the screens before writing code.' },
+            { title: 'Build', body: 'We build in milestones and show you progress every week.' },
+            { title: 'Launch', body: 'We test, migrate your data, train your team and go live.' },
+            { title: 'Support', body: 'We stay on hand to fix, improve and keep things running.' },
+          ],
+          link: { label: 'More about how we work', href: '/how-we-work' },
+        },
+      },
+      {
+        key: 'values',
+        type: 'values',
+        content: {
+          title: 'What we value',
+          items: [
+            { title: 'Excellence', body: 'We do careful work and check it before it reaches you.' },
+            { title: 'Integrity', body: 'We say what we can do, price it honestly and keep our word.' },
+            { title: 'Customer commitment', body: 'Your goals set the priorities, and we stay with you after launch.' },
+          ],
+          link: { label: 'About Kuzikode', href: '/about' },
+        },
+      },
+      {
+        key: 'products',
+        type: 'products_grid',
+        content: { title: 'Our products', intro: 'Software we are building for African businesses.' },
+      },
+      {
+        key: 'cta',
+        type: 'cta',
+        content: {
+          title: 'Have a project in mind?',
+          body: 'Tell us what you need. We will reply with questions or a proposed next step.',
+          primaryCta: startProject,
+          secondaryCta: { label: 'Contact us', href: '/contact' },
+        },
+      },
+    ],
+  },
+  {
+    key: 'about',
+    title: 'About',
+    seoTitle: 'About Kuzikode Technologies',
+    seoDescription:
+      'Kuzikode Technologies is a Zimbabwe-based technology company that designs, builds and runs digital solutions for businesses and organisations.',
+    sections: [
+      {
+        key: 'overview',
+        type: 'rich_text',
+        content: {
+          title: 'About Kuzikode',
+          html: '<p>Kuzikode Technologies is a technology company based in Zimbabwe. We design, build and run digital solutions for businesses, organisations and individuals: websites, mobile and desktop apps, business software, data and AI tools, integrations and the cloud infrastructure behind them.</p><p>We work as a long-term technology partner rather than a one-off supplier. That means clear scope before we start, regular updates while we build, and support once the work is live.</p>',
+        },
+      },
+      {
+        key: 'story',
+        type: 'rich_text',
+        content: {
+          title: 'Our story',
+          html: '<p>Kuzikode started from a simple observation: many organisations in Zimbabwe run on spreadsheets, paper and tools that do not talk to each other, while the software built for other markets rarely fits local payment methods, currencies and networks.</p><p>We set out to build technology that fits. That means accepting EcoCash and cards, handling USD and ZWG correctly, working on mobile data, and being simple enough for busy teams to use every day.</p>',
+        },
+      },
+      {
+        key: 'mission',
+        type: 'statement',
+        content: {
+          title: 'Mission',
+          body: 'To empower businesses and organisations through accessible, intelligent and dependable technology solutions that solve real-world problems.',
+        },
+      },
+      {
+        key: 'vision',
+        type: 'statement',
+        content: {
+          title: 'Vision',
+          body: 'To become a leading African technology company, creating impactful digital solutions that contribute to business growth and technological advancement.',
+        },
+      },
+      {
+        key: 'values',
+        type: 'values',
+        content: {
+          title: 'Core values',
+          items: [
+            {
+              title: 'Excellence',
+              body: 'We hold our work to a high standard and test it properly. Small details matter to the people who use it every day.',
+            },
+            {
+              title: 'Innovation',
+              body: 'We use new technology where it solves a real problem, not for its own sake.',
+            },
+            {
+              title: 'Integrity',
+              body: 'We are honest about scope, cost and timelines, and we keep our commitments.',
+            },
+            {
+              title: 'Customer commitment',
+              body: 'Our clients’ goals set our priorities. We stay involved after launch so the work keeps delivering.',
+            },
+            {
+              title: 'Continuous growth',
+              body: 'We keep learning, improve how we work after every project and help our clients grow their own capability.',
+            },
+          ],
+        },
+      },
+      {
+        key: 'objectives',
+        type: 'list',
+        content: {
+          title: 'Objectives',
+          items: [
+            'Deliver reliable websites, apps and business systems that organisations use every day.',
+            'Make local payment methods and multi-currency records work properly in the software we build.',
+            'Help organisations move from paper and spreadsheets to connected digital processes.',
+            'Build lasting client relationships through clear communication and dependable support.',
+            'Develop our own products for African small and medium businesses.',
+          ],
+        },
+      },
+      {
+        key: 'approach',
+        type: 'rich_text',
+        content: {
+          title: 'Our approach to technology and problem-solving',
+          html: '<p>We start with the problem, not the tool. Before proposing anything we learn how your team works, where time is lost and what a good outcome looks like.</p><p>We then choose proven technology that suits your budget, your users and the networks they rely on. We build in small milestones, show working software early and adjust based on what we learn.</p><p>Security, data protection and maintainability are part of the build from day one: role-based access, audit trails, backups and documentation come as standard.</p>',
+        },
+      },
+    ],
+  },
+  {
+    key: 'services',
+    title: 'Services',
+    seoTitle: 'Services · Kuzikode Technologies',
+    seoDescription:
+      'Web development, mobile apps, business software, AI and data, automation and integration, and cloud and IT services.',
+    sections: [
+      {
+        key: 'intro',
+        type: 'rich_text',
+        content: {
+          title: 'Services',
+          html: '<p>From a first website to a full business platform, we design, build and support technology across six areas. Each one can stand alone or work together.</p>',
+        },
+      },
+    ],
+  },
+  {
+    key: 'work',
+    title: 'Our Work',
+    seoTitle: 'Our Work · Kuzikode Technologies',
+    seoDescription: 'Case studies of websites, apps and systems built by Kuzikode Technologies.',
+    sections: [
+      {
+        key: 'intro',
+        type: 'rich_text',
+        content: { title: 'Our work', html: '<p>Projects we have designed, built and supported.</p>' },
+      },
+      {
+        key: 'empty',
+        type: 'cta',
+        content: {
+          title: 'Case studies are being prepared.',
+          body: 'Talk to us about what we can build for you.',
+          primaryCta: { label: 'Contact us', href: '/contact' },
+        },
+      },
+    ],
+  },
+  {
+    key: 'products',
+    title: 'Products',
+    seoTitle: 'Products · Kuzikode Technologies',
+    seoDescription: 'Software products in development at Kuzikode Technologies.',
+    sections: [
+      {
+        key: 'intro',
+        type: 'rich_text',
+        content: {
+          title: 'Products',
+          html: '<p>Alongside client work, we are building our own software for African businesses.</p>',
+        },
+      },
+    ],
+  },
+  {
+    key: 'contact',
+    title: 'Contact',
+    seoTitle: 'Contact Kuzikode Technologies',
+    seoDescription: 'Tell us about your project or ask a question. We reply to every enquiry.',
+    sections: [
+      {
+        key: 'intro',
+        type: 'rich_text',
+        content: {
+          title: 'Contact us',
+          html: '<p>Tell us about your project, ask a question or request a quotation. We reply to every enquiry, usually within one business day.</p>',
+        },
+      },
+    ],
+  },
+];
+
+export const PRODUCTS = [
+  {
+    id: 'prd_business_suite',
+    slug: 'business-suite',
+    name: 'Kuzikode Business Suite',
+    tagline: 'Integrated business management for African SMEs.',
+    description:
+      'An integrated platform we are developing for small and medium businesses: sales and point of sale, stock, finance, people and customer management in one place, built for local payment methods and multi-currency trading. It is in development and not yet available.',
+    status: 'in_development',
+    interestFormEnabled: 1,
+  },
+];
+
+export const EXPENSE_CATEGORIES = [
+  ['exc_hosting', 'Hosting & cloud', 'Servers, cloud services and hosting fees'],
+  ['exc_software', 'Software & subscriptions', 'Licences and SaaS subscriptions'],
+  ['exc_domains', 'Domains & email', 'Domain registrations and mailbox costs'],
+  ['exc_equipment', 'Equipment', 'Computers, phones and accessories'],
+  ['exc_internet', 'Internet & airtime', 'Data bundles, fibre and airtime'],
+  ['exc_transport', 'Transport & travel', 'Fuel, taxis and travel to clients'],
+  ['exc_office', 'Office & utilities', 'Rent, power and office supplies'],
+  ['exc_marketing', 'Marketing', 'Advertising and promotional costs'],
+  ['exc_professional', 'Professional fees', 'Legal, accounting and consulting'],
+  ['exc_contractors', 'Contractors', 'Freelancers and subcontractors'],
+  ['exc_bank', 'Bank & payment fees', 'Bank charges and gateway fees'],
+  ['exc_training', 'Training', 'Courses, books and certifications'],
+  ['exc_other', 'Other', 'Anything not covered above'],
+] as const;
+
+/** application_settings defaults. Blank values are hidden on the site, never shown as placeholders. */
+export const SETTINGS: Record<string, unknown> = {
+  'company.name': 'Kuzikode Technologies',
+  'company.legal_name': '',
+  'company.registration_number': '',
+  'company.tax_number': '',
+  'company.tagline': 'Building intelligent digital solutions.',
+  'company.blurb':
+    'Kuzikode Technologies designs, builds and runs websites, apps and business software for organisations in Zimbabwe and across Africa.',
+  'contact.email': '',
+  'contact.billing_email': '',
+  'contact.phone': '',
+  'contact.whatsapp_number': '',
+  'contact.whatsapp_message': 'Hi Kuzikode, I would like to talk about a project.',
+  'contact.location': 'Zimbabwe',
+  'contact.address': '',
+  'contact.hours': '',
+  'social.linkedin': '',
+  'social.facebook': '',
+  'social.x': '',
+  'social.instagram': '',
+  'social.github': '',
+  'social.youtube': '',
+  'branding.accent_colour': '#2747E8',
+  'branding.logo_file_id': '',
+  'documents.footer_text': 'Thank you for your business.',
+  'documents.bank_details': '',
+  'numbering.invoice': 'INV-{YYYY}-{SEQ:5}',
+  'numbering.quotation': 'QUO-{YYYY}-{SEQ:4}',
+  'numbering.credit_note': 'CN-{YYYY}-{SEQ:4}',
+  'numbering.receipt': 'RCT-{YYYY}-{SEQ:5}',
+  'numbering.project': 'PRJ-{YYYY}-{SEQ:4}',
+  'numbering.enquiry': 'ENQ-{YYYY}-{SEQ:4}',
+  'numbering.support': 'SUP-{YYYY}-{SEQ:4}',
+  'numbering.application': 'APP-{YYYY}-{SEQ:4}',
+  'numbering.client': 'CL-{SEQ:4}',
+  'currency.default': 'USD',
+  'display.timezone': 'Africa/Harare',
+  'invoice.default_terms_days': 14,
+  'invoice.default_terms_text':
+    'Payment is due by the due date shown. Please quote the invoice number with your payment.',
+  'invoice.reminder_schedule': [
+    { kind: 'before_due', offsetDays: -3 },
+    { kind: 'due', offsetDays: 0 },
+    { kind: 'overdue_7', offsetDays: 7 },
+    { kind: 'overdue_14', offsetDays: 14 },
+  ],
+  'quotation.default_validity_days': 30,
+  'quotation.default_terms_text':
+    'This quotation is valid until the date shown. Work starts once the quotation is accepted and any agreed deposit is paid.',
+  'payments.allow_partial': false,
+  'pricing.show_prices': false,
+  'pricing.vat_note': 'Prices exclude VAT where applicable. Final scope and price are confirmed in a written quotation.',
+  'careers.general_applications': false,
+  'careers.show_in_nav_when_open': true,
+  'careers.retention_months': 12,
+  'careers.intro':
+    'We are a small team building technology for organisations across Zimbabwe and Africa. When we hire, we look for people who care about doing careful work, communicate clearly and want to keep learning.',
+  'booking.cal_url': '',
+  'subscriptions.lead_days': 7,
+  'subscriptions.at_risk_days': 30,
+  'time.default_hourly_rate_minor': 2500,
+  'time.default_currency': 'USD',
+  'portal.self_registration': false,
+  'content_version': 1,
+};

@@ -27,3 +27,8 @@ declare namespace App {
     ctx: import('./server/context').RequestContext;
   }
 }
+
+declare module '*.sql?raw' {
+  const content: string;
+  export default content;
+}

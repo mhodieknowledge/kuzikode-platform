@@ -5,11 +5,18 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phase: 1 — inspection & planning
-- Last completed task: P2.6 (P1.5 pen.dev runs in progress)
-- **Next step:** P2.7 seeds (`seeds/base.sql` real content, `seeds/dev.sql` fictional, `scripts/seed.ts` with production guard).
+- Last completed task: P2.7
+- **Next step:** review P1.5 mockups (design/mockups/*.png) and tick P1.5; then P2.8 repositories/DB helpers (client wrapper, batch builder, pagination, sequences `nextNumber`, audit helper, outbox enqueue, concurrency test).
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh (non-exempt calls this month: ~3/15) · CI status: —
 
 ---
+
+## 2026-11-05 20:45 UTC — P2.7 seeds
+- Done: permissions + role matrix (`src/shared/permissions.ts`), seed generator + real copy (6 divisions, 37 sub-services, home/about/
+  services/work/products/contact sections, settings, Business Suite product, expense categories, Paynow/PesePay accounts + USD route),
+  `seeds/nonprod.sql`, fictional `seeds/dev.sql`, `scripts/seed.ts` with production guard (`npm run db:seed:local`).
+- Tests: unit 88 / integration 19 (guard refuses prod dev seed; base twice = no duplicates; routes). verify green.
+- Next step: P1.5 review, then P2.8.
 
 ## 2026-11-05 20:20 UTC — P2.6 initial migrations
 - Done: migrations/0001–0009 covering every docs/04 table (+10b), indexes on FKs/filters, append-only audit trigger, financial guards.

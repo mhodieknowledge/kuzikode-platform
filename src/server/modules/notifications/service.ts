@@ -63,3 +63,70 @@ export function notifyUser(ctx: RequestContext, userId: string, n: NotificationI
     ctx.now().toISOString(),
   );
 }
+
+export interface NotificationItem {
+  id: string;
+  type: string;
+  title: string;
+  body: string | null;
+  link: string | null;
+  readAt: string | null;
+  createdAt: string;
+}
+
+/** Latest notifications for a user plus the unread count (bell and notifications page). */
+export async function listNotifications(
+  ctx: RequestContext,
+  userId: string,
+  opts: { limit?: number; unreadOnly?: boolean } = {},
+): Promise<{ items: NotificationItem[]; unread: number }> {
+  const limit = Math.min(Math.max(opts.limit ?? 20, 1), 100);
+  const [list, count] = await ctx.db.batch([
+    ctx.db
+      .prepare(
+        `SELECT id, type, title, body, link, read_at, created_at FROM notifications
+         WHERE user_id = ? AND (? = 0 OR read_at IS NULL) ORDER BY created_at DESC, id DESC LIMIT ?`,
+      )
+      .bind(userId, opts.unreadOnly ? 1 : 0, limit),
+    ctx.db.prepare('SELECT COUNT(*) AS n FROM notifications WHERE user_id = ? AND read_at IS NULL').bind(userId),
+  ]);
+  const rows = (list?.results ?? []) as {
+    id: string;
+    type: string;
+    title: string;
+    body: string | null;
+    link: string | null;
+    read_at: string | null;
+    created_at: string;
+  }[];
+  return {
+    items: rows.map((r) => ({
+      id: r.id,
+      type: r.type,
+      title: r.title,
+      body: r.body,
+      // Only same-site relative links are followed from the UI.
+      link: r.link && /^\/(?!\/)/.test(r.link) ? r.link : null,
+      readAt: r.read_at,
+      createdAt: r.created_at,
+    })),
+    unread: ((count?.results ?? [])[0] as { n: number } | undefined)?.n ?? 0,
+  };
+}
+
+/** Marks the given notifications (or all, when ids is empty) as read. Only the owner's rows are touched. */
+export async function markNotificationsRead(ctx: RequestContext, userId: string, ids: string[]): Promise<number> {
+  const now = ctx.now().toISOString();
+  const res = ids.length
+    ? await ctx.db
+        .prepare(
+          'UPDATE notifications SET read_at = ? WHERE user_id = ? AND read_at IS NULL AND id IN (SELECT value FROM json_each(?))',
+        )
+        .bind(now, userId, JSON.stringify(ids.slice(0, 100)))
+        .run()
+    : await ctx.db
+        .prepare('UPDATE notifications SET read_at = ? WHERE user_id = ? AND read_at IS NULL')
+        .bind(now, userId)
+        .run();
+  return res.meta.changes ?? 0;
+}

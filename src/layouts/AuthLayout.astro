@@ -1,0 +1,37 @@
+---
+/** Centered card for sign-in, password and 2FA pages (admin and portal). */
+import AppLayout from './AppLayout.astro';
+import Logo from '../components/Logo.astro';
+
+interface Props {
+  title: string;
+  heading: string;
+  intro?: string;
+  area: 'Admin' | 'Client portal';
+  csrfToken?: string | undefined;
+}
+const { title, heading, intro, area, csrfToken } = Astro.props;
+---
+
+<AppLayout title={`${title} · Kuzikode ${area}`} csrfToken={csrfToken}>
+  <main
+    id="main"
+    tabindex="-1"
+    class="flex min-h-screen flex-col items-center justify-center px-4 py-12 focus:outline-none"
+  >
+    <div class="w-full max-w-md">
+      <div class="mb-8 flex items-center justify-between">
+        <Logo href="/" height={26} />
+        <span class="text-[13px] font-semibold text-ink-600">{area}</span>
+      </div>
+      <div class="rounded-lg border border-line bg-surface p-6 shadow-1 md:p-8">
+        <h1 class="text-2xl font-bold tracking-display">{heading}</h1>
+        {intro ? <p class="mt-2 text-[15px] text-ink-600">{intro}</p> : null}
+        <div class="mt-6">
+          <slot />
+        </div>
+      </div>
+      <slot name="after" />
+    </div>
+  </main>
+</AppLayout>

@@ -1,6 +1,15 @@
 ---
+/**
+ * Admin shell (P4.1): permission-filtered sidebar (drawer on small screens), top bar with ⌘K search, notifications bell
+ * and account menu. Pages pass the result of `loadAdminPage` as `page`; the dev UI kit passes a static nav instead.
+ */
+import { Menu, X } from 'lucide-react';
 import AppLayout from './AppLayout.astro';
 import Logo from '../components/Logo.astro';
+import CommandPalette from '../components/admin/CommandPalette';
+import NotificationsBell from '../components/admin/NotificationsBell';
+import UserMenu from '../components/admin/UserMenu';
+import type { AdminPage } from '../server/lib/admin-page';
 
 export interface NavGroup {
   label: string;
@@ -8,11 +17,14 @@ export interface NavGroup {
 }
 interface Props {
   title: string;
+  page?: AdminPage;
   nav?: NavGroup[];
   csrfToken?: string | undefined;
   userName?: string;
 }
-const { title, nav = [], csrfToken, userName } = Astro.props;
+const { title, page, csrfToken = page?.csrfToken, userName } = Astro.props;
+const nav: NavGroup[] = page?.nav ?? Astro.props.nav ?? [];
+const shortcuts = nav.flatMap((g) => g.items.map((i) => ({ label: i.label, href: i.href })));
 ---
 
 <AppLayout title={`${title} · Kuzikode Admin`} csrfToken={csrfToken}>
@@ -21,7 +33,7 @@ const { title, nav = [], csrfToken, userName } = Astro.props;
       <div class="flex h-16 items-center px-5">
         <Logo href="/admin" height={24} />
       </div>
-      <nav aria-label="Admin navigation" class="flex-1 overflow-y-auto px-3 pb-6">
+      <nav aria-label="Admin navigation" class="flex-1 overflow-y-auto px-3 pb-6" data-admin-nav>
         {nav.map((group) => (
           <div class="mt-4">
             <p class="px-2 pb-1 text-[11px] font-semibold tracking-wider text-ink-600 uppercase">{group.label}</p>
@@ -46,16 +58,81 @@ const { title, nav = [], csrfToken, userName } = Astro.props;
       </nav>
     </aside>
     <div class="flex min-w-0 flex-1 flex-col">
-      <header class="flex h-16 items-center justify-between gap-4 border-b border-line bg-surface px-4 lg:px-8">
-        <div class="lg:hidden">
-          <Logo href="/admin" height={22} />
+      <header class="flex h-16 items-center gap-3 border-b border-line bg-surface px-4 lg:px-8">
+        <button
+          type="button"
+          class="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-line text-ink-950 lg:hidden"
+          aria-label="Open navigation"
+          aria-controls="admin-mobile-nav"
+          data-admin-nav-open
+        >
+          <Menu size={20} aria-hidden="true" />
+        </button>
+        <div class="flex min-w-0 flex-1 items-center">
+          {page ? <CommandPalette client:idle shortcuts={shortcuts} /> : <slot name="topbar" />}
         </div>
-        <slot name="topbar" />
-        {userName ? <span class="text-sm text-ink-600">{userName}</span> : null}
+        {page ? (
+          <div class="flex items-center gap-1">
+            <NotificationsBell client:idle initialUnread={page.unread} />
+            <UserMenu client:idle name={page.auth.user.name} email={page.auth.user.email} />
+          </div>
+        ) : userName ? (
+          <span class="text-sm text-ink-600">{userName}</span>
+        ) : null}
       </header>
       <main id="main" tabindex="-1" class="flex-1 px-4 py-6 focus:outline-none lg:px-8">
         <slot />
       </main>
     </div>
   </div>
+  <dialog
+    id="admin-mobile-nav"
+    aria-label="Admin navigation"
+    class="m-0 h-full max-h-none w-72 max-w-[85vw] bg-surface p-0 backdrop:bg-ink-950/40"
+    data-admin-nav-dialog
+  >
+    <div class="flex h-16 items-center justify-between px-5">
+      <Logo href="/admin" height={22} />
+      <button
+        type="button"
+        class="inline-flex h-10 w-10 items-center justify-center rounded-sm text-ink-950"
+        aria-label="Close navigation"
+        data-admin-nav-close
+      >
+        <X size={20} aria-hidden="true" />
+      </button>
+    </div>
+    <nav class="px-3 pb-6">
+      {nav.map((group) => (
+        <div class="mt-4">
+          <p class="px-2 pb-1 text-[11px] font-semibold tracking-wider text-ink-600 uppercase">{group.label}</p>
+          <ul>
+            {group.items.map((item) => (
+              <li>
+                <a
+                  href={item.href}
+                  aria-current={item.active ? 'page' : undefined}
+                  class:list={[
+                    'flex h-11 items-center rounded-sm px-2 text-[15px]',
+                    item.active ? 'bg-brand-50 font-semibold text-brand-600' : 'text-ink-800',
+                  ]}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </nav>
+  </dialog>
 </AppLayout>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-admin-nav-dialog]');
+  document.querySelector('[data-admin-nav-open]')?.addEventListener('click', () => dialog?.showModal());
+  document.querySelector('[data-admin-nav-close]')?.addEventListener('click', () => dialog?.close());
+  dialog?.addEventListener('click', (e) => {
+    if (e.target === dialog) dialog.close();
+  });
+</script>

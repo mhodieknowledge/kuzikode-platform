@@ -16,3 +16,4 @@ export { Spinner } from './Spinner';
 export { Breadcrumbs, EmptyState, ErrorState, PageHeader, Skeleton, Timeline } from './States';
 export { ToastProvider, useToast } from './Toast';
 export { ApiError, apiFetch, newIdempotencyKey } from './api';
+export { QrCode } from './QrCode';

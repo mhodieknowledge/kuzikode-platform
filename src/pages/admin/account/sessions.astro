@@ -1,0 +1,93 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { SessionActions } from '../../../components/admin/AccountActions';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { listSessions } from '../../../server/modules/auth/service';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request);
+if (page instanceof Response) return page;
+const sessions = await listSessions(ctx, page.auth);
+const fmt = (iso: string) =>
+  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
+    new Date(iso),
+  );
+const device = (ua: string | null) => {
+  if (!ua) return 'Unknown device';
+  const browser = /Edg\//.test(ua)
+    ? 'Edge'
+    : /Chrome\//.test(ua)
+      ? 'Chrome'
+      : /Firefox\//.test(ua)
+        ? 'Firefox'
+        : /Safari\//.test(ua)
+          ? 'Safari'
+          : 'Browser';
+  const os = /Windows/.test(ua)
+    ? 'Windows'
+    : /Android/.test(ua)
+      ? 'Android'
+      : /iPhone|iPad/.test(ua)
+        ? 'iOS'
+        : /Mac OS X/.test(ua)
+          ? 'macOS'
+          : /Linux/.test(ua)
+            ? 'Linux'
+            : '';
+  return os ? `${browser} on ${os}` : browser;
+};
+---
+
+<AdminLayout title="Signed-in devices" page={page}>
+  <h1 class="text-2xl font-bold tracking-display">Signed-in devices</h1>
+  <p class="mt-1 text-sm text-ink-600">
+    Sessions end after 12 hours, or after 2 hours without activity. Sign out any you don't recognise.
+  </p>
+  <div class="mt-6 overflow-x-auto rounded-lg border border-line bg-surface">
+    <table class="w-full text-left text-sm">
+      <caption class="sr-only">Active sessions</caption>
+      <thead class="bg-canvas text-[13px] text-ink-600">
+        <tr>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Device
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            IP address
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Signed in
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Last active
+          </th>
+          <th scope="col" class="px-4 py-3">
+            <span class="sr-only">Actions</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {sessions.map((s) => (
+          <tr class="border-t border-line">
+            <td class="px-4 py-3 font-medium text-ink-950">
+              {device(s.userAgent)}
+              {s.current ? (
+                <span class="ml-2 rounded-full bg-success-50 px-2 py-0.5 text-[12px] font-semibold text-success-700">
+                  This device
+                </span>
+              ) : null}
+            </td>
+            <td class="px-4 py-3 text-ink-800">{s.ip ?? '—'}</td>
+            <td class="px-4 py-3 text-ink-800">{fmt(s.createdAt)}</td>
+            <td class="px-4 py-3 text-ink-800">{fmt(s.lastSeenAt)}</td>
+            <td class="px-4 py-3 text-right">
+              {s.current ? null : <SessionActions client:visible sessionId={s.id} />}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <div class="mt-6">
+    <SessionActions client:visible />
+  </div>
+</AdminLayout>

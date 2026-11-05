@@ -1,1 +1,8 @@
-export { notifyStaffWithPermission, notifyUser, type NotificationInput } from './service';
+export {
+  listNotifications,
+  markNotificationsRead,
+  notifyStaffWithPermission,
+  notifyUser,
+  type NotificationInput,
+  type NotificationItem,
+} from './service';

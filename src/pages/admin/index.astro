@@ -1,0 +1,88 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { loadAdminPage } from '../../server/lib/admin-page';
+import { listNotifications } from '../../server/modules/notifications';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request);
+if (page instanceof Response) return page;
+const { items } = await listNotifications(ctx, page.auth.user.id, { limit: 5 });
+const sections = page.nav.flatMap((g) => g.items).filter((i) => i.href !== '/admin');
+const firstName = page.auth.user.name.split(/\s+/)[0] ?? page.auth.user.name;
+const fmt = (iso: string) =>
+  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
+    new Date(iso),
+  );
+---
+
+<AdminLayout title="Dashboard" page={page}>
+  <h1 class="text-2xl font-bold tracking-display">Welcome, {firstName}</h1>
+  <p class="mt-1 text-ink-600">Press ⌘K (Ctrl+K on Windows) to find a client, invoice, quotation or project.</p>
+  <div class="mt-8 grid gap-6 lg:grid-cols-2">
+    <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="recent-title">
+      <div class="flex items-center justify-between">
+        <h2 id="recent-title" class="font-sans text-base font-semibold">
+          Recent notifications
+        </h2>
+        <a href="/admin/notifications" class="text-sm font-semibold text-brand-600">
+          See all
+        </a>
+      </div>
+      {items.length === 0 ? (
+        <p class="mt-4 text-sm text-ink-600">
+          Nothing new. Notifications about enquiries, applications and payments appear here.
+        </p>
+      ) : (
+        <ul class="mt-4 divide-y divide-line">
+          {items.map((n) => (
+            <li class="py-3">
+              {n.link ? (
+                <a href={n.link} class="text-sm font-semibold text-ink-950 hover:underline">
+                  {n.title}
+                </a>
+              ) : (
+                <p class="text-sm font-semibold text-ink-950">{n.title}</p>
+              )}
+              <p class="text-[12px] text-ink-600">{fmt(n.createdAt)}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+    <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="account-title">
+      <h2 id="account-title" class="font-sans text-base font-semibold">
+        Your account
+      </h2>
+      <dl class="mt-4 grid gap-3 text-sm">
+        <div>
+          <dt class="text-ink-600">Signed in as</dt>
+          <dd class="font-medium text-ink-950">{page.auth.user.email}</dd>
+        </div>
+        <div>
+          <dt class="text-ink-600">Two-factor authentication</dt>
+          <dd class="font-medium text-ink-950">{page.auth.mfa.enabled ? 'On' : 'Off'}</dd>
+        </div>
+      </dl>
+      <a href="/admin/account/security" class="mt-4 inline-flex text-sm font-semibold text-brand-600">
+        Security settings
+      </a>
+      {sections.length > 0 ? (
+        <>
+          <h3 class="mt-6 text-sm font-semibold text-ink-950">Your sections</h3>
+          <ul class="mt-2 flex flex-wrap gap-2">
+            {sections.map((s) => (
+              <li>
+                <a
+                  href={s.href}
+                  class="inline-flex h-9 items-center rounded-sm border border-line px-3 text-sm font-medium text-ink-800 hover:border-ink-400"
+                >
+                  {s.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+    </section>
+  </div>
+</AdminLayout>

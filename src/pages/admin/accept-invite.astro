@@ -1,0 +1,20 @@
+---
+import AuthLayout from '../../layouts/AuthLayout.astro';
+import { SetPasswordForm } from '../../components/auth/AuthForms';
+
+const token = (Astro.url.searchParams.get('token') ?? '').slice(0, 200);
+Astro.response.headers.set('referrer-policy', 'no-referrer');
+---
+
+<AuthLayout
+  title="Accept your invitation"
+  heading="Set up your account"
+  intro="Choose a password to finish setting up your Kuzikode staff account."
+  area="Admin"
+>
+  {token ? (
+    <SetPasswordForm client:load audience="admin" token={token} mode="invite" />
+  ) : (
+    <p class="text-ink-600">This invitation link is incomplete. Ask the person who invited you to send it again.</p>
+  )}
+</AuthLayout>

@@ -1,12 +1,48 @@
 import { execFileSync } from 'node:child_process';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { hashPassword } from '../../src/server/lib/crypto';
+import { E2E_PASSWORD, E2E_USERS } from './users';
+
+const wrangler = (...args: string[]) => execFileSync('npx', ['wrangler', ...args], { stdio: 'pipe' });
+const q = (s: string) => `'${s.replace(/'/g, "''")}'`;
 
 /**
- * Local runs reuse the wrangler dev D1 state between runs, so per-IP rate limits for public forms would pile up
- * (every request comes from localhost). Start each run with an empty rate_limits table. CI starts from fresh state.
+ * Prepares the LOCAL D1 used by `wrangler dev` (never a remote database):
+ * - per-IP rate limits are cleared (state persists between local runs and every request comes from localhost);
+ * - fixed e2e staff accounts are (re)created with a known password and no sessions or failed-login history.
  */
-export default function globalSetup() {
-  if (process.env.CI) return;
-  execFileSync('npx', ['wrangler', 'd1', 'execute', 'DB', '--local', '--command', 'DELETE FROM rate_limits'], {
-    stdio: 'ignore',
-  });
+export default async function globalSetup() {
+  wrangler('d1', 'migrations', 'apply', 'DB', '--local');
+  // Idempotent: roles and permissions must exist before the accounts get their roles (fresh CI database).
+  execFileSync('node', ['scripts/seed.ts', '--env', 'local'], { stdio: 'pipe' });
+  const hash = await hashPassword(E2E_PASSWORD);
+  const now = new Date().toISOString();
+  const ids = Object.values(E2E_USERS)
+    .map((u) => q(u.id))
+    .join(',');
+  const sql = [
+    'DELETE FROM rate_limits;',
+    `DELETE FROM sessions WHERE user_id IN (${ids});`,
+    `DELETE FROM user_roles WHERE user_id IN (${ids});`,
+    `DELETE FROM user_backup_codes WHERE user_id IN (${ids});`,
+    `DELETE FROM user_mfa WHERE user_id IN (${ids});`,
+    ...Object.values(E2E_USERS).flatMap((u) => [
+      `INSERT INTO users (id, email, name, user_type, password_hash, status, must_change_password, email_verified_at)
+       VALUES (${q(u.id)}, ${q(u.email)}, ${q(u.name)}, 'staff', ${q(hash)}, 'active', ${u.mustChange ? 1 : 0}, ${q(now)})
+       ON CONFLICT(id) DO UPDATE SET password_hash = excluded.password_hash, status = 'active',
+         must_change_password = excluded.must_change_password, name = excluded.name,
+         failed_login_count = 0, locked_until = NULL;`,
+      `INSERT INTO user_roles (user_id, role_id) SELECT ${q(u.id)}, id FROM roles WHERE key = ${q(u.role)};`,
+    ]),
+  ].join('\n');
+  const dir = mkdtempSync(join(tmpdir(), 'kz-e2e-'));
+  try {
+    const file = join(dir, 'setup.sql');
+    writeFileSync(file, sql);
+    wrangler('d1', 'execute', 'DB', '--local', '--file', file);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 }

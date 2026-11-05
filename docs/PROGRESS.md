@@ -164,3 +164,11 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Tests: integration `careers.test.ts` (7: PDF accepted, renamed EXE rejected, closed/future/past-deadline rejected, auto-close, JSON-LD, 410, retention anonymises + deletes CV), e2e `careers.spec.ts` (2). Full e2e suite: 44 passed.
 - Admin side (postings CRUD, pipeline/kanban, erase applicant) is in Phase 4.
 - Next step: P3.18 Site imagery (deferred until the Workers AI free neuron quota resets at 00:00 UTC: `npm run img:gen -- --id <slot> --size 1344x768 --variants 2`, prompts in design/images/prompts/, see docs/13 §4 shot list; keep steps at 20 to fit ~2× more images/day). If the quota is still exhausted, continue with Phase 4 (P4.1) and come back to imagery.
+
+## 2026-11-05 · P4.1 Admin shell ✅
+- Server: `server/lib/admin-page.ts` (loadAdminPage, adminStage, safeNext, seeOther), `server/modules/admin` (ADMIN_NAV + adminNavFor, adminSearch, routes `GET /api/v1/admin/search`, `GET /api/v1/admin/notifications`, `POST /api/v1/admin/notifications/read`), notifications service list/mark-read.
+- UI: `layouts/AuthLayout.astro`, rewritten `layouts/AdminLayout.astro` (sidebar, mobile drawer, top bar), islands `components/auth/AuthForms.tsx` (Login with Turnstile after failures, Forgot, SetPassword for reset/invite, ChangePassword, MfaVerify, MfaSetup with QR via `ui/QrCode`), `components/admin/{CommandPalette,NotificationsBell,UserMenu,AccountActions}.tsx`.
+- Pages: /admin (home), /admin/login, /admin/forgot-password, /admin/reset-password, /admin/accept-invite, /admin/password, /admin/mfa, /admin/mfa/setup, /admin/notifications, /admin/account/sessions, /admin/account/security.
+- New dependency: qrcode-generator 2.0.4.
+- Tests: unit `admin-shell.test.ts` (6, permission-filtered nav per role), integration `admin-shell.test.ts` (3), e2e `admin-shell.spec.ts` (5). Full e2e suite: 49 passed.
+- Next step: P4.2 Users & roles (invite staff → /admin/accept-invite already works; deactivate, assign roles, permissions matrix, super-admin custom roles, audit). Flip `built: true` for Users in `server/modules/admin/navigation.ts` when the page exists. P3.18 imagery still waits for the Workers AI quota (resets 00:00 UTC).

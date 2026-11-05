@@ -7,9 +7,9 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 ---
 
 ## Phase 1 — Inspection & planning
-- [ ] **P1.1 Inspect repo.** List existing files and tooling. Keep useful work, and note what you keep or replace in DECISIONS.md. AC: PROGRESS.md entry with findings.
-- [ ] **P1.2 Verify external facts.** Re-check (WebFetch) current Astro + `@astrojs/cloudflare` major + custom entry/queue/scheduled pattern, Tailwind v4 + Astro setup, vitest-pool-workers setup, Paynow developer docs (initiate, express checkout, status update, hash, polling, test mode) + PesePay llms-full.txt, Resend API + idempotency + webhooks, Turnstile test keys, Workers free limits. AC: DECISIONS.md lists versions and any deviation from docs/02.
-- [ ] **P1.3 Coding conventions.** Create `docs/CONVENTIONS.md` (naming, module layout, error codes, commit style, test naming). AC: file exists and matches docs/03.
+- [x] **P1.1 Inspect repo.** List existing files and tooling. Keep useful work, and note what you keep or replace in DECISIONS.md. AC: PROGRESS.md entry with findings.
+- [x] **P1.2 Verify external facts.** Re-check (WebFetch) current Astro + `@astrojs/cloudflare` major + custom entry/queue/scheduled pattern, Tailwind v4 + Astro setup, vitest-pool-workers setup, Paynow developer docs (initiate, express checkout, status update, hash, polling, test mode) + PesePay llms-full.txt, Resend API + idempotency + webhooks, Turnstile test keys, Workers free limits. AC: DECISIONS.md lists versions and any deviation from docs/02.
+- [x] **P1.3 Coding conventions.** Create `docs/CONVENTIONS.md` (naming, module layout, error codes, commit style, test naming). AC: file exists and matches docs/03.
 - [ ] **P1.4 Brand & tool probe.** Canva logo exploration → chosen direction → hand-built SVG logo set + favicons. Figma capability probe (docs/11 §3). pen.dev auth check (`pen status`). AC: logo SVGs committed. Each tool's status recorded in DECISIONS.md. BLOCKERS entries for any unavailable tool.
 - [ ] **P1.5 Mockups (pen.dev).** Write briefs in `design/briefs/` from PRD content, then generate the 6 key screens (docs/11 §1, ≤ 12 runs), review each PNG against docs/05. AC: `design/mockups/*.png` committed and referenced in PROGRESS.md. If pen.dev is unavailable → `[!]` and continue (Phase 2 doesn't depend on it).
 

@@ -26,13 +26,19 @@ test.describe('public layout', () => {
     await page.keyboard.press('Escape');
     await expect(panel).toBeHidden();
     await expect(services).toBeFocused();
-    await expect(page.getByRole('link', { name: 'Start a project' })).toHaveAttribute('href', '/start-a-project');
-    await expect(page.getByRole('link', { name: 'Client Portal' })).toHaveAttribute('href', '/portal/login');
+    await expect(page.getByRole('banner').getByRole('link', { name: 'Start a project' })).toHaveAttribute(
+      'href',
+      '/start-a-project',
+    );
+    await expect(page.getByRole('banner').getByRole('link', { name: 'Client Portal' })).toHaveAttribute(
+      'href',
+      '/portal/login',
+    );
     await expectAccessible(page);
   });
 
   test('tablet and phone: the menu button opens a dialog with the full navigation', async ({ page }) => {
-    for (const width of [768, 375]) {
+    for (const width of [1024, 768, 375]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto('/');
       await expect(page.getByRole('navigation', { name: 'Main' })).toBeHidden();

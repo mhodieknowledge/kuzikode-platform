@@ -26,11 +26,11 @@ const aboutActive = ['/about', '/products', '/faq', '/how-we-work', ...(nav.care
 ---
 
 <header class:list={['sticky top-0 z-40 border-b', dark ? 'border-dark-line bg-ink-950' : 'border-line bg-surface/95 backdrop-blur']} data-site-header>
-  <div class="container-content flex h-16 items-center justify-between gap-6 lg:h-[72px]">
+  <div class="container-content flex h-16 items-center justify-between gap-4 xl:h-[72px]">
     <Logo variant={dark ? 'light' : 'dark'} height={26} />
 
-    <nav aria-label="Main" class="hidden lg:block">
-      <ul class="flex items-center gap-1 text-[15px]">
+    <nav aria-label="Main" class="hidden xl:block">
+      <ul class="flex items-center gap-0.5 text-[15px] whitespace-nowrap">
         <li>
           <a href="/" aria-current={isActive('/') ? 'page' : undefined} class:list={['rounded-sm px-3 py-2 font-medium', isActive('/') ? linkActive : linkBase]}>Home</a>
         </li>
@@ -116,7 +116,7 @@ const aboutActive = ['/about', '/products', '/faq', '/how-we-work', ...(nav.care
       </ul>
     </nav>
 
-    <div class="hidden items-center gap-2 lg:flex">
+    <div class="hidden items-center gap-2 whitespace-nowrap xl:flex">
       <a
         href="/portal/login"
         class:list={[
@@ -129,7 +129,7 @@ const aboutActive = ['/about', '/products', '/faq', '/how-we-work', ...(nav.care
 
     <button
       type="button"
-      class:list={['inline-flex h-11 w-11 items-center justify-center rounded-sm border lg:hidden', dark ? 'border-white/25 text-white' : 'border-line text-ink-950']}
+      class:list={['inline-flex h-11 w-11 items-center justify-center rounded-sm border xl:hidden', dark ? 'border-white/25 text-white' : 'border-line text-ink-950']}
       aria-label="Open menu"
       aria-controls="mobile-nav"
       data-mobile-open

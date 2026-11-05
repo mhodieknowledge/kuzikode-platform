@@ -1,0 +1,41 @@
+---
+import Icon from '../Icon.astro';
+import ResponsiveImage from '../../ResponsiveImage.astro';
+import SectionHeading from './SectionHeading.astro';
+import type { SectionContent } from '../../../shared/schemas/cms';
+
+interface Props {
+  content: SectionContent<'features'>;
+  imageId?: string | undefined;
+  anchor: string;
+}
+const { content: c, imageId, anchor } = Astro.props;
+---
+
+<section class="bg-canvas py-16 md:py-24 lg:py-28" aria-labelledby={`${anchor}-title`}>
+  <div class:list={['container-content', imageId && 'grid items-center gap-12 lg:grid-cols-2']}>
+    <div>
+      <SectionHeading id={`${anchor}-title`} title={c.title} intro={c.intro} />
+      <ul class:list={['grid gap-x-8 gap-y-10', imageId ? 'sm:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-4']}>
+        {
+          c.items.map((item) => (
+            <li>
+              <span class="flex h-10 w-10 items-center justify-center rounded-sm border border-line bg-surface text-brand-600">
+                <Icon name={item.icon} size={20} />
+              </span>
+              <h3 class="mt-4 font-sans text-base font-semibold text-ink-950">{item.title}</h3>
+              <p class="mt-1.5 text-[15px] leading-6 text-ink-600">{item.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    {
+      imageId ? (
+        <div class="overflow-hidden rounded-lg">
+          <ResponsiveImage id={imageId} sizes="(min-width: 1024px) 560px, 100vw" class="aspect-[4/3] h-auto w-full object-cover" />
+        </div>
+      ) : null
+    }
+  </div>
+</section>

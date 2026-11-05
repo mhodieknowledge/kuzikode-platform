@@ -1,11 +1,54 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
+import Hero from '../components/public/sections/Hero.astro';
+import ServicesGrid from '../components/public/sections/ServicesGrid.astro';
+import Features from '../components/public/sections/Features.astro';
+import WorkGrid from '../components/public/sections/WorkGrid.astro';
+import Process from '../components/public/sections/Process.astro';
+import Values from '../components/public/sections/Values.astro';
+import ProductsGrid from '../components/public/sections/ProductsGrid.astro';
+import CtaBand from '../components/public/sections/CtaBand.astro';
+import { getPage, getServiceCatalogue, listPortfolio, listProducts } from '../server/modules/cms';
+import type { Section } from '../shared/schemas/cms';
+
+const { ctx } = Astro.locals;
+const [page, categories, portfolio, products] = await Promise.all([
+  getPage(ctx, 'home'),
+  getServiceCatalogue(ctx),
+  listPortfolio(ctx),
+  listProducts(ctx),
+]);
+if (!page) return new Response('Not found', { status: 404 });
+const featured = portfolio.filter((p) => p.featured).length ? portfolio.filter((p) => p.featured) : portfolio;
+const sections = page.sections as Section[];
 ---
 
-<PublicLayout title="Kuzikode Technologies" headerTone="dark">
-  <section class="bg-ink-950 py-24 text-white">
-    <div class="container-content">
-      <h1 class="text-4xl font-bold tracking-display text-white">Building intelligent digital solutions.</h1>
-    </div>
-  </section>
+<PublicLayout
+  title={page.seoTitle ?? 'Kuzikode Technologies'}
+  description={page.seoDescription ?? undefined}
+  canonicalPath="/"
+  headerTone="dark"
+>
+  {sections.map((s) => {
+    switch (s.type) {
+      case 'hero':
+        return <Hero content={s.content as Section<'hero'>['content']} />;
+      case 'services_grid':
+        return <ServicesGrid content={s.content as Section<'services_grid'>['content']} categories={categories} />;
+      case 'features':
+        return <Features content={s.content as Section<'features'>['content']} anchor={s.key} />;
+      case 'work_grid':
+        return <WorkGrid content={s.content as Section<'work_grid'>['content']} items={featured} />;
+      case 'process':
+        return <Process content={s.content as Section<'process'>['content']} />;
+      case 'values':
+        return <Values content={s.content as Section<'values'>['content']} anchor={s.key} />;
+      case 'products_grid':
+        return <ProductsGrid content={s.content as Section<'products_grid'>['content']} products={products} />;
+      case 'cta':
+        return <CtaBand content={s.content as Section<'cta'>['content']} />;
+      default:
+        return null;
+    }
+  })}
 </PublicLayout>

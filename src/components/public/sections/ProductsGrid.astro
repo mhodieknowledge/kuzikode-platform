@@ -1,0 +1,37 @@
+---
+import SectionHeading from './SectionHeading.astro';
+import type { SectionContent } from '../../../shared/schemas/cms';
+
+interface Props {
+  content: SectionContent<'products_grid'>;
+  products: { slug: string; name: string; tagline: string | null; description: string; status: string }[];
+}
+const { content: c, products } = Astro.props;
+const label: Record<string, string> = { in_development: 'In Development', beta: 'Beta', available: 'Available' };
+---
+
+{
+  products.length > 0 ? (
+    <section class="bg-canvas py-16 md:py-24" aria-labelledby="products-title">
+      <div class="container-content">
+        <SectionHeading id="products-title" title={c.title} intro={c.intro} />
+        <ul class:list={['grid gap-4', products.length > 1 && 'md:grid-cols-2']}>
+          {products.map((p) => (
+            <li class="rounded-lg border border-line bg-surface p-8 md:p-10">
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-ink-950/5 px-2.5 py-0.5 text-xs font-semibold text-ink-800">
+                <span class="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
+                {label[p.status] ?? p.status}
+              </span>
+              <h3 class="mt-4 font-display text-xl font-bold tracking-display text-ink-950">{p.name}</h3>
+              {p.tagline ? <p class="mt-1 font-medium text-ink-800">{p.tagline}</p> : null}
+              <p class="mt-3 max-w-3xl text-[15px] leading-6 text-ink-600">{p.description}</p>
+              <a href="/products" class="mt-5 inline-flex text-sm font-semibold text-brand-600 hover:underline">
+                About our products
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  ) : null
+}

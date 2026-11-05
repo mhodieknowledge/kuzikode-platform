@@ -5,11 +5,19 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phase: 1 — inspection & planning
-- Last completed task: P1.4
-- **Next step:** P1.5 mockups with pen.dev (briefs in design/briefs/, ≤ 12 runs, Sonnet model).
+- Last completed task: P2.3 (P1.5 pen.dev runs in progress)
+- **Next step:** P2.4 config & core libs (config.ts, errors.ts, logger.ts, ids.ts, context.ts, middleware). Then review P1.5 mockups.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh (non-exempt calls this month: ~3/15) · CI status: —
 
 ---
+
+## 2026-11-05 19:30 UTC — P2.1–P2.3 scaffold, worker entry, wrangler config
+- Done: Astro 7 SSR + Cloudflare adapter 14 + React 19 + Tailwind 4, TS 6 strictest, ESLint 9 (ts, astro, jsx-a11y, react-hooks, no-only-tests,
+  no .skip/.fixme), Prettier, .gitignore, .nvmrc, .dev.vars.example, npm scripts. `src/worker.ts` → `createWorker()` (Hono for /api/*, Astro
+  handler otherwise, queue + scheduled exported). wrangler.jsonc with local/staging/production envs, all bindings, placeholders for remote IDs.
+  `npm run preview:worker` serves `/`, `/api/health`, static assets (checked with curl). Staging dry-run deploy lists all bindings.
+- Tests: unit 1 passed / integration 4 passed (health, page routing, queue ack, scheduled). verify green.
+- Next step: P2.4.
 
 ## 2026-11-05 18:55 UTC — P1.4 brand & tool probe
 - Done: Canva logo exploration (1 candidate, chosen), hand-built `public/brand/logo.svg`, `logo-white.svg`, `logo-mark.svg`, `favicon.svg`;

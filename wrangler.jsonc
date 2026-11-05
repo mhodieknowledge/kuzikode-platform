@@ -1,0 +1,195 @@
+// Kuzikode Worker configuration. Bindings are NOT inherited into env.* blocks, so each env repeats them.
+// <..._ID> placeholders are replaced with real IDs once the remote resources exist (roadmap P8.1).
+// Production custom domain (enable when kuzikode.com is on Cloudflare, docs/09 §8):
+//   "routes": [{ "pattern": "kuzikode.com", "custom_domain": true }, { "pattern": "www.kuzikode.com", "custom_domain": true }]
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kuzikode-dev",
+  "main": "./src/worker.ts",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS",
+  },
+  "observability": {
+    "enabled": true,
+  },
+  "triggers": {
+    "crons": ["*/5 * * * *", "17 2 * * *"],
+  },
+  "vars": {
+    "APP_ENV": "development",
+    "PUBLIC_SITE_URL": "http://localhost:8787",
+    "PAYMENTS_MOCK_ENABLED": "true",
+    "EMAIL_FROM": "Kuzikode <onboarding@resend.dev>",
+    "EMAIL_REPLY_TO": "",
+    "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+    "ADMIN_ALERT_EMAIL": "",
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kuzikode-local-db",
+      "database_id": "local",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "FILES",
+      "bucket_name": "kuzikode-local-files",
+    },
+    {
+      "binding": "BACKUPS",
+      "bucket_name": "kuzikode-local-backups",
+    },
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "CACHE",
+      "id": "local",
+    },
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "JOBS",
+        "queue": "kuzikode-local-jobs",
+      },
+      {
+        "binding": "JOBS_DLQ",
+        "queue": "kuzikode-local-jobs-dlq",
+      },
+    ],
+    "consumers": [
+      {
+        "queue": "kuzikode-local-jobs",
+        "max_batch_size": 10,
+        "max_retries": 5,
+        "dead_letter_queue": "kuzikode-local-jobs-dlq",
+      },
+    ],
+  },
+  "env": {
+    "staging": {
+      "name": "kuzikode-staging",
+      "vars": {
+        "APP_ENV": "staging",
+        "PUBLIC_SITE_URL": "https://kuzikode-staging.mhodieknowledge.workers.dev",
+        "PAYMENTS_MOCK_ENABLED": "true",
+        "EMAIL_FROM": "Kuzikode <onboarding@resend.dev>",
+        "EMAIL_REPLY_TO": "",
+        "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+        "ADMIN_ALERT_EMAIL": "",
+      },
+      "triggers": {
+        "crons": ["*/5 * * * *", "17 2 * * *"],
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "kuzikode-staging-db",
+          "database_id": "<STAGING_D1_ID>",
+          "migrations_dir": "migrations",
+        },
+      ],
+      "r2_buckets": [
+        {
+          "binding": "FILES",
+          "bucket_name": "kuzikode-staging-files",
+        },
+        {
+          "binding": "BACKUPS",
+          "bucket_name": "kuzikode-staging-backups",
+        },
+      ],
+      "kv_namespaces": [
+        {
+          "binding": "CACHE",
+          "id": "<STAGING_KV_ID>",
+        },
+      ],
+      "queues": {
+        "producers": [
+          {
+            "binding": "JOBS",
+            "queue": "kuzikode-staging-jobs",
+          },
+          {
+            "binding": "JOBS_DLQ",
+            "queue": "kuzikode-staging-jobs-dlq",
+          },
+        ],
+        "consumers": [
+          {
+            "queue": "kuzikode-staging-jobs",
+            "max_batch_size": 10,
+            "max_retries": 5,
+            "dead_letter_queue": "kuzikode-staging-jobs-dlq",
+          },
+        ],
+      },
+    },
+    "production": {
+      "name": "kuzikode",
+      "vars": {
+        "APP_ENV": "production",
+        "PUBLIC_SITE_URL": "https://kuzikode.mhodieknowledge.workers.dev",
+        "PAYMENTS_MOCK_ENABLED": "false",
+        "EMAIL_FROM": "Kuzikode <onboarding@resend.dev>",
+        "EMAIL_REPLY_TO": "",
+        "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+        "ADMIN_ALERT_EMAIL": "",
+      },
+      "triggers": {
+        "crons": ["*/5 * * * *", "17 2 * * *"],
+      },
+      "routes": [],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "kuzikode-prod-db",
+          "database_id": "<PROD_D1_ID>",
+          "migrations_dir": "migrations",
+        },
+      ],
+      "r2_buckets": [
+        {
+          "binding": "FILES",
+          "bucket_name": "kuzikode-prod-files",
+        },
+        {
+          "binding": "BACKUPS",
+          "bucket_name": "kuzikode-prod-backups",
+        },
+      ],
+      "kv_namespaces": [
+        {
+          "binding": "CACHE",
+          "id": "<PROD_KV_ID>",
+        },
+      ],
+      "queues": {
+        "producers": [
+          {
+            "binding": "JOBS",
+            "queue": "kuzikode-prod-jobs",
+          },
+          {
+            "binding": "JOBS_DLQ",
+            "queue": "kuzikode-prod-jobs-dlq",
+          },
+        ],
+        "consumers": [
+          {
+            "queue": "kuzikode-prod-jobs",
+            "max_batch_size": 10,
+            "max_retries": 5,
+            "dead_letter_queue": "kuzikode-prod-jobs-dlq",
+          },
+        ],
+      },
+    },
+  },
+}

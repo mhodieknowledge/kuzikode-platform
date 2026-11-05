@@ -1,0 +1,807 @@
+{
+  "version": "2.21",
+  "children": [
+    {
+      "type": "frame",
+      "id": "mjrIk",
+      "x": 0,
+      "y": 0,
+      "name": "Home Mobile 390",
+      "clip": true,
+      "width": 390,
+      "fill": "$canvas",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "CmU6O",
+          "name": "Hero",
+          "clip": true,
+          "width": "fill_container",
+          "fill": "$ink-950",
+          "layout": "vertical",
+          "gap": 36,
+          "padding": [
+            0,
+            20,
+            48,
+            20
+          ],
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "Aof4z",
+              "layoutPosition": "absolute",
+              "x": 120,
+              "y": -120,
+              "name": "Glow",
+              "fill": {
+                "type": "gradient",
+                "gradientType": "radial",
+                "enabled": true,
+                "rotation": 0,
+                "size": {
+                  "width": 1,
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#2747E85C",
+                    "position": 0
+                  },
+                  {
+                    "color": "#2747E800",
+                    "position": 1
+                  }
+                ]
+              },
+              "width": 420,
+              "height": 420
+            },
+            {
+              "type": "frame",
+              "id": "kZOwA",
+              "name": "Nav",
+              "width": "fill_container",
+              "padding": [
+                14,
+                0
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "A8DDxG",
+                  "name": "Logo",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "duIXl",
+                      "name": "K Mark",
+                      "width": 28,
+                      "height": 28,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "m464D4",
+                          "x": 0,
+                          "y": 0,
+                          "name": "Stem",
+                          "fill": "#FFFFFF",
+                          "width": 5,
+                          "height": 28
+                        },
+                        {
+                          "type": "path",
+                          "id": "E0za5",
+                          "x": 8,
+                          "y": 0,
+                          "name": "Upper Arm",
+                          "geometry": "M8 14l12-14 8 0-13 14z",
+                          "viewBox": [
+                            8,
+                            0,
+                            20,
+                            14
+                          ],
+                          "fill": "#5B78FF",
+                          "width": 20,
+                          "height": 14
+                        },
+                        {
+                          "type": "path",
+                          "id": "r8cKT",
+                          "x": 10,
+                          "y": 16,
+                          "name": "Lower Arm",
+                          "geometry": "M10 17l6-2.5 12 13.5-8 0z",
+                          "viewBox": [
+                            10,
+                            16,
+                            18,
+                            12
+                          ],
+                          "fill": "#FFFFFF",
+                          "width": 18,
+                          "height": 12
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "hfurG",
+                      "name": "Wordmark",
+                      "fill": "#FFFFFF",
+                      "content": "kuzikode",
+                      "fontFamily": "$font-display",
+                      "fontSize": 22,
+                      "fontWeight": "700",
+                      "letterSpacing": -0.5
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "eGW76",
+                  "name": "Menu Button",
+                  "width": 44,
+                  "height": 44,
+                  "cornerRadius": 6,
+                  "stroke": "#2A3350",
+                  "strokeWidth": 1,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "m9NWry",
+                      "name": "Hamburger Icon",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "menu",
+                      "library": "lucide",
+                      "fill": "#FFFFFF"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "P39q7V",
+              "name": "Hero Copy",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "ZpEuT",
+                  "name": "Headline",
+                  "fill": "#FFFFFF",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Building intelligent digital solutions.",
+                  "lineHeight": 1.1,
+                  "fontFamily": "$font-display",
+                  "fontSize": 40,
+                  "fontWeight": "800",
+                  "letterSpacing": -0.9
+                },
+                {
+                  "type": "text",
+                  "id": "WxZhL",
+                  "name": "Subhead",
+                  "fill": "$on-dark-2",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Kuzikode designs, builds and runs websites, apps and business software for organisations in Zimbabwe and across Africa.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-body",
+                  "fontSize": 16,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "di2p5",
+              "name": "Hero CTAs",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "HAXGK",
+                  "name": "Start a project",
+                  "width": "fill_container",
+                  "height": 52,
+                  "fill": "$brand-600",
+                  "cornerRadius": 6,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "qkCci",
+                      "name": "Label",
+                      "fill": "#FFFFFF",
+                      "content": "Start a project",
+                      "fontFamily": "$font-body",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "CRnkb",
+                  "name": "Explore services",
+                  "width": "fill_container",
+                  "height": 52,
+                  "cornerRadius": 6,
+                  "stroke": "#3A4565",
+                  "strokeWidth": 1,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "VFlIh",
+                      "name": "Label",
+                      "fill": "#FFFFFF",
+                      "content": "Explore services",
+                      "fontFamily": "$font-body",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "fO4B9",
+              "name": "Interface Fragments",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "hT8nB",
+                  "name": "Invoice Card",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": 10,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#00000040",
+                    "offset": {
+                      "x": 0,
+                      "y": 8
+                    },
+                    "blur": 24
+                  },
+                  "layout": "vertical",
+                  "gap": 14,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "EBfFo",
+                      "name": "Invoice Header",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "tYjjZ",
+                          "name": "Reference",
+                          "fill": "$ink-600",
+                          "content": "INV-2026-00012",
+                          "fontFamily": "$font-mono",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "BQGzV",
+                          "name": "Paid Badge",
+                          "fill": "#E3F4EC",
+                          "cornerRadius": 6,
+                          "gap": 6,
+                          "padding": [
+                            4,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "ellipse",
+                              "id": "PPyS9",
+                              "name": "Dot",
+                              "fill": "$success-600",
+                              "width": 6,
+                              "height": 6
+                            },
+                            {
+                              "type": "text",
+                              "id": "Y53PWx",
+                              "name": "Label",
+                              "fill": "$success-600",
+                              "content": "Paid",
+                              "fontFamily": "$font-body",
+                              "fontSize": 12,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "gSat5",
+                      "name": "Amount",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "DJ3NZ",
+                          "name": "Label",
+                          "fill": "$ink-600",
+                          "content": "Total",
+                          "fontFamily": "$font-body",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "T9Myb",
+                          "name": "Value",
+                          "fill": "$ink-800",
+                          "content": "$750.00",
+                          "fontFamily": "$font-display",
+                          "fontSize": 32,
+                          "fontWeight": "700",
+                          "letterSpacing": -0.6
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "r2XuND",
+                  "name": "JSON Wrap",
+                  "width": "fill_container",
+                  "padding": [
+                    0,
+                    0,
+                    0,
+                    24
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "lqoPv",
+                      "name": "API Response",
+                      "width": "fill_container",
+                      "fill": "$surface-dark",
+                      "cornerRadius": 10,
+                      "stroke": "$line-dark",
+                      "strokeWidth": 1,
+                      "layout": "vertical",
+                      "gap": 4,
+                      "padding": 16,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "X5e1Yw",
+                          "name": "Request",
+                          "fill": "$ink-400",
+                          "content": "GET /invoices/INV-2026-00012",
+                          "fontFamily": "$font-mono",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "JABCC",
+                          "name": "Line ",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "YH4P5",
+                              "name": "Value",
+                              "fill": "#8A93A6",
+                              "content": "{",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Y3rLd",
+                          "name": "Line \"number\":",
+                          "gap": 6,
+                          "padding": [
+                            0,
+                            0,
+                            0,
+                            16
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "n1PG2Y",
+                              "name": "Key",
+                              "fill": "#9DB0FF",
+                              "content": "\"number\":",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "rJIEF",
+                              "name": "Value",
+                              "fill": "#C5CBD8",
+                              "content": "\"INV-2026-00012\",",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "XOgMo",
+                          "name": "Line \"status\":",
+                          "gap": 6,
+                          "padding": [
+                            0,
+                            0,
+                            0,
+                            16
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "pgHdg",
+                              "name": "Key",
+                              "fill": "#9DB0FF",
+                              "content": "\"status\":",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "gOqTK",
+                              "name": "Value",
+                              "fill": "#5FD3A5",
+                              "content": "\"paid\",",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "VkhFf",
+                          "name": "Line \"amount_minor\":",
+                          "gap": 6,
+                          "padding": [
+                            0,
+                            0,
+                            0,
+                            16
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "M20Rt",
+                              "name": "Key",
+                              "fill": "#9DB0FF",
+                              "content": "\"amount_minor\":",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "V5PNF",
+                              "name": "Value",
+                              "fill": "#5FD3A5",
+                              "content": "75000,",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "hVrAB",
+                          "name": "Line \"currency\":",
+                          "gap": 6,
+                          "padding": [
+                            0,
+                            0,
+                            0,
+                            16
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "rnw7X",
+                              "name": "Key",
+                              "fill": "#9DB0FF",
+                              "content": "\"currency\":",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "iE1K1",
+                              "name": "Value",
+                              "fill": "#C5CBD8",
+                              "content": "\"USD\"",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "OCatu",
+                          "name": "Line ",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "aHxUX",
+                              "name": "Value",
+                              "fill": "#8A93A6",
+                              "content": "}",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Stelt",
+                  "name": "Chart Wrap",
+                  "width": "fill_container",
+                  "padding": [
+                    0,
+                    24,
+                    0,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "LoSiL",
+                      "name": "Chart Card",
+                      "width": "fill_container",
+                      "fill": "$surface-dark",
+                      "cornerRadius": 10,
+                      "stroke": "$line-dark",
+                      "strokeWidth": 1,
+                      "padding": 16,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "jKHkY",
+                          "name": "Chart",
+                          "width": "fill_container",
+                          "height": 72,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "id": "zq4VC",
+                              "x": 0,
+                              "y": 12,
+                              "name": "Gridline",
+                              "fill": "#232B3D",
+                              "width": 300,
+                              "height": 1
+                            },
+                            {
+                              "type": "rectangle",
+                              "id": "WoR4j",
+                              "x": 0,
+                              "y": 36,
+                              "name": "Gridline",
+                              "fill": "#232B3D",
+                              "width": 300,
+                              "height": 1
+                            },
+                            {
+                              "type": "rectangle",
+                              "id": "L7rN5",
+                              "x": 0,
+                              "y": 60,
+                              "name": "Gridline",
+                              "fill": "#232B3D",
+                              "width": 300,
+                              "height": 1
+                            },
+                            {
+                              "type": "path",
+                              "id": "eLhI3",
+                              "x": 0,
+                              "y": 0,
+                              "name": "Area",
+                              "geometry": "M0 56l40-10 40 6 40-18 40 4 40-16 40 4 60-18 0 64-300 0z",
+                              "viewBox": [
+                                0,
+                                0,
+                                300,
+                                72
+                              ],
+                              "fill": {
+                                "type": "gradient",
+                                "gradientType": "linear",
+                                "enabled": true,
+                                "rotation": 180,
+                                "size": {
+                                  "height": 1
+                                },
+                                "colors": [
+                                  {
+                                    "color": "#5B78FF40",
+                                    "position": 0
+                                  },
+                                  {
+                                    "color": "#5B78FF00",
+                                    "position": 1
+                                  }
+                                ]
+                              },
+                              "width": 300,
+                              "height": 72
+                            },
+                            {
+                              "type": "path",
+                              "id": "IKqBF",
+                              "x": 0,
+                              "y": 0,
+                              "name": "Line",
+                              "geometry": "M0 56l40-10 40 6 40-18 40 4 40-16 40 4 60-18",
+                              "viewBox": [
+                                0,
+                                0,
+                                300,
+                                72
+                              ],
+                              "width": 300,
+                              "height": 72,
+                              "stroke": "#5B78FF",
+                              "strokeWidth": 2,
+                              "strokeLinejoin": "round",
+                              "strokeLinecap": "round"
+                            },
+                            {
+                              "type": "ellipse",
+                              "id": "aPS1e",
+                              "x": 294,
+                              "y": 2,
+                              "name": "Marker",
+                              "fill": "$accent-500",
+                              "width": 12,
+                              "height": 12
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "ink-950": {
+      "type": "color",
+      "value": "#0A0F1C"
+    },
+    "ink-800": {
+      "type": "color",
+      "value": "#1C2333"
+    },
+    "ink-600": {
+      "type": "color",
+      "value": "#475066"
+    },
+    "ink-400": {
+      "type": "color",
+      "value": "#8A93A6"
+    },
+    "line": {
+      "type": "color",
+      "value": "#E4E7EE"
+    },
+    "line-dark": {
+      "type": "color",
+      "value": "#232B3D"
+    },
+    "surface": {
+      "type": "color",
+      "value": "#FFFFFF"
+    },
+    "surface-dark": {
+      "type": "color",
+      "value": "#0E1424"
+    },
+    "canvas": {
+      "type": "color",
+      "value": "#F7F8FA"
+    },
+    "brand-600": {
+      "type": "color",
+      "value": "#2747E8"
+    },
+    "brand-500": {
+      "type": "color",
+      "value": "#3355FF"
+    },
+    "brand-50": {
+      "type": "color",
+      "value": "#EEF1FF"
+    },
+    "accent-500": {
+      "type": "color",
+      "value": "#E8A33D"
+    },
+    "success-600": {
+      "type": "color",
+      "value": "#11845B"
+    },
+    "on-dark-2": {
+      "type": "color",
+      "value": "#C5CBD8"
+    },
+    "font-display": {
+      "type": "string",
+      "value": "Manrope"
+    },
+    "font-body": {
+      "type": "string",
+      "value": "Inter"
+    },
+    "font-mono": {
+      "type": "string",
+      "value": "JetBrains Mono"
+    }
+  },
+  "fileToken": "5852dfb9-cf01-4f84-bcc5-b90a1560ce1b"
+}

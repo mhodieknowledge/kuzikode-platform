@@ -1,0 +1,184 @@
+---
+import PublicLayout from '../layouts/PublicLayout.astro';
+import PackageCard from '../components/public/pricing/PackageCard.astro';
+import ComparisonTable from '../components/public/pricing/ComparisonTable.astro';
+import CtaBand from '../components/public/sections/CtaBand.astro';
+import {
+  PRICING_TABS,
+  breadcrumbLd,
+  comparisonRows,
+  faqLd,
+  getPage,
+  getPricingCatalogue,
+  listFaqs,
+  sectionOf,
+} from '../server/modules/cms';
+import { formatPriceTag } from '../shared/service-display';
+
+const { ctx } = Astro.locals;
+const [page, catalogue, faqs] = await Promise.all([
+  getPage(ctx, 'pricing'),
+  getPricingCatalogue(ctx),
+  listFaqs(ctx, 'pricing'),
+]);
+const intro = sectionOf(page, 'intro', 'rich_text');
+const cta = sectionOf(page, 'cta', 'cta');
+const tabs = PRICING_TABS.map((t) => ({ ...t, packages: catalogue.packages.filter((p) => p.tab === t.key) })).filter(
+  (t) => t.packages.length > 0,
+);
+const unitLabel: Record<string, string> = {
+  each: '',
+  page: 'per page',
+  mailbox: 'per mailbox / year',
+  month: 'per month',
+  year: 'per year',
+  hour: 'per hour',
+};
+const ld = [breadcrumbLd(ctx, [{ name: 'Pricing', path: '/pricing' }]), ...(faqs.length ? [faqLd(faqs)] : [])];
+---
+
+<PublicLayout
+  structuredData={ld}
+  title={page?.seoTitle ?? 'Pricing · Kuzikode Technologies'}
+  description={page?.seoDescription ?? undefined}
+>
+  <section class="bg-canvas py-14 md:py-20" aria-labelledby="pricing-title">
+    <div class="container-content">
+      <p class="text-[13px] font-semibold tracking-wide text-brand-600 uppercase">Pricing</p>
+      <h1 id="pricing-title" class="mt-3 max-w-3xl text-4xl font-bold tracking-display md:text-5xl">
+        {intro?.content.title ?? 'Pricing'}
+      </h1>
+      {intro ? <div class="prose-kz mt-4 max-w-2xl text-lg" set:html={intro.content.html} /> : null}
+      {catalogue.showPrices ? null : (
+        <p class="mt-4 max-w-2xl text-[15px] text-ink-600" data-prices-hidden>
+          Prices are confirmed in a written quotation. Choose a package to request yours.
+        </p>
+      )}
+    </div>
+  </section>
+
+  {tabs.length > 0 ? (
+    <nav
+      aria-label="Pricing categories"
+      class="sticky top-16 z-20 border-b border-line bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/85"
+    >
+      <ul class="container-content flex gap-1 overflow-x-auto py-2">
+        {tabs.map((t) => (
+          <li class="shrink-0">
+            <a
+              href={`#${t.key}`}
+              class="inline-flex h-10 items-center rounded-sm px-3.5 text-sm font-semibold text-ink-800 hover:bg-canvas hover:text-ink-950"
+            >
+              {t.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  ) : null}
+
+  {tabs.length === 0 ? (
+    <section class="bg-surface py-14 md:py-20">
+      <div class="container-content">
+        <p class="text-ink-600">
+          Our packages are being updated.{' '}
+          <a href="/contact" class="font-semibold text-brand-600 underline underline-offset-2">
+            Contact us
+          </a>{' '}
+          for a quotation.
+        </p>
+      </div>
+    </section>
+  ) : (
+    tabs.map((t, i) => {
+      const hasTable = comparisonRows(t.packages).length > 0 && t.packages.length > 1;
+      return (
+        <section
+          id={t.key}
+          class:list={['scroll-mt-32 py-14 md:py-20', i % 2 === 0 ? 'bg-surface' : 'bg-canvas']}
+          aria-labelledby={`tab-${t.key}`}
+        >
+          <div class="container-content">
+            <h2 id={`tab-${t.key}`} class="text-3xl font-bold tracking-display">
+              {t.label}
+            </h2>
+            <div
+              class:list={[
+                'mt-8 grid gap-6 sm:grid-cols-2',
+                t.packages.length >= 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3',
+              ]}
+            >
+              {t.packages.map((p) => (
+                <PackageCard pkg={p} featuresMobileOnly={hasTable} />
+              ))}
+            </div>
+            <ComparisonTable packages={t.packages} caption={`${t.label}: package comparison`} />
+          </div>
+        </section>
+      );
+    })
+  )}
+
+  {catalogue.addons.length > 0 ? (
+    <section class="bg-surface py-14 md:py-20" aria-labelledby="addons-title">
+      <div class="container-content">
+        <h2 id="addons-title" class="text-3xl font-bold tracking-display">
+          Add-ons
+        </h2>
+        <p class="mt-2 max-w-2xl text-[15px] text-ink-600">Add any of these to a package.</p>
+        <ul class="mt-8 grid gap-x-10 divide-y divide-line border-y border-line md:grid-cols-2 md:divide-y-0">
+          {catalogue.addons.map((a) => (
+            <li class="flex items-start justify-between gap-6 py-4 md:border-b md:border-line">
+              <div>
+                <p class="font-semibold text-ink-950">{a.name}</p>
+                {a.description ? <p class="mt-0.5 text-[14px] leading-6 text-ink-600">{a.description}</p> : null}
+              </div>
+              <p class="tnum shrink-0 text-right text-[15px] font-semibold text-ink-950">
+                {a.priceMinor !== null ? formatPriceTag(a.priceMinor, a.currency) : 'On request'}
+                {a.priceMinor !== null && unitLabel[a.unit] ? (
+                  <span class="block text-[12px] font-normal text-ink-600">{unitLabel[a.unit]}</span>
+                ) : null}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  ) : null}
+
+  <section class="bg-canvas py-10" aria-label="Pricing note">
+    <div class="container-content">
+      <p class="max-w-3xl text-[14px] leading-6 text-ink-600" data-vat-note>
+        {catalogue.vatNote}
+      </p>
+    </div>
+  </section>
+
+  {faqs.length > 0 ? (
+    <section class="bg-surface py-14 md:py-20" aria-labelledby="faq-title">
+      <div class="container-content max-w-3xl">
+        <h2 id="faq-title" class="text-3xl font-bold tracking-display">
+          Pricing questions
+        </h2>
+        <div class="mt-8 divide-y divide-line border-y border-line">
+          {faqs.map((f, i) => (
+            <details class="group py-5" open={i === 0}>
+              <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-ink-950">
+                {f.question}
+                <span
+                  aria-hidden="true"
+                  class="text-xl leading-none text-ink-600 transition-transform group-open:rotate-45"
+                >
+                  +
+                </span>
+              </summary>
+              <p class="mt-3 text-[15px] leading-7 text-ink-600">{f.answer}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  ) : null}
+
+  {cta ? <CtaBand content={cta.content} /> : null}
+</PublicLayout>

@@ -95,3 +95,16 @@ export function caseStudyLd(
     ...(p.technologies.length ? { keywords: p.technologies.join(', ') } : {}),
   };
 }
+
+/** FAQPage structured data for a visible list of questions (answers are plain text). */
+export function faqLd(items: { question: string; answer: string }[]): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((f) => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: { '@type': 'Answer', text: f.answer },
+    })),
+  };
+}

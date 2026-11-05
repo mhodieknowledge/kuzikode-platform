@@ -271,6 +271,33 @@ export const PAGES: PageSeed[] = [
     ],
   },
   {
+    key: 'pricing',
+    title: 'Pricing',
+    seoTitle: 'Pricing · Kuzikode Technologies',
+    seoDescription:
+      'Website packages, care plans, business email, domains and other services from Kuzikode Technologies, with what each one includes.',
+    sections: [
+      {
+        key: 'intro',
+        type: 'rich_text',
+        content: {
+          title: 'Clear packages, confirmed in writing',
+          html: '<p>Start from a package, add what you need, and we confirm the final scope and price in a written quotation before any work begins.</p>',
+        },
+      },
+      {
+        key: 'cta',
+        type: 'cta',
+        content: {
+          title: 'Not sure which package fits?',
+          body: 'Tell us about your project and we will recommend a package or quote it separately.',
+          primaryCta: { label: 'Start a project', href: '/start-a-project' },
+          secondaryCta: { label: 'Contact us', href: '/contact' },
+        },
+      },
+    ],
+  },
+  {
     key: 'contact',
     title: 'Contact',
     seoTitle: 'Contact Kuzikode Technologies',

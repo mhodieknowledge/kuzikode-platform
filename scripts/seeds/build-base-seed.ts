@@ -8,6 +8,8 @@ import { PERMISSIONS, ROLE_DEFINITIONS } from '../../src/shared/permissions.ts';
 import { EXPENSE_CATEGORIES, PAGES, PRODUCTS, SETTINGS } from './content/cms.ts';
 import { DIVISIONS } from './content/services.ts';
 import { LEGAL_PAGES } from './content/legal.ts';
+import { ADDONS, PACKAGES } from './content/packages.ts';
+import { FAQS } from './content/faq.ts';
 
 export const sq = (v: string | number | null | undefined): string =>
   v === null || v === undefined ? 'NULL' : typeof v === 'number' ? String(v) : `'${v.replace(/'/g, "''")}'`;
@@ -77,6 +79,78 @@ export function buildBaseSeed(): string {
       ),
     );
   });
+
+  out.push('', '-- Packages & add-ons (docs/12 §A.2). Suggested prices: price_review_required = 1 until the owner confirms.');
+  const serviceIds = new Set(
+    DIVISIONS.flatMap((d) => d.services.map((s) => `${d.slug}/${s.slug}`)),
+  );
+  PACKAGES.forEach((p, i) => {
+    if (!serviceIds.has(p.service)) throw new Error(`package ${p.slug}: unknown service ${p.service}`);
+    const [div, svc] = p.service.split('/') as [string, string];
+    const pkgId = `pkg_${p.slug.replace(/-/g, '_')}`;
+    out.push(
+      ins('service_packages', {
+        id: pkgId,
+        service_id: `svc_${div.replace(/-/g, '_')}__${svc.replace(/-/g, '_')}`,
+        slug: p.slug,
+        name: p.name,
+        tagline: p.tagline,
+        billing_type: p.billing,
+        interval: p.billing === 'recurring' ? (p.interval ?? 'month') : null,
+        price_type: p.priceType,
+        price_minor: p.priceType === 'custom_quote' ? null : (p.price ?? null),
+        currency: p.priceType === 'custom_quote' ? null : 'USD',
+        price_unit: p.unit ?? null,
+        annual_price_minor: p.annual ?? null,
+        min_quantity: p.minQuantity ?? 1,
+        delivery_time: p.delivery ?? null,
+        revision_rounds: p.revisions ?? null,
+        support_period: p.support ?? null,
+        most_popular: p.popular ? 1 : 0,
+        pricing_tab: p.tab,
+        status: 'active',
+        price_review_required: 1,
+        cost_note: p.costNote ?? null,
+        sort_order: (i + 1) * 10,
+      }),
+    );
+    p.features.forEach(([key, label, value], j) =>
+      out.push(
+        ins('package_features', {
+          id: `pkf_${p.slug.replace(/-/g, '_')}__${key}`,
+          package_id: pkgId,
+          position: (j + 1) * 10,
+          label,
+          value_type: value === 'included' || value === 'not_included' ? value : 'text',
+          value_text: value === 'included' || value === 'not_included' ? null : value,
+          comparison_key: key,
+        }),
+      ),
+    );
+  });
+  ADDONS.forEach((a, i) =>
+    out.push(
+      ins('package_addons', {
+        id: a.id,
+        package_id: null,
+        name: a.name,
+        description: a.description,
+        price_minor: a.price,
+        currency: 'USD',
+        unit: a.unit,
+        billing_type: a.billing,
+        active: 1,
+        sort_order: (i + 1) * 10,
+      }),
+    ),
+  );
+
+  out.push('', '-- FAQ');
+  FAQS.forEach((f, i) =>
+    out.push(
+      ins('faqs', { id: f.id, category: f.category, question: f.question, answer: f.answer, sort_order: (i + 1) * 10, published: 1 }),
+    ),
+  );
 
   out.push('', '-- Website pages & sections (published defaults)');
   for (const page of [...PAGES, ...LEGAL_PAGES]) {

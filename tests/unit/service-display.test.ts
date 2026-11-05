@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { canRequestQuote, pricingLabel, quotationHref } from '../../src/shared/service-display';
+import {
+  canRequestQuote,
+  packagePrice,
+  pricingLabel,
+  quotationHref,
+  startProjectHref,
+} from '../../src/shared/service-display';
 
 describe('service display rules', () => {
   it('labels pricing models and hides prices when the switch is off', () => {
@@ -19,5 +25,48 @@ describe('service display rules', () => {
 
   it('preselects division and service on the contact form', () => {
     expect(quotationHref('web-development', 'e-commerce')).toBe('/contact?category=web-development&service=e-commerce');
+  });
+});
+
+describe('package price display (docs/12 §A.1)', () => {
+  const base = {
+    priceType: 'fixed' as const,
+    priceMinor: 35000,
+    annualPriceMinor: null,
+    currency: 'USD',
+    billingType: 'one_off' as const,
+    interval: null,
+    priceUnit: null,
+  };
+
+  it('formats fixed, starting-from, recurring and per-unit prices', () => {
+    expect(packagePrice(base)).toEqual({
+      prefix: null,
+      amount: '$350',
+      suffix: 'one-off',
+      annual: null,
+      hasPrice: true,
+    });
+    expect(packagePrice({ ...base, priceType: 'starting_from', priceMinor: 150000 })).toMatchObject({
+      prefix: 'From',
+      amount: '$1,500',
+    });
+    expect(
+      packagePrice({ ...base, billingType: 'recurring', interval: 'month', priceMinor: 2500, annualPriceMinor: 25000 }),
+    ).toMatchObject({ amount: '$25', suffix: 'per month', annual: 'or $250 per year' });
+    expect(packagePrice({ ...base, priceMinor: 2500, priceUnit: 'per hour' })).toMatchObject({ suffix: 'per hour' });
+    expect(packagePrice({ ...base, priceMinor: 1250 }).amount).toBe('$12.50');
+  });
+
+  it('hidden prices read "Request a quote"; custom quotes read "Custom quote"', () => {
+    expect(packagePrice({ ...base, priceMinor: null })).toMatchObject({ amount: 'Request a quote', hasPrice: false });
+    expect(packagePrice({ ...base, priceType: 'custom_quote', priceMinor: null, currency: null })).toMatchObject({
+      amount: 'Custom quote',
+      hasPrice: false,
+    });
+  });
+
+  it('"Get started" opens the wizard with the package preselected', () => {
+    expect(startProjectHref('business-website')).toBe('/start-a-project?package=business-website');
   });
 });

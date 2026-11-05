@@ -15,6 +15,7 @@ const STATIC = [
   '/services',
   '/work',
   '/products',
+  '/pricing',
   '/contact',
   '/legal/privacy',
   '/legal/terms',

@@ -2,7 +2,15 @@
 import { ArrowRight, Check } from 'lucide-react';
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import Icon from '../../components/public/Icon.astro';
-import { breadcrumbLd, getCategory, getSettings, serviceLd, settingBool } from '../../server/modules/cms';
+import PackageCard from '../../components/public/pricing/PackageCard.astro';
+import {
+  breadcrumbLd,
+  getCategory,
+  getSettings,
+  packagesForCategory,
+  serviceLd,
+  settingBool,
+} from '../../server/modules/cms';
 import { canRequestQuote, pricingLabel, quotationHref } from '../../shared/service-display';
 
 const { ctx } = Astro.locals;
@@ -10,6 +18,7 @@ const cat = await getCategory(ctx, Astro.params.slug ?? '');
 if (!cat) return new Response(null, { status: 404, statusText: 'Not found' });
 const settings = await getSettings(ctx);
 const showPrices = settingBool(settings, 'pricing.show_prices');
+const { packages } = await packagesForCategory(ctx, cat.slug);
 const quotable = canRequestQuote(cat.status);
 const ld = [
   serviceLd(ctx, cat),
@@ -120,7 +129,27 @@ const ld = [
     </div>
   </section>
 
-  <section class="bg-canvas py-14 md:py-20" aria-label="Benefits and deliverables">
+  {packages.length > 0 ? (
+    <section class="bg-canvas py-14 md:py-20" aria-labelledby="packages-title">
+      <div class="container-content">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <h2 id="packages-title" class="text-3xl font-bold tracking-display">
+            Packages
+          </h2>
+          <a href="/pricing" class="text-sm font-semibold text-brand-600 underline underline-offset-2">
+            Compare all pricing
+          </a>
+        </div>
+        <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {packages.map((p) => (
+            <PackageCard pkg={p} />
+          ))}
+        </div>
+      </div>
+    </section>
+  ) : null}
+
+  <section class="bg-surface py-14 md:py-20" aria-label="Benefits and deliverables">
     <div class="container-content grid gap-12 lg:grid-cols-2">
       {cat.benefits.length > 0 ? (
         <div>

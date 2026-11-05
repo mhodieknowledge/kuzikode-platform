@@ -31,7 +31,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P2.13 Email abstraction.** `EmailProvider`, Resend adapter (idempotency header), log adapter, dev mailbox viewer (dev only), base branded template (HTML + text). AC: integration test via outbox. Resend adapter unit-tested with mocked fetch.
 - [x] **P2.14 Files/R2.** Upload pipeline (size, magic bytes, allow-list, random keys), authorised download route, signed short-lived URLs, image metadata. AC: spoofed-type and SVG uploads rejected. Unauthorised download → 404.
 - [x] **P2.15 UI foundation.** tokens.css, fonts, Tailwind theme, all `ui/` primitives from docs/05 §5, Public/Admin/Portal layouts, toast system, confirm dialog, DataTable, FilterBar, Pagination, Empty/Loading/Error states, logo + favicons. AC: a `/dev/ui` kitchen-sink page (dev only) renders every component. axe clean. Screenshots reviewed.
-- [ ] **P2.16 CI.** `ci.yml` running verify + e2e. AC: green run on GitHub (or documented blocker if Actions unavailable).
+- [~] **P2.16 CI.** `ci.yml` running verify + e2e. AC: green run on GitHub (or documented blocker if Actions unavailable).
 - [ ] **P2.17 Two-factor authentication** (TOTP + backup codes, mandatory for super admin/finance). AC: docs/12 §D + docs/07 §5b tests.
 
 ## Phase 3 — Public website

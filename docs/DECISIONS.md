@@ -22,5 +22,6 @@ One line per decision (newest at the bottom). Format:
 - 2026-11-05 · package-sales · packages lead to the wizard/quotation, no direct checkout · scope must be confirmed before work; invoices are paid online
 - 2026-11-05 · payments-packaging · gateway code in reusable workspace package `packages/payments` (@kuzikode/payments), extractable to its own repo via git subtree · reuse later without multi-repo overhead now · separate repo from day one
 - 2026-11-05 · checkout · custom Kuzikode checkout page for all methods; gateway pages are never the checkout UI. Card entry is a short hand-off to the gateway's secure card form (or saved-card tokens when approved) · owner requirement + PCI DSS (never handle raw card data) · building our own card form
+- 2026-11-05 · cards · Paynow-only cards: saved-card tokens pay fully on our checkout; a new card is entered once in Paynow's secure popup over our checkout (tokenize=true), never our own card inputs · owner wants Paynow only + no gateway checkout UI; Paynow has no raw-card API or embeddable fields and blocks iframes; PCI DSS · own card form (forbidden), other processors (owner declined), full redirect
 
 ## Agent decisions

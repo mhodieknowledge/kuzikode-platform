@@ -120,16 +120,16 @@ flowchart TD
 
 - It never asks you questions. It decides and records each decision in `docs/DECISIONS.md`.
 - Before a session ends it writes a precise "Next step" so the next session resumes.
-- It stops only when all 97 tasks are done and `docs/FINAL-REPORT.md` is written.
+- It stops only when all 98 tasks are done and `docs/FINAL-REPORT.md` is written.
 
-### Roadmap: 97 tasks in 8 phases
+### Roadmap: 98 tasks in 8 phases
 
 ```mermaid
 xychart-beta
     title "Tasks per phase"
     x-axis ["1 Plan", "2 Foundation", "3 Website", "4 Admin", "5 Portal", "6 Payments+Email", "7 QA", "8 Production"]
     y-axis "Tasks" 0 --> 25
-    bar [6, 17, 19, 23, 8, 11, 6, 7]
+    bar [6, 17, 19, 23, 8, 12, 6, 7]
 ```
 
 ### Design tools

@@ -51,7 +51,7 @@ export interface ProviderCapabilities {
   flows: CheckoutFlow[];
   methods: { code: string; name: string; flow: CheckoutFlow; needs?: ('phone' | 'otp' | 'token')[] }[];
   currencies: string[];              // ISO-style codes as WE use them ('USD','ZWG'); the adapter maps to gateway codes
-  refunds: boolean; statusPolling: boolean; signedCallbacks: boolean; tokenization: boolean;
+  refunds: boolean; statusPolling: boolean; signedCallbacks: boolean; tokenization: boolean; hostedCardFields: boolean; // false for Paynow today
 }
 
 export interface ProviderConfig {     // built by the app from a provider ACCOUNT + Worker secrets
@@ -203,19 +203,33 @@ success/failure, and the receipt.
 4. **Trust footer:** "Payments are processed securely by our payment partner. Kuzikode never sees or stores your PIN or card number."
    Small gateway attribution if the gateway's terms require it.
 
-**Card rule (security and compliance, non-negotiable):**
-- **Never** collect, transmit, log or store raw card numbers, expiry dates or CVV on Kuzikode's page or servers. Doing so would require full
-  PCI DSS compliance.
-- Paynow's express checkout only accepts cards as a **token** from a previously tokenized payment (and tokenization needs Paynow's approval).
-  So for cards:
-  - **Default:** the card tile on our page says *"You'll enter your card details on our payment partner's secure card form, then come straight back here."*
-    That's a short hand-off using the redirect flow. `returnurl` brings the customer back to **our** checkout page, which shows the live status
-    and receipt. The gateway page is used only for card entry, never as the checkout itself.
-  - **When tokenization is approved** (`capabilities.tokenization`): offer "Save this card for future payments". Saved cards then pay fully on
-    our page (express with `token` + unique `merchanttrace`), shown as "Visa •••• 1234". Store only the token, expiry and masked number
-    (encrypted at rest with `DATA_ENCRYPTION_KEY`). This also enables auto-charging subscriptions later.
-  - If the gateway later offers an embeddable, PCI-compliant card field (iframe/SDK), add it as a new capability without changing this page's structure.
-- Methods that can't run on our page are never shown as if they could. The UI always says which step happens where.
+**Card payments with Paynow only (owner decision: Paynow is the only gateway; cards must stay; no gateway checkout page as the UI):**
+
+Facts that constrain the design (verified on developers.paynow.co.zw, Nov 2026, full doc list checked): Paynow's API does **not** accept raw
+card numbers (express checkout `vmc`/`zimswitch` only accepts a **token** from a previous tokenized payment), Paynow offers **no embeddable
+card fields**, and paynow.co.zw sends `X-Frame-Options: SAMEORIGIN` (it can't be shown in an iframe). Building our own card inputs is
+**forbidden**: card data would pass through our page and server, which puts Kuzikode in full PCI DSS scope, and Paynow would reject it anyway.
+So the design minimises Paynow's card screen to a **one-time, in-context step per card**:
+
+1. **Card tile on our checkout:** "Visa / Mastercard / Zimswitch". If the client has a **saved card**, show it first: "Visa •••• 1234 · expires 08/27 → Pay $X".
+2. **Saved card → 100% on our page:** express checkout with `method=vmc` (or `zimswitch`) + `token` + a unique `merchanttrace` (prevents
+   double debits on timeouts). The customer clicks Pay and our status panel shows Confirming → Paid. No Paynow screen at all.
+3. **New card → secure card window (once per card):** clicking "Pay with a new card" opens Paynow's card entry in a **centred popup window**
+   (`window.open`, 480×720, opened directly from the click so browsers don't block it) **on top of our checkout**. Our checkout stays visible behind
+   it with a "Complete card entry in the secure window…" state and live status polling. The initiate request sets `tokenize=true`. Paynow's
+   `returnurl` points to our small `/pay/card-return` page, which sends `postMessage` to our checkout (same origin) and closes itself. Our
+   checkout then shows the result and receipt. The card token (+ `tokenexpiry`, masked number from `paymentinstrument`) is saved, so **every later
+   payment with that card is step 2.** If popups are blocked or on small phones, fall back to a same-tab hand-off that returns to our checkout.
+   The text always says: *"For your security, card details are entered once in Paynow's secure window. Kuzikode never sees your card number."*
+4. **Saved-card management in the portal:** list saved cards (masked number + expiry), set default, remove (deletes the token).
+   Tokens are encrypted at rest (AES-GCM, `DATA_ENCRYPTION_KEY`), never logged, never sent to the browser. Tokens last up to 6 months
+   (capped by card expiry), so re-prompt when expired.
+5. **Subscriptions:** with a saved card and the client's explicit consent ("Charge my saved card automatically for this plan"), the billing cron charges the
+   token on the due date. Failed charge → invoice stays open, client is emailed a pay link. Consent and every charge are audited.
+6. **Before Paynow approves tokenization** (`capabilities.tokenization = false`): step 3 still works through the popup (without saving the card), so
+   cards are accepted from day one. Saved cards and auto-charge switch on automatically once the account option `tokenizationEnabled` is set.
+7. **Future:** if Paynow later offers embeddable card fields or a direct card API, add it as a new adapter capability (`hostedCardFields`).
+   The checkout page structure doesn't change.
 
 **Other requirements:** keyboard accessible, screen-reader announcements for status changes (`aria-live`), 44 px touch targets, works without
 JavaScript for the summary and bank-transfer details (methods need JS), Turnstile on the pay action for public token pages, rate limits
@@ -224,7 +238,7 @@ Gateway-independent: the page renders entirely from `payment-options` + attempt 
 Every gateway-specific detail (phone prompt text, InnBucks code, OTP) arrives as normalized fields from the adapter (`InitiateResult`).
 
 **Tests:** Playwright on the mock and Paynow-test adapters: EcoCash success/cancel/insufficient (test numbers), InnBucks code + QR displayed,
-O'mari OTP flow (mock), card hand-off returns to our page with the correct status, double-click starts one attempt, mobile 375 px screenshots,
+O'mari OTP flow (mock), new-card popup flow (mock card window → postMessage → status + receipt, popup-blocked fallback), saved-card payment fully on our page via token (mock), token never returned to the browser or logged (asserted), double-click starts one attempt, mobile 375 px screenshots,
 axe clean.
 
 ## 4. Paynow adapter (launch gateway). Facts verified on developers.paynow.co.zw, Nov 2026
@@ -246,7 +260,7 @@ adapter with `fetch` + WebCrypto** (Workers-compatible). Don't depend on the SDK
 | Statuses → normalized | `Paid`, `Awaiting Delivery`, `Delivered` → **succeeded** (all mean "paid"; funds may sit in suspense) · `Created`, `Sent` → pending · `Cancelled` → cancelled · `Failed` → failed · `Disputed` → disputed · `Refunded` → refunded · unknown → pending + alert (never paid) |
 | Test mode | New integrations start in test mode. Only the **merchant account that created the integration** can fake-pay. Set `authemail` to that merchant login email (`options.testAuthEmail`). Express test numbers: **0771111111** success (5 s), **0772222222** delayed success (30 s), **0773333333** user cancelled → failed (30 s), **0774444444** insufficient balance (immediate error). Card tokens `{11111111-…}` success / `{22222222-…}` pending / `{33333333-…}` cancelled / `{44444444-…}` insufficient. Go live via "Request to be Set Live" after ≥ 1 successful test |
 | Refunds | No refund API documented → `capabilities.refunds = false` |
-| Tokenization | `tokenize=true` needs Paynow approval → `capabilities.tokenization = false` until approved (future: auto-charging subscriptions) |
+| Tokenization | `tokenize=true` needs Paynow approval (email Paynow support). Until approved: `capabilities.tokenization = false` (cards still work via the popup, see §3b). When approved: saved cards + auto-charge |
 
 Method list for the launch account: EcoCash, OneMoney, InnBucks (express), plus "Pay on Paynow page" (redirect: cards, Zimswitch, others).
 Add O'mari express (OTP step) behind the `omari` method flag. Build it, and enable it when the merchant account supports it.

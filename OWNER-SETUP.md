@@ -124,5 +124,5 @@ Figma ✓, Canva ✓, Cloudflare Developer Platform ✓, all connected on claude
 
 ## Files in the pack
 `CLAUDE.md` (agent rules) · `KICKOFF_PROMPT.md` · `OWNER-SETUP.md` (this file) · `KANSO-NOTE.md` (snapshot) ·
-`docs/01–13` (requirements, tech, architecture, database, design, payments, security, testing, deployment, roadmap with 97 tasks,
+`docs/01–13` (requirements, tech, architecture, database, design, payments, security, testing, deployment, roadmap with 98 tasks,
 design tools, commercial features, imagery) · `docs/PROGRESS.md`, `DECISIONS.md`, `BLOCKERS.md` · `.claude/skills/pen-design/`.

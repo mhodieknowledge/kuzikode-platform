@@ -45,4 +45,9 @@ Things only the owner can do. The agent keeps building around them and records e
   `wrangler` (Workers, Queues, secrets, migrations, domains) can't use the connector. You **don't** need to create any Workers, databases or
   buckets yourself: the agent creates them all (names prefixed `kuzikode-`) and leaves your existing `zimindex` resources alone.
 
+- [ ] **Paynow card tokenization:** email Paynow support and ask them to **enable tokenization (`tokenize`) for your integration** so
+  customers' cards can be saved and charged on Kuzikode's own checkout. While you're at it, ask: *"Do you offer embeddable card fields or a
+  direct card API for merchants?"* (if yes, the agent can remove the one-time card window entirely). Until approved, cards still work through the
+  one-time secure window.
+
 ## Raised by the agent

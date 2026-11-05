@@ -3,7 +3,8 @@ import BaseHead from '../components/BaseHead.astro';
 import AnnouncementBar from '../components/public/AnnouncementBar.astro';
 import SiteFooter from '../components/public/SiteFooter.astro';
 import SiteHeader from '../components/public/SiteHeader.astro';
-import { currentAnnouncement, siteNavigation } from '../server/modules/cms';
+import JsonLd from '../components/JsonLd.astro';
+import { currentAnnouncement, organizationLd, siteNavigation, websiteLd } from '../server/modules/cms';
 
 interface Props {
   title: string;
@@ -11,16 +12,42 @@ interface Props {
   canonicalPath?: string;
   noindex?: boolean;
   headerTone?: 'light' | 'dark';
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+  /** Page-specific schema.org objects; Organization is always included, WebSite on the home page. */
+  structuredData?: Record<string, unknown>[];
 }
-const { title, description, canonicalPath = Astro.url.pathname, noindex = false, headerTone = 'light' } = Astro.props;
+const {
+  title,
+  description,
+  canonicalPath = Astro.url.pathname,
+  noindex = false,
+  headerTone = 'light',
+  ogImage,
+  ogType,
+  structuredData = [],
+} = Astro.props;
 const { ctx } = Astro.locals;
-const [nav, announcement] = await Promise.all([siteNavigation(ctx), currentAnnouncement(ctx)]);
+const [nav, announcement, org] = await Promise.all([
+  siteNavigation(ctx),
+  currentAnnouncement(ctx),
+  organizationLd(ctx),
+]);
+const ld = [org, ...(Astro.url.pathname === '/' ? [websiteLd(ctx)] : []), ...structuredData];
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
-    <BaseHead title={title} description={description} canonicalPath={canonicalPath} noindex={noindex} />
+    <BaseHead
+      title={title}
+      description={description}
+      canonicalPath={noindex ? undefined : canonicalPath}
+      noindex={noindex}
+      ogImage={ogImage}
+      ogType={ogType}
+    />
+    {noindex ? null : <JsonLd data={ld} />}
     <slot name="head" />
   </head>
   <body class="flex min-h-screen flex-col bg-surface">

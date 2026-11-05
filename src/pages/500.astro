@@ -1,0 +1,31 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Logo from '../components/Logo.astro';
+/** Kept independent of the database: it must render even when D1 is unavailable. */
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title="Something went wrong · Kuzikode Technologies" noindex />
+  </head>
+  <body class="min-h-screen bg-canvas">
+    <header class="border-b border-line bg-surface">
+      <div class="container-content flex h-16 items-center">
+        <Logo />
+      </div>
+    </header>
+    <main id="main" class="container-content max-w-2xl py-24">
+      <p class="font-mono text-sm text-danger-600">500</p>
+      <h1 class="mt-3 text-4xl font-bold tracking-display">Something went wrong on our side.</h1>
+      <p class="mt-4 text-lg text-ink-600">
+        Please try again in a moment. If it keeps happening, email us or use the contact page.
+      </p>
+      <p class="mt-8">
+        <a href="/" class="inline-flex h-11 items-center rounded-sm bg-brand-600 px-5 text-sm font-semibold text-white">
+          Back to the home page
+        </a>
+      </p>
+    </main>
+  </body>
+</html>

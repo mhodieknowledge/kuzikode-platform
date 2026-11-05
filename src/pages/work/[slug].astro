@@ -1,11 +1,18 @@
 ---
 import { ExternalLink } from 'lucide-react';
 import PublicLayout from '../../layouts/PublicLayout.astro';
-import { getPortfolioItem } from '../../server/modules/cms';
+import { breadcrumbLd, caseStudyLd, getPortfolioItem } from '../../server/modules/cms';
 
 const { ctx } = Astro.locals;
 const item = await getPortfolioItem(ctx, Astro.params.slug ?? '');
 if (!item) return new Response(null, { status: 404 });
+const ld = [
+  caseStudyLd(ctx, item),
+  breadcrumbLd(ctx, [
+    { name: 'Our Work', path: '/work' },
+    { name: item.name, path: `/work/${item.slug}` },
+  ]),
+];
 const completed = item.completionDate
   ? new Date(`${item.completionDate}T00:00:00Z`).toLocaleDateString('en-GB', {
       month: 'long',
@@ -16,6 +23,8 @@ const completed = item.completionDate
 ---
 
 <PublicLayout
+  structuredData={ld}
+  ogType="article"
   title={`${item.seoTitle ?? item.name} · Kuzikode Technologies`}
   description={item.seoDescription ?? item.summary}
 >

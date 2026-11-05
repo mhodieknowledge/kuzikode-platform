@@ -1,0 +1,11 @@
+---
+/** Structured data block. `<` is escaped so content can never close the script element. */
+import { jsonLdString } from '../server/lib/json-ld';
+
+interface Props {
+  data: Record<string, unknown> | Record<string, unknown>[];
+}
+const json = jsonLdString(Astro.props.data);
+---
+
+<script type="application/ld+json" is:inline set:html={json} />

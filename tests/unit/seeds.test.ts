@@ -66,3 +66,14 @@ describe('base seed', () => {
       for (const s of page.sections) expect(String(s.content['title'] ?? '')).not.toContain('!');
   });
 });
+
+describe('robots', () => {
+  it('disallows everything outside production and private paths in production', async () => {
+    const { renderRobots } = await import('../../src/server/modules/cms/sitemap');
+    const prod = renderRobots({ config: { appEnv: 'production', siteUrl: new URL('https://kuzikode.com') } } as never);
+    for (const p of ['/admin', '/portal', '/api', '/q/', '/i/']) expect(prod).toContain(`Disallow: ${p}`);
+    expect(prod).toContain('Sitemap: https://kuzikode.com/sitemap.xml');
+    const staging = renderRobots({ config: { appEnv: 'staging', siteUrl: new URL('https://s.example') } } as never);
+    expect(staging).toContain('Disallow: /\n');
+  });
+});

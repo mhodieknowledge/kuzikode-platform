@@ -19,7 +19,11 @@ const cta = home?.sections.find((s) => s.type === 'cta') as Section<'cta'> | und
 let statementsRendered = false;
 ---
 
-<PublicLayout title={page.seoTitle ?? 'About Kuzikode Technologies'} description={page.seoDescription ?? undefined}>
+<PublicLayout
+  ogImage="/brand/og/about.png"
+  title={page.seoTitle ?? 'About Kuzikode Technologies'}
+  description={page.seoDescription ?? undefined}
+>
   {sections.map((s) => {
     switch (s.type) {
       case 'rich_text':

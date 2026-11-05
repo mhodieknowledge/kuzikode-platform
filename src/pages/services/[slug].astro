@@ -2,7 +2,7 @@
 import { ArrowRight, Check } from 'lucide-react';
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import Icon from '../../components/public/Icon.astro';
-import { getCategory, getSettings, settingBool } from '../../server/modules/cms';
+import { breadcrumbLd, getCategory, getSettings, serviceLd, settingBool } from '../../server/modules/cms';
 import { canRequestQuote, pricingLabel, quotationHref } from '../../shared/service-display';
 
 const { ctx } = Astro.locals;
@@ -11,9 +11,18 @@ if (!cat) return new Response(null, { status: 404, statusText: 'Not found' });
 const settings = await getSettings(ctx);
 const showPrices = settingBool(settings, 'pricing.show_prices');
 const quotable = canRequestQuote(cat.status);
+const ld = [
+  serviceLd(ctx, cat),
+  breadcrumbLd(ctx, [
+    { name: 'Services', path: '/services' },
+    { name: cat.name, path: `/services/${cat.slug}` },
+  ]),
+];
 ---
 
 <PublicLayout
+  structuredData={ld}
+  ogImage={`/brand/og/services-${cat.slug}.png`}
   title={`${cat.seoTitle ?? cat.name} · Kuzikode Technologies`}
   description={cat.seoDescription ?? cat.summary}
 >

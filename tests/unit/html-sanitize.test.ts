@@ -61,3 +61,10 @@ describe('sanitizeHtml', () => {
     expect(htmlToText('<h2>Title</h2><p>One &amp; two</p><script>x</script>')).toBe('Title One & two');
   });
 });
+
+describe('jsonLdString', () => {
+  it('cannot be used to close the script element', async () => {
+    const { jsonLdString } = await import('../../src/server/lib/json-ld');
+    expect(jsonLdString({ name: '</script><script>alert(1)</script>' })).not.toContain('</script>');
+  });
+});

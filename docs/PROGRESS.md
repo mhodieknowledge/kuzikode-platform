@@ -6,11 +6,19 @@ The **Next step** line must be specific enough that a fresh session can continue
 ## Current status
 - Phase: 1 — inspection & planning
 - Phase: 2 complete → starting Phase 3 (public website)
-- Last completed task: P2.17
-- **Next step:** P3.1 CMS read layer: `src/server/modules/cms/{repository,service,index}.ts` with published-content reads for pages/sections (website_pages, website_sections.published_content), service_categories/services, portfolio (published only), products (published), announcements (active window), settings (application_settings, per-isolate 60 s cache) and a content_version-keyed cache (KV `CACHE`, key `cms:v<version>:<name>`); test that bumping `content_version` invalidates. Then P3.2 public layout (header/mega-menu/mobile sheet/footer from settings). P1.6 imagery pipeline is still open (do it before P3.18).
+- Last completed task: P3.9 (P3.1–P3.9 done; P1.6 done)
+- **Next step:** P3.10 SEO: meta/canonical/OG/Twitter in `src/components/BaseHead.astro` (props: ogImage, type), JSON-LD helper (`src/components/JsonLd.astro`: Organization, WebSite, Service per division, BreadcrumbList, CreativeWork for case studies), `src/pages/sitemap.xml.ts` + `robots.txt.ts` (disallow /admin /portal /api /q/ /i/ /pay /dev), OG images (generated SVG→PNG at build in `public/brand/og/`), 404/500 pages (`src/pages/404.astro`, `500.astro`), `tests/e2e/public.spec.ts` SEO assertions. Then P3.11 edge cache, P3.12 packages/pricing.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh (non-exempt calls this month: ~3/15) · CI status: green (GitHub Actions run #1, verify + e2e, ~3 min)
 
 ---
+
+## 2026-11-05 23:50 UTC — P1.6, P3.1–P3.9 public site
+- P1.6 image pipeline (`npm run img:gen|img:process`, manifest, ResponsiveImage); home-hero processed. Workers AI daily neurons ran out
+  after 5 images; remaining shots in P3.18 (fewer steps, or OPENAI_API_KEY).
+- P3.1 CMS read layer (KV cache by content_version, sanitizer). P3.2 header/mega-menu/mobile dialog/footer. P3.3 home. P3.4 about.
+  P3.5 services index + division pages. P3.6 our work + `/media/:id`. P3.7 products + interest form. P3.8 contact + public enquiry API
+  (`/api/v1/public/enquiries`). P3.9 legal pages (5).
+- Tests: unit ~180 / integration 77 / e2e 23 — all green; screenshots reviewed at 375/1440 for home, about, services, contact.
 
 ## 2026-11-05 22:40 UTC — P2.14–P2.17 files, UI kit, CI, 2FA
 - P2.14: `lib/uploads.ts` (magic bytes incl. OOXML via ZIP central directory, SVG/HTML refused, per-purpose size caps, image dims),

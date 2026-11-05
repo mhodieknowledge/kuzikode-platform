@@ -35,6 +35,11 @@ conflict and your resolution in `docs/DECISIONS.md`.
 
 ## 2. The work loop (repeat until the roadmap is done)
 
+0. **Overlap guard (scheduled runs):** sessions are started automatically every hour. Before anything else, run
+   `git fetch origin main` and check `git log -1 --format='%ct %s' origin/main`. If the last commit is less than **40 minutes** old
+   and is not one of the owner's own commits, another session is probably still working: **stop immediately** and do nothing (no
+   commits, no messages). Also stop immediately if your first actions hit a usage-limit error. The next hourly run will continue.
+   While working, commit and push at least every 30 minutes (a PROGRESS.md "heartbeat" update is fine) so the guard stays reliable.
 1. **Sync:** `git fetch origin main && git checkout main && git pull --rebase origin main`.
 2. **Orient:** read `docs/PROGRESS.md` and find the first unchecked task in `docs/10-ROADMAP.md`
    whose dependencies are done. If a task is marked `[~]` (in progress), resume it first.

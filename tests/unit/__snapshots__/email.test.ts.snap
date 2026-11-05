@@ -1,5 +1,24 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`templates > application_acknowledgement renders HTML and text with the branded layout 1`] = `
+"<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>We received your application (APP-2026-0001)</title></head>
+<body style="margin:0;padding:0;background:#F7F8FA;font-family:Inter,'Segoe UI',Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">Thank you for applying: Junior Web Developer.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F7F8FA"><tr><td align="center" style="padding:24px 12px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #E4E7EE;border-radius:10px">
+<tr><td style="padding:24px 32px;border-bottom:1px solid #E4E7EE"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#0A0F1C"><span style="color:#2747E8">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:28px 32px 12px">
+<h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#0A0F1C;font-weight:700">Thank you for applying</h1>
+<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#1C2333">Hi Ann,</p>
+<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#1C2333">We have received your application for Junior Web Developer. We read every application and will contact you if we would like to take it further.</p>
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 20px;border-collapse:collapse"><tr><td style="padding:8px 0;border-bottom:1px solid #E4E7EE;font-size:14px;color:#475066">Your reference</td><td align="right" style="padding:8px 0;border-bottom:1px solid #E4E7EE;font-size:14px;color:#0A0F1C;font-weight:600">APP-2026-0001</td></tr><tr><td style="padding:8px 0;border-bottom:1px solid #E4E7EE;font-size:14px;color:#475066">Position</td><td align="right" style="padding:8px 0;border-bottom:1px solid #E4E7EE;font-size:14px;color:#0A0F1C;font-weight:600">Junior Web Developer</td></tr></table>
+<p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#475066">We keep applications for 12 months after the position closes and then delete your CV. To withdraw your application or ask us to delete your data sooner, reply to this email.</p>
+</td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #E4E7EE;font-size:12px;line-height:1.5;color:#475066">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#475066">kuzikode.example</a></td></tr>
+</table></td></tr></table></body></html>"
+`;
+
 exports[`templates > client_invitation renders HTML and text with the branded layout 1`] = `
 "<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>Your Kuzikode client portal account</title></head>

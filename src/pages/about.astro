@@ -80,5 +80,18 @@ let statementsRendered = false;
       </div>
     </section>
   ) : null}
+  <section class="bg-surface py-12" aria-labelledby="join-title">
+    <div class="container-content flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div>
+        <h2 id="join-title" class="text-2xl font-bold tracking-display">
+          Work with us
+        </h2>
+        <p class="mt-1 text-ink-600">See open roles and how we hire.</p>
+      </div>
+      <a href="/careers" class="text-sm font-semibold text-brand-600 underline underline-offset-2">
+        Careers at Kuzikode
+      </a>
+    </div>
+  </section>
   {cta ? <CtaBand content={cta.content} /> : null}
 </PublicLayout>

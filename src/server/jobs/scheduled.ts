@@ -1,6 +1,7 @@
 import { createContext, type RequestContext } from '../context';
 import { publishDuePosts } from '../modules/cms/insights';
 import { pruneUnconfirmed } from '../modules/newsletter/service';
+import { applyApplicationRetention, autoClosePostings } from '../modules/careers/service';
 import type { QueueMessageBody } from './outbox';
 
 export const CRON_FREQUENT = '*/5 * * * *';
@@ -70,10 +71,12 @@ export const SCHEDULE: Record<string, [name: string, task: ScheduledTask][]> = {
   [CRON_FREQUENT]: [
     ['outbox-sweep', (ctx) => sweepOutbox(ctx)],
     ['publish-due-posts', (ctx) => publishDuePosts(ctx)],
+    ['auto-close-postings', (ctx) => autoClosePostings(ctx)],
   ],
   [CRON_NIGHTLY]: [
     ['prune-operational-data', (ctx) => pruneOperationalData(ctx)],
     ['prune-unconfirmed-newsletter', (ctx) => pruneUnconfirmed(ctx)],
+    ['application-retention', (ctx) => applyApplicationRetention(ctx)],
   ],
 };
 

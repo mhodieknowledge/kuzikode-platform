@@ -183,6 +183,33 @@ const defs = {
         ],
       }),
   },
+  application_acknowledgement: {
+    schema: z.object({ name: z.string(), reference: z.string(), position: z.string() }),
+    render: (b: Brand, d: { name: string; reference: string; position: string }) =>
+      renderEmail(b, {
+        subject: `We received your application (${d.reference})`,
+        preheader: `Thank you for applying: ${d.position}.`,
+        heading: 'Thank you for applying',
+        blocks: [
+          { kind: 'p', text: `Hi ${d.name},` },
+          {
+            kind: 'p',
+            text: `We have received your application for ${d.position}. We read every application and will contact you if we would like to take it further.`,
+          },
+          {
+            kind: 'kv',
+            rows: [
+              ['Your reference', d.reference],
+              ['Position', d.position],
+            ],
+          },
+          {
+            kind: 'small',
+            text: 'We keep applications for 12 months after the position closes and then delete your CV. To withdraw your application or ask us to delete your data sooner, reply to this email.',
+          },
+        ],
+      }),
+  },
   newsletter_confirmation: {
     schema: z.object({ link: url }),
     render: (b: Brand, d: { link: string }) =>

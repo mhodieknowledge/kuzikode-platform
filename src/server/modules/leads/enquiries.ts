@@ -9,9 +9,8 @@ import { hashIp, type Bytes } from '../../lib/crypto';
 import { businessYear } from '../../lib/dates';
 import { validationError } from '../../lib/errors';
 import { newId } from '../../lib/ids';
-import { enforce } from '../../lib/rate-limit';
 import { numberSqlExpr, renderNumber, sequenceKey, sequenceStatements } from '../../lib/sequences';
-import { verifyTurnstile } from '../../lib/turnstile';
+import { guardPublicSubmission } from '../../lib/public-forms';
 import { dispatch, enqueue } from '../../jobs/outbox';
 import { getPricingCatalogue, getServiceCatalogue, getSettings, settingText } from '../cms';
 import { storeUpload } from '../files';
@@ -30,20 +29,6 @@ const KIND_LABEL = {
   product_interest: 'Product interest',
   consultation: 'Consultation request',
 } as const;
-
-/** Honeypot, per-IP rate limit and Turnstile, shared by every public form. Returns false when the honeypot was filled. */
-async function guardPublicSubmission(ctx: RequestContext, honeypot: string | undefined, token: string | undefined) {
-  if (honeypot && honeypot.trim() !== '') {
-    // Honeypot filled: answer like a success so bots learn nothing, store nothing.
-    ctx.logger.info('enquiry honeypot triggered');
-    return false;
-  }
-  await enforce(ctx, { key: `enquiry:ip:${ctx.ip}`, limit: 5, windowSeconds: 3600 });
-  if (!(await verifyTurnstile(ctx, token))) {
-    throw validationError({ turnstile: ['Complete the security check and send again.'] });
-  }
-  return true;
-}
 
 interface EnquiryRecord {
   id: string;
@@ -187,7 +172,8 @@ async function honeypotReference(ctx: RequestContext): Promise<EnquiryResult> {
 
 /** Validated public submission → enquiry + notifications + emails, atomically. Returns the reference shown to the sender. */
 export async function submitEnquiry(ctx: RequestContext, input: Input): Promise<EnquiryResult> {
-  if (!(await guardPublicSubmission(ctx, input.website, input.turnstileToken))) return honeypotReference(ctx);
+  if (!(await guardPublicSubmission(ctx, { honeypot: input.website, token: input.turnstileToken, bucket: 'enquiry' })))
+    return honeypotReference(ctx);
 
   const catalogue = await getServiceCatalogue(ctx);
   const division = catalogue.find((c) => c.slug === input.category);
@@ -245,7 +231,8 @@ export async function submitProjectRequest(
   input: ProjectInput,
   attachment?: { bytes: Bytes; filename: string },
 ): Promise<EnquiryResult> {
-  if (!(await guardPublicSubmission(ctx, input.website, input.turnstileToken))) return honeypotReference(ctx);
+  if (!(await guardPublicSubmission(ctx, { honeypot: input.website, token: input.turnstileToken, bucket: 'enquiry' })))
+    return honeypotReference(ctx);
 
   const division = (await getServiceCatalogue(ctx)).find((c) => c.slug === input.category);
   if (!division || division.status !== 'active') throw validationError({ category: ['Choose what you need.'] });

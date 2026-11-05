@@ -157,3 +157,10 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Admin subscriber list + CSV export (with unsubscribe URLs via `unsubscribeUrl`) belongs to the Phase 4 CMS/admin tasks.
 - Tests: unit (whatsappHref), integration `newsletter.test.ts` (5), e2e `engagement.spec.ts` (4). Full e2e suite: 42 passed.
 - Next step: P3.18 Site imagery (docs/13 §4 shot list; Workers AI daily neuron limit was hit earlier, so check the limit has reset, else use the OPENAI_API_KEY fallback noted in DECISIONS), then P3.19 Careers (public).
+
+## 2026-11-05 · P3.19 Careers (public) ✅
+- Module `server/modules/careers` (listOpenPostings, getPostingView, jobPostingLd, submitApplication, autoClosePostings on `*/5`, applyApplicationRetention nightly), schema `shared/schemas/careers.ts`, routes `POST /api/v1/public/careers/:slug/applications` and `/careers/applications` (general, setting-gated), email `application_acknowledgement` (+ resolver for the reference).
+- Pages `/careers` (filters: department/type/workplace, empty state, general-application link when enabled), `/careers/[slug]` (details, salary when shown, share links, JSON-LD only when open, closed state, 410), `/careers/apply`; `ApplicationForm` island; sitemap includes open roles; About links to Careers. Header nav already shows Careers only while a role is open.
+- Tests: integration `careers.test.ts` (7: PDF accepted, renamed EXE rejected, closed/future/past-deadline rejected, auto-close, JSON-LD, 410, retention anonymises + deletes CV), e2e `careers.spec.ts` (2). Full e2e suite: 44 passed.
+- Admin side (postings CRUD, pipeline/kanban, erase applicant) is in Phase 4.
+- Next step: P3.18 Site imagery (deferred until the Workers AI free neuron quota resets at 00:00 UTC: `npm run img:gen -- --id <slot> --size 1344x768 --variants 2`, prompts in design/images/prompts/, see docs/13 §4 shot list; keep steps at 20 to fit ~2× more images/day). If the quota is still exhausted, continue with Phase 4 (P4.1) and come back to imagery.

@@ -64,9 +64,10 @@ line (file names, what's half-done), commit, push. The next session resumes from
 
 **Hand-off (keeps the build going, with connectors):** after that final push, start **exactly one** successor session with
 `create_session` (from the claude-code-remote tools): `source_url` = `https://github.com/mhodieknowledge/kuzikode-platform`,
-`permission_mode` = `auto`, same environment (omit `environment_id`), `title` = `Kuzikode build: <YYYY-MM-DD HH:MM UTC>`, and `prompt` =
+`permission_mode` = `auto`, `environment_id` = `env_019Mujw8AsLq9GtkNZSgMFCH` (the owner's "kuzikode" environment with all keys; always this one), `title` = `Kuzikode build: <YYYY-MM-DD HH:MM UTC>`, and `prompt` =
 `"Hand-off from session <your session id>: skip the overlap guard (CLAUDE.md §2 step 0b)."` followed by the full text of
-`KICKOFF_PROMPT.md`. Then rename yourself `Kuzikode build: finished (handed off)` and stop. Never start more than one successor.
+`KICKOFF_PROMPT.md`. Then rename yourself `Kuzikode build: finished (handed off)` and stop. Never start more than one successor. If `create_session` fails (for example the session-chain depth limit), just stop after your final push: the
+hourly watchdog starts a fresh session within an hour.
 Don't hand off if the roadmap is complete. Instead write FINAL-REPORT, rename yourself `Kuzikode build: DONE` and stop.
 
 **Usage limit reached:** don't hand off (the new session would hit the same limit). Push what's green, rename yourself

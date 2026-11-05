@@ -5,11 +5,23 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phase: 1 — inspection & planning
-- Last completed task: P2.9 (P1.5 also done)
-- **Next step:** P2.10 RBAC (role-matrix unit tests, policies helpers, portal client-scope helper, last-super-admin protection).
+- Last completed task: P2.13
+- **Next step:** P2.14 files/R2 (upload pipeline: size, magic bytes, allow-list, random keys; authorised download route; signed short-lived URLs; image metadata).
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh (non-exempt calls this month: ~3/15) · CI status: —
 
 ---
+
+## 2026-11-05 22:10 UTC — P2.10–P2.13 RBAC, bootstrap, jobs, email
+- P2.10: `lib/policies.ts` (can/assertCan, portal scope → 404, clientScope SQL), users service (setUserRoles, disable/enable) with
+  last-active-super-admin guards in SQL, conditional audit (`auditWhen`), session revocation on role change.
+- P2.11: `npm run bootstrap:admin -- --env … --email … --name …` (+ `--reissue`), tested against an isolated local D1.
+- P2.12: outbox consumer (atomic claim → at-most-once, backoff 30s…2h, 5 attempts, DLQ + admin notification + audit), `*/5` sweep,
+  nightly retention pruning, minimal notifications service.
+- P2.13: EmailProvider, Resend adapter (verified API: POST /emails, Idempotency-Key, reply_to), log adapter, branded layout + 5 auth
+  templates (snapshots), `email.send` handler (email_logs per outbox row), dev mailbox `/admin/dev/mailbox` (404 outside development).
+  `EMAIL_PROVIDER` var: log (local) / resend (staging, production).
+- Tests: unit 128 / integration 58. verify green.
+- Next step: P2.14.
 
 ## 2026-11-05 21:40 UTC — P1.5 mockups + P2.9 auth core
 - Done: P1.5 mockups committed (design/mockups/README.md lists state; 7/12 pen.dev runs). P2.9: crypto (PBKDF2 100k, HMAC, AES-GCM,

@@ -5,11 +5,17 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phase: 1 — inspection & planning
-- Last completed task: P2.4 (P1.5 pen.dev runs in progress)
-- **Next step:** P2.5 money & pricing core (`src/server/lib/money.ts`, `pricing.ts`, unit tests per docs/08 §2). Then review P1.5 mockups.
+- Last completed task: P2.5 (P1.5 pen.dev runs in progress)
+- **Next step:** P2.6 initial migrations (all docs/04 tables split into logical files, audit trigger, indexes) + constraint tests. Then review P1.5 mockups.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh (non-exempt calls this month: ~3/15) · CI status: —
 
 ---
+
+## 2026-11-05 20:00 UTC — P2.5 money & pricing core
+- Done: shared money (minor units, half-even BigInt mul/div, allocation, parsing/formatting) + pricing engine (lines, discounts, doc discount
+  allocation, inclusive/exclusive tax). Server re-exports.
+- Tests: unit 80 passed (money/pricing suites per docs/08 §2) / integration 7. verify green.
+- Next step: P2.6.
 
 ## 2026-11-05 19:45 UTC — P2.4 config & core libs
 - Done: config.ts (Zod, fail-closed), errors.ts (AppError + mapping), logger.ts (redaction), ids.ts, context.ts, security-headers.ts,

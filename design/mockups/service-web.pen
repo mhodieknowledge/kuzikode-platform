@@ -1,4 +1,725 @@
 {
   "version": "2.21",
-  "children": []
+  "children": [
+    {
+      "type": "frame",
+      "id": "iAyBr",
+      "x": 0,
+      "y": 0,
+      "name": "Service - Web Development (Desktop 1440)",
+      "clip": true,
+      "width": 1440,
+      "fill": "$surface",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "EEEpE",
+          "name": "Nav",
+          "width": "fill_container",
+          "height": 72,
+          "fill": "$surface",
+          "stroke": "$line",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "padding": [
+            0,
+            120
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "d45cV",
+              "name": "Logo",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "N6JVQz",
+                  "name": "K Mark",
+                  "width": 28,
+                  "height": 28,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "K3QCw",
+                      "x": 3,
+                      "y": 1,
+                      "name": "Stem",
+                      "fill": "$ink-950",
+                      "width": 5,
+                      "height": 26
+                    },
+                    {
+                      "type": "path",
+                      "id": "PmYfQ",
+                      "x": 10,
+                      "y": 3,
+                      "name": "Upper Arm",
+                      "geometry": "M10 15l13-12",
+                      "viewBox": [
+                        10,
+                        3,
+                        13,
+                        12
+                      ],
+                      "width": 13,
+                      "height": 12,
+                      "stroke": "$brand-600",
+                      "strokeWidth": 5
+                    },
+                    {
+                      "type": "path",
+                      "id": "cYiWt",
+                      "x": 14,
+                      "y": 14,
+                      "name": "Lower Arm",
+                      "geometry": "M14 14l11 12",
+                      "viewBox": [
+                        14,
+                        14,
+                        11,
+                        12
+                      ],
+                      "width": 11,
+                      "height": 12,
+                      "stroke": "$ink-950",
+                      "strokeWidth": 5
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "S2peQF",
+                  "name": "Wordmark",
+                  "fill": "$ink-950",
+                  "content": "kuzikode",
+                  "fontFamily": "$font-display",
+                  "fontSize": 23,
+                  "fontWeight": "700",
+                  "letterSpacing": -0.6
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "v2lpb",
+              "name": "Nav Links",
+              "gap": 32,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "vnpyz",
+                  "name": "Link Services",
+                  "fill": "$ink-950",
+                  "content": "Services",
+                  "fontFamily": "$font-body",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "dvpgw",
+                  "name": "Link Pricing",
+                  "fill": "$ink-600",
+                  "content": "Pricing",
+                  "fontFamily": "$font-body",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "kr7pN",
+                  "name": "Link Portfolio",
+                  "fill": "$ink-600",
+                  "content": "Portfolio",
+                  "fontFamily": "$font-body",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "W9XKY",
+                  "name": "Link About",
+                  "fill": "$ink-600",
+                  "content": "About",
+                  "fontFamily": "$font-body",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "V593d",
+                  "name": "Link Careers",
+                  "fill": "$ink-600",
+                  "content": "Careers",
+                  "fontFamily": "$font-body",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "ALvrq",
+                  "name": "Link Contact",
+                  "fill": "$ink-600",
+                  "content": "Contact",
+                  "fontFamily": "$font-body",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "IknRv",
+              "name": "Nav CTA",
+              "fill": "$brand-600",
+              "cornerRadius": 6,
+              "padding": [
+                11,
+                18
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "HyDv8",
+                  "name": "Label",
+                  "fill": "#FFFFFF",
+                  "content": "Request a quotation",
+                  "fontFamily": "$font-body",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "D5LKW",
+          "name": "Header",
+          "width": "fill_container",
+          "fill": "$canvas",
+          "padding": [
+            72,
+            120,
+            88,
+            120
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "VeJLT",
+              "name": "Header Copy",
+              "width": 620,
+              "layout": "vertical",
+              "gap": 24,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "m10hSL",
+                  "name": "Breadcrumb",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "q9rln",
+                      "name": "Crumb Services",
+                      "fill": "$ink-600",
+                      "content": "Services",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "v4Irr",
+                      "name": "Crumb Sep",
+                      "fill": "$ink-400",
+                      "content": "/",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "VgMdy",
+                      "name": "Crumb Current",
+                      "fill": "$ink-950",
+                      "content": "Web Development",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "sE5ox",
+                  "name": "H1",
+                  "fill": "$ink-950",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Web Development & Digital Solutions",
+                  "lineHeight": 1.1,
+                  "fontFamily": "$font-display",
+                  "fontSize": 56,
+                  "fontWeight": "800",
+                  "letterSpacing": -1.4
+                },
+                {
+                  "type": "text",
+                  "id": "fou3e",
+                  "name": "Intro",
+                  "fill": "$ink-600",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Websites and web applications that load fast, rank well and are easy for your team to update.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-body",
+                  "fontSize": 20,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "H5x4e2",
+                  "name": "Header Buttons",
+                  "gap": 12,
+                  "padding": [
+                    8,
+                    0,
+                    0,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "MqVEs",
+                      "name": "Primary Button",
+                      "fill": "$brand-600",
+                      "cornerRadius": 6,
+                      "padding": [
+                        15,
+                        24
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "GaQM5",
+                          "name": "Label",
+                          "fill": "#FFFFFF",
+                          "content": "Request a quotation",
+                          "fontFamily": "$font-body",
+                          "fontSize": 15,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "LRPs8",
+                      "name": "Secondary Button",
+                      "fill": "$surface",
+                      "cornerRadius": 6,
+                      "stroke": "$line",
+                      "strokeWidth": 1,
+                      "padding": [
+                        15,
+                        24
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "zK7AG",
+                          "name": "Label",
+                          "fill": "$ink-950",
+                          "content": "See pricing",
+                          "fontFamily": "$font-body",
+                          "fontSize": 15,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "IXzCX",
+              "name": "Abstract Browser Visual",
+              "clip": true,
+              "width": 460,
+              "fill": "$surface",
+              "cornerRadius": 16,
+              "stroke": "$line",
+              "strokeWidth": 1,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#0A0F1C14",
+                "offset": {
+                  "x": 0,
+                  "y": 8
+                },
+                "blur": 24
+              },
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "v8XIlC",
+                  "name": "Browser Chrome",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "$canvas",
+                  "stroke": "$line",
+                  "strokeWidth": {
+                    "bottom": 1
+                  },
+                  "gap": 8,
+                  "padding": [
+                    0,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "ellipse",
+                      "id": "WIjjK",
+                      "name": "Dot 1",
+                      "fill": "#D5DAE5",
+                      "width": 10,
+                      "height": 10
+                    },
+                    {
+                      "type": "ellipse",
+                      "id": "aQj8D",
+                      "name": "Dot 2",
+                      "fill": "#D5DAE5",
+                      "width": 10,
+                      "height": 10
+                    },
+                    {
+                      "type": "ellipse",
+                      "id": "n03Rp",
+                      "name": "Dot 3",
+                      "fill": "#D5DAE5",
+                      "width": 10,
+                      "height": 10
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "h0yy0V",
+                      "name": "Address Bar",
+                      "fill": "$surface",
+                      "width": "fill_container",
+                      "height": 22,
+                      "stroke": "$line",
+                      "strokeWidth": 1
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "GS2YW",
+                  "name": "Browser Body",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": 28,
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 5,
+                      "id": "RaUDO",
+                      "name": "Eyebrow Bar",
+                      "fill": "$brand-600",
+                      "width": 64,
+                      "height": 10
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "bXNKz",
+                      "name": "Title Bar",
+                      "fill": "$ink-800",
+                      "width": "fill_container",
+                      "height": 22
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "N3f0HQ",
+                      "name": "Title Bar Short",
+                      "fill": "$ink-800",
+                      "width": 260,
+                      "height": 22
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 4,
+                      "id": "i7ZVwr",
+                      "name": "Text Line 1",
+                      "fill": "$line",
+                      "width": "fill_container",
+                      "height": 8
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 4,
+                      "id": "S37NVw",
+                      "name": "Text Line 2",
+                      "fill": "$line",
+                      "width": 300,
+                      "height": 8
+                    },
+                    {
+                      "type": "frame",
+                      "id": "SkR4r",
+                      "name": "Tiles",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "padding": [
+                        8,
+                        0,
+                        0,
+                        0
+                      ],
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 10,
+                          "id": "udUQw",
+                          "name": "Tile 1",
+                          "fill": "$canvas",
+                          "width": "fill_container",
+                          "height": 64,
+                          "stroke": "$line",
+                          "strokeWidth": 1
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 10,
+                          "id": "u7NWT",
+                          "name": "Tile 2",
+                          "fill": "$canvas",
+                          "width": "fill_container",
+                          "height": 64,
+                          "stroke": "$line",
+                          "strokeWidth": 1
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 10,
+                          "id": "N6Zxp",
+                          "name": "Tile 3",
+                          "fill": "$canvas",
+                          "width": "fill_container",
+                          "height": 64,
+                          "stroke": "$line",
+                          "strokeWidth": 1
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "I1tJT",
+                      "name": "Bar Chart",
+                      "width": "fill_container",
+                      "height": 96,
+                      "gap": 10,
+                      "padding": [
+                        8,
+                        0,
+                        0,
+                        0
+                      ],
+                      "alignItems": "end",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": [
+                            4,
+                            4,
+                            0,
+                            0
+                          ],
+                          "id": "mdESI",
+                          "name": "Bar 1",
+                          "fill": "$brand-50",
+                          "width": "fill_container",
+                          "height": 36
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": [
+                            4,
+                            4,
+                            0,
+                            0
+                          ],
+                          "id": "nUKCa",
+                          "name": "Bar 2",
+                          "fill": "$brand-50",
+                          "width": "fill_container",
+                          "height": 52
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": [
+                            4,
+                            4,
+                            0,
+                            0
+                          ],
+                          "id": "Y4DRUW",
+                          "name": "Bar 3",
+                          "fill": "$brand-50",
+                          "width": "fill_container",
+                          "height": 44
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": [
+                            4,
+                            4,
+                            0,
+                            0
+                          ],
+                          "id": "st5B0",
+                          "name": "Bar 4",
+                          "fill": "$brand-50",
+                          "width": "fill_container",
+                          "height": 68
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": [
+                            4,
+                            4,
+                            0,
+                            0
+                          ],
+                          "id": "gyBFl",
+                          "name": "Bar 5",
+                          "fill": "$brand-50",
+                          "width": "fill_container",
+                          "height": 58
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": [
+                            4,
+                            4,
+                            0,
+                            0
+                          ],
+                          "id": "PaYlU",
+                          "name": "Bar 6",
+                          "fill": "$accent-500",
+                          "width": "fill_container",
+                          "height": 84
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": [
+                            4,
+                            4,
+                            0,
+                            0
+                          ],
+                          "id": "YgpDJ",
+                          "name": "Bar 7",
+                          "fill": "$brand-600",
+                          "width": "fill_container",
+                          "height": 72
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "ink-950": {
+      "type": "color",
+      "value": "#0A0F1C"
+    },
+    "ink-800": {
+      "type": "color",
+      "value": "#1C2333"
+    },
+    "ink-600": {
+      "type": "color",
+      "value": "#475066"
+    },
+    "ink-400": {
+      "type": "color",
+      "value": "#8A93A6"
+    },
+    "line": {
+      "type": "color",
+      "value": "#E4E7EE"
+    },
+    "surface": {
+      "type": "color",
+      "value": "#FFFFFF"
+    },
+    "canvas": {
+      "type": "color",
+      "value": "#F7F8FA"
+    },
+    "brand-600": {
+      "type": "color",
+      "value": "#2747E8"
+    },
+    "brand-500": {
+      "type": "color",
+      "value": "#3355FF"
+    },
+    "brand-50": {
+      "type": "color",
+      "value": "#EEF1FF"
+    },
+    "accent-500": {
+      "type": "color",
+      "value": "#E8A33D"
+    },
+    "success-600": {
+      "type": "color",
+      "value": "#11845B"
+    },
+    "font-display": {
+      "type": "string",
+      "value": "Manrope"
+    },
+    "font-body": {
+      "type": "string",
+      "value": "Inter"
+    },
+    "font-mono": {
+      "type": "string",
+      "value": "JetBrains Mono"
+    }
+  },
+  "fileToken": "820053b5-0271-483b-b8d5-786efe5ee283"
 }

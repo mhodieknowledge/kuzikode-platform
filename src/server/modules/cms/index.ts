@@ -3,3 +3,4 @@ export { openRolesCount, siteNavigation, type NavLink, type SiteNavigation } fro
 export * from './seo';
 export { renderRobots, renderSitemap, sitemapEntries, SITEMAP_SOURCES, type SitemapEntry } from './sitemap';
 export * from './packages';
+export * from './industries';

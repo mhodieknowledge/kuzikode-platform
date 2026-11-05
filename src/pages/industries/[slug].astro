@@ -1,0 +1,131 @@
+---
+import { ArrowRight } from 'lucide-react';
+import PublicLayout from '../../layouts/PublicLayout.astro';
+import Icon from '../../components/public/Icon.astro';
+import PackageCard from '../../components/public/pricing/PackageCard.astro';
+import { breadcrumbLd, getIndustry } from '../../server/modules/cms';
+import { quotationHref } from '../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const industry = await getIndustry(ctx, Astro.params.slug ?? '');
+if (!industry) return new Response(null, { status: 404, statusText: 'Not found' });
+const ld = [
+  breadcrumbLd(ctx, [
+    { name: 'Industries', path: '/industries' },
+    { name: industry.name, path: `/industries/${industry.slug}` },
+  ]),
+];
+const packages = industry.packages.slice(0, 3);
+---
+
+<PublicLayout
+  structuredData={ld}
+  title={industry.seoTitle ?? `${industry.name} · Kuzikode Technologies`}
+  description={industry.seoDescription ?? industry.summary}
+>
+  <section class="bg-canvas py-14 md:py-20" aria-labelledby="industry-title">
+    <div class="container-content">
+      <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+        <ol class="flex gap-1.5">
+          <li>
+            <a href="/industries" class="hover:text-ink-950 hover:underline">
+              Industries
+            </a>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li aria-current="page" class="text-ink-950">
+            {industry.name}
+          </li>
+        </ol>
+      </nav>
+      <span class="mt-6 flex h-11 w-11 items-center justify-center rounded-sm bg-brand-50 text-brand-600">
+        <Icon name={industry.icon} size={22} />
+      </span>
+      <h1 id="industry-title" class="mt-5 max-w-3xl text-4xl font-bold tracking-display md:text-5xl">
+        Solutions for {industry.name}
+      </h1>
+      <p class="mt-4 max-w-2xl text-lg leading-8 text-ink-600">{industry.summary}</p>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+        <a
+          href="/start-a-project"
+          class="inline-flex h-12 items-center justify-center rounded-sm bg-brand-600 px-6 text-[15px] font-semibold text-white hover:bg-brand-500"
+        >
+          Start a project
+        </a>
+        <a
+          href="/contact"
+          class="inline-flex h-12 items-center justify-center rounded-sm border border-line bg-surface px-6 text-[15px] font-semibold text-ink-950 hover:border-ink-400"
+        >
+          Talk to us
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {industry.challenges.length > 0 ? (
+    <section class="bg-surface py-14 md:py-20" aria-labelledby="challenges-title">
+      <div class="container-content">
+        <h2 id="challenges-title" class="text-3xl font-bold tracking-display">
+          Challenges we solve
+        </h2>
+        <ul class="mt-8 grid gap-6 md:grid-cols-3">
+          {industry.challenges.map((c) => (
+            <li class="rounded-md border border-line p-6">
+              <h3 class="font-sans text-base font-semibold text-ink-950">{c.title}</h3>
+              <p class="mt-2 text-[15px] leading-6 text-ink-600">{c.body}</p>
+            </li>
+          ))}
+        </ul>
+        {industry.body ? <div class="prose-kz mt-10 max-w-3xl" set:html={industry.body} /> : null}
+      </div>
+    </section>
+  ) : null}
+
+  {industry.services.length > 0 ? (
+    <section class="bg-canvas py-14 md:py-20" aria-labelledby="services-title">
+      <div class="container-content">
+        <h2 id="services-title" class="text-3xl font-bold tracking-display">
+          Relevant services
+        </h2>
+        <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {industry.services.map((s) => (
+            <li class="flex flex-col rounded-md border border-line bg-surface p-6">
+              <p class="text-[13px] font-medium text-ink-600">{s.categoryName}</p>
+              <h3 class="mt-1 font-sans text-base font-semibold text-ink-950">{s.name}</h3>
+              <p class="mt-2 flex-1 text-[15px] leading-6 text-ink-600">{s.summary}</p>
+              <div class="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
+                <a href={`/services/${s.categorySlug}`} class="text-ink-950 underline underline-offset-2">
+                  About this service<span class="sr-only">: {s.name}</span>
+                </a>
+                <a href={quotationHref(s.categorySlug, s.slug)} class="inline-flex items-center gap-1.5 text-brand-600">
+                  Request a quotation <ArrowRight size={16} aria-hidden="true" />
+                  <span class="sr-only">for {s.name}</span>
+                </a>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  ) : null}
+
+  {packages.length > 0 ? (
+    <section class="bg-surface py-14 md:py-20" aria-labelledby="packages-title">
+      <div class="container-content">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <h2 id="packages-title" class="text-3xl font-bold tracking-display">
+            Packages to start from
+          </h2>
+          <a href="/pricing" class="text-sm font-semibold text-brand-600 underline underline-offset-2">
+            See all pricing
+          </a>
+        </div>
+        <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {packages.map((p) => (
+            <PackageCard pkg={p} />
+          ))}
+        </div>
+      </div>
+    </section>
+  ) : null}
+</PublicLayout>

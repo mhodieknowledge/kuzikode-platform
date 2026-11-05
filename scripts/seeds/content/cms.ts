@@ -315,6 +315,23 @@ export const PAGES: PageSeed[] = [
     ],
   },
   {
+    key: 'industries',
+    title: 'Industries',
+    seoTitle: 'Industries · Kuzikode Technologies',
+    seoDescription:
+      'Software, websites and systems for retail, financial services, education, healthcare, NGOs, hospitality, agriculture and logistics.',
+    sections: [
+      {
+        key: 'intro',
+        type: 'rich_text',
+        content: {
+          title: 'Solutions for your sector',
+          html: '<p>Every sector has its own way of working. These are the problems we design for, and the services that solve them.</p>',
+        },
+      },
+    ],
+  },
+  {
     key: 'contact',
     title: 'Contact',
     seoTitle: 'Contact Kuzikode Technologies',

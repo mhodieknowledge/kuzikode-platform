@@ -10,6 +10,7 @@ import { DIVISIONS } from './content/services.ts';
 import { LEGAL_PAGES } from './content/legal.ts';
 import { ADDONS, PACKAGES } from './content/packages.ts';
 import { FAQS } from './content/faq.ts';
+import { INDUSTRIES } from './content/industries.ts';
 
 export const sq = (v: string | number | null | undefined): string =>
   v === null || v === undefined ? 'NULL' : typeof v === 'number' ? String(v) : `'${v.replace(/'/g, "''")}'`;
@@ -144,6 +145,36 @@ export function buildBaseSeed(): string {
       }),
     ),
   );
+
+  out.push('', '-- Industries (docs/12 §C.3)');
+  INDUSTRIES.forEach((ind, i) => {
+    const indId = `ind_${ind.slug.replace(/-/g, '_')}`;
+    out.push(
+      ins('industries', {
+        id: indId,
+        slug: ind.slug,
+        name: ind.name,
+        summary: ind.summary,
+        challenges: JSON.stringify(ind.challenges),
+        body: ind.body,
+        icon: ind.icon,
+        status: 'published',
+        sort_order: (i + 1) * 10,
+        seo_title: `${ind.name} · Kuzikode Technologies`,
+        seo_description: ind.seoDescription,
+      }),
+    );
+    for (const ref of ind.services) {
+      if (!serviceIds.has(ref)) throw new Error(`industry ${ind.slug}: unknown service ${ref}`);
+      const [div, svc] = ref.split('/') as [string, string];
+      out.push(
+        ins('industry_services', {
+          industry_id: indId,
+          service_id: `svc_${div.replace(/-/g, '_')}__${svc.replace(/-/g, '_')}`,
+        }),
+      );
+    }
+  });
 
   out.push('', '-- FAQ');
   FAQS.forEach((f, i) =>

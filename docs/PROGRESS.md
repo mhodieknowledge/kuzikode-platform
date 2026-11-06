@@ -5,11 +5,13 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phase 1, 2 and 3 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 4 (administration) in progress.
-- Last completed task: **P4.14 Support inbox** (P4.1–P4.14 done).
-- **Next step:** P4.15 CMS editors — pages/sections draft → preview → publish, portfolio, products, announcements, legal pages, SEO fields,
-  media library (alt text required), publish bumps `content_version`. Read `server/modules/cms` (read layer from P3.1: published reads +
-  KV cache by content_version) and docs/04 CMS tables first; AC: preview never leaks drafts publicly (preview behind admin session,
-  `noindex`, no cache). Nav items `Pages` (`/admin/cms`) and media → `built: true` when done.
+- Last completed task: **P4.15 CMS editors** (P4.1–P4.15 done).
+- **Next step:** P4.16 Notifications — in-app list page (`/admin/notifications`: read/unread, mark all read; the bell from P4.1 links
+  there), per-user preferences already exist (P4.3 `/admin/account/notifications`?) — check `modules/notifications` and settings
+  first; email dispatch per preference for every type in `shared/notifications.ts` (a dispatcher that turns new `notifications` rows
+  into `email.send` jobs when the user's preference says email, idempotent per notification id), and one integration test per type
+  trigger (enquiry.new, quotation.viewed/accepted/rejected, invoice.issued, payment.received, payment.failed (Phase 6: test the
+  notifier function directly), invoice.overdue, milestone.updated, support.created/replied, client.registered, application.new).
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 
 ---
@@ -302,4 +304,17 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Tests: integration `support.test.ts` (3) · e2e invoices spec opens a request, adds a note and replies. settings e2e: account-menu
   click now retries until the island hydrates (was flaky under parallel load).
 - verify: unit 228 / integration 176 green; e2e green (invoices + settings re-run after the fixes; full run 56/58 before them).
+
+## 2026-11-06 10:15 UTC · P4.15 CMS editors ✅
+- Preview: `?preview=1` on any public page, honoured only for an admin session with `cms.manage` (page middleware sets `ctx.preview`);
+  `getPage`/`listPortfolio` then read drafts and skip every cache; responses get `Cache-Control: private, no-store` and
+  `X-Robots-Tag: noindex`; a "Preview of unpublished changes" bar shows. Requests with a session cookie are never edge-cached anyway.
+- `cms/admin.ts` + `/api/v1/admin/cms/*`: pages list (unpublished-changes flag), section drafts validated by the section schemas
+  (rich text sanitised), hide/show and move (bump version), page title/SEO/share image (bump), publish (drafts → published, bump),
+  discard; media library (PNG/JPEG/WebP/AVIF, public, alt text required, edit, delete blocked while used); portfolio (draft →
+  publish/unpublish, unique slug, cover + gallery, delete only unpublished); products; announcements (window, link pairs).
+- UI: /admin/cms (pages incl. legal), /admin/cms/pages/[key] (generic section editor from `shared/cms-fields.ts`, publish bar with
+  preview/live links, details form), /admin/cms/portfolio(+[id]), /products, /announcements, /admin/media. Pages + Media nav on.
+- Tests: integration `cms-admin.test.ts` (4) · e2e `cms.spec.ts` (draft → staff preview with no-store/noindex → visitor never sees it,
+  even with ?preview=1 → publish → visible; restores the original hero). verify: unit 228 / integration 180; e2e 59/59 green.
 

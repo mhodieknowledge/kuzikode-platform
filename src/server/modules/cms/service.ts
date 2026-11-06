@@ -128,7 +128,18 @@ function parseSections(ctx: RequestContext, rows: repo.SectionRow[]): Section[] 
   return out;
 }
 
-export function getPage(ctx: RequestContext, key: string): Promise<PublishedPage | null> {
+export async function getPage(ctx: RequestContext, key: string): Promise<PublishedPage | null> {
+  if (ctx.preview) {
+    const page = await repo.anyPageByKey(ctx.db, key);
+    if (!page) return null;
+    return {
+      key: page.key,
+      title: page.title,
+      seoTitle: page.seo_title,
+      seoDescription: page.seo_description,
+      sections: parseSections(ctx, await repo.draftSections(ctx.db, key)),
+    };
+  }
   return cached(ctx, `page:${key}`, async () => {
     const page = await repo.pageByKey(ctx.db, key);
     if (!page) return null;
@@ -251,8 +262,8 @@ export interface PublicPortfolioItem {
 }
 
 export function listPortfolio(ctx: RequestContext): Promise<PublicPortfolioItem[]> {
-  return cached(ctx, 'portfolio', async () =>
-    (await repo.publishedPortfolio(ctx.db)).map((p) => ({
+  const load = async () =>
+    (await repo.publishedPortfolio(ctx.db, !!ctx.preview)).map((p) => ({
       slug: p.slug,
       name: p.name,
       clientName: p.show_client_name === 1 ? p.client_name : null,
@@ -271,8 +282,9 @@ export function listPortfolio(ctx: RequestContext): Promise<PublicPortfolioItem[
       featured: p.featured === 1,
       seoTitle: p.seo_title,
       seoDescription: p.seo_description,
-    })),
-  );
+    }));
+  // Previews include drafts and never touch the cache.
+  return ctx.preview ? load() : cached(ctx, 'portfolio', load);
 }
 
 export async function getPortfolioItem(ctx: RequestContext, slug: string): Promise<PublicPortfolioItem | null> {

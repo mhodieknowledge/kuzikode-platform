@@ -1,0 +1,25 @@
+---
+/** Sub-navigation for the website CMS area. */
+interface Props {
+  current: 'pages' | 'portfolio' | 'products' | 'announcements';
+}
+const tabs = [
+  ['pages', 'Pages', '/admin/cms'],
+  ['portfolio', 'Our work', '/admin/cms/portfolio'],
+  ['products', 'Products', '/admin/cms/products'],
+  ['announcements', 'Announcements', '/admin/cms/announcements'],
+] as const;
+const { current } = Astro.props;
+---
+
+<nav aria-label="Website content" class="mt-4 flex gap-6 overflow-x-auto border-b border-line">
+  {tabs.map(([k, l, href]) => (
+    <a
+      href={href}
+      aria-current={k === current ? 'page' : undefined}
+      class={`inline-flex h-10 shrink-0 items-center border-b-2 px-1 text-sm font-semibold ${k === current ? 'border-brand-600 text-ink-950' : 'border-transparent text-ink-600 hover:text-ink-950'}`}
+    >
+      {l}
+    </a>
+  ))}
+</nav>

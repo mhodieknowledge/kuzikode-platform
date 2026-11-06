@@ -26,6 +26,11 @@ export interface RequestContext {
   actor: Actor;
   /** Resolved session (admin or portal), or null. Set by the auth middleware. */
   auth: AuthState | null;
+  /**
+   * CMS draft preview: set by the page middleware only for `?preview=1` requests from staff with `cms.manage`.
+   * Content reads then return drafts and skip every cache; the response is `no-store` and `noindex`.
+   */
+  preview?: boolean;
 }
 
 export interface ContextInit {

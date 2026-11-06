@@ -1,0 +1,23 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import CmsTabs from '../../../components/admin/CmsTabs.astro';
+import { ProductsManager } from '../../../components/admin/CmsAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { listProductsAdmin } from '../../../server/modules/cms/admin';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'cms.manage' });
+if (page instanceof Response) return page;
+const products = (await listProductsAdmin(ctx)) as never[];
+---
+
+<AdminLayout title="Products" page={page}>
+  <h1 class="text-2xl font-bold tracking-display">Website</h1>
+  <CmsTabs current="products" />
+  <p class="mt-4 mb-4 max-w-3xl text-sm text-ink-600">
+    Products are described honestly: nothing is sold or subscribed to from these pages.
+  </p>
+  <div class="max-w-3xl">
+    <ProductsManager client:load products={products} />
+  </div>
+</AdminLayout>

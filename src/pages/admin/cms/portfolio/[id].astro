@@ -1,0 +1,78 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { PortfolioForm } from '../../../../components/admin/CmsAdmin';
+import { loadAdminPage } from '../../../../server/lib/admin-page';
+import { AppError } from '../../../../server/lib/errors';
+import { getPortfolioAdmin, listMedia } from '../../../../server/modules/cms/admin';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'cms.manage' });
+if (page instanceof Response) return page;
+const id = Astro.params.id ?? '';
+const media = (await listMedia(ctx)).map((m) => ({ id: m.id, file_id: m.file_id, alt_text: m.alt_text }));
+let item: Record<string, unknown> | null = null;
+let gallery: string[] = [];
+if (id !== 'new') {
+  try {
+    const data = await getPortfolioAdmin(ctx, id);
+    item = data.item;
+    gallery = data.gallery;
+  } catch (err) {
+    if (err instanceof AppError && err.code === 'NOT_FOUND')
+      return new Response(null, { status: 404, statusText: 'Not found' });
+    throw err;
+  }
+}
+const str = (k: string) => (item?.[k] as string | null | undefined) ?? null;
+let technologies: string[] = [];
+try {
+  technologies = item ? (JSON.parse(String(item['technologies'] ?? '[]')) as string[]) : [];
+} catch {
+  technologies = [];
+}
+const initial = {
+  slug: str('slug') ?? '',
+  name: str('name') ?? '',
+  clientName: str('client_name'),
+  showClientName: item?.['show_client_name'] === 1,
+  category: str('category') ?? '',
+  summary: str('summary') ?? '',
+  description: str('description'),
+  challenge: str('challenge'),
+  solution: str('solution'),
+  technologies,
+  completionDate: str('completion_date'),
+  externalUrl: str('external_url'),
+  coverMediaId: str('cover_media_id'),
+  galleryMediaIds: gallery,
+  featured: item?.['featured'] === 1,
+  sortOrder: Number(item?.['sort_order'] ?? 0),
+  seoTitle: str('seo_title'),
+  seoDescription: str('seo_description'),
+};
+const title = item ? String(item['name']) : 'New case study';
+---
+
+<AdminLayout title={title} page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/cms/portfolio" class="hover:text-ink-950 hover:underline">
+      Our work
+    </a>{' '}
+    / <span class="text-ink-950">{title}</span>
+  </nav>
+  <h1 class="mt-2 mb-1 text-2xl font-bold tracking-display">{title}</h1>
+  {item ? (
+    <p class="mb-6 text-sm text-ink-600">
+      {item['status'] === 'published' ? 'Published' : 'Draft (not on the website)'}
+    </p>
+  ) : (
+    <p class="mb-6 text-sm text-ink-600">Saved as a draft first.</p>
+  )}
+  <div class="max-w-4xl">
+    {item ? (
+      <PortfolioForm client:load id={id} status={String(item['status'])} initial={initial} media={media} />
+    ) : (
+      <PortfolioForm client:load initial={initial} media={media} />
+    )}
+  </div>
+</AdminLayout>

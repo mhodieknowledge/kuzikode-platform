@@ -110,7 +110,7 @@ export const visibleServices = (db: D1Database) =>
      WHERE s.status <> 'inactive' AND c.status <> 'inactive' ORDER BY s.sort_order, s.name`,
   );
 
-export const publishedPortfolio = (db: D1Database) =>
+export const publishedPortfolio = (db: D1Database, includeDrafts = false) =>
   all<PortfolioRow>(
     db,
     `SELECT p.id, p.slug, p.name, p.client_name, p.show_client_name, p.category, p.summary, p.description, p.challenge, p.solution,
@@ -119,7 +119,8 @@ export const publishedPortfolio = (db: D1Database) =>
      FROM portfolio_projects p
      LEFT JOIN media_assets m ON m.id = p.cover_media_id
      LEFT JOIN files f ON f.id = m.file_id AND f.visibility = 'public'
-     WHERE p.status = 'published' ORDER BY p.featured DESC, p.sort_order, p.completion_date DESC LIMIT 200`,
+     WHERE ${includeDrafts ? "p.status IN ('draft','published')" : "p.status = 'published'"}
+     ORDER BY p.featured DESC, p.sort_order, p.completion_date DESC LIMIT 200`,
   );
 
 export const publishedProducts = (db: D1Database) =>
@@ -143,3 +144,19 @@ export const activeAnnouncements = (db: D1Database) =>
 
 export const allSettings = (db: D1Database) =>
   all<{ key: string; value: string }>(db, 'SELECT key, value FROM application_settings');
+
+/** Draft reads for the admin preview (never cached, never served without an admin session). */
+export const anyPageByKey = (db: D1Database, key: string) =>
+  first<PageRow>(
+    db,
+    'SELECT id, key, title, seo_title, seo_description, og_image_id, status FROM website_pages WHERE key = ?',
+    key,
+  );
+
+export const draftSections = (db: D1Database, pageKey: string) =>
+  all<SectionRow>(
+    db,
+    `SELECT s.key, s.type, s.position, s.draft_content AS published_content FROM website_sections s
+     JOIN website_pages p ON p.id = s.page_id WHERE p.key = ? AND s.visible = 1 ORDER BY s.position, s.key`,
+    pageKey,
+  );

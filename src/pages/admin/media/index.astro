@@ -1,0 +1,20 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { MediaLibrary } from '../../../components/admin/CmsAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { listMedia } from '../../../server/modules/cms/admin';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'media.manage' });
+if (page instanceof Response) return page;
+const media = await listMedia(ctx);
+---
+
+<AdminLayout title="Media library" page={page}>
+  <h1 class="text-2xl font-bold tracking-display">Media library</h1>
+  <p class="mt-1 mb-6 max-w-3xl text-sm text-ink-600">
+    Images for the website. Every image needs alt text. Images used on the website can't be deleted until they are
+    replaced.
+  </p>
+  <MediaLibrary client:load media={media} canManage={true} />
+</AdminLayout>

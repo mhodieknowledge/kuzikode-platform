@@ -7,3 +7,4 @@ export * from './industries';
 export * from './insights';
 export * from './content';
 export * from './search';
+export { cmsAdminRoutes } from './admin-routes';

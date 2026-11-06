@@ -71,6 +71,11 @@ const ld = [org, ...(Astro.url.pathname === '/' ? [websiteLd(ctx)] : []), ...str
     <a class="skip-link" href="#main">
       Skip to content
     </a>
+    {Astro.locals.ctx.preview ? (
+      <p role="status" class="sticky top-0 z-50 bg-warning-700 px-4 py-2 text-center text-sm font-semibold text-white">
+        Preview of unpublished changes. Visitors still see the published version.
+      </p>
+    ) : null}
     <AnnouncementBar announcement={announcement} />
     <SiteHeader nav={nav} tone={headerTone} />
     <main id="main" tabindex="-1" class="flex-1 focus:outline-none">

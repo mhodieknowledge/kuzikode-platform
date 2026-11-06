@@ -1,0 +1,45 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import CmsTabs from '../../../components/admin/CmsTabs.astro';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { listPages } from '../../../server/modules/cms/admin';
+import { pagePath } from '../../../shared/cms-fields';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'cms.manage' });
+if (page instanceof Response) return page;
+const pages = await listPages(ctx);
+const when = (iso: string | null) =>
+  iso
+    ? new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeZone: 'Africa/Harare' }).format(new Date(iso))
+    : 'never';
+---
+
+<AdminLayout title="Website pages" page={page}>
+  <h1 class="text-2xl font-bold tracking-display">Website</h1>
+  <CmsTabs current="pages" />
+  <p class="mt-4 max-w-3xl text-sm text-ink-600">
+    Edit a page's sections as drafts, preview them on the real page, then publish. Visitors only ever see published
+    content.
+  </p>
+  <ul class="mt-4 divide-y divide-line rounded-lg border border-line bg-surface">
+    {pages.map((p) => (
+      <li class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+        <div>
+          <a href={`/admin/cms/pages/${p.key}`} class="font-semibold text-ink-950 hover:underline">
+            {p.title}
+          </a>
+          <p class="text-[12px] text-ink-600">
+            <span class="font-mono">{pagePath(p.key)}</span> · {p.sections} {p.sections === 1 ? 'section' : 'sections'}{' '}
+            · published {when(p.published_at)}
+          </p>
+        </div>
+        {p.has_changes ? (
+          <span class="rounded-full bg-warning-50 px-2 py-0.5 text-[12px] font-semibold text-warning-700">
+            Unpublished changes
+          </span>
+        ) : null}
+      </li>
+    ))}
+  </ul>
+</AdminLayout>

@@ -1,0 +1,23 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import CmsTabs from '../../../components/admin/CmsTabs.astro';
+import { AnnouncementsManager } from '../../../components/admin/CmsAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { listAnnouncementsAdmin } from '../../../server/modules/cms/admin';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'cms.manage' });
+if (page instanceof Response) return page;
+const announcements = (await listAnnouncementsAdmin(ctx)) as never[];
+---
+
+<AdminLayout title="Announcements" page={page}>
+  <h1 class="text-2xl font-bold tracking-display">Website</h1>
+  <CmsTabs current="announcements" />
+  <p class="mt-4 mb-4 max-w-3xl text-sm text-ink-600">
+    The site shows one active announcement at a time, inside its start and end dates.
+  </p>
+  <div class="max-w-3xl">
+    <AnnouncementsManager client:load announcements={announcements} />
+  </div>
+</AdminLayout>

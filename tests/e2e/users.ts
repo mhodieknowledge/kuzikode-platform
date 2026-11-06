@@ -52,6 +52,13 @@ export const E2E_USERS = {
     role: 'admin',
     mustChange: false,
   },
+  contentEditor: {
+    id: 'usr_e2e_content',
+    email: 'e2e-content@example.com',
+    name: 'Cora Content',
+    role: 'content_manager',
+    mustChange: false,
+  },
   invoicesAdmin: {
     id: 'usr_e2e_invoices',
     email: 'e2e-invoices@example.com',

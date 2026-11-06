@@ -70,7 +70,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P4.12 Projects** (CRUD, from quotation, members, milestones, tasks board/list, progress auto/manual, internal notes, client updates + notify, files/deliverables, messages, activity). AC: e2e step 15.
 - [x] **P4.13 Expenses** (CRUD, categories, receipts, void, reports, CSV). AC: tests.
 - [x] **P4.14 Support inbox** (threads, internal notes, assignment, statuses, attachments). AC: tests.
-- [ ] **P4.15 CMS editors** (pages/sections draft→preview→publish, portfolio, products, announcements, legal, SEO fields, media library with alt text required, publish bumps content_version). AC: preview doesn't leak drafts publicly.
+- [x] **P4.15 CMS editors** (pages/sections draft→preview→publish, portfolio, products, announcements, legal, SEO fields, media library with alt text required, publish bumps content_version). AC: preview doesn't leak drafts publicly.
 - [ ] **P4.16 Notifications** (in-app list, read/unread, preferences, email dispatch per prefs, all types in PRD §4.2 J). AC: one test per type trigger.
 - [ ] **P4.17 Dashboard** (KPIs per currency, charts, recent lists, permission-filtered tiles). AC: figures match fixtures exactly in a test.
 - [ ] **P4.19 Packages & pricing admin** (packages, features, add-ons, comparison order, price-review flag + dashboard warning, "Add package" in quotation editor). AC: price-copy test.

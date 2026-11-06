@@ -5,13 +5,12 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phase 1, 2 and 3 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 4 (administration) in progress.
-- Last completed task: **P4.10 Credit notes** (P4.1–P4.10 done).
-- **Next step:** P4.11 Payments admin — `/admin/payments` list/filter (status, method, provider, client, date range) over `payments`
-  (+ attempts once Phase 6 exists), detail page with timeline (payment, allocations, receipt PDF, payment_events, refunds), "Reconcile"
-  button only when the payment's account has a provider adapter (Phase 6; hide until then), unmatched queue (`payment_events` with
-  event_type 'unmatched'), manual refund recording (`refunds` row, method 'manual', optional link to a 'refund' credit note via
-  `credit_note_id`, guard: refunded total ≤ payment amount, payment status → partially_refunded/refunded, audit). Nav item "Payments"
-  in `server/modules/admin/navigation.ts` is `built: false` until then.
+- Last completed task: **P4.11 Payments admin** (P4.1–P4.11 done).
+- **Next step:** P4.12 Projects — `server/modules/projects` (CRUD with `numbering.project` PRJ number, from accepted quotation (copy
+  lines → milestones/tasks scaffold; add the "Create project" action on /admin/quotations/[id], currently not rendered), members,
+  milestones (client-visible flag, linked invoice), tasks board/list, progress auto from milestones/tasks with manual override,
+  internal notes, client updates (+ notify), files/deliverables via `storeUpload` with `project_files.client_visible`, messages,
+  activity), admin pages `/admin/projects*`, nav item `built: true`. AC: e2e step 15 (docs/08). Read docs/04 project tables first.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 
 ---
@@ -258,4 +257,15 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Tests: unit `credit-notes.test.ts` (3) · integration `credit-notes.test.ts` (3: partial + full credit → paid, quantity/balance caps,
   account credit and refund limits, permanence, PDF, concurrency, permission, drafts refused) · e2e invoices spec issues a credit note.
   verify: unit 226 / integration 160 green; invoices, quotations and admin-shell e2e green.
+
+## 2026-11-06 09:05 UTC · P4.11 Payments admin ✅
+- `modules/payments`: list with filters (status, provider, method, currency, client, date range, search by receipt/invoice/reference/
+  client) and per-currency received/refunded totals; detail (allocations, account credit kept, refunds, attempt + redacted events
+  timeline when a gateway attempt exists); manual refunds that must be covered by a "to be refunded" credit note or account credit,
+  in one guarded batch (refund ≤ payment, cover ≥ amount, account-credit ledger entry, payment status, audit); unmatched queue.
+- UI: /admin/payments (All payments | Unmatched), /admin/payments/[id] (details, applied to, refunds, gateway timeline, receipt PDF,
+  "Record refund" dialog). Payments nav on; invoice payment entries link to the payment.
+- "Reconcile" is not rendered yet: no provider adapter exists until Phase 6 (P6.x adds it with `checkPaymentStatus`).
+- Tests: integration `payments-admin.test.ts` (4: filters/detail, refund cover + limits + status, concurrent refunds, unmatched +
+  permissions) · e2e invoices spec visits payments list/detail. verify: unit 226 / integration 164; full e2e 58/58 green.
 

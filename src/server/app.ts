@@ -18,6 +18,7 @@ import { catalogueRoutes } from './modules/catalogue';
 import { publicQuotationRoutes, quotationRoutes } from './modules/quotations';
 import { documentRoutes, publicDocumentRoutes } from './modules/documents';
 import { invoiceRoutes } from './modules/invoices';
+import { paymentRoutes } from './modules/payments';
 
 export function createApp() {
   const app = new Hono<ApiEnv>();
@@ -36,6 +37,7 @@ export function createApp() {
   app.route('/api/v1/admin/quotations', quotationRoutes());
   app.route('/api/v1/admin/documents', documentRoutes());
   app.route('/api/v1/admin/invoices', invoiceRoutes());
+  app.route('/api/v1/admin/payments', paymentRoutes());
   app.route('/api/v1/admin/enquiries', enquiryAdminRoutes());
   app.route('/api/v1/admin/leads', leadAdminRoutes());
   app.route('/api/v1/admin', adminShellRoutes());

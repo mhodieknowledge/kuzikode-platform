@@ -173,7 +173,9 @@ const REMINDER = (k: string) =>
               {payments.map((p) => (
                 <li>
                   <p class="tnum flex justify-between gap-2 font-medium text-ink-950">
-                    <span>{METHOD[p.method] ?? p.method}</span>
+                    <a href={`/admin/payments/${p.id}`} class="text-brand-600 hover:underline">
+                      {METHOD[p.method] ?? p.method}
+                    </a>
                     <span>{money(p.applied_minor)}</span>
                   </p>
                   <p class="text-[12px] text-ink-600">

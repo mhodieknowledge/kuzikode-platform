@@ -66,7 +66,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P4.8 PDF engine** (pdf-lib layout kit, branding, quotation/invoice/receipt/credit note, TEST watermark outside prod, R2 storage, never regenerate issued docs). AC: PDF tests. CPU timing recorded.
 - [x] **P4.9 Invoices** (draft editor, issue with snapshot + number + token, send/resend, PDF, manual payments, allocations, overpayment → credit, apply client credit, void rules, status history, overdue cron, reminders schedule with dedupe). AC: all invoice tests in docs/08.
 - [x] **P4.10 Credit notes** (from invoice, full/partial, numbering, PDF, effect on balance/credits/refund). AC: balance tests.
-- [ ] **P4.11 Payments admin** (list/filter/detail timeline, reconcile button, unmatched queue, manual refund recording). AC: tests.
+- [x] **P4.11 Payments admin** (list/filter/detail timeline, reconcile button, unmatched queue, manual refund recording). AC: tests.
 - [ ] **P4.12 Projects** (CRUD, from quotation, members, milestones, tasks board/list, progress auto/manual, internal notes, client updates + notify, files/deliverables, messages, activity). AC: e2e step 15.
 - [ ] **P4.13 Expenses** (CRUD, categories, receipts, void, reports, CSV). AC: tests.
 - [ ] **P4.14 Support inbox** (threads, internal notes, assignment, statuses, attachments). AC: tests.

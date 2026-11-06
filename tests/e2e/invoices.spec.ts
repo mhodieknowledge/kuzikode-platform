@@ -120,6 +120,20 @@ test('draft invoice → issued and emailed → client views and downloads the PD
   await expect(page.getByRole('link', { name: /^CN-\d{4}-\d{4}$/ })).toBeVisible();
   await expect(page.getByText(/Added to account credit · Launch delayed by us/)).toBeVisible();
 
+  // Payments admin lists both receipts; a payment page shows where it was applied (P4.11).
+  await page.goto(`/admin/payments?q=${encodeURIComponent(clientName)}`);
+  await expect(page.getByRole('link', { name: /^RCT-\d{4}-\d{5}$/ })).toHaveCount(2);
+  await expectAccessible(page);
+  await screenshots(page, 'admin-payments');
+  await page
+    .getByRole('link', { name: /^RCT-\d{4}-\d{5}$/ })
+    .first()
+    .click();
+  await expect(page.getByRole('heading', { level: 2, name: 'Applied to' })).toBeVisible();
+  await expect(page.getByRole('link', { name: number })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Download receipt' })).toBeVisible();
+  await expectAccessible(page);
+
   await client.reload();
   await expect(client.getByText('Paid in full. Thank you.')).toBeVisible();
   await clientContext.close();

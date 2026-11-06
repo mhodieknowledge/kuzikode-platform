@@ -1,0 +1,272 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { listPayments, listUnmatched } from '../../../server/modules/payments';
+import { paymentListQuery, PAYMENT_STATUSES } from '../../../shared/schemas/payments';
+import { MANUAL_PAYMENT_METHODS } from '../../../shared/invoices';
+import { formatMoney } from '../../../shared/money';
+import { formatLongDate } from '../../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'payments.view' });
+if (page instanceof Response) return page;
+const params = new URLSearchParams(Astro.url.searchParams);
+const unmatchedView = params.get('view') === 'unmatched';
+params.delete('view');
+const parsed = paymentListQuery.safeParse(Object.fromEntries(params));
+const filter = parsed.success ? parsed.data : paymentListQuery.parse({});
+const result = unmatchedView ? null : await listPayments(ctx, filter);
+const unmatched = await listUnmatched(ctx, unmatchedView ? filter.page : 1);
+const currencies = (
+  await ctx.db
+    .prepare('SELECT code FROM currencies WHERE active = 1 ORDER BY is_default DESC, code')
+    .all<{ code: string }>()
+).results;
+const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
+const STATUS: Record<string, [string, string]> = {
+  completed: ['Completed', 'bg-success-50 text-success-700'],
+  partially_refunded: ['Part refunded', 'bg-warning-50 text-warning-700'],
+  refunded: ['Refunded', 'bg-ink-950/5 text-ink-800'],
+  reversed: ['Reversed', 'bg-danger-50 text-danger-700'],
+};
+const METHOD: Record<string, string> = Object.fromEntries(
+  MANUAL_PAYMENT_METHODS.map((m) => [m.value, m.label.replace(' (manual)', '')]),
+);
+const PROVIDER: Record<string, string> = {
+  manual: 'Recorded manually',
+  paynow: 'Paynow',
+  pesepay: 'PesePay',
+  mock: 'Test provider',
+};
+const pages = unmatchedView ? unmatched.pages : result!.pages;
+const current = unmatchedView ? unmatched.page : result!.page;
+const pageHref = (n: number) => {
+  const q = new URLSearchParams(Astro.url.searchParams);
+  q.set('page', String(n));
+  return `/admin/payments?${q.toString()}`;
+};
+const tab = (active: boolean) =>
+  `inline-flex h-10 items-center border-b-2 px-1 text-sm font-semibold ${active ? 'border-brand-600 text-ink-950' : 'border-transparent text-ink-600 hover:text-ink-950'}`;
+---
+
+<AdminLayout title="Payments" page={page}>
+  <h1 class="text-2xl font-bold tracking-display">Payments</h1>
+  <nav aria-label="Payment views" class="mt-4 flex gap-6 border-b border-line">
+    <a href="/admin/payments" class={tab(!unmatchedView)} aria-current={!unmatchedView ? 'page' : undefined}>
+      All payments
+    </a>
+    <a
+      href="/admin/payments?view=unmatched"
+      class={tab(unmatchedView)}
+      aria-current={unmatchedView ? 'page' : undefined}
+    >
+      Unmatched{unmatched.total ? ` (${unmatched.total})` : ''}
+    </a>
+  </nav>
+
+  {unmatchedView ? (
+    <section class="mt-6" aria-labelledby="um-h">
+      <h2 id="um-h" class="sr-only">
+        Unmatched gateway notifications
+      </h2>
+      <p class="max-w-3xl text-sm text-ink-600">
+        Notifications from a payment gateway that did not match any payment started here. Check the reference in the
+        gateway's merchant dashboard; if the client really paid, record the payment on the right invoice. Entries stay
+        here for the record.
+      </p>
+      {unmatched.items.length === 0 ? (
+        <p class="mt-6 rounded-lg border border-line bg-surface px-4 py-10 text-center text-sm text-ink-600">
+          Nothing unmatched.
+        </p>
+      ) : (
+        <ul class="mt-4 flex flex-col gap-3">
+          {unmatched.items.map((e) => (
+            <li class="rounded-lg border border-line bg-surface p-4 text-sm">
+              <p class="font-semibold text-ink-950">
+                {PROVIDER[e.provider_key] ?? e.provider_key}
+                {e.account ? ` · ${e.account}` : ''} ·{' '}
+                <span class="font-mono">{e.provider_reference ?? 'no reference'}</span>
+              </p>
+              <p class="text-[12px] text-ink-600">{formatLongDate(e.received_at)}</p>
+              {e.payload_redacted ? (
+                <pre class="mt-2 max-h-40 overflow-auto rounded-sm bg-canvas p-3 text-[12px] whitespace-pre-wrap">{e.payload_redacted}</pre>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  ) : (
+    <>
+      {result!.totals.length ? (
+        <dl class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {result!.totals.map((t) => (
+            <div class="rounded-lg border border-line bg-surface p-4">
+              <dt class="text-[13px] font-semibold text-ink-600">Received ({t.currency})</dt>
+              <dd class="tnum mt-1 text-xl font-bold text-ink-950">{formatMoney(t.received, t.currency)}</dd>
+              {t.refunded > 0 ? (
+                <dd class="tnum mt-1 text-[13px] text-ink-600">{formatMoney(t.refunded, t.currency)} refunded</dd>
+              ) : null}
+            </div>
+          ))}
+        </dl>
+      ) : null}
+      <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter payments">
+        <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+          Search
+          <input
+            name="q"
+            type="search"
+            value={filter.q ?? ''}
+            maxlength="80"
+            class={field}
+            placeholder="Receipt, invoice, reference or client"
+          />
+        </label>
+        <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+          Status
+          <select name="status" class={field}>
+            <option value="">Any</option>
+            {PAYMENT_STATUSES.map((s) => (
+              <option value={s} selected={filter.status === s}>
+                {STATUS[s]![0]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+          Provider
+          <select name="provider" class={field}>
+            <option value="">Any</option>
+            {Object.entries(PROVIDER).map(([k, l]) => (
+              <option value={k} selected={filter.provider === k}>
+                {l}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+          Method
+          <select name="method" class={field}>
+            <option value="">Any</option>
+            {Object.entries(METHOD).map(([k, l]) => (
+              <option value={k} selected={filter.method === k}>
+                {l}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+          Currency
+          <select name="currency" class={field}>
+            <option value="">Any</option>
+            {currencies.map((c) => (
+              <option value={c.code} selected={filter.currency === c.code}>
+                {c.code}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+          From
+          <input name="from" type="date" value={filter.from ?? ''} class={field} />
+        </label>
+        <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+          To
+          <input name="to" type="date" value={filter.to ?? ''} class={field} />
+        </label>
+        {filter.clientId ? <input type="hidden" name="clientId" value={filter.clientId} /> : null}
+        <button
+          type="submit"
+          class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+        >
+          Filter
+        </button>
+      </form>
+      <div class="mt-6 overflow-x-auto rounded-lg border border-line bg-surface">
+        <table class="w-full min-w-[720px] text-left text-sm">
+          <caption class="sr-only">Payments</caption>
+          <thead class="bg-canvas text-[13px] text-ink-600">
+            <tr>
+              <th scope="col" class="px-4 py-3 font-semibold">
+                Receipt
+              </th>
+              <th scope="col" class="px-4 py-3 font-semibold">
+                Client
+              </th>
+              <th scope="col" class="px-4 py-3 font-semibold">
+                Invoices
+              </th>
+              <th scope="col" class="px-4 py-3 font-semibold">
+                Method
+              </th>
+              <th scope="col" class="px-4 py-3 font-semibold">
+                Status
+              </th>
+              <th scope="col" class="px-4 py-3 text-right font-semibold">
+                Amount
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {result!.items.length === 0 ? (
+              <tr>
+                <td colspan="6" class="px-4 py-10 text-center text-ink-600">
+                  {parsed.success && Object.keys(Object.fromEntries(params)).length
+                    ? 'No payments match these filters.'
+                    : 'No payments yet. Payments recorded on invoices appear here.'}
+                </td>
+              </tr>
+            ) : (
+              result!.items.map((p) => (
+                <tr class="border-t border-line">
+                  <td class="px-4 py-3">
+                    <a href={`/admin/payments/${p.id}`} class="font-mono font-semibold text-ink-950 hover:underline">
+                      {p.receipt_number}
+                    </a>
+                    <span class="block text-[12px] text-ink-600">{formatLongDate(p.received_at)}</span>
+                  </td>
+                  <td class="px-4 py-3 text-ink-800">{p.client_name}</td>
+                  <td class="px-4 py-3 font-mono text-[13px] text-ink-800">{p.invoices ?? '—'}</td>
+                  <td class="px-4 py-3 text-ink-800">
+                    {METHOD[p.method] ?? p.method}
+                    <span class="block text-[12px] text-ink-600">{PROVIDER[p.provider_key] ?? p.provider_key}</span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${STATUS[p.status]?.[1] ?? ''}`}>
+                      {STATUS[p.status]?.[0] ?? p.status}
+                    </span>
+                  </td>
+                  <td class="tnum px-4 py-3 text-right font-medium text-ink-950">
+                    {formatMoney(p.amount_minor, p.currency)}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </>
+  )}
+  {pages > 1 ? (
+    <nav aria-label="Pagination" class="mt-4 flex items-center justify-between text-sm font-semibold">
+      {current > 1 ? (
+        <a href={pageHref(current - 1)} rel="prev" class="text-brand-600">
+          Previous
+        </a>
+      ) : (
+        <span />
+      )}
+      <span class="text-ink-600">
+        Page {current} of {pages}
+      </span>
+      {current < pages ? (
+        <a href={pageHref(current + 1)} rel="next" class="text-brand-600">
+          Next
+        </a>
+      ) : (
+        <span />
+      )}
+    </nav>
+  ) : null}
+</AdminLayout>

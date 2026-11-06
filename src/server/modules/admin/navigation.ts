@@ -34,7 +34,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     label: 'Finance',
     items: [
       { label: 'Invoices', href: '/admin/invoices', anyOf: ['invoices.view'], built: true },
-      { label: 'Payments', href: '/admin/payments', anyOf: ['payments.view'], built: false },
+      { label: 'Payments', href: '/admin/payments', anyOf: ['payments.view'], built: true },
       { label: 'Subscriptions', href: '/admin/subscriptions', anyOf: ['subscriptions.view'], built: false },
       { label: 'Expenses', href: '/admin/expenses', anyOf: ['expenses.view'], built: false },
       { label: 'Reports', href: '/admin/reports', anyOf: ['reports.view'], built: false },

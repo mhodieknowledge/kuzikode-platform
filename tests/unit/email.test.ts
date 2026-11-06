@@ -106,6 +106,12 @@ describe('templates', () => {
       subject: 'Email not syncing',
       body: 'We reset the mailbox password; please try again.',
     },
+    support_ack: {
+      name: 'Ann',
+      reference: 'SUP-2026-0002',
+      subject: 'Website is down',
+      link: 'https://kuzikode.example/portal/support/sup_1',
+    },
     candidate_message: {
       subject: 'Interview invitation: Junior Developer',
       body: 'Hi Tino,\n\nWe would like to invite you to an interview.\n\nKind regards,\nKuzikode Technologies',

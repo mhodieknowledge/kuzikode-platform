@@ -537,3 +537,17 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Next step: P5.7 Portal support (create, reply, attachments, status) + "Your services" page (clientServices from P4.20) with
   "Request cancellation" creating a support request (docs/12 §A.3). Check modules/support (admin side, attachments via
   `support_attachments`, is_internal_note) and modules/subscriptions for `clientServices`.
+
+## 2026-11-06 22:55 UTC · P5.7 Portal support & "Your services" ✅
+- `modules/support/portal.ts`: list (open/all), detail (internal notes + their files never selected), create (multipart with up
+  to 5 files, client choice when linked to several, project check, rate-limited, staff notified, `support_ack` email), reply
+  (reopens; closed refused), mark resolved. Shared `requestStatements` in support/service.ts (staff + portal create).
+  `modules/subscriptions/portal.ts`: `listPortalServices` (finance area), `requestCancellation` (billing request, deduped).
+  Routes `/api/v1/portal/support[/:id[/messages|/resolve]]`, `/services`, `/services/subscriptions/:id/cancellation`.
+- Pages /portal/support, /portal/support/new, /portal/support/[id], /portal/services (`SupportForms.tsx` islands). Menu
+  "Services" (finance) + "Support" (all roles); desktop menu now from `xl`.
+- Tests: integration `portal-support.test.ts` (5) + unit email template · e2e portal-auth spec P5.7 (new request with file →
+  reply → resolve → services → cancellation request; axe + 375/768/1440 reviewed). Second e2e portal user (login rate limit);
+  `hydrated()` scrolls `client:visible` islands into view (was flaky). verify: integration 257 green.
+- Next step: P5.8 Public document pages `/q/:token`, `/i/:token`, `/pay/return` (AC: token tests, noindex/no-store). Check
+  `src/server/lib/public-links.ts` (documentToken) and whether any of these pages already exist under src/pages/q, src/pages/i.

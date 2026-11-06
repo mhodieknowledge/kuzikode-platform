@@ -24,3 +24,14 @@ export const SUPPORT_CATEGORIES = [
   { value: 'other', label: 'Something else' },
 ] as const;
 export type SupportCategory = (typeof SUPPORT_CATEGORIES)[number]['value'];
+
+/** Portal wording: "waiting for the client" reads as "waiting for your reply" to the client. */
+export function portalSupportStatus(s: SupportStatus): string {
+  return s === 'awaiting_client' ? 'Waiting for your reply' : SUPPORT_STATUS_LABEL[s];
+}
+export const SUPPORT_STATUS_TONE: Record<SupportStatus, 'neutral' | 'info' | 'success' | 'warning'> = {
+  open: 'info',
+  awaiting_client: 'warning',
+  resolved: 'success',
+  closed: 'neutral',
+};

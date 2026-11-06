@@ -535,6 +535,24 @@ const defs = {
         ],
       }),
   },
+  support_ack: {
+    schema: z.object({ name: z.string(), reference: z.string(), subject: z.string(), link: url }),
+    render: (b: Brand, d: { name: string; reference: string; subject: string; link: string }) =>
+      renderEmail(b, {
+        subject: `We received your request: ${d.subject} [${d.reference}]`,
+        preheader: `Your support request ${d.reference} is with our team.`,
+        heading: 'We received your support request',
+        blocks: [
+          { kind: 'p', text: `Hi ${d.name},` },
+          {
+            kind: 'p',
+            text: 'Thank you for getting in touch. Our team will look at your request and reply in the client portal.',
+          },
+          { kind: 'kv', rows: [['Request', `${d.reference}: ${d.subject}`]] },
+          { kind: 'button', text: 'View your request', href: d.link },
+        ],
+      }),
+  },
 } as const;
 
 export type TemplateName = keyof typeof defs;

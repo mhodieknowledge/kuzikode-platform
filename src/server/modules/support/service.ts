@@ -110,7 +110,7 @@ export async function listRequests(ctx: RequestContext, f: SupportListQuery) {
   };
 }
 
-async function loadRow(ctx: RequestContext, id: string): Promise<SupportRow> {
+export async function loadRow(ctx: RequestContext, id: string): Promise<SupportRow> {
   const r = await ctx.db.prepare('SELECT * FROM support_requests WHERE id = ?').bind(id).first<SupportRow>();
   if (!r) throw notFound();
   return r;
@@ -183,6 +183,75 @@ async function clientRecipient(ctx: RequestContext, clientId: string) {
     .first<{ name: string; email: string | null }>();
 }
 
+/**
+ * Statements that number and insert a request with its first message and tell support staff (shared by staff-opened
+ * and portal-opened requests). The caller adds its own audit row (and attachments) to the same batch.
+ */
+export async function requestStatements(
+  ctx: RequestContext,
+  input: {
+    clientId: string;
+    subject: string;
+    category: string;
+    priority: SupportPriority;
+    assignedTo: string | null;
+    projectId: string | null;
+    body: string;
+  },
+): Promise<{ id: string; messageId: string; stmts: D1PreparedStatement[] }> {
+  const settings = await getSettings(ctx);
+  const format = settingText(settings, 'numbering.support') ?? 'SUP-{YYYY}-{SEQ:4}';
+  const year = businessYear(ctx.now());
+  const key = sequenceKey('support', format, year);
+  const number = numberSqlExpr(key, format, year);
+  const id = newId('sup', ctx.now().getTime());
+  const messageId = newId('smg', ctx.now().getTime());
+  const now = ctx.now().toISOString();
+  return {
+    id,
+    messageId,
+    stmts: [
+      stmt(ctx.db, 'INSERT OR IGNORE INTO sequences (key, next_value) VALUES (?, 1)', key),
+      stmt(ctx.db, 'UPDATE sequences SET next_value = next_value + 1 WHERE key = ?', key),
+      stmt(
+        ctx.db,
+        `INSERT INTO support_requests (id, reference, client_id, opened_by, subject, category, priority, status, assigned_to,
+           project_id, last_message_at, created_at, updated_at)
+         VALUES (?, ${number.sql}, ?, ?, ?, ?, ?, 'open', ?, ?, ?, ?, ?)`,
+        id,
+        ...number.params,
+        input.clientId,
+        ctx.actor.userId,
+        input.subject,
+        input.category,
+        input.priority,
+        input.assignedTo,
+        input.projectId,
+        now,
+        now,
+        now,
+      ),
+      stmt(
+        ctx.db,
+        'INSERT INTO support_messages (id, request_id, author_id, body, is_internal_note, created_at) VALUES (?, ?, ?, ?, 0, ?)',
+        messageId,
+        id,
+        ctx.actor.userId,
+        input.body,
+        now,
+      ),
+      notifyStaffWithPermission(ctx, 'support.view', {
+        type: 'support.created',
+        title: `New support request: ${input.subject}`,
+        link: `/admin/support/${id}`,
+        entityType: 'support_request',
+        entityId: id,
+        dedupeKey: `support_created:${id}`,
+      }),
+    ],
+  };
+}
+
 export async function createRequest(
   ctx: RequestContext,
   input: NewSupportInput,
@@ -198,66 +267,27 @@ export async function createRequest(
   if (input.projectId && !(project?.results ?? []).length)
     throw validationError({ projectId: ["Choose one of this client's projects."] });
   await checkAssignee(ctx, input.assignedTo);
-  const settings = await getSettings(ctx);
-  const format = settingText(settings, 'numbering.support') ?? 'SUP-{YYYY}-{SEQ:4}';
-  const year = businessYear(ctx.now());
-  const key = sequenceKey('support', format, year);
-  const number = numberSqlExpr(key, format, year);
-  const id = newId('sup', ctx.now().getTime());
-  const now = ctx.now().toISOString();
+  const created = await requestStatements(ctx, {
+    clientId: input.clientId,
+    subject: input.subject,
+    category: input.category,
+    priority: input.priority,
+    assignedTo: input.assignedTo ?? null,
+    projectId: input.projectId ?? null,
+    body: input.body,
+  });
   await new Batch(ctx.db)
-    .add(stmt(ctx.db, 'INSERT OR IGNORE INTO sequences (key, next_value) VALUES (?, 1)', key))
-    .add(stmt(ctx.db, 'UPDATE sequences SET next_value = next_value + 1 WHERE key = ?', key))
-    .add(
-      stmt(
-        ctx.db,
-        `INSERT INTO support_requests (id, reference, client_id, opened_by, subject, category, priority, status, assigned_to,
-           project_id, last_message_at, created_at, updated_at)
-         VALUES (?, ${number.sql}, ?, ?, ?, ?, ?, 'open', ?, ?, ?, ?, ?)`,
-        id,
-        ...number.params,
-        input.clientId,
-        ctx.actor.userId,
-        input.subject,
-        input.category,
-        input.priority,
-        input.assignedTo ?? null,
-        input.projectId ?? null,
-        now,
-        now,
-        now,
-      ),
-    )
-    .add(
-      stmt(
-        ctx.db,
-        'INSERT INTO support_messages (id, request_id, author_id, body, is_internal_note, created_at) VALUES (?, ?, ?, ?, 0, ?)',
-        newId('smg', ctx.now().getTime()),
-        id,
-        ctx.actor.userId,
-        input.body,
-        now,
-      ),
-    )
-    .add(
-      notifyStaffWithPermission(ctx, 'support.view', {
-        type: 'support.created',
-        title: `New support request: ${input.subject}`,
-        link: `/admin/support/${id}`,
-        entityType: 'support_request',
-        entityId: id,
-        dedupeKey: `support_created:${id}`,
-      }),
-    )
+    .addAll(created.stmts)
     .add(
       auditStmt(ctx, {
         action: 'support.created',
         entityType: 'support_request',
-        entityId: id,
+        entityId: created.id,
         after: { clientId: input.clientId, subject: input.subject, onBehalf: true },
       }),
     )
     .run();
+  const id = created.id;
   const r = await loadRow(ctx, id);
   return { id, reference: r.reference };
 }

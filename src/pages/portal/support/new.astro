@@ -1,0 +1,29 @@
+---
+import PortalLayout from '../../../layouts/PortalLayout.astro';
+import { NewSupportRequest } from '../../../components/portal/SupportForms';
+import { loadPortalPage } from '../../../server/lib/portal-page';
+import { portalSupportOptions } from '../../../server/modules/support/portal';
+import { SUPPORT_CATEGORIES } from '../../../shared/support';
+
+const { ctx } = Astro.locals;
+const page = await loadPortalPage(ctx, Astro.request, { area: 'support' });
+if (page instanceof Response) return page;
+const options = await portalSupportOptions(ctx);
+---
+
+<PortalLayout title="New support request" page={page} active="support">
+  <p class="text-sm">
+    <a href="/portal/support" class="font-semibold text-brand-600 underline underline-offset-2">
+      Support
+    </a>
+  </p>
+  <h1 class="mt-2 text-2xl font-bold tracking-display md:text-3xl">New support request</h1>
+  <div class="mt-6 max-w-2xl rounded-lg border border-line bg-surface p-5 md:p-6">
+    <NewSupportRequest
+      client:load
+      clients={options.clients}
+      projects={options.projects}
+      categories={SUPPORT_CATEGORIES.map((c) => ({ value: c.value, label: c.label }))}
+    />
+  </div>
+</PortalLayout>

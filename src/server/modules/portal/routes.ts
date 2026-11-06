@@ -1,9 +1,17 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { respondSchema } from '../../../shared/schemas/quotations';
+import {
+  cancellationRequestSchema,
+  portalNewSupportSchema,
+  portalSupportReplySchema,
+} from '../../../shared/schemas/support';
+import { validationError } from '../../lib/errors';
 import { enforce } from '../../lib/rate-limit';
 import { csrfProtect, requireAuth, withAuth } from '../../middleware/auth';
 import type { ApiEnv } from '../../middleware/request-context';
+import type { Context } from 'hono';
+import type { z as Z } from 'zod';
 import { jsonBody, query } from '../../middleware/validate';
 import { documentPdf } from '../documents/service';
 import { fileResponse } from '../files/service';
@@ -11,10 +19,43 @@ import * as invoices from '../invoices/portal';
 import * as payments from '../payments/portal';
 import * as projects from '../projects/portal';
 import * as quotations from '../quotations/service';
+import * as services from '../subscriptions/portal';
+import * as support from '../support/portal';
 import { portalOverview } from './service';
 
 const messageSchema = z.object({ body: z.string().trim().min(1, 'Write a message.').max(5000) }).strict();
 const listQuery = z.object({ show: z.enum(['open', 'all']).default('all') }).strict();
+
+const MAX_MULTIPART_BYTES = 26 * 1024 * 1024;
+
+/**
+ * Support forms come as JSON, or as multipart with the same fields plus up to 5 `files`. Field errors are reported
+ * like JSON validation errors.
+ */
+async function supportBody<S extends Z.ZodTypeAny>(
+  c: Context<ApiEnv>,
+  schema: S,
+): Promise<{ data: Z.output<S>; files: support.UploadedFile[] }> {
+  if (!(c.req.header('content-type') ?? '').startsWith('multipart/form-data'))
+    return { data: await jsonBody(c, schema), files: [] };
+  if (Number(c.req.header('content-length') ?? '0') > MAX_MULTIPART_BYTES)
+    throw validationError({ files: ['Attachments are too large.'] });
+  const form = await c.req.formData().catch(() => {
+    throw validationError({ files: ['Send the form as multipart/form-data.'] });
+  });
+  const fields: Record<string, string> = {};
+  for (const [k, v] of form.entries()) if (k !== 'files' && typeof v === 'string' && v !== '') fields[k] = v;
+  const parsed = schema.safeParse(fields);
+  if (!parsed.success) {
+    const errors: Record<string, string[]> = {};
+    for (const i of parsed.error.issues) (errors[String(i.path[0] ?? 'body')] ??= []).push(i.message);
+    throw validationError(errors);
+  }
+  const files: support.UploadedFile[] = [];
+  for (const f of form.getAll('files'))
+    if (f instanceof File && f.size > 0) files.push({ bytes: new Uint8Array(await f.arrayBuffer()), filename: f.name });
+  return { data: parsed.data, files };
+}
 
 /** `/api/v1/portal/*`: client portal reads and actions, portal sessions only (docs/07 §5). */
 export function portalRoutes() {
@@ -128,5 +169,26 @@ export function portalRoutes() {
       201,
     ),
   );
+
+  r.get('/support', async (c) => c.json({ data: await support.listPortalRequests(c.var.ctx, query(c, listQuery)) }));
+  r.post('/support', async (c) => {
+    const { data, files } = await supportBody(c, portalNewSupportSchema);
+    return c.json({ data: await support.createPortalRequest(c.var.ctx, data, files) }, 201);
+  });
+  r.get('/support/:id', async (c) => c.json({ data: await support.getPortalRequest(c.var.ctx, c.req.param('id')) }));
+  r.post('/support/:id/messages', async (c) => {
+    const { data, files } = await supportBody(c, portalSupportReplySchema);
+    return c.json({ data: await support.replyPortal(c.var.ctx, c.req.param('id'), data.body, files) }, 201);
+  });
+  r.post('/support/:id/resolve', async (c) =>
+    c.json({ data: await support.resolvePortal(c.var.ctx, c.req.param('id')) }),
+  );
+
+  r.get('/services', async (c) => c.json({ data: await services.listPortalServices(c.var.ctx) }));
+  r.post('/services/subscriptions/:id/cancellation', async (c) => {
+    const { reason } = await jsonBody(c, cancellationRequestSchema);
+    const res = await services.requestCancellation(c.var.ctx, c.req.param('id'), reason);
+    return c.json({ data: res }, res.existing ? 200 : 201);
+  });
   return r;
 }

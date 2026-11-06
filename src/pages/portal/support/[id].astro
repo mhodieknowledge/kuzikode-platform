@@ -1,0 +1,109 @@
+---
+import PortalLayout from '../../../layouts/PortalLayout.astro';
+import StatusPill from '../../../components/portal/StatusPill.astro';
+import { ResolveRequestButton, SupportReplyForm } from '../../../components/portal/SupportForms';
+import { loadPortalPage } from '../../../server/lib/portal-page';
+import { getPortalRequest } from '../../../server/modules/support/portal';
+import { AppError } from '../../../server/lib/errors';
+import { harareDateTime } from '../../../shared/devices';
+import { formatLongDate } from '../../../shared/service-display';
+import { SUPPORT_STATUS_TONE, portalSupportStatus } from '../../../shared/support';
+
+const { ctx } = Astro.locals;
+const page = await loadPortalPage(ctx, Astro.request, { area: 'support' });
+if (page instanceof Response) return page;
+let data;
+try {
+  data = await getPortalRequest(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND') return new Response(null, { status: 404 });
+  throw err;
+}
+const r = data.request;
+const size = (b: number) =>
+  b >= 1_048_576 ? `${(b / 1_048_576).toFixed(1)} MB` : `${Math.max(1, Math.round(b / 1024))} KB`;
+const section = 'rounded-lg border border-line bg-surface p-5 md:p-6';
+---
+
+<PortalLayout title={r.subject} page={page} active="support">
+  <p class="text-sm">
+    <a href="/portal/support" class="font-semibold text-brand-600 underline underline-offset-2">
+      Support
+    </a>
+  </p>
+  <div class="mt-2 flex flex-wrap items-start justify-between gap-3">
+    <h1 class="min-w-0 text-2xl font-bold tracking-display md:text-3xl [overflow-wrap:anywhere]">{r.subject}</h1>
+    <StatusPill label={portalSupportStatus(r.status)} tone={SUPPORT_STATUS_TONE[r.status]} />
+  </div>
+  <p class="mt-1 text-sm text-ink-600">
+    <span class="font-mono">{r.reference}</span> · {r.category} · opened {formatLongDate(r.createdAt)}
+    {page.clients.length > 1 ? ` · ${r.clientName}` : ''}
+    {r.project ? (
+      <>
+        {' · '}
+        <a href={`/portal/projects/${r.project.id}`} class="font-semibold text-brand-600 underline underline-offset-2">
+          {r.project.name}
+        </a>
+      </>
+    ) : null}
+  </p>
+
+  <section class:list={[section, 'mt-6']} aria-labelledby="thread-title">
+    <h2 id="thread-title" class="font-sans text-lg font-semibold">
+      Conversation
+    </h2>
+    <ol class="mt-4 flex flex-col gap-3" data-testid="support-thread">
+      {data.messages.map((m) => (
+        <li
+          class:list={[
+            'max-w-[85%] rounded-lg px-4 py-3',
+            m.fromTeam ? 'self-start bg-canvas' : 'self-end bg-brand-600/10',
+          ]}
+        >
+          <p class="text-[13px] text-ink-600">
+            {m.mine ? 'You' : m.fromTeam ? `${m.author} · Kuzikode` : m.author} ·{' '}
+            <time datetime={m.createdAt}>{harareDateTime(m.createdAt)}</time>
+          </p>
+          <p class="mt-1 whitespace-pre-line text-ink-950 [overflow-wrap:anywhere]">{m.body}</p>
+          {m.attachments.length ? (
+            <ul class="mt-2 flex flex-col gap-1" aria-label="Attachments">
+              {m.attachments.map((f) => (
+                <li class="text-sm">
+                  <a
+                    href={`/api/v1/portal/files/${f.fileId}`}
+                    download
+                    class="font-semibold text-brand-600 underline underline-offset-2 [overflow-wrap:anywhere]"
+                  >
+                    {f.name}
+                  </a>{' '}
+                  <span class="text-ink-600">({size(f.size)})</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </li>
+      ))}
+    </ol>
+    <div class="mt-6 border-t border-line pt-5">
+      {r.status === 'closed' ? (
+        <p class="text-sm text-ink-600">
+          This request is closed. If you still need help,{' '}
+          <a href="/portal/support/new" class="font-semibold text-brand-600 underline underline-offset-2">
+            open a new request
+          </a>
+          .
+        </p>
+      ) : (
+        <div class="flex flex-col gap-5">
+          <SupportReplyForm client:visible requestId={r.id} reopens={r.status === 'resolved'} />
+          {r.status !== 'resolved' ? (
+            <div class="border-t border-line pt-4">
+              <p class="mb-2 text-sm text-ink-600">Problem solved? Let us know so we can close the request.</p>
+              <ResolveRequestButton client:visible requestId={r.id} />
+            </div>
+          ) : null}
+        </div>
+      )}
+    </div>
+  </section>
+</PortalLayout>

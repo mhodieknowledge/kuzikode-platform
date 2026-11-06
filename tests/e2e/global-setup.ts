@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { hashPassword } from '../../src/server/lib/crypto';
-import { E2E_PASSWORD, E2E_PORTAL_USER, E2E_USERS } from './users';
+import { E2E_PASSWORD, E2E_PORTAL_SUPPORT_USER, E2E_PORTAL_USER, E2E_USERS } from './users';
 
 const wrangler = (...args: string[]) => execFileSync('npx', ['wrangler', ...args], { stdio: 'pipe' });
 const q = (s: string) => `'${s.replace(/'/g, "''")}'`;
@@ -52,6 +52,13 @@ export default async function globalSetup() {
     `INSERT INTO client_user_access (id, client_id, user_id, role, status)
      VALUES ('cua_e2e_portal', ${q(E2E_PORTAL_USER.clientId)}, ${q(E2E_PORTAL_USER.id)}, 'owner', 'active')
      ON CONFLICT(client_id, user_id) DO UPDATE SET status = 'active';`,
+    `INSERT INTO users (id, email, name, user_type, password_hash, status, must_change_password, email_verified_at)
+     VALUES (${q(E2E_PORTAL_SUPPORT_USER.id)}, ${q(E2E_PORTAL_SUPPORT_USER.email)}, ${q(E2E_PORTAL_SUPPORT_USER.name)}, 'client', ${q(hash)}, 'active', 0, ${q(now)})
+     ON CONFLICT(id) DO UPDATE SET password_hash = excluded.password_hash, status = 'active', failed_login_count = 0, locked_until = NULL;`,
+    `DELETE FROM sessions WHERE user_id = ${q(E2E_PORTAL_SUPPORT_USER.id)};`,
+    `INSERT INTO client_user_access (id, client_id, user_id, role, status)
+     VALUES ('cua_e2e_portal_support', ${q(E2E_PORTAL_USER.clientId)}, ${q(E2E_PORTAL_SUPPORT_USER.id)}, 'owner', 'active')
+     ON CONFLICT(client_id, user_id) DO UPDATE SET status = 'active';`,
     // portal overview fixtures: two open USD invoices (one overdue), one sent quotation, one active project with a
     // client-visible milestone and update (fixed ids; never touched by other specs).
     // Invoices are inserted as drafts, given their lines (lines are locked after issue), then issued.
@@ -99,6 +106,19 @@ export default async function globalSetup() {
     `INSERT INTO project_updates (id, project_id, author_id, body, visibility, created_at)
      VALUES ('pup_e2e_portal', 'prj_e2e_portal', 'usr_e2e_admin', 'The first logo concepts are ready for your feedback.', 'client', '2026-10-25T10:00:00.000Z')
      ON CONFLICT(id) DO NOTHING;`,
+    // portal support + services (P5.7): one active subscription and one managed domain; the client's support requests
+    // from earlier runs are removed so the list starts empty.
+    `INSERT INTO subscriptions (id, client_id, description, quantity_milli, unit_price_minor, currency, interval, start_date, next_billing_date, status)
+     VALUES ('sub_e2e_portal', ${q(E2E_PORTAL_USER.clientId)}, 'Website care plan', 1000, 15000, 'USD', 'month', '2026-09-01', '2099-12-01', 'active')
+     ON CONFLICT(id) DO NOTHING;`,
+    `INSERT INTO client_assets (id, client_id, type, name, provider, renewal_date, auto_renew)
+     VALUES ('ast_e2e_portal', ${q(E2E_PORTAL_USER.clientId)}, 'domain', 'e2e-portal-client.co.zw', 'ZISPA', '2099-03-01', 1)
+     ON CONFLICT(id) DO NOTHING;`,
+    `DELETE FROM support_attachments WHERE message_id IN (SELECT m.id FROM support_messages m JOIN support_requests r ON r.id = m.request_id
+     WHERE r.client_id = ${q(E2E_PORTAL_USER.clientId)});`,
+    `DELETE FROM support_messages WHERE request_id IN (SELECT id FROM support_requests WHERE client_id = ${q(E2E_PORTAL_USER.clientId)});`,
+    `DELETE FROM notifications WHERE entity_type = 'support_request' AND entity_id IN (SELECT id FROM support_requests WHERE client_id = ${q(E2E_PORTAL_USER.clientId)});`,
+    `DELETE FROM support_requests WHERE client_id = ${q(E2E_PORTAL_USER.clientId)};`,
     // Divisions left behind by an interrupted services.spec run (it normally deletes its own).
     "DELETE FROM services WHERE category_id IN (SELECT id FROM service_categories WHERE slug GLOB 'workshops-[0-9]*');",
     "DELETE FROM service_categories WHERE slug GLOB 'workshops-[0-9]*';",

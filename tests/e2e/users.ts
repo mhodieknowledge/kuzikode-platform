@@ -132,3 +132,10 @@ export const E2E_PORTAL_USER = {
   clientId: 'cli_e2e_portal',
   clientName: 'Borrowdale Florists (e2e)',
 } as const;
+
+/** A second owner contact of the portal client, so the support spec stays under the 5-logins-per-email limit. */
+export const E2E_PORTAL_SUPPORT_USER = {
+  id: 'usr_e2e_portal_support',
+  email: 'e2e-portal-support@example.com',
+  name: 'Rudo Client',
+} as const;

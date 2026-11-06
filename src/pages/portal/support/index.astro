@@ -1,0 +1,78 @@
+---
+import PortalLayout from '../../../layouts/PortalLayout.astro';
+import StatusPill from '../../../components/portal/StatusPill.astro';
+import { loadPortalPage } from '../../../server/lib/portal-page';
+import { listPortalRequests } from '../../../server/modules/support/portal';
+import { harareDateTime } from '../../../shared/devices';
+import { SUPPORT_STATUS_TONE, portalSupportStatus } from '../../../shared/support';
+
+const { ctx } = Astro.locals;
+const page = await loadPortalPage(ctx, Astro.request, { area: 'support' });
+if (page instanceof Response) return page;
+const show = Astro.url.searchParams.get('show') === 'open' ? 'open' : 'all';
+const requests = await listPortalRequests(ctx, { show });
+const multiClient = page.clients.length > 1;
+const tab = (on: boolean) =>
+  on
+    ? 'rounded-full bg-ink-950 px-3 py-1 text-sm font-semibold text-white'
+    : 'rounded-full px-3 py-1 text-sm font-semibold text-ink-800 underline-offset-2 hover:underline';
+---
+
+<PortalLayout title="Support" page={page} active="support">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h1 class="text-2xl font-bold tracking-display md:text-3xl">Support</h1>
+    <a
+      href="/portal/support/new"
+      class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
+    >
+      New request
+    </a>
+  </div>
+  <nav class="mt-4 flex gap-2" aria-label="Filter requests">
+    <a href="/portal/support" class={tab(show === 'all')} aria-current={show === 'all' ? 'page' : undefined}>
+      All
+    </a>
+    <a
+      href="/portal/support?show=open"
+      class={tab(show === 'open')}
+      aria-current={show === 'open' ? 'page' : undefined}
+    >
+      Open
+    </a>
+  </nav>
+  {requests.length === 0 ? (
+    <p class="mt-6 max-w-2xl rounded-lg border border-line bg-surface p-6 text-ink-600">
+      {show === 'open'
+        ? 'You have no open requests.'
+        : 'You have not asked for help yet. When you need something, open a request and our team will reply here.'}
+    </p>
+  ) : (
+    <ul class="mt-6 divide-y divide-line rounded-lg border border-line bg-surface" aria-label="Support requests">
+      {requests.map((r) => {
+        const st = portalSupportStatus(r.status);
+        return (
+          <li class="relative flex flex-wrap items-start justify-between gap-x-4 gap-y-2 p-4 hover:bg-canvas md:p-5">
+            <div class="min-w-0">
+              <a
+                href={`/portal/support/${r.id}`}
+                class="font-semibold text-ink-950 after:absolute after:inset-0 hover:underline [overflow-wrap:anywhere]"
+              >
+                {r.subject}
+              </a>
+              <p class="mt-0.5 text-sm text-ink-600">
+                <span class="font-mono">{r.reference}</span> · {r.category}
+                {multiClient ? ` · ${r.clientName}` : ''}
+              </p>
+              <p class="mt-0.5 text-[13px] text-ink-600">
+                Last activity{' '}
+                <time datetime={r.lastMessageAt ?? r.createdAt}>{harareDateTime(r.lastMessageAt ?? r.createdAt)}</time>
+                {r.teamReplied && r.status === 'awaiting_client' ? ' · Kuzikode replied' : ''}
+              </p>
+            </div>
+            <StatusPill label={st} tone={SUPPORT_STATUS_TONE[r.status]} />
+          </li>
+        );
+      })}
+    </ul>
+  )}
+</PortalLayout>

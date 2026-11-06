@@ -1,11 +1,15 @@
 import { expect, test, type Page } from '@playwright/test';
 import { expectAccessible, screenshots } from './helpers';
-import { E2E_PASSWORD, E2E_PORTAL_USER, E2E_USERS } from './users';
+import { E2E_PASSWORD, E2E_PORTAL_SUPPORT_USER, E2E_PORTAL_USER, E2E_USERS } from './users';
 
 test.use({ actionTimeout: 15_000 });
 
-const hydrated = (page: Page, text: string) =>
-  expect(page.locator('astro-island').filter({ hasText: text }).first()).not.toHaveAttribute('ssr');
+/** Waits for an island to hydrate; `client:visible` islands below the fold only hydrate once scrolled into view. */
+async function hydrated(page: Page, text: string) {
+  const island = page.locator('astro-island').filter({ hasText: text }).first();
+  await island.scrollIntoViewIfNeeded();
+  await expect(island).not.toHaveAttribute('ssr');
+}
 
 async function portalSignIn(page: Page, email: string, password: string) {
   await page.goto('/portal/login');
@@ -51,7 +55,7 @@ test('a client signs in, updates their details, sees their devices and signs out
   await page.setViewportSize({ width: 1440, height: 900 });
   await portalSignIn(page, E2E_PORTAL_USER.email, E2E_PASSWORD);
   await expect(page.getByRole('heading', { level: 1, name: 'Hello, Kuda' })).toBeVisible();
-  await expect(page.getByText(E2E_PORTAL_USER.clientName).first()).toBeVisible();
+  await expect(page.getByRole('main').getByText(E2E_PORTAL_USER.clientName)).toBeVisible();
   // Overview (P5.2): balance per currency with the overdue part, open quotation, active project, recent activity.
   const usd = page.getByTestId('portal-balance-USD');
   await expect(usd).toContainText('$1,450.00');
@@ -173,7 +177,7 @@ test('optional self-registration: sign up, set a password, wait for staff to lin
 
     await visitor.reload();
     await expect(visitor.getByTestId('portal-unlinked')).toHaveCount(0);
-    await expect(visitor.getByText(E2E_PORTAL_USER.clientName).first()).toBeVisible();
+    await expect(visitor.getByRole('main').getByText(E2E_PORTAL_USER.clientName)).toBeVisible();
     await visitorContext.close();
   } finally {
     await page.goto('/admin');
@@ -323,4 +327,58 @@ test('a client follows a project and writes to the team (P5.6)', async ({ page }
   await expect(page.getByTestId('project-messages')).toContainText(text);
   await expectAccessible(page);
   await screenshots(page, 'portal-project');
+});
+
+test('a client opens a support request with a file, replies, and asks to cancel a service (P5.7)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await portalSignIn(page, E2E_PORTAL_SUPPORT_USER.email, E2E_PASSWORD);
+  const nav = page.getByRole('navigation', { name: 'Portal navigation' }).first();
+  await nav.getByRole('link', { name: 'Support' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Support' })).toBeVisible();
+  await expect(page.getByText('You have not asked for help yet.')).toBeVisible();
+  await expectAccessible(page);
+  await screenshots(page, 'portal-support');
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.getByRole('link', { name: 'New request' }).click();
+  await hydrated(page, 'Send request');
+  await page.getByLabel('Subject').fill('Contact form is not sending');
+  await page.getByLabel('What is it about?').selectOption('website');
+  await page.getByLabel('How can we help?').fill('The contact form shows an error when I press Send.');
+  await page.getByLabel('Attachments (optional)').setInputFiles('tests/e2e/fixtures/brief.pdf');
+  await expectAccessible(page);
+  await screenshots(page, 'portal-support-new');
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.getByRole('button', { name: 'Send request' }).click();
+  await expect(page).toHaveURL(/\/portal\/support\/sup_/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Contact form is not sending' })).toBeVisible();
+  const thread = page.getByTestId('support-thread');
+  await expect(thread).toContainText('The contact form shows an error');
+  await expect(thread.getByRole('link', { name: 'brief.pdf' })).toBeVisible();
+
+  await hydrated(page, 'Send message');
+  await page.getByLabel('Your message').fill('It happens on mobile too.');
+  await page.getByRole('button', { name: 'Send message' }).click();
+  await expect(thread).toContainText('It happens on mobile too.');
+  await page.getByRole('button', { name: 'Mark as resolved' }).click();
+  await expect(page.getByText('Resolved', { exact: true })).toBeVisible();
+  await expect(page.getByText('Sending a message reopens this request.')).toBeVisible();
+  await expectAccessible(page);
+  await screenshots(page, 'portal-support-request');
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await nav.getByRole('link', { name: 'Services' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Your services' })).toBeVisible();
+  await expect(page.getByTestId('assets')).toContainText('e2e-portal-client.co.zw');
+  await expectAccessible(page);
+  await screenshots(page, 'portal-services');
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await hydrated(page, 'Request cancellation');
+  await page.getByRole('button', { name: 'Request cancellation of Website care plan' }).click();
+  await page.getByLabel('Reason (optional)').fill('We are moving the site in-house.');
+  await page.getByRole('button', { name: 'Send cancellation request' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Cancellation request: Website care plan' })).toBeVisible();
+  await expect(page.getByTestId('support-thread')).toContainText('We are moving the site in-house.');
+  await page.goto('/portal/services');
+  await expect(page.getByText('Cancellation requested.')).toBeVisible();
 });

@@ -115,7 +115,7 @@ Every schema change is a new numbered file in `migrations/`. Never edit an appli
 | `tax_rates` | id, name, rate_bp INT (1550 = 15.5%), inclusive INT, active, is_default |
 | `sequences` | key PK ('invoice:2026','quotation:2026','credit_note:2026','receipt:2026','project:2026','enquiry:2026','support:2026','client'), next_value INT NOT NULL |
 | `outbox` | id, type, payload JSON, idempotency_key UNIQUE, status CHECK('pending','processing','done','failed'), attempts, last_error, available_at, processed_at |
-| `notifications` | id, user_id FK, type, title, body, link, entity_type, entity_id, read_at, created_at. Index (user_id, read_at) |
+| `notifications` | id, user_id FK, type, title, body, link, entity_type, entity_id, dedupe_key UNIQUE, read_at, created_at, in_app INT (0 = in-app channel off for this type; row kept for email), email_state ('none','pending','queued','skipped'). Index (user_id, read_at); partial index on pending emails (0010) |
 | `notification_preferences` | user_id FK, type, in_app INT, email INT, PK(user_id,type) |
 | `email_logs` | id, outbox_id UNIQUE, to_email, template, subject, provider, provider_message_id, status ('queued','sent','delivered','bounced','complained','failed'), error, sent_at, updated_at |
 | `audit_logs` | id, actor_user_id NULL, actor_type ('staff','client','system','provider'), action ('invoice.issued','role.permission_granted',…), entity_type, entity_id, before JSON (redacted), after JSON (redacted), ip, user_agent, request_id, created_at. **Append-only:** no UPDATE/DELETE in code, and a trigger raises on UPDATE/DELETE |

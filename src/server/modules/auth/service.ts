@@ -15,6 +15,7 @@ import { passwordProblem } from '../../lib/passwords';
 import { enforce, hit, peek } from '../../lib/rate-limit';
 import { verifyTurnstile } from '../../lib/turnstile';
 import { dispatch, enqueue } from '../../jobs/outbox';
+import { notifySecurity } from '../notifications';
 import * as repo from './repository';
 
 // ---------------------------------------------------------------- constants (docs/07 §2, §4)
@@ -55,6 +56,24 @@ export interface AuthState {
 }
 
 const MFA_REQUIRED_ROLES = ['super_admin', 'finance_manager'];
+
+const KNOWN_DEVICE_DAYS = 180;
+
+/**
+ * A sign-in is "new" when the account has signed in before but never from this browser (user agent) in the last
+ * 180 days. The very first sign-in (straight after accepting an invitation) is not alerted.
+ */
+async function isNewDevice(ctx: RequestContext, userId: string): Promise<boolean> {
+  const since = new Date(ctx.now().getTime() - KNOWN_DEVICE_DAYS * 86_400_000).toISOString();
+  const row = await ctx.db
+    .prepare(
+      `SELECT COUNT(*) AS total, COALESCE(SUM(CASE WHEN user_agent IS ? THEN 1 ELSE 0 END), 0) AS same
+       FROM sessions WHERE user_id = ? AND created_at >= ?`,
+    )
+    .bind(ctx.userAgent, userId, since)
+    .first<{ total: number; same: number }>();
+  return !!row && row.total > 0 && row.same === 0;
+}
 
 export function cookieName(ctx: RequestContext, audience: Audience): string {
   return ctx.config.secureCookies ? `__Host-kz_${audience}` : `kz_${audience}_dev`;
@@ -251,8 +270,10 @@ export async function login(
   }
 
   const session = await newSession(ctx, user.id, audience, false);
+  const alert = (await isNewDevice(ctx, user.id)) ? securityEmail(ctx, user, 'new_login', session.row.id) : null;
   const batch = new Batch(ctx.db)
     .add(session.stmt)
+    .addAll(alert ? [alert.stmt, alert.notice] : [])
     .add(repo.loginSuccessStmt(ctx.db, user.id, nowIso))
     .add(
       auditStmt(ctx, {
@@ -266,6 +287,7 @@ export async function login(
     );
   if (check.needsRehash) batch.add(repo.rehashStmt(ctx.db, user.id, await hashPassword(input.password)));
   await batch.run();
+  if (alert) dispatch(ctx, [alert.id]);
   await ctx.db.prepare('DELETE FROM rate_limits WHERE key = ?').bind(failKey).run();
 
   const mfaRow = await ctx.db
@@ -337,13 +359,27 @@ function assertPolicy(password: string, user: { email: string; name?: string }):
   if (problem) throw validationError({ password: [problem] }, problem);
 }
 
+const SECURITY_TITLES: Record<string, string> = {
+  password_changed: 'Your password was changed',
+  password_reset: 'Your password was reset',
+  new_login: 'New sign-in to your account',
+  mfa_changed: 'Two-factor authentication settings changed',
+};
+
+/** The security_alert email plus the matching in-app notice (always on), for the caller's batch. */
 function securityEmail(
   ctx: RequestContext,
-  user: { id: string; email: string; name: string },
+  user: { id: string; email: string; name: string; user_type?: 'staff' | 'client' },
   event: string,
   key: string,
 ) {
-  return enqueue(ctx, {
+  const notice = notifySecurity(ctx, user.id, {
+    title: SECURITY_TITLES[event] ?? 'Security alert',
+    body: `${ctx.ip ? `From IP ${ctx.ip}. ` : ''}If this wasn't you, reset your password straight away.`,
+    link: user.user_type === 'client' ? '/portal/account' : '/admin/account/security',
+    dedupeKey: `security:${event}:${key}`,
+  });
+  const job = enqueue(ctx, {
     type: 'email.send',
     payload: {
       template: 'security_alert',
@@ -352,6 +388,7 @@ function securityEmail(
     },
     idempotencyKey: `email:security:${event}:${user.id}:${key}`,
   });
+  return { ...job, notice };
 }
 
 /** Changes the signed-in user's password, rotates their session and revokes all others. Returns a new cookie. */
@@ -377,6 +414,7 @@ export async function changePassword(
     .add(session.stmt)
     .add(auditStmt(ctx, { action: 'auth.password_changed', entityType: 'user', entityId: user.id }))
     .add(email.stmt)
+    .add(email.notice)
     .run();
   dispatch(ctx, [email.id]);
   return sessionCookie(ctx, auth.session.audience, session.token);
@@ -456,6 +494,7 @@ export async function resetPassword(ctx: RequestContext, input: { token: string;
     .add(repo.revokeUserSessionsStmt(ctx.db, user.id, now))
     .add(auditStmt(ctx, { action: 'auth.password_reset', entityType: 'user', entityId: user.id, actorType: 'public' }))
     .add(email.stmt)
+    .add(email.notice)
     .run()
     .catch((err: unknown) => {
       throw err;

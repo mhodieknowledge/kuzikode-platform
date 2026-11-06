@@ -106,6 +106,13 @@ describe('templates', () => {
       subject: 'Email not syncing',
       body: 'We reset the mailbox password; please try again.',
     },
+    notification: {
+      name: 'Tendai',
+      label: 'New enquiry',
+      title: 'New enquiry from Ann Moyo',
+      body: 'Website for a bakery, budget USD 1,000–2,500.',
+      link: 'https://kuzikode.example/admin/enquiries/enq_1',
+    },
     project_update: {
       name: 'Ann',
       project: 'Online ordering website',

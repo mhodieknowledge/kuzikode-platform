@@ -17,7 +17,7 @@ import type { NewSupportInput, SupportListQuery, SupportReplyInput } from '../..
 import type { SupportPriority, SupportStatus } from '../../../shared/support';
 import { getSettings, settingText } from '../cms';
 import { storeUpload } from '../files/service';
-import { notifyStaffWithPermission } from '../notifications';
+import { notifyClientUsers, notifyStaffWithPermission, notifyUser } from '../notifications';
 
 export const PAGE_SIZE = 25;
 
@@ -340,22 +340,32 @@ export async function reply(
       input.internal
         ? []
         : [
-            stmt(
-              ctx.db,
-              `INSERT OR IGNORE INTO notifications (id, user_id, type, title, body, link, entity_type, entity_id, dedupe_key, created_at)
-               SELECT ? || '_' || a.user_id, a.user_id, 'support.replied', ?, ?, ?, 'support_request', ?, ? || ':' || a.user_id, ?
-               FROM client_user_access a JOIN users u ON u.id = a.user_id
-               WHERE a.client_id = ? AND a.status = 'active' AND u.status = 'active'`,
-              messageId.replace(/^smg_/, 'ntf_'),
-              `Reply on ${r.reference}: ${r.subject}`,
-              input.body.slice(0, 200),
-              `/portal/support/${id}`,
-              id,
-              `support_reply:${messageId}`,
-              now,
-              r.client_id,
-            ),
+            notifyClientUsers(ctx, r.client_id, {
+              type: 'support.replied',
+              title: `Reply on ${r.reference}: ${r.subject}`,
+              body: input.body.slice(0, 200),
+              link: `/portal/support/${id}`,
+              entityType: 'support_request',
+              entityId: id,
+              dedupeKey: `support_reply:${messageId}`,
+            }),
           ],
+    )
+    // The assignee hears about replies and notes someone else added (notifyUser skips the author).
+    .addAll(
+      r.assigned_to
+        ? [
+            notifyUser(ctx, r.assigned_to, {
+              type: 'support.replied',
+              title: `${input.internal ? 'Internal note' : 'Reply'} on ${r.reference}: ${r.subject}`,
+              body: input.body.slice(0, 200),
+              link: `/admin/support/${id}`,
+              entityType: 'support_request',
+              entityId: id,
+              dedupeKey: `support_reply_staff:${messageId}`,
+            }),
+          ]
+        : [],
     )
     .addAll(job ? [job.stmt] : [])
     .add(

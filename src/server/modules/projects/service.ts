@@ -13,6 +13,7 @@ import { auditStmt, auditWhen } from '../../lib/audit';
 import { businessYear } from '../../lib/dates';
 import { conflict, notFound, validationError } from '../../lib/errors';
 import { newId } from '../../lib/ids';
+import { notifyClientUsers, notifyUser } from '../notifications';
 import { assertCan, can } from '../../lib/policies';
 import { numberSqlExpr, sequenceKey } from '../../lib/sequences';
 import { dispatch, enqueue } from '../../jobs/outbox';
@@ -612,9 +613,56 @@ export async function addMilestone(ctx: RequestContext, projectId: string, input
   return { id };
 }
 
+const MILESTONE_STATUS_LABEL: Record<string, string> = {
+  pending: 'not started',
+  in_progress: 'in progress',
+  completed: 'completed',
+  cancelled: 'cancelled',
+};
+
+/**
+ * "Milestone updated" notifications when a milestone's status changes: the project team (staff, not the person making
+ * the change) and, for client-visible milestones, the client's portal users (in-app).
+ */
+async function milestoneNotifications(
+  ctx: RequestContext,
+  p: ProjectRow,
+  id: string,
+  before: { status: string; client_visible: number } | null,
+  input: MilestoneInput,
+): Promise<D1PreparedStatement[]> {
+  if (!before || before.status === input.status) return [];
+  const { results: team } = await ctx.db
+    .prepare('SELECT user_id FROM project_members WHERE project_id = ?')
+    .bind(p.id)
+    .all<{ user_id: string }>();
+  const recipients = new Set(team.map((t) => t.user_id));
+  if (p.created_by) recipients.add(p.created_by);
+  const n = {
+    type: 'milestone.updated',
+    title: `Milestone ${MILESTONE_STATUS_LABEL[input.status] ?? input.status}: ${input.title}`,
+    body: `${p.reference} · ${p.name}`,
+    entityType: 'project',
+    entityId: p.id,
+  };
+  const key = `milestone:${id}:${input.status}:${ctx.now().getTime()}`;
+  return [
+    ...[...recipients].map((u) => notifyUser(ctx, u, { ...n, link: `/admin/projects/${p.id}`, dedupeKey: key })),
+    ...(input.clientVisible
+      ? [notifyClientUsers(ctx, p.client_id, { ...n, link: `/portal/projects/${p.id}`, dedupeKey: key })]
+      : []),
+  ];
+}
+
 export async function updateMilestone(ctx: RequestContext, projectId: string, id: string, input: MilestoneInput) {
   const p = await loadManaged(ctx, projectId);
   await checkInvoice(ctx, p, input.invoiceId);
+  const before = await ctx.db
+    .prepare('SELECT status, client_visible FROM project_milestones WHERE id = ? AND project_id = ?')
+    .bind(id, projectId)
+    .first<{ status: string; client_visible: number }>();
+  if (!before) throw notFound();
+  const notices = await milestoneNotifications(ctx, p, id, before, input);
   const now = ctx.now().toISOString();
   const res = await new Batch(ctx.db)
     .add(
@@ -639,6 +687,7 @@ export async function updateMilestone(ctx: RequestContext, projectId: string, id
     )
     .add(progressStmt(ctx, projectId))
     .add(touch(ctx, projectId))
+    .addAll(notices)
     .add(audit(ctx, projectId, 'project.milestone_updated', { milestoneId: id, status: input.status }))
     .run();
   if (res.changes('milestone') !== 1) throw notFound();
@@ -849,21 +898,15 @@ export async function postUpdate(ctx: RequestContext, projectId: string, input: 
     .addAll(
       toClient
         ? [
-            stmt(
-              ctx.db,
-              `INSERT OR IGNORE INTO notifications (id, user_id, type, title, body, link, entity_type, entity_id, dedupe_key, created_at)
-               SELECT ? || '_' || a.user_id, a.user_id, 'milestone.updated', ?, ?, ?, 'project', ?, ? || ':' || a.user_id, ?
-               FROM client_user_access a JOIN users u ON u.id = a.user_id
-               WHERE a.client_id = ? AND a.status = 'active' AND u.status = 'active'`,
-              id.replace(/^pup_/, 'ntf_'),
-              `New update on ${p.name}`,
-              input.body.slice(0, 200),
-              `/portal/projects/${projectId}`,
-              projectId,
-              `project_update:${id}`,
-              now,
-              p.client_id,
-            ),
+            notifyClientUsers(ctx, p.client_id, {
+              type: 'milestone.updated',
+              title: `New update on ${p.name}`,
+              body: input.body.slice(0, 200),
+              link: `/portal/projects/${projectId}`,
+              entityType: 'project',
+              entityId: projectId,
+              dedupeKey: `project_update:${id}`,
+            }),
           ]
         : [],
     )

@@ -5,6 +5,7 @@ import { publishDuePosts } from '../modules/cms/insights';
 import { pruneUnconfirmed } from '../modules/newsletter/service';
 import { applyApplicationRetention, autoClosePostings } from '../modules/careers/service';
 import { sendFollowUpReminders } from '../modules/leads/admin';
+import { dispatchNotificationEmails } from '../modules/notifications';
 import type { QueueMessageBody } from './outbox';
 
 export const CRON_FREQUENT = '*/5 * * * *';
@@ -75,6 +76,7 @@ export async function pruneOperationalData(ctx: RequestContext): Promise<Record<
 export const SCHEDULE: Record<string, [name: string, task: ScheduledTask][]> = {
   [CRON_FREQUENT]: [
     ['outbox-sweep', (ctx) => sweepOutbox(ctx)],
+    ['notification-emails', (ctx) => dispatchNotificationEmails(ctx)],
     ['publish-due-posts', (ctx) => publishDuePosts(ctx)],
     ['auto-close-postings', (ctx) => autoClosePostings(ctx)],
   ],

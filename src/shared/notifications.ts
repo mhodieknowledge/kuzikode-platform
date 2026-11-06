@@ -1,6 +1,11 @@
-/** Notification types users can tune (PRD §4.2 J). Security notices are always emailed and cannot be turned off. */
+/**
+ * Notification types (PRD §4.2 J). `staff` types appear in the admin preferences page; `client` types are portal-only
+ * (the matching client email is sent by the business flow itself). Security notices are always on: they can't be tuned.
+ */
 export const NOTIFICATION_TYPES = [
   { type: 'enquiry.new', label: 'New enquiry', group: 'Sales' },
+  { type: 'lead.assigned', label: 'Lead assigned to you', group: 'Sales' },
+  { type: 'lead.follow_up', label: 'Lead follow-up due', group: 'Sales' },
   { type: 'quotation.viewed', label: 'Quotation viewed', group: 'Sales' },
   { type: 'quotation.accepted', label: 'Quotation accepted', group: 'Sales' },
   { type: 'quotation.rejected', label: 'Quotation rejected', group: 'Sales' },
@@ -13,6 +18,16 @@ export const NOTIFICATION_TYPES = [
   { type: 'support.replied', label: 'Support request replied', group: 'Delivery' },
   { type: 'client.registered', label: 'Client registered', group: 'Clients' },
   { type: 'application.new', label: 'New job application', group: 'Careers' },
+  { type: 'system.job_failed', label: 'Background job failed', group: 'System' },
 ] as const;
-export type NotificationType = (typeof NOTIFICATION_TYPES)[number]['type'];
-export const isNotificationType = (t: string): t is NotificationType => NOTIFICATION_TYPES.some((n) => n.type === t);
+export type NotificationType = (typeof NOTIFICATION_TYPES)[number]['type'] | 'security.alert';
+export const isNotificationType = (t: string): t is (typeof NOTIFICATION_TYPES)[number]['type'] =>
+  NOTIFICATION_TYPES.some((n) => n.type === t);
+
+/** Not tunable: shown in-app always; the email goes out from the auth flow itself (security_alert template). */
+export const SECURITY_TYPE = 'security.alert';
+
+export const notificationLabel = (type: string): string =>
+  type === SECURITY_TYPE
+    ? 'Security alert'
+    : (NOTIFICATION_TYPES.find((n) => n.type === type)?.label ?? 'Notification');

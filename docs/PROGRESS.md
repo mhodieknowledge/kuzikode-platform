@@ -318,3 +318,19 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Tests: integration `cms-admin.test.ts` (4) · e2e `cms.spec.ts` (draft → staff preview with no-store/noindex → visitor never sees it,
   even with ?preview=1 → publish → visible; restores the original hero). verify: unit 228 / integration 180; e2e 59/59 green.
 
+
+## 2026-11-06 12:25 UTC · P3.18 still blocked · P4.16 Notifications ✅
+- P3.18 imagery: Workers AI daily neurons already spent at 12:00 UTC, OpenAI key has no credit, Canva gives only 200 px thumbnails.
+  `img:gen` gained `--provider openai`; BLOCKERS has the owner action. Phase 4 continues.
+- Migration 0010: `notifications.in_app`, `notifications.email_state` (+ partial index on pending).
+- `modules/notifications`: preference-aware `notifyStaffWithPermission` / `notifyUser` / new `notifyClientUsers` / `notifySecurity`
+  (actor excluded by default; `email: false` option), bell/page read only in-app rows, `dispatchNotificationEmails` (cron
+  `*/5`, `notification` template, idempotency `email:notification:<id>`, inactive recipients → skipped).
+- Triggers added: `milestone.updated` on status change (team + portal), `support.replied` to the assignee for others' replies/notes,
+  `security.alert` (new browser sign-in alert + email, password changed/reset, 2FA). New tunable types: lead.assigned, lead.follow_up,
+  system.job_failed. `payment.failed` and `client.registered` triggers are carried into P6.2 / P5.1 (noted in the roadmap AC).
+- UI: /admin/notifications All/Unread filter, type label, per-item "Mark as read", Preferences link.
+- Tests: integration `notifications.test.ts` (9: viewed/rejected, issued/payment received, milestone, support replied, security,
+  preferences, email dispatch double-run, job-failed in-app only, mark-read ownership); support test now checks actor exclusion;
+  e2e admin-shell covers the filter. verify: unit 229 / integration 189 green; e2e admin-shell 5/5.
+- Next step: P4.17 Dashboard (KPIs per currency, charts, recent lists, permission-filtered tiles; test figures against fixtures).

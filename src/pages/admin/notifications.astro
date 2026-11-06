@@ -1,17 +1,24 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import { MarkAllReadButton } from '../../components/admin/AccountActions';
+import { MarkAllReadButton, MarkReadButton } from '../../components/admin/AccountActions';
 import { loadAdminPage } from '../../server/lib/admin-page';
 import { listNotifications } from '../../server/modules/notifications';
+import { notificationLabel } from '../../shared/notifications';
 
 const { ctx } = Astro.locals;
 const page = await loadAdminPage(ctx, Astro.request);
 if (page instanceof Response) return page;
-const { items, unread } = await listNotifications(ctx, page.auth.user.id, { limit: 100 });
+const unreadOnly = Astro.url.searchParams.get('filter') === 'unread';
+const { items, unread } = await listNotifications(ctx, page.auth.user.id, { limit: 100, unreadOnly });
 const fmt = (iso: string) =>
   new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
     new Date(iso),
   );
+const tab = (active: boolean) =>
+  [
+    'rounded-md px-3 py-1.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600',
+    active ? 'bg-ink-950 text-white' : 'text-ink-800 hover:bg-ink-950/5',
+  ].join(' ');
 ---
 
 <AdminLayout title="Notifications" page={page}>
@@ -20,21 +27,36 @@ const fmt = (iso: string) =>
       <h1 class="text-2xl font-bold tracking-display">Notifications</h1>
       <p class="mt-1 text-sm text-ink-600">
         {unread} unread · showing the latest {items.length}
+        {' · '}
+        <a href="/admin/account/notifications" class="underline underline-offset-2 hover:text-ink-950">
+          Preferences
+        </a>
       </p>
     </div>
     {unread > 0 ? <MarkAllReadButton client:load /> : null}
   </div>
+  <nav aria-label="Filter notifications" class="mt-5 flex gap-1">
+    <a href="/admin/notifications" class={tab(!unreadOnly)} aria-current={!unreadOnly ? 'page' : undefined}>
+      All
+    </a>
+    <a href="/admin/notifications?filter=unread" class={tab(unreadOnly)} aria-current={unreadOnly ? 'page' : undefined}>
+      Unread ({unread})
+    </a>
+  </nav>
   {items.length === 0 ? (
-    <p class="mt-8 rounded-lg border border-line bg-surface p-6 text-ink-600">You have no notifications yet.</p>
+    <p class="mt-6 rounded-lg border border-line bg-surface p-6 text-ink-600">
+      {unreadOnly ? 'You have read everything.' : 'You have no notifications yet.'}
+    </p>
   ) : (
-    <ul class="mt-6 divide-y divide-line rounded-lg border border-line bg-surface">
+    <ul class="mt-4 divide-y divide-line rounded-lg border border-line bg-surface">
       {items.map((n) => (
-        <li class="flex gap-3 px-5 py-4">
+        <li class="flex gap-3 px-5 py-4" data-notification={n.id}>
           <span
             class:list={['mt-2 h-2 w-2 shrink-0 rounded-full', n.readAt ? 'bg-transparent' : 'bg-brand-600']}
             aria-hidden="true"
           />
-          <div class="min-w-0">
+          <div class="min-w-0 flex-1">
+            <p class="text-[12px] font-medium uppercase tracking-wide text-ink-600">{notificationLabel(n.type)}</p>
             {n.link ? (
               <a href={n.link} class="font-semibold text-ink-950 hover:underline">
                 {n.title}
@@ -46,6 +68,11 @@ const fmt = (iso: string) =>
             {n.body ? <p class="mt-0.5 text-sm text-ink-600">{n.body}</p> : null}
             <p class="mt-0.5 text-[12px] text-ink-600">{fmt(n.createdAt)}</p>
           </div>
+          {n.readAt ? null : (
+            <div class="shrink-0 self-center">
+              <MarkReadButton client:visible id={n.id} title={n.title} />
+            </div>
+          )}
         </li>
       ))}
     </ul>

@@ -19,6 +19,15 @@ test('protected admin pages redirect to sign-in and come back afterwards', async
   await signIn(page, E2E_USERS.admin.email, '/admin/notifications');
   await expect(page).toHaveURL(/\/admin\/notifications$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Notifications' })).toBeVisible();
+  // P4.16: All / Unread filter and a link to the preferences.
+  const filters = page.getByRole('navigation', { name: 'Filter notifications' });
+  await expect(filters.getByRole('link', { name: 'All' })).toHaveAttribute('aria-current', 'page');
+  await filters.getByRole('link', { name: /^Unread/ }).click();
+  await expect(page).toHaveURL(/\/admin\/notifications\?filter=unread$/);
+  await expect(filters.getByRole('link', { name: /^Unread/ })).toHaveAttribute('aria-current', 'page');
+  await expectAccessible(page);
+  await screenshots(page, 'admin-notifications');
+  await expect(page.getByRole('link', { name: 'Preferences' })).toHaveAttribute('href', '/admin/account/notifications');
 });
 
 test('wrong password shows a generic error', async ({ page }) => {

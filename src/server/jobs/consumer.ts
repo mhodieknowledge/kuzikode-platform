@@ -98,6 +98,9 @@ export async function processOutbox(
         entityType: 'outbox',
         entityId: row.id,
         dedupeKey: `job_failed:${row.id}`,
+        // When email itself is failing, an email about it would only fail (or loop); the bell still shows it.
+        email: row.type !== 'email.send',
+        excludeActor: false,
       }),
       auditStmt(ctx, {
         action: 'job.failed',

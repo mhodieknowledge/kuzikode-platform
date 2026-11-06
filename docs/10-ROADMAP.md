@@ -71,7 +71,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P4.13 Expenses** (CRUD, categories, receipts, void, reports, CSV). AC: tests.
 - [x] **P4.14 Support inbox** (threads, internal notes, assignment, statuses, attachments). AC: tests.
 - [x] **P4.15 CMS editors** (pages/sections draft→preview→publish, portfolio, products, announcements, legal, SEO fields, media library with alt text required, publish bumps content_version). AC: preview doesn't leak drafts publicly.
-- [ ] **P4.16 Notifications** (in-app list, read/unread, preferences, email dispatch per prefs, all types in PRD §4.2 J). AC: one test per type trigger.
+- [x] **P4.16 Notifications** (in-app list, read/unread, preferences, email dispatch per prefs, all types in PRD §4.2 J). AC: one test per type trigger.
 - [ ] **P4.17 Dashboard** (KPIs per currency, charts, recent lists, permission-filtered tiles). AC: figures match fixtures exactly in a test.
 - [ ] **P4.19 Packages & pricing admin** (packages, features, add-ons, comparison order, price-review flag + dashboard warning, "Add package" in quotation editor). AC: price-copy test.
 - [ ] **P4.20 Subscriptions & recurring billing** + **managed services register** with renewal reminders and portal "Your services". AC: double-run cron test. MRR tile correct.
@@ -81,7 +81,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [ ] **P4.18 Reports & export** (revenue, ageing, conversion, expenses, indicative profit, CSV, data export per module, audit log viewer + export). AC: tests on aggregates.
 
 ## Phase 5 — Client portal
-- [ ] **P5.1 Portal auth UX** (accept invite, login, reset, verify email, sessions, profile, optional approved registration flow off by default). AC: tests + no auto-linking by email.
+- [ ] **P5.1 Portal auth UX** (accept invite, login, reset, verify email, sessions, profile, optional approved registration flow off by default). AC: tests + no auto-linking by email. A completed registration raises `client.registered` for `clients.view` staff, with a test (carried over from P4.16).
 - [ ] **P5.2 Portal overview** (outstanding balance per currency, open quotations, active projects, recent activity). AC: visual QA.
 - [ ] **P5.3 Quotations** (list, view, PDF, accept/reject). AC: isolation tests.
 - [ ] **P5.4 Invoices & credit notes** (list, view, PDF, Pay now). AC: isolation tests.
@@ -92,7 +92,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 
 ## Phase 6 — Payments & email integrations
 - [ ] **P6.1 `packages/payments` workspace package** (interface, types, money helpers, adapter conformance kit, mock provider, README + extraction guide + "writing a new adapter" guide, own tests in CI) + app router (accounts + routes) + mock checkout page. AC: mock unreachable in production config (test).
-- [ ] **P6.2 Payments service** (initiate, attempts reuse, callback endpoint, verify, apply, state machine, reversal, overpayment, idempotency). AC: all docs/06 §5 tests.
+- [ ] **P6.2 Payments service** (initiate, attempts reuse, callback endpoint, verify, apply, state machine, reversal, overpayment, idempotency). AC: all docs/06 §5 tests. Also: a failed/cancelled attempt raises a `payment.failed` notification (`notifyStaffWithPermission(ctx, 'payments.view', …)` in the same batch) with a test (carried over from P4.16).
 - [ ] **P6.3 Paynow adapter (launch)**: redirect + express (EcoCash, OneMoney, InnBucks, O'mari OTP), SHA-512 hash in/out, polling, mapper, redaction. AC: docs' hash vectors pass, conformance kit passes, mocked-HTTP integration tests.
 - [ ] **P6.3b PesePay adapter (alternative)**: AES-256-CBC, initiate, check, mapper. AC: conformance kit passes. Test that switching the route from Paynow to PesePay changes only new attempts.
 - [ ] **P6.3c Admin: payment accounts & routing** (Super Admin): accounts list with credentials found/missing, mode, methods; routes editor per app/currency/method; audited. Portal "Pay now" shows the methods for the routed account.

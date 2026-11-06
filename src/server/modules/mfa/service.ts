@@ -10,6 +10,7 @@ import { enforce } from '../../lib/rate-limit';
 import { generateBackupCodes, generateSecret, normalizeBackupCode, otpauthUri, verifyTotp } from '../../lib/totp';
 import { dispatch, enqueue } from '../../jobs/outbox';
 import type { AuthState } from '../auth/service';
+import { notifySecurity } from '../notifications';
 
 /** Roles that must use 2FA. */
 export const MFA_REQUIRED_ROLES = ['super_admin', 'finance_manager'];
@@ -69,8 +70,15 @@ export async function startEnrolment(ctx: RequestContext): Promise<{ secret: str
   return { secret, otpauthUri: otpauthUri(secret, auth.user.email) };
 }
 
+/** The security_alert email plus the matching in-app notice (always on), for the caller's batch. */
 function securityEmail(ctx: RequestContext, auth: AuthState, key: string) {
-  return enqueue(ctx, {
+  const notice = notifySecurity(ctx, auth.user.id, {
+    title: 'Two-factor authentication settings changed',
+    body: "If this wasn't you, reset your password straight away.",
+    link: '/admin/account/security',
+    dedupeKey: `security:mfa:${key}`,
+  });
+  const job = enqueue(ctx, {
     type: 'email.send',
     payload: {
       template: 'security_alert',
@@ -79,6 +87,7 @@ function securityEmail(ctx: RequestContext, auth: AuthState, key: string) {
     },
     idempotencyKey: `email:security:mfa:${auth.user.id}:${key}`,
   });
+  return { ...job, notice };
 }
 
 /** Confirms enrolment with a code. Returns 10 backup codes, shown once. Marks the current session as verified. */
@@ -105,7 +114,8 @@ export async function confirmEnrolment(ctx: RequestContext, code: string): Promi
     .sql('DELETE FROM user_backup_codes WHERE user_id = ?', auth.user.id)
     .sql('UPDATE sessions SET mfa_verified = 1 WHERE id = ?', auth.session.id)
     .add(auditStmt(ctx, { action: 'auth.mfa_enabled', entityType: 'user', entityId: auth.user.id }))
-    .add(email.stmt);
+    .add(email.stmt)
+    .add(email.notice);
   for (const c of codes) {
     batch.sql(
       'INSERT INTO user_backup_codes (id, user_id, code_hash, created_at) VALUES (?, ?, ?, ?)',
@@ -192,6 +202,7 @@ export async function disable(ctx: RequestContext, input: { password: string; co
     .sql('DELETE FROM user_mfa WHERE user_id = ?', auth.user.id)
     .add(auditStmt(ctx, { action: 'auth.mfa_disabled', entityType: 'user', entityId: auth.user.id }))
     .add(email.stmt)
+    .add(email.notice)
     .run();
   dispatch(ctx, [email.id]);
 }

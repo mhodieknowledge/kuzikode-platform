@@ -34,6 +34,7 @@ describe('support inbox (P4.14)', () => {
 
   it('opens a numbered request on a client’s behalf and notifies support staff', async () => {
     const support = await staff(['support_staff']);
+    const colleague = await createStaff(['support_staff']);
     const client = await createClient();
     const res = await S_(support, '', {
       clientId: client.id,
@@ -45,9 +46,14 @@ describe('support inbox (P4.14)', () => {
     expect(res.body.data.reference).toMatch(/^SUP-\d{4}-\d{4}$/);
     const r = await row('SELECT * FROM support_requests WHERE id = ?', res.body.data.id);
     expect(r).toMatchObject({ status: 'open', priority: 'high', opened_by: support.id });
-    expect(
-      (await row("SELECT COUNT(*) AS n FROM notifications WHERE type = 'support.created' AND entity_id = ?", r.id)).n,
-    ).toBeGreaterThan(0);
+    const notified = (
+      await env.DB.prepare("SELECT user_id FROM notifications WHERE type = 'support.created' AND entity_id = ?")
+        .bind(r.id)
+        .all<{ user_id: string }>()
+    ).results.map((n) => n.user_id);
+    // Colleagues hear about it; the person who opened it doesn't get a notification about their own action.
+    expect(notified).toContain(colleague.id);
+    expect(notified).not.toContain(support.id);
     expect((await S_(support, '', { clientId: client.id, subject: 'x', body: 'y' })).status).toBe(422);
     const list = await S_(support, `?clientId=${client.id}`);
     expect(list.body.data.items.map((i: any) => i.id)).toEqual([r.id]);

@@ -443,6 +443,33 @@ const defs = {
         ],
       }),
   },
+  notification: {
+    schema: z.object({
+      name: z.string(),
+      label: z.string(),
+      title: z.string(),
+      body: z.string().optional(),
+      link: url.optional(),
+    }),
+    render: (
+      b: Brand,
+      d: { name: string; label: string; title: string; body?: string | undefined; link?: string | undefined },
+    ) =>
+      renderEmail(b, {
+        subject: `${d.title} · ${b.companyName}`,
+        preheader: d.body ? d.body.slice(0, 120) : d.label,
+        heading: d.title,
+        blocks: [
+          { kind: 'p', text: `Hi ${d.name},` },
+          ...(d.body ? [{ kind: 'p' as const, text: d.body }] : []),
+          ...(d.link ? [{ kind: 'button' as const, text: 'Open in admin', href: d.link }] : []),
+          {
+            kind: 'small',
+            text: `You get this email because "${d.label}" emails are on. Change it under Account → Notification preferences.`,
+          },
+        ],
+      }),
+  },
   support_reply: {
     schema: z.object({ name: z.string(), reference: z.string(), subject: z.string(), body: z.string() }),
     render: (b: Brand, d: { name: string; reference: string; subject: string; body: string }) =>

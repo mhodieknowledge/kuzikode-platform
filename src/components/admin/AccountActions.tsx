@@ -19,6 +19,24 @@ export function MarkAllReadButton() {
   );
 }
 
+/** Marks one notification as read. */
+export function MarkReadButton({ id, title }: { id: string; title: string }) {
+  const [busy, setBusy] = useState(false);
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      loading={busy}
+      onClick={() => {
+        setBusy(true);
+        void apiFetch('/api/v1/admin/notifications/read', { body: { ids: [id] } }).finally(reload);
+      }}
+    >
+      Mark as read<span className="sr-only">: {title}</span>
+    </Button>
+  );
+}
+
 /** Revoke one other session, or every session (which signs this browser out too). */
 export function SessionActions({ sessionId }: { sessionId?: string }) {
   const [open, setOpen] = useState(false);

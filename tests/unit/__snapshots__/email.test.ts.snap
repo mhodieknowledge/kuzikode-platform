@@ -152,6 +152,25 @@ exports[`templates > newsletter_confirmation renders HTML and text with the bran
 </table></td></tr></table></body></html>"
 `;
 
+exports[`templates > notification renders HTML and text with the branded layout 1`] = `
+"<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>New enquiry from Ann Moyo · Kuzikode Technologies</title></head>
+<body style="margin:0;padding:0;background:#F7F8FA;font-family:Inter,'Segoe UI',Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">Website for a bakery, budget USD 1,000–2,500.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F7F8FA"><tr><td align="center" style="padding:24px 12px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #E4E7EE;border-radius:10px">
+<tr><td style="padding:24px 32px;border-bottom:1px solid #E4E7EE"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#0A0F1C"><span style="color:#2747E8">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:28px 32px 12px">
+<h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#0A0F1C;font-weight:700">New enquiry from Ann Moyo</h1>
+<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#1C2333">Hi Tendai,</p>
+<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#1C2333">Website for a bakery, budget USD 1,000–2,500.</p>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:#2747E8;border-radius:6px"><a href="https://kuzikode.example/admin/enquiries/enq_1" style="display:inline-block;padding:12px 22px;font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none">Open in admin</a></td></tr></table>
+<p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#475066">You get this email because &quot;New enquiry&quot; emails are on. Change it under Account → Notification preferences.</p>
+</td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #E4E7EE;font-size:12px;line-height:1.5;color:#475066">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#475066">kuzikode.example</a></td></tr>
+</table></td></tr></table></body></html>"
+`;
+
 exports[`templates > password_reset renders HTML and text with the branded layout 1`] = `
 "<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>Reset your Kuzikode password</title></head>

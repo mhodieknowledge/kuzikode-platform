@@ -1,0 +1,24 @@
+---
+import AuthLayout from '../../layouts/AuthLayout.astro';
+import { RegisterForm } from '../../components/auth/AuthForms';
+import { portalRegistrationEnabled } from '../../server/modules/auth/service';
+
+const { ctx } = Astro.locals;
+// Off by default (PRD §5): without the setting there is no registration page at all.
+if (!(await portalRegistrationEnabled(ctx))) return new Response(null, { status: 404 });
+---
+
+<AuthLayout
+  title="Create an account"
+  heading="Create a portal account"
+  intro="We will email you a link to choose your password. Our team then links your account to your company."
+  area="Client portal"
+>
+  <RegisterForm client:load siteKey={ctx.config.turnstileSiteKey} />
+  <p slot="after" class="mt-6 text-center text-sm text-ink-600">
+    Already have an account?{' '}
+    <a href="/portal/login" class="font-semibold text-brand-600 underline underline-offset-2">
+      Sign in
+    </a>
+  </p>
+</AuthLayout>

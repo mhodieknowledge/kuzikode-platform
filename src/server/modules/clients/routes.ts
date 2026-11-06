@@ -26,6 +26,21 @@ export function clientRoutes() {
     const { primaryContact, ...data } = await jsonBody(c, createSchema);
     return c.json({ data: await clients.createClient(c.var.ctx, data, primaryContact) }, 201);
   });
+  r.get('/portal-signups', requirePermission('clients.view'), async (c) =>
+    c.json({ data: await clients.listPortalSignups(c.var.ctx) }),
+  );
+  r.post('/portal-signups/:userId/link', requirePermission('clients.update'), async (c) => {
+    const input = await jsonBody(
+      c,
+      z.object({ clientId: z.string().min(1).max(64), role: z.enum(['owner', 'member', 'billing']) }).strict(),
+    );
+    await clients.linkPortalSignup(c.var.ctx, c.req.param('userId'), input);
+    return c.json(ok);
+  });
+  r.post('/portal-signups/:userId/decline', requirePermission('clients.update'), async (c) => {
+    await clients.declinePortalSignup(c.var.ctx, c.req.param('userId'));
+    return c.json(ok);
+  });
   r.get('/:id', requirePermission('clients.view'), async (c) =>
     c.json({ data: await clients.getClient(c.var.ctx, c.req.param('id')) }),
   );

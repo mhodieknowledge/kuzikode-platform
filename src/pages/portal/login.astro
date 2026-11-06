@@ -1,0 +1,32 @@
+---
+import AuthLayout from '../../layouts/AuthLayout.astro';
+import { LoginForm } from '../../components/auth/AuthForms';
+import { portalAlreadySignedIn, safePortalNext } from '../../server/lib/portal-page';
+import { portalRegistrationEnabled } from '../../server/modules/auth/service';
+
+const { ctx } = Astro.locals;
+const next = safePortalNext(Astro.url.searchParams.get('next'));
+if (await portalAlreadySignedIn(ctx, Astro.request)) return Astro.redirect(next, 303);
+const canRegister = await portalRegistrationEnabled(ctx);
+---
+
+<AuthLayout
+  title="Sign in"
+  heading="Sign in to your portal"
+  intro="See your quotations, invoices, payments and projects with Kuzikode."
+  area="Client portal"
+>
+  <LoginForm client:load audience="portal" next={next} siteKey={ctx.config.turnstileSiteKey} />
+  <p slot="after" class="mt-6 text-center text-sm text-ink-600">
+    {canRegister ? (
+      <>
+        New here?{' '}
+        <a href="/portal/register" class="font-semibold text-brand-600 underline underline-offset-2">
+          Create an account
+        </a>
+      </>
+    ) : (
+      <>Portal accounts are created by invitation from Kuzikode.</>
+    )}
+  </p>
+</AuthLayout>

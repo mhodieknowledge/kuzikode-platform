@@ -440,3 +440,24 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Phase 4 is complete. Next step: P5.1 Portal auth UX (accept invite, login, reset, verify email, sessions, profile, optional approved
   registration off by default; no auto-linking by email; `client.registered` notification for clients.view staff, with a test). Read
   docs/07 portal sections and check src/pages/portal + modules/auth for what exists.
+
+## 2026-11-06 18:50 UTC · P5.1 Portal auth UX ✅
+- Connectors present (Figma, Canva, Cloudflare). Hand-off session.
+- Backend: `registerPortalAccount` (setting-gated 404, Turnstile, per-IP + per-email limits, generic reply, set-password link via
+  `invite_client` token with registration metadata), `acceptInvitation` raises `client.registered` (clients.view staff, deduped) +
+  audit on a completed sign-up, `updateProfile` (name, phone; audited) for both audiences. Clients: `listPortalSignups`,
+  `linkPortalSignup` (explicit, audited, notifies the user), `declinePortalSignup` (disable + revoke sessions). Routes:
+  `POST /auth/portal/register`, `PUT /auth/{admin|portal}/profile`, `/admin/clients/portal-signups[/:userId/link|decline]`.
+  Setting `portal.self_registration` (Settings → General → Client portal).
+- Pages: `server/lib/portal-page.ts` guard; /portal (overview with "waiting to be linked" state), /portal/login, register,
+  forgot-password, reset-password, accept-invite, verify-email (+ /admin/verify-email, which was missing), password, mfa, mfa/setup,
+  account (details, email status + resend, companies, password, 2FA), account/sessions. PortalLayout: account menu with sign out,
+  mobile nav row. Admin /admin/clients/portal-signups + link from Clients when sign-ups wait. Session/2FA actions take an audience.
+- Tests: integration `portal-auth.test.ts` (8: off by default, Turnstile, no sign-in before finishing, no enumeration, no auto-link with
+  matching contact email, notification only to clients.view staff, link/decline permissions and guards, re-registration replaces the
+  link, profile CSRF/validation/audit) · e2e `portal-auth.spec.ts` (sign-in → profile → devices → sign out; sign-up → mailbox link →
+  password → unlinked state → staff link → client visible; axe + 375/768/1440). verify: unit 232 / integration 233 green; clients,
+  settings, admin-shell e2e green.
+- Next step: P5.2 Portal overview (outstanding balance per currency, open quotations, active projects, recent activity) on
+  `src/pages/portal/index.astro` (keep the unlinked state). Every query scoped by `page.auth.clientIds`; add a `modules/portal`
+  service for portal reads. Add nav items in `PortalLayout.astro` as sections ship.

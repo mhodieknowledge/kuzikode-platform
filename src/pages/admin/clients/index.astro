@@ -1,7 +1,7 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { loadAdminPage } from '../../../server/lib/admin-page';
-import { allTags, listClients } from '../../../server/modules/clients';
+import { allTags, listClients, listPortalSignups } from '../../../server/modules/clients';
 import { clientListQuery } from '../../../shared/schemas/clients';
 
 const { ctx } = Astro.locals;
@@ -9,7 +9,7 @@ const page = await loadAdminPage(ctx, Astro.request, { permission: 'clients.view
 if (page instanceof Response) return page;
 const parsed = clientListQuery.safeParse(Object.fromEntries(Astro.url.searchParams));
 const filter = parsed.success ? parsed.data : clientListQuery.parse({});
-const [result, tags] = await Promise.all([listClients(ctx, filter), allTags(ctx)]);
+const [result, tags, signups] = await Promise.all([listClients(ctx, filter), allTags(ctx), listPortalSignups(ctx)]);
 const canCreate = page.auth.permissions.has('clients.create');
 const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
 const pageHref = (n: number) => {
@@ -27,14 +27,24 @@ const pageHref = (n: number) => {
         {result.total} {result.total === 1 ? 'client' : 'clients'}
       </p>
     </div>
-    {canCreate ? (
-      <a
-        href="/admin/clients/new"
-        class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
-      >
-        New client
-      </a>
-    ) : null}
+    <div class="flex flex-wrap items-center gap-3">
+      {signups.length > 0 ? (
+        <a
+          href="/admin/clients/portal-signups"
+          class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+        >
+          Portal sign-ups ({signups.length})
+        </a>
+      ) : null}
+      {canCreate ? (
+        <a
+          href="/admin/clients/new"
+          class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
+        >
+          New client
+        </a>
+      ) : null}
+    </div>
   </div>
   <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter clients">
     <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">

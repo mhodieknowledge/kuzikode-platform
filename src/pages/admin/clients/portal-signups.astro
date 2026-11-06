@@ -1,0 +1,60 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { PortalSignupActions } from '../../../components/admin/ClientsAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { listPortalSignups } from '../../../server/modules/clients';
+import { portalRegistrationEnabled } from '../../../server/modules/auth/service';
+import { harareDateTime } from '../../../shared/devices';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'clients.view' });
+if (page instanceof Response) return page;
+const [signups, enabled] = await Promise.all([listPortalSignups(ctx), portalRegistrationEnabled(ctx)]);
+const canEdit = page.auth.permissions.has('clients.update');
+const clients = canEdit
+  ? (
+      await ctx.db
+        .prepare(
+          "SELECT id, display_name AS name FROM clients WHERE status = 'active' ORDER BY display_name LIMIT 1000",
+        )
+        .all<{ id: string; name: string }>()
+    ).results
+  : [];
+---
+
+<AdminLayout title="Portal sign-ups" page={page}>
+  <p class="text-sm">
+    <a href="/admin/clients" class="font-semibold text-brand-600 underline underline-offset-2">
+      Clients
+    </a>
+  </p>
+  <h1 class="mt-2 text-2xl font-bold tracking-display">Portal sign-ups</h1>
+  <p class="mt-1 max-w-2xl text-sm text-ink-600">
+    People who created a portal account themselves. They see nothing until you link them to a client. Accounts are never
+    linked automatically, even when the email matches a contact.
+    {enabled ? ' Self-registration is on.' : ' Self-registration is off (Settings → General → Client portal).'}
+  </p>
+  {signups.length === 0 ? (
+    <p class="mt-6 rounded-lg border border-line bg-surface px-5 py-10 text-center text-ink-600">
+      No sign-ups are waiting.
+    </p>
+  ) : (
+    <ul class="mt-6 divide-y divide-line rounded-lg border border-line bg-surface" aria-label="Portal sign-ups">
+      {signups.map((s) => (
+        <li class="flex flex-wrap items-start justify-between gap-4 px-5 py-4">
+          <div class="min-w-0 text-sm">
+            <p class="font-semibold text-ink-950">{s.name}</p>
+            <p class="text-ink-800">
+              {s.email}
+              {s.phone ? ` · ${s.phone}` : ''}
+            </p>
+            <p class="text-[13px] text-ink-600">
+              {s.company ? `Says they are from ${s.company} · ` : ''}Signed up {harareDateTime(s.registeredAt)}
+            </p>
+          </div>
+          {canEdit ? <PortalSignupActions client:visible userId={s.userId} name={s.name} clients={clients} /> : null}
+        </li>
+      ))}
+    </ul>
+  )}
+</AdminLayout>

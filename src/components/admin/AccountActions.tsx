@@ -38,7 +38,13 @@ export function MarkReadButton({ id, title }: { id: string; title: string }) {
 }
 
 /** Revoke one other session, or every session (which signs this browser out too). */
-export function SessionActions({ sessionId }: { sessionId?: string }) {
+export function SessionActions({
+  sessionId,
+  audience = 'admin',
+}: {
+  sessionId?: string;
+  audience?: 'admin' | 'portal';
+}) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   if (sessionId)
@@ -49,9 +55,9 @@ export function SessionActions({ sessionId }: { sessionId?: string }) {
         loading={busy}
         onClick={() => {
           setBusy(true);
-          void apiFetch(`/api/v1/auth/admin/sessions/${encodeURIComponent(sessionId)}`, { method: 'DELETE' }).finally(
-            reload,
-          );
+          void apiFetch(`/api/v1/auth/${audience}/sessions/${encodeURIComponent(sessionId)}`, {
+            method: 'DELETE',
+          }).finally(reload);
         }}
       >
         Sign out
@@ -70,8 +76,8 @@ export function SessionActions({ sessionId }: { sessionId?: string }) {
         confirmLabel="Sign out everywhere"
         destructive
         onConfirm={async () => {
-          await apiFetch('/api/v1/auth/admin/logout-all', { method: 'POST', body: {} }).catch(() => undefined);
-          window.location.assign('/admin/login');
+          await apiFetch(`/api/v1/auth/${audience}/logout-all`, { method: 'POST', body: {} }).catch(() => undefined);
+          window.location.assign(`/${audience}/login`);
         }}
       />
     </>
@@ -79,7 +85,7 @@ export function SessionActions({ sessionId }: { sessionId?: string }) {
 }
 
 /** Turn 2FA off (only when the role does not require it) or get new backup codes; both need password + code. */
-export function MfaManage({ canDisable }: { canDisable: boolean }) {
+export function MfaManage({ canDisable, audience = 'admin' }: { canDisable: boolean; audience?: 'admin' | 'portal' }) {
   const [mode, setMode] = useState<'disable' | 'codes' | null>(null);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [error, setError] = useState<string | null>(null);
@@ -95,10 +101,10 @@ export function MfaManage({ canDisable }: { canDisable: boolean }) {
     setError(null);
     try {
       if (mode === 'disable') {
-        await apiFetch('/api/v1/auth/admin/mfa/disable', { body });
+        await apiFetch(`/api/v1/auth/${audience}/mfa/disable`, { body });
         reload();
       } else {
-        const res = await apiFetch<{ data: { backupCodes: string[] } }>('/api/v1/auth/admin/mfa/backup-codes', {
+        const res = await apiFetch<{ data: { backupCodes: string[] } }>(`/api/v1/auth/${audience}/mfa/backup-codes`, {
           body,
         });
         setCodes(res.data.backupCodes);

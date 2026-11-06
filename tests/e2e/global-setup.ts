@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { hashPassword } from '../../src/server/lib/crypto';
-import { E2E_PASSWORD, E2E_USERS } from './users';
+import { E2E_PASSWORD, E2E_PORTAL_USER, E2E_USERS } from './users';
 
 const wrangler = (...args: string[]) => execFileSync('npx', ['wrangler', ...args], { stdio: 'pipe' });
 const q = (s: string) => `'${s.replace(/'/g, "''")}'`;
@@ -37,6 +37,19 @@ export default async function globalSetup() {
          failed_login_count = 0, locked_until = NULL;`,
       `INSERT INTO user_roles (user_id, role_id) SELECT ${q(u.id)}, id FROM roles WHERE key = ${q(u.role)};`,
     ]),
+    // portal specs: one linked client account, sessions and 2FA reset; leftover self-registrations are removed.
+    `INSERT INTO clients (id, client_number, type, display_name, default_currency, email)
+     VALUES (${q(E2E_PORTAL_USER.clientId)}, 'CL-E2E-PORTAL', 'business', ${q(E2E_PORTAL_USER.clientName)}, 'USD', 'hello@borrowdale-florists.example')
+     ON CONFLICT(id) DO NOTHING;`,
+    `INSERT INTO users (id, email, name, user_type, password_hash, status, must_change_password, email_verified_at)
+     VALUES (${q(E2E_PORTAL_USER.id)}, ${q(E2E_PORTAL_USER.email)}, ${q(E2E_PORTAL_USER.name)}, 'client', ${q(hash)}, 'active', 0, ${q(now)})
+     ON CONFLICT(id) DO UPDATE SET password_hash = excluded.password_hash, status = 'active', name = excluded.name,
+       phone = NULL, must_change_password = 0, failed_login_count = 0, locked_until = NULL;`,
+    `DELETE FROM sessions WHERE user_id = ${q(E2E_PORTAL_USER.id)};`,
+    `DELETE FROM user_mfa WHERE user_id = ${q(E2E_PORTAL_USER.id)};`,
+    `INSERT INTO client_user_access (id, client_id, user_id, role, status)
+     VALUES ('cua_e2e_portal', ${q(E2E_PORTAL_USER.clientId)}, ${q(E2E_PORTAL_USER.id)}, 'owner', 'active')
+     ON CONFLICT(client_id, user_id) DO UPDATE SET status = 'active';`,
     // Divisions left behind by an interrupted services.spec run (it normally deletes its own).
     "DELETE FROM services WHERE category_id IN (SELECT id FROM service_categories WHERE slug GLOB 'workshops-[0-9]*');",
     "DELETE FROM service_categories WHERE slug GLOB 'workshops-[0-9]*';",

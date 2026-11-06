@@ -82,6 +82,20 @@ export const SETTING_SECTIONS: SettingSection[] = [
     ],
   },
   {
+    id: 'portal',
+    title: 'Client portal',
+    description: 'Who can create a client portal account.',
+    page: 'general',
+    fields: [
+      {
+        key: 'portal.self_registration',
+        label: 'Let people create a portal account themselves',
+        type: 'bool',
+        help: 'Off by default. New accounts see nothing until you link them to a client (Clients → Portal sign-ups).',
+      },
+    ],
+  },
+  {
     id: 'social',
     title: 'Social media',
     description: 'Full https:// links. Blank links are hidden.',

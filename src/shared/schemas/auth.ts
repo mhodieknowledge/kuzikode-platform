@@ -46,3 +46,26 @@ export const acceptInviteSchema = z
   .strict();
 
 export const verifyEmailSchema = z.object({ token: z.string().min(20).max(200) }).strict();
+
+/** Optional portal self-registration (PRD §5, off by default). The account sees nothing until staff link it. */
+export const registerSchema = z
+  .object({
+    name: z.string().trim().min(1, 'Enter your name.').max(120),
+    company: z.string().trim().max(160).optional(),
+    email: emailSchema,
+    turnstileToken: z.string().max(2048).optional(),
+  })
+  .strict();
+export type RegisterInput = z.infer<typeof registerSchema>;
+
+const phoneSchema = z
+  .string()
+  .trim()
+  .max(40)
+  .refine((v) => v === '' || /^[+\d][\d\s()-]{6,}$/.test(v), 'Enter a valid phone number.');
+
+/** Own profile: name and phone. The email is the sign-in identity and is changed by staff only. */
+export const profileSchema = z
+  .object({ name: z.string().trim().min(1, 'Enter your name.').max(120), phone: phoneSchema })
+  .strict();
+export type ProfileInput = z.infer<typeof profileSchema>;

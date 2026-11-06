@@ -14,6 +14,7 @@ import { assertCan } from '../../lib/policies';
 import { numberSqlExpr, sequenceKey, sequenceStatements } from '../../lib/sequences';
 import { buildInvitation } from '../auth';
 import { dispatch, enqueue } from '../../jobs/outbox';
+import { notifyUser } from '../notifications';
 import { getSettings, settingText } from '../cms';
 
 type ClientData = z.output<typeof clientSchema>;
@@ -630,4 +631,157 @@ export async function setPortalAccess(
         : 'This link is already revoked.',
     );
   }
+}
+
+// ---------------------------------------------------------------- portal sign-ups (optional self-registration)
+
+/** Finished self-registrations that are not linked to any client yet (no pending or active access). */
+const SIGNUP_WHERE = `u.user_type = 'client' AND u.status = 'active'
+  AND NOT EXISTS (SELECT 1 FROM client_user_access a WHERE a.user_id = u.id AND a.status IN ('pending','active'))
+  AND EXISTS (SELECT 1 FROM auth_tokens t WHERE t.user_id = u.id AND t.purpose = 'invite_client'
+              AND t.used_at IS NOT NULL AND json_extract(t.metadata, '$.registration') = 1)`;
+
+export interface PortalSignup {
+  userId: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  company: string | null;
+  registeredAt: string;
+}
+
+export async function listPortalSignups(ctx: RequestContext): Promise<PortalSignup[]> {
+  assertCan(ctx, 'clients.view');
+  const { results } = await ctx.db
+    .prepare(
+      `SELECT u.id, u.name, u.email, u.phone, u.created_at,
+         (SELECT json_extract(t.metadata, '$.company') FROM auth_tokens t WHERE t.user_id = u.id AND t.purpose = 'invite_client'
+          AND t.used_at IS NOT NULL ORDER BY t.used_at DESC LIMIT 1) AS company,
+         (SELECT t.used_at FROM auth_tokens t WHERE t.user_id = u.id AND t.purpose = 'invite_client'
+          AND t.used_at IS NOT NULL ORDER BY t.used_at DESC LIMIT 1) AS registered_at
+       FROM users u WHERE ${SIGNUP_WHERE} ORDER BY registered_at DESC LIMIT 200`,
+    )
+    .all<{
+      id: string;
+      name: string;
+      email: string;
+      phone: string | null;
+      created_at: string;
+      company: string | null;
+      registered_at: string | null;
+    }>();
+  return results.map((r) => ({
+    userId: r.id,
+    name: r.name,
+    email: r.email,
+    phone: r.phone,
+    company: r.company,
+    registeredAt: r.registered_at ?? r.created_at,
+  }));
+}
+
+async function assertSignup(ctx: RequestContext, userId: string): Promise<void> {
+  const row = await ctx.db
+    .prepare(`SELECT 1 AS ok FROM users u WHERE u.id = ? AND ${SIGNUP_WHERE}`)
+    .bind(userId)
+    .first();
+  if (!row) throw notFound();
+}
+
+/** Staff explicitly link a sign-up to a client (the only way a self-registered account gets access). */
+export async function linkPortalSignup(
+  ctx: RequestContext,
+  userId: string,
+  input: { clientId: string; role: 'owner' | 'member' | 'billing' },
+): Promise<void> {
+  assertCan(ctx, 'clients.update');
+  const client = await getClientRow(ctx, input.clientId);
+  if (client.status !== 'active') throw conflict('Restore this client before giving people portal access.');
+  await assertSignup(ctx, userId);
+  const now = ctx.now().toISOString();
+  const accessId = newId('cua', ctx.now().getTime());
+  const res = await new Batch(ctx.db)
+    .add(
+      stmt(
+        ctx.db,
+        `INSERT INTO client_user_access (id, client_id, user_id, role, status, approved_by, approved_at, created_at, updated_at)
+         SELECT ?, ?, u.id, ?, 'active', ?, ?, ?, ? FROM users u WHERE u.id = ? AND ${SIGNUP_WHERE}
+         ON CONFLICT(client_id, user_id) DO UPDATE SET role = excluded.role, status = 'active',
+           approved_by = excluded.approved_by, approved_at = excluded.approved_at, updated_at = excluded.updated_at`,
+        accessId,
+        input.clientId,
+        input.role,
+        ctx.actor.userId,
+        now,
+        now,
+        now,
+        userId,
+      ),
+      'link',
+    )
+    .add(
+      auditWhen(
+        ctx,
+        {
+          action: 'client.portal_linked',
+          entityType: 'client',
+          entityId: input.clientId,
+          after: { userId, role: input.role },
+        },
+        "EXISTS (SELECT 1 FROM client_user_access WHERE client_id = ? AND user_id = ? AND status = 'active' AND approved_at = ?)",
+        input.clientId,
+        userId,
+        now,
+      ),
+    )
+    .add(
+      notifyUser(ctx, userId, {
+        type: 'client.portal_linked',
+        title: `Your account is now linked to ${client.display_name}`,
+        body: 'You can now see your quotations, invoices and projects in the portal.',
+        link: '/portal',
+        dedupeKey: `client.portal_linked:${input.clientId}`,
+      }),
+    )
+    .run();
+  if (res.changes('link') !== 1) throw conflict('This sign-up is no longer waiting to be linked.');
+}
+
+/** Declines a sign-up: the account is disabled and signed out everywhere. */
+export async function declinePortalSignup(ctx: RequestContext, userId: string): Promise<void> {
+  assertCan(ctx, 'clients.update');
+  await assertSignup(ctx, userId);
+  const now = ctx.now().toISOString();
+  const res = await new Batch(ctx.db)
+    .add(
+      stmt(
+        ctx.db,
+        `UPDATE users SET status = 'disabled', updated_at = ? WHERE id IN (SELECT u.id FROM users u WHERE u.id = ? AND ${SIGNUP_WHERE})`,
+        now,
+        userId,
+      ),
+      'decline',
+    )
+    .add(
+      stmt(
+        ctx.db,
+        `UPDATE sessions SET revoked_at = ? WHERE user_id = ? AND revoked_at IS NULL
+         AND EXISTS (SELECT 1 FROM users WHERE id = ? AND status = 'disabled' AND updated_at = ?)`,
+        now,
+        userId,
+        userId,
+        now,
+      ),
+    )
+    .add(
+      auditWhen(
+        ctx,
+        { action: 'client.portal_signup_declined', entityType: 'user', entityId: userId },
+        "EXISTS (SELECT 1 FROM users WHERE id = ? AND status = 'disabled' AND updated_at = ?)",
+        userId,
+        now,
+      ),
+    )
+    .run();
+  if (res.changes('decline') !== 1) throw conflict('This sign-up is no longer waiting to be linked.');
 }

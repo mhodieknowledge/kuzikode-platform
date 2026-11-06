@@ -1,0 +1,15 @@
+---
+import AuthLayout from '../../layouts/AuthLayout.astro';
+import { VerifyEmailForm } from '../../components/auth/AuthForms';
+
+const token = (Astro.url.searchParams.get('token') ?? '').slice(0, 200);
+Astro.response.headers.set('referrer-policy', 'no-referrer');
+---
+
+<AuthLayout title="Confirm your email" heading="Confirm your email address" area="Client portal">
+  {token ? (
+    <VerifyEmailForm client:load audience="portal" token={token} />
+  ) : (
+    <p class="text-ink-600">This link is incomplete. Open the link from your email again.</p>
+  )}
+</AuthLayout>

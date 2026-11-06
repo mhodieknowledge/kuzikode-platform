@@ -5,6 +5,8 @@ import {
   changePasswordSchema,
   forgotPasswordSchema,
   loginSchema,
+  profileSchema,
+  registerSchema,
   resetPasswordSchema,
   verifyEmailSchema,
   type Audience,
@@ -60,6 +62,17 @@ export function authRoutes() {
           mfaEnrolmentRequired: result.mfaEnrolmentRequired,
         },
       });
+    });
+
+    if (audience === 'portal') {
+      a.post('/register', async (c) =>
+        c.json({ data: await auth.registerPortalAccount(c.var.ctx, await jsonBody(c, registerSchema)) }, 202),
+      );
+    }
+
+    a.put('/profile', requireAuth(audience), async (c) => {
+      await auth.updateProfile(c.var.ctx, c.var.ctx.auth!, await jsonBody(c, profileSchema));
+      return c.json({ data: { ok: true } });
     });
 
     a.post('/password/forgot', async (c) => {

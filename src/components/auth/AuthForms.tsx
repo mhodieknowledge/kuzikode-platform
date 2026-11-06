@@ -380,3 +380,102 @@ export function MfaSetupForm({ audience, after }: { audience: Audience; after: s
     </form>
   );
 }
+
+/** Optional portal self-registration (only rendered when the setting is on). The password is chosen from the email link. */
+export function RegisterForm({ siteKey }: { siteKey: string }) {
+  const s = useSubmit();
+  const [message, setMessage] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [reset, setReset] = useState(0);
+  const onToken = useCallback((t: string | null) => setToken(t), []);
+  async function submit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    const company = String(f.get('company') ?? '').trim();
+    await s.run(async () => {
+      try {
+        const res = await apiFetch<{ data: { message: string } }>('/api/v1/auth/portal/register', {
+          body: {
+            name: String(f.get('name') ?? ''),
+            email: f.get('email'),
+            ...(company ? { company } : {}),
+            turnstileToken: token ?? undefined,
+          },
+        });
+        setMessage(res.data.message);
+      } catch (err) {
+        setReset((n) => n + 1);
+        throw err;
+      }
+    });
+  }
+  if (message)
+    return (
+      <Done title="Check your email">
+        <p>{message}</p>
+        <p className="mt-2">
+          Once your account is set up, our team links it to your company. Until then the portal stays empty.
+        </p>
+      </Done>
+    );
+  return (
+    <form onSubmit={submit} method="post" noValidate className="flex flex-col gap-5">
+      <FormAlert message={s.formError} />
+      <Field label="Your name" required error={s.errors['name']}>
+        <Input name="name" autoComplete="name" maxLength={120} />
+      </Field>
+      <Field
+        label="Company"
+        hint="Optional. Helps us link your account to the right client."
+        error={s.errors['company']}
+      >
+        <Input name="company" autoComplete="organization" maxLength={160} />
+      </Field>
+      <Field label="Email" required error={s.errors['email']}>
+        <Input name="email" type="email" autoComplete="email" maxLength={254} />
+      </Field>
+      <div className="flex flex-col gap-1">
+        <Turnstile siteKey={siteKey} onToken={onToken} resetSignal={reset} />
+        {s.errors['turnstile'] ? (
+          <p className="text-[13px] font-medium text-danger-600">{s.errors['turnstile'].join(' ')}</p>
+        ) : null}
+      </div>
+      <Button type="submit" size="lg" loading={s.busy}>
+        Create account
+      </Button>
+    </form>
+  );
+}
+
+/** Confirms an email address from the link in a verification email (one click, so link scanners can't use it up). */
+export function VerifyEmailForm({ audience, token }: { audience: Audience; token: string }) {
+  const s = useSubmit();
+  const [done, setDone] = useState(false);
+  if (done)
+    return (
+      <Done title="Your email is confirmed">
+        <p>
+          <a href={`/${audience}`} className="font-semibold text-brand-600 underline underline-offset-2">
+            Continue
+          </a>
+        </p>
+      </Done>
+    );
+  return (
+    <div className="flex flex-col gap-5">
+      <FormAlert message={s.errors['token'] ? s.errors['token'].join(' ') : s.formError} />
+      <Button
+        size="lg"
+        loading={s.busy}
+        onClick={() =>
+          void s.run(async () => {
+            await apiFetch('/api/v1/auth/email/verify', { body: { token } });
+            setDone(true);
+          })
+        }
+      >
+        Confirm my email address
+      </Button>
+    </div>
+  );
+}

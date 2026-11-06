@@ -1,0 +1,20 @@
+---
+import AuthLayout from '../../../layouts/AuthLayout.astro';
+import { MfaSetupForm } from '../../../components/auth/AuthForms';
+import { loadPortalPage } from '../../../server/lib/portal-page';
+
+const { ctx } = Astro.locals;
+const page = await loadPortalPage(ctx, Astro.request);
+if (page instanceof Response) return page;
+if (page.auth.mfa.enabled) return Astro.redirect('/portal/account', 303);
+---
+
+<AuthLayout
+  title="Set up two-factor authentication"
+  heading="Set up two-factor authentication"
+  intro="Protect your account with a code from your phone each time you sign in."
+  area="Client portal"
+  csrfToken={page.csrfToken}
+>
+  <MfaSetupForm client:load audience="portal" after="/portal/account" />
+</AuthLayout>

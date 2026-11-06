@@ -108,6 +108,13 @@ export const E2E_USERS = {
     role: 'admin',
     mustChange: false,
   },
+  portalAdmin: {
+    id: 'usr_e2e_portal_admin',
+    email: 'e2e-portal-admin@example.com',
+    name: 'Pania Portal',
+    role: 'admin',
+    mustChange: false,
+  },
   newcomer: {
     id: 'usr_e2e_newcomer',
     email: 'e2e-newcomer@example.com',
@@ -115,4 +122,13 @@ export const E2E_USERS = {
     role: 'support_staff',
     mustChange: true,
   },
+} as const;
+
+/** A fixed client-portal account (user_type client) linked to one client, for the portal specs. */
+export const E2E_PORTAL_USER = {
+  id: 'usr_e2e_portal',
+  email: 'e2e-portal@example.com',
+  name: 'Kuda Client',
+  clientId: 'cli_e2e_portal',
+  clientName: 'Borrowdale Florists (e2e)',
 } as const;

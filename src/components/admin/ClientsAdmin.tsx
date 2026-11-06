@@ -660,3 +660,98 @@ export function ClientStatusActions({
     </div>
   );
 }
+
+/** One self-registered portal account waiting for staff: link it to a client, or decline it (P5.1). */
+export function PortalSignupActions({
+  userId,
+  name,
+  clients,
+}: {
+  userId: string;
+  name: string;
+  clients: { id: string; name: string }[];
+}) {
+  const [linking, setLinking] = useState(false);
+  const [declining, setDeclining] = useState(false);
+  const [clientId, setClientId] = useState('');
+  const [role, setRole] = useState<'owner' | 'member' | 'billing'>('member');
+  const a = useAction();
+  return (
+    <div className="flex flex-col items-end gap-2">
+      <Alert message={a.error} />
+      <div className="flex gap-2">
+        <Button size="sm" onClick={() => setLinking(true)} disabled={clients.length === 0}>
+          Link to a client<span className="sr-only"> for {name}</span>
+        </Button>
+        <Button size="sm" variant="ghost" onClick={() => setDeclining(true)}>
+          Decline<span className="sr-only"> {name}</span>
+        </Button>
+      </div>
+      <Dialog
+        open={linking}
+        onOpenChange={setLinking}
+        title={`Link ${name} to a client`}
+        description="Only link people you have confirmed belong to that client. They will see its quotations, invoices and projects."
+      >
+        <form
+          noValidate
+          className="flex flex-col gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void a.run(async () => {
+              await apiFetch(`/api/v1/admin/clients/portal-signups/${encodeURIComponent(userId)}/link`, {
+                body: { clientId, role },
+              });
+              reload();
+            });
+          }}
+        >
+          <Field label="Client" required error={a.errors['clientId']}>
+            <Select
+              value={clientId}
+              onChange={(e) => setClientId(e.target.value)}
+              placeholder="Choose a client"
+              options={clients.map((c) => ({ value: c.id, label: c.name }))}
+            />
+          </Field>
+          <Field label="Access" required>
+            <Select
+              value={role}
+              onChange={(e) => setRole(e.target.value as typeof role)}
+              options={[
+                { value: 'member', label: 'Member: projects, documents and support' },
+                { value: 'billing', label: 'Billing: invoices and payments' },
+                { value: 'owner', label: 'Owner: everything' },
+              ]}
+            />
+          </Field>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="ghost" onClick={() => setLinking(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" loading={a.busy} disabled={!clientId}>
+              Link account
+            </Button>
+          </div>
+        </form>
+      </Dialog>
+      <ConfirmDialog
+        open={declining}
+        onOpenChange={setDeclining}
+        title={`Decline ${name}'s sign-up?`}
+        description="Their portal account is switched off and they are signed out. Nothing is shared with them."
+        confirmLabel="Decline sign-up"
+        destructive
+        onConfirm={() =>
+          a.run(async () => {
+            await apiFetch(`/api/v1/admin/clients/portal-signups/${encodeURIComponent(userId)}/decline`, {
+              method: 'POST',
+              body: {},
+            });
+            reload();
+          })
+        }
+      />
+    </div>
+  );
+}

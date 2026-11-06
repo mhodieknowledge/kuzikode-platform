@@ -9,13 +9,14 @@ import { Batch, assertChanges } from '../../db/client';
 import { auditStmt } from '../../lib/audit';
 import { clearCookie, parseCookies, serializeCookie } from '../../lib/cookies';
 import { hashPassword, hmacSha256Base64Url, sha256Hex, timingSafeEqualString, verifyPassword } from '../../lib/crypto';
-import { AppError, unauthenticated, validationError } from '../../lib/errors';
+import { AppError, notFound, unauthenticated, validationError } from '../../lib/errors';
 import { newId, randomToken } from '../../lib/ids';
 import { passwordProblem } from '../../lib/passwords';
 import { enforce, hit, peek } from '../../lib/rate-limit';
 import { verifyTurnstile } from '../../lib/turnstile';
 import { dispatch, enqueue } from '../../jobs/outbox';
-import { notifySecurity } from '../notifications';
+import { notifySecurity, notifyStaffWithPermission } from '../notifications';
+import { getSettings, settingBool } from '../cms/service';
 import * as repo from './repository';
 
 // ---------------------------------------------------------------- constants (docs/07 §2, §4)
@@ -697,7 +698,9 @@ export async function acceptInvitation(
   assertPolicy(input.password, user);
   const now = ctx.now().toISOString();
   const audience: Audience = row.purpose === 'invite_staff' ? 'admin' : 'portal';
-  const meta = row.metadata ? (JSON.parse(row.metadata) as { clientId?: string }) : {};
+  const meta = row.metadata
+    ? (JSON.parse(row.metadata) as { clientId?: string; registration?: boolean; company?: string })
+    : {};
   const batch = new Batch(ctx.db)
     .add(repo.useAuthTokenStmt(ctx.db, row.id, now), 'use')
     .add(repo.setPasswordStmt(ctx.db, user.id, await hashPassword(input.password), now))
@@ -725,7 +728,166 @@ export async function acceptInvitation(
       user.id,
     );
   }
+  if (audience === 'portal' && meta.registration) {
+    // A completed self-registration: staff decide which client (if any) it belongs to. Never linked automatically.
+    const name = input.name ?? user.name;
+    batch
+      .add(
+        auditStmt(ctx, {
+          action: 'auth.registration_completed',
+          entityType: 'user',
+          entityId: user.id,
+          after: { email: user.email, company: meta.company ?? null },
+          actorType: 'client',
+          actorUserId: user.id,
+        }),
+      )
+      .add(
+        notifyStaffWithPermission(ctx, 'clients.view', {
+          type: 'client.registered',
+          title: `New portal sign-up: ${name}`,
+          body: `${user.email}${meta.company ? ` (${meta.company})` : ''} created a portal account. Link it to a client so they can see their documents.`,
+          link: '/admin/clients/portal-signups',
+          entityType: 'user',
+          entityId: user.id,
+          dedupeKey: `client.registered:${user.id}`,
+        }),
+      );
+  }
   const result = await batch.run();
   assertChanges(result.get('use'), 1, 'This link is invalid or has expired. Request a new one.');
   return { audience, userId: user.id };
+}
+
+// ---------------------------------------------------------------- portal self-registration (PRD §5)
+
+const REGISTERED_MESSAGE =
+  'Thanks. If this email can be used, we have sent a link to finish setting up your account. It expires in 24 hours.';
+
+export async function portalRegistrationEnabled(ctx: RequestContext): Promise<boolean> {
+  return settingBool(await getSettings(ctx), 'portal.self_registration', false);
+}
+
+/**
+ * Starts a self-registration: the person gets an email with a link to choose their password (the password is set
+ * only by whoever controls the inbox, so nobody can pre-create an account for someone else's email). The reply is the
+ * same whether or not the email is already known. The finished account belongs to no client until staff link it.
+ */
+export async function registerPortalAccount(
+  ctx: RequestContext,
+  input: { name: string; company?: string | undefined; email: string; turnstileToken?: string | undefined },
+): Promise<{ message: string }> {
+  if (!(await portalRegistrationEnabled(ctx))) throw notFound();
+  const email = input.email.toLowerCase();
+  await enforce(ctx, { key: `register:ip:${ctx.ip}`, limit: 5, windowSeconds: 3600 });
+  if (!(await verifyTurnstile(ctx, input.turnstileToken))) {
+    throw validationError(
+      { turnstile: ['Complete the security check to continue.'] },
+      'Complete the security check to continue.',
+    );
+  }
+  await enforce(ctx, { key: `register:email:${email}`, limit: 3, windowSeconds: 3600 });
+
+  const existing = await repo.findUserByEmail(ctx.db, email);
+  const pendingSignup =
+    existing &&
+    existing.user_type === 'client' &&
+    existing.status === 'invited' &&
+    !existing.password_hash &&
+    !(await ctx.db.prepare('SELECT 1 FROM client_user_access WHERE user_id = ?').bind(existing.id).first());
+  // Known accounts (and people already invited by staff) get nothing new: no enumeration, no duplicate accounts.
+  if (existing && !pendingSignup) {
+    await auditStmt(ctx, {
+      action: 'auth.registration_ignored',
+      entityType: 'user',
+      entityId: existing.id,
+      actorType: 'public',
+      actorUserId: null,
+    }).run();
+    return { message: REGISTERED_MESSAGE };
+  }
+
+  const now = ctx.now().getTime();
+  const userId = existing?.id ?? newId('usr', now);
+  const token = randomToken(32);
+  const tokenId = newId('tok', now);
+  const company = input.company?.trim() || undefined;
+  const link = new URL(`/portal/accept-invite?token=${encodeURIComponent(token)}`, ctx.config.siteUrl).toString();
+  const job = enqueue(ctx, {
+    type: 'email.send',
+    payload: { template: 'email_verification', to: email, data: { name: input.name, link } },
+    idempotencyKey: `email:register:${tokenId}`,
+  });
+  const batch = new Batch(ctx.db);
+  if (!existing) {
+    batch.sql(
+      "INSERT INTO users (id, email, name, user_type, status, created_at, updated_at) VALUES (?, ?, ?, 'client', 'invited', ?, ?)",
+      userId,
+      email,
+      input.name,
+      iso(now),
+      iso(now),
+    );
+  } else {
+    batch.sql(
+      'UPDATE users SET name = ?, updated_at = ? WHERE id = ? AND password_hash IS NULL',
+      input.name,
+      iso(now),
+      userId,
+    );
+  }
+  await batch
+    .add(repo.expireOpenTokensStmt(ctx.db, userId, 'invite_client', iso(now)))
+    .add(
+      repo.insertAuthTokenStmt(ctx.db, {
+        id: tokenId,
+        user_id: userId,
+        email,
+        purpose: 'invite_client',
+        token_hash: await sha256Hex(token),
+        expires_at: iso(now + TOKEN_TTL_MS.email_verify),
+        metadata: JSON.stringify({ registration: true, ...(company ? { company } : {}) }),
+        created_by: null,
+        created_at: iso(now),
+      }),
+    )
+    .add(
+      auditStmt(ctx, {
+        action: 'auth.registration_started',
+        entityType: 'user',
+        entityId: userId,
+        after: { email, company: company ?? null },
+        actorType: 'public',
+        actorUserId: null,
+      }),
+    )
+    .add(job.stmt)
+    .run();
+  dispatch(ctx, [job.id]);
+  return { message: REGISTERED_MESSAGE };
+}
+
+// ---------------------------------------------------------------- own profile
+
+export async function updateProfile(
+  ctx: RequestContext,
+  auth: AuthState,
+  input: { name: string; phone: string },
+): Promise<void> {
+  const before = await repo.findUserById(ctx.db, auth.user.id);
+  if (!before) throw unauthenticated();
+  const now = ctx.now().toISOString();
+  const phone = input.phone.trim() || null;
+  await new Batch(ctx.db)
+    .sql('UPDATE users SET name = ?, phone = ?, updated_at = ? WHERE id = ?', input.name, phone, now, auth.user.id)
+    .add(
+      auditStmt(ctx, {
+        action: 'user.profile_updated',
+        entityType: 'user',
+        entityId: auth.user.id,
+        before: { name: before.name, phone: before.phone },
+        after: { name: input.name, phone },
+      }),
+    )
+    .run();
 }

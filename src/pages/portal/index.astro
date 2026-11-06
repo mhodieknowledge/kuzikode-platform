@@ -1,0 +1,60 @@
+---
+import PortalLayout from '../../layouts/PortalLayout.astro';
+import { loadPortalPage } from '../../server/lib/portal-page';
+import { getSettings, settingText } from '../../server/modules/cms';
+
+const { ctx } = Astro.locals;
+const page = await loadPortalPage(ctx, Astro.request);
+if (page instanceof Response) return page;
+const settings = await getSettings(ctx);
+const contactEmail = settingText(settings, 'contact.email');
+const firstName = page.auth.user.name.split(/\s+/)[0] ?? page.auth.user.name;
+---
+
+<PortalLayout title="Overview" page={page} active="overview">
+  <h1 class="text-2xl font-bold tracking-display md:text-3xl">Hello, {firstName}</h1>
+  {page.clients.length === 0 ? (
+    <section
+      class="mt-6 max-w-2xl rounded-lg border border-line bg-canvas p-6 md:p-8"
+      aria-labelledby="pending-title"
+      data-testid="portal-unlinked"
+    >
+      <h2 id="pending-title" class="font-sans text-lg font-semibold">
+        Your account is waiting to be linked
+      </h2>
+      <p class="mt-2 text-ink-600">
+        Our team links each portal account to the right company before any documents are shown. We will let you know
+        when that is done. You can already update your details and security settings.
+      </p>
+      <p class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+        <a href="/portal/account" class="font-semibold text-brand-600 underline underline-offset-2">
+          Your account
+        </a>
+        {contactEmail ? (
+          <a href={`mailto:${contactEmail}`} class="font-semibold text-brand-600 underline underline-offset-2">
+            Email {contactEmail}
+          </a>
+        ) : null}
+      </p>
+    </section>
+  ) : (
+    <section class="mt-6 max-w-2xl" aria-labelledby="clients-title">
+      <h2 id="clients-title" class="sr-only">
+        Your companies
+      </h2>
+      <p class="text-ink-600">
+        You are signed in for{' '}
+        <strong class="font-semibold text-ink-950">{page.clients.map((c) => c.name).join(', ')}</strong>.
+      </p>
+      {contactEmail ? (
+        <p class="mt-4 text-sm text-ink-600">
+          Questions? Email{' '}
+          <a href={`mailto:${contactEmail}`} class="font-semibold text-brand-600 underline underline-offset-2">
+            {contactEmail}
+          </a>
+          .
+        </p>
+      ) : null}
+    </section>
+  )}
+</PortalLayout>

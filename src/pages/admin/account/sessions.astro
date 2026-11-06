@@ -3,39 +3,14 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { SessionActions } from '../../../components/admin/AccountActions';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { listSessions } from '../../../server/modules/auth/service';
+import { deviceLabel, harareDateTime } from '../../../shared/devices';
 
 const { ctx } = Astro.locals;
 const page = await loadAdminPage(ctx, Astro.request);
 if (page instanceof Response) return page;
 const sessions = await listSessions(ctx, page.auth);
-const fmt = (iso: string) =>
-  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
-    new Date(iso),
-  );
-const device = (ua: string | null) => {
-  if (!ua) return 'Unknown device';
-  const browser = /Edg\//.test(ua)
-    ? 'Edge'
-    : /Chrome\//.test(ua)
-      ? 'Chrome'
-      : /Firefox\//.test(ua)
-        ? 'Firefox'
-        : /Safari\//.test(ua)
-          ? 'Safari'
-          : 'Browser';
-  const os = /Windows/.test(ua)
-    ? 'Windows'
-    : /Android/.test(ua)
-      ? 'Android'
-      : /iPhone|iPad/.test(ua)
-        ? 'iOS'
-        : /Mac OS X/.test(ua)
-          ? 'macOS'
-          : /Linux/.test(ua)
-            ? 'Linux'
-            : '';
-  return os ? `${browser} on ${os}` : browser;
-};
+const fmt = harareDateTime;
+const device = deviceLabel;
 ---
 
 <AdminLayout title="Signed-in devices" page={page}>

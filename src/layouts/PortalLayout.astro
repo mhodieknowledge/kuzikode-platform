@@ -1,49 +1,72 @@
 ---
 import AppLayout from './AppLayout.astro';
 import Logo from '../components/Logo.astro';
+import { PortalUserMenu } from '../components/portal/PortalAccount';
+import type { PortalPage } from '../server/lib/portal-page';
 
+/** Calmer client-portal shell (docs/05 §3). Sections appear in the menu as they are built. */
 interface Props {
   title: string;
-  active?: 'overview' | 'quotations' | 'invoices' | 'projects' | 'support' | 'profile';
-  csrfToken?: string | undefined;
-  clientName?: string;
+  page: PortalPage;
+  active?: 'overview' | 'account';
 }
-const { title, active, csrfToken, clientName } = Astro.props;
-const items = [
+const { title, page, active } = Astro.props;
+const items: { key: NonNullable<Props['active']>; label: string; href: string }[] = [
   { key: 'overview', label: 'Overview', href: '/portal' },
-  { key: 'quotations', label: 'Quotations', href: '/portal/quotations' },
-  { key: 'invoices', label: 'Invoices', href: '/portal/invoices' },
-  { key: 'projects', label: 'Projects', href: '/portal/projects' },
-  { key: 'support', label: 'Support', href: '/portal/support' },
+  { key: 'account', label: 'Account', href: '/portal/account' },
 ];
+const clientLabel = page.clients.map((c) => c.name).join(', ');
 ---
 
-<AppLayout title={`${title} · Kuzikode Client Portal`} csrfToken={csrfToken} bodyClass="bg-surface text-[15px]">
+<AppLayout title={`${title} · Kuzikode Client Portal`} csrfToken={page.csrfToken} bodyClass="bg-surface text-[15px]">
   <header class="border-b border-line bg-surface">
-    <div class="container-content flex h-16 items-center justify-between gap-6">
-      <Logo href="/portal" height={24} />
-      <nav aria-label="Portal navigation" class="hidden md:block">
-        <ul class="flex gap-1">
-          {items.map((i) => (
-            <li>
-              <a
-                href={i.href}
-                aria-current={active === i.key ? 'page' : undefined}
-                class:list={[
-                  'inline-flex h-16 items-center border-b-2 px-3 text-[15px]',
-                  active === i.key
-                    ? 'border-brand-600 font-semibold text-ink-950'
-                    : 'border-transparent text-ink-600 hover:text-ink-950',
-                ]}
-              >
-                {i.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      <slot name="account">{clientName ? <span class="text-sm text-ink-600">{clientName}</span> : null}</slot>
+    <div class="container-content flex h-16 items-center justify-between gap-4">
+      <div class="flex min-w-0 items-center gap-6">
+        <Logo href="/portal" height={24} />
+        <nav aria-label="Portal navigation" class="hidden md:block">
+          <ul class="flex gap-1">
+            {items.map((i) => (
+              <li>
+                <a
+                  href={i.href}
+                  aria-current={active === i.key ? 'page' : undefined}
+                  class:list={[
+                    'inline-flex h-16 items-center border-b-2 px-3 text-[15px]',
+                    active === i.key
+                      ? 'border-brand-600 font-semibold text-ink-950'
+                      : 'border-transparent text-ink-600 hover:text-ink-950',
+                  ]}
+                >
+                  {i.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+      <div class="flex min-w-0 items-center gap-3">
+        {clientLabel ? <span class="hidden truncate text-sm text-ink-600 lg:block">{clientLabel}</span> : null}
+        <PortalUserMenu client:load name={page.auth.user.name} email={page.auth.user.email} />
+      </div>
     </div>
+    <nav aria-label="Portal navigation" class="border-t border-line md:hidden">
+      <ul class="container-content flex gap-1 overflow-x-auto">
+        {items.map((i) => (
+          <li>
+            <a
+              href={i.href}
+              aria-current={active === i.key ? 'page' : undefined}
+              class:list={[
+                'inline-flex h-12 items-center whitespace-nowrap border-b-2 px-3 text-[15px]',
+                active === i.key ? 'border-brand-600 font-semibold text-ink-950' : 'border-transparent text-ink-600',
+              ]}
+            >
+              {i.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
   </header>
   <main id="main" tabindex="-1" class="container-content py-8 focus:outline-none md:py-10">
     <slot />

@@ -44,6 +44,7 @@ conflict and your resolution in `docs/DECISIONS.md`.
       `git fetch origin main` and `git log -1 --format='%ct %s' origin/main`. If the last commit is less than **40 minutes** old,
       another session is probably working: **stop immediately** (no commits).
    c. Set your session title to `Kuzikode build: <YYYY-MM-DD HH:MM UTC>` (`set_session_title`) so the watchdog can see you.
+   d. **Image inbox:** if `design/images/inbox/` contains images from the owner, process them first per `docs/13-IMAGERY.md` §1b.
    While working, commit and push at least every 30 minutes (a PROGRESS.md heartbeat line is fine).
 1. **Sync:** `git fetch origin main && git checkout main && git pull --rebase origin main`.
 2. **Orient:** read `docs/PROGRESS.md` and find the first unchecked task in `docs/10-ROADMAP.md`

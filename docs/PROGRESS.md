@@ -172,3 +172,9 @@ The **Next step** line must be specific enough that a fresh session can continue
 - New dependency: qrcode-generator 2.0.4.
 - Tests: unit `admin-shell.test.ts` (6, permission-filtered nav per role), integration `admin-shell.test.ts` (3), e2e `admin-shell.spec.ts` (5). Full e2e suite: 49 passed.
 - Next step: P4.2 Users & roles (invite staff → /admin/accept-invite already works; deactivate, assign roles, permissions matrix, super-admin custom roles, audit). Flip `built: true` for Users in `server/modules/admin/navigation.ts` when the page exists. P3.18 imagery still waits for the Workers AI quota (resets 00:00 UTC).
+
+## 2026-11-06 · P4.2 Users & roles ✅
+- Service: users/service.ts (listStaff, getStaff with audit history, inviteStaff, resendInvitation, renameStaff; enable fix), users/roles.ts (listRoles, createRole, updateRole, deleteRole), schemas shared/schemas/users.ts, routes `/api/v1/admin/users` (+ /:id, roles, disable, enable, invitation, mfa/reset) and `/api/v1/admin/roles`.
+- UI: /admin/users (filters, invite dialog), /admin/users/[id] (name, roles, resend invite, reset 2FA, disable/enable, history), /admin/users/roles (role cards, permission matrix, custom-role editor for super admins); islands components/admin/UsersAdmin.tsx; readable 403 page (`forbiddenPage`); nav item Users is built.
+- Tests: integration `users-admin.test.ts` (4), e2e `users-admin.spec.ts` (2). Full e2e: 51 passed.
+- Next step: P4.3 Settings (company, branding/logo, addresses/contacts, socials, numbering that can't be lowered, currencies, taxes, provider status, email status + test send, notification prefs; all audited). Then flip Settings to built in server/modules/admin/navigation.ts. P3.18 imagery: retry `npm run img:gen -- --id home-approach --size 1024x768 --variants 1 --steps 20` after ~16:00 UTC.

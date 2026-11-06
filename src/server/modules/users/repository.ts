@@ -63,7 +63,21 @@ export const disableStaffStmt = (db: D1Database, userId: string, now: string) =>
 export const enableStaffStmt = (db: D1Database, userId: string, now: string) =>
   stmt(
     db,
-    "UPDATE users SET status = 'active', updated_at = ? WHERE id = ? AND user_type = 'staff' AND status = 'disabled'",
+    // Someone disabled before accepting their invitation goes back to 'invited' (they have no password yet).
+    `UPDATE users SET status = CASE WHEN password_hash IS NULL THEN 'invited' ELSE 'active' END, updated_at = ?
+     WHERE id = ? AND user_type = 'staff' AND status = 'disabled'`,
     now,
     userId,
   );
+
+export interface StaffListRow extends StaffRow {
+  created_at: string;
+  mfa_enabled: number;
+  invited_pending: number;
+}
+
+export const STAFF_LIST_SQL = `SELECT u.id, u.email, u.name, u.status, u.last_login_at, u.created_at,
+    (SELECT group_concat(r.key) FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id) AS roles,
+    EXISTS (SELECT 1 FROM user_mfa m WHERE m.user_id = u.id AND m.enabled_at IS NOT NULL) AS mfa_enabled,
+    EXISTS (SELECT 1 FROM auth_tokens t WHERE t.user_id = u.id AND t.purpose = 'invite_staff' AND t.used_at IS NULL AND t.expires_at > ?) AS invited_pending
+  FROM users u WHERE u.user_type = 'staff'`;

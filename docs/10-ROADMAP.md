@@ -57,7 +57,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 
 ## Phase 4 — Administration
 - [x] **P4.1 Admin shell.** Login page (Turnstile after failures), forced password change, sidebar grouped by permission, top bar, ⌘K global search (clients, invoices, quotations, projects by number/name), notifications bell, user menu, sessions page. AC: permission-filtered nav test.
-- [ ] **P4.2 Users & roles.** Invite staff, deactivate, assign roles, permissions matrix view (super admin edits custom roles), audit. AC: tests for each guard.
+- [x] **P4.2 Users & roles.** Invite staff, deactivate, assign roles, permissions matrix view (super admin edits custom roles), audit. AC: tests for each guard.
 - [ ] **P4.3 Settings.** Company, branding/logo, addresses/contacts, socials, numbering, currencies, taxes, providers (status only for secrets), email status + test send, notification prefs. AC: numbering can't be lowered. All changes audited.
 - [ ] **P4.4 Clients** (CRUD, contacts, notes, tags, archive, detail tabs, credits balance, portal access tab: invite contact, approve/revoke links). AC: integration tests + e2e step 3.
 - [ ] **P4.5 Enquiries & leads** (inbox, triage, spam, lead pipeline list + board view, assignment, follow-ups, activities, convert to client). AC: e2e step 2. Conversion test.

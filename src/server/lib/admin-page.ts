@@ -62,9 +62,7 @@ export async function loadAdminPage(
   if (stage === 'ready' && opts.allowStage && opts.allowStage !== 'mfa-setup') {
     return seeOther('/admin');
   }
-  if (opts.permission && !auth.permissions.has(opts.permission)) {
-    return new Response(null, { status: 403, statusText: 'Forbidden' });
-  }
+  if (opts.permission && !auth.permissions.has(opts.permission)) return forbiddenPage();
   const unread = stage === 'ready' ? (await listNotifications(ctx, auth.user.id, { limit: 1 })).unread : 0;
   return {
     auth,
@@ -78,4 +76,16 @@ export async function loadAdminPage(
 export async function adminAlreadySignedIn(ctx: RequestContext, request: Request): Promise<boolean> {
   const auth = await resolveSession(ctx, request.headers.get('cookie'), 'admin');
   return !!auth && adminStage(auth) === 'ready';
+}
+
+/** A plain, readable 403 page for signed-in staff without the permission (no layout needed). */
+export function forbiddenPage(): Response {
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>No access · Kuzikode Admin</title>
+<style>body{font-family:system-ui,sans-serif;background:#f6f7f9;color:#0b1020;display:grid;place-items:center;min-height:100vh;margin:0;padding:16px}
+main{max-width:28rem;background:#fff;border:1px solid #e3e6ec;border-radius:12px;padding:32px}h1{font-size:22px;margin:0 0 8px}
+p{color:#4a5263;line-height:1.5}a{color:#2747e8;font-weight:600}</style></head>
+<body><main><h1>You don't have access to this page</h1><p>Your role doesn't include this section. If you need it, ask an administrator.</p>
+<p><a href="/admin">Back to the dashboard</a></p></main></body></html>`;
+  return new Response(html, { status: 403, headers: { 'content-type': 'text/html; charset=utf-8' } });
 }

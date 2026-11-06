@@ -1,2 +1,3 @@
-export { disableUser, enableUser, setUserRoles } from './service';
-export { userRoutes } from './routes';
+export * from './service';
+export * from './roles';
+export { roleRoutes, userRoutes } from './routes';

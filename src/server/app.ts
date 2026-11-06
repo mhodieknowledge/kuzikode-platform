@@ -7,7 +7,7 @@ import { apiHeaders } from './middleware/headers';
 import { requestContext, type ApiEnv } from './middleware/request-context';
 import { authRoutes } from './modules/auth';
 import { fileRoutes } from './modules/files';
-import { userRoutes } from './modules/users';
+import { roleRoutes, userRoutes } from './modules/users';
 import { publicEnquiryRoutes } from './modules/leads';
 import { publicNewsletterRoutes } from './modules/newsletter';
 import { publicCareersRoutes } from './modules/careers';
@@ -23,6 +23,7 @@ export function createApp() {
   app.route('/api/v1/auth', authRoutes());
   app.route('/api/v1', fileRoutes());
   app.route('/api/v1/admin/users', userRoutes());
+  app.route('/api/v1/admin/roles', roleRoutes());
   app.route('/api/v1/admin', adminShellRoutes());
   app.route('/api/v1/public', publicEnquiryRoutes());
   app.route('/api/v1/public', publicNewsletterRoutes());

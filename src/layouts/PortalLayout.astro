@@ -8,13 +8,18 @@ import type { PortalPage } from '../server/lib/portal-page';
 interface Props {
   title: string;
   page: PortalPage;
-  active?: 'overview' | 'quotations' | 'invoices' | 'account';
+  active?: 'overview' | 'quotations' | 'invoices' | 'payments' | 'account';
 }
 const { title, page, active } = Astro.props;
 const items: { key: NonNullable<Props['active']>; label: string; href: string }[] = [
   { key: 'overview', label: 'Overview', href: '/portal' },
   ...(page.areas.quotations ? [{ key: 'quotations' as const, label: 'Quotations', href: '/portal/quotations' }] : []),
-  ...(page.areas.finance ? [{ key: 'invoices' as const, label: 'Invoices', href: '/portal/invoices' }] : []),
+  ...(page.areas.finance
+    ? [
+        { key: 'invoices' as const, label: 'Invoices', href: '/portal/invoices' },
+        { key: 'payments' as const, label: 'Payments', href: '/portal/payments' },
+      ]
+    : []),
   { key: 'account', label: 'Account', href: '/portal/account' },
 ];
 const clientLabel = page.clients.map((c) => c.name).join(', ');
@@ -25,7 +30,7 @@ const clientLabel = page.clients.map((c) => c.name).join(', ');
     <div class="container-content flex h-16 items-center justify-between gap-4">
       <div class="flex min-w-0 items-center gap-6">
         <Logo href="/portal" height={24} />
-        <nav aria-label="Portal navigation" class="hidden md:block">
+        <nav aria-label="Portal navigation" class="hidden lg:block">
           <ul class="flex gap-1">
             {items.map((i) => (
               <li>
@@ -47,19 +52,19 @@ const clientLabel = page.clients.map((c) => c.name).join(', ');
         </nav>
       </div>
       <div class="flex min-w-0 items-center gap-3">
-        {clientLabel ? <span class="hidden truncate text-sm text-ink-600 lg:block">{clientLabel}</span> : null}
+        {clientLabel ? <span class="hidden truncate text-sm text-ink-600 xl:block">{clientLabel}</span> : null}
         <PortalUserMenu client:load name={page.auth.user.name} email={page.auth.user.email} />
       </div>
     </div>
-    <nav aria-label="Portal navigation" class="border-t border-line md:hidden">
-      <ul class="container-content flex gap-1 overflow-x-auto">
+    <nav aria-label="Portal navigation" class="border-t border-line lg:hidden">
+      <ul class="container-content flex flex-wrap gap-x-1">
         {items.map((i) => (
           <li>
             <a
               href={i.href}
               aria-current={active === i.key ? 'page' : undefined}
               class:list={[
-                'inline-flex h-12 items-center whitespace-nowrap border-b-2 px-3 text-[15px]',
+                'inline-flex h-11 items-center whitespace-nowrap border-b-2 px-2.5 text-[15px]',
                 active === i.key ? 'border-brand-600 font-semibold text-ink-950' : 'border-transparent text-ink-600',
               ]}
             >

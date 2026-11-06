@@ -8,6 +8,7 @@ import { jsonBody, query } from '../../middleware/validate';
 import { documentPdf } from '../documents/service';
 import { fileResponse } from '../files/service';
 import * as invoices from '../invoices/portal';
+import * as payments from '../payments/portal';
 import * as quotations from '../quotations/service';
 import { portalOverview } from './service';
 
@@ -104,5 +105,15 @@ export function portalRoutes() {
     const pdf = await documentPdf(ctx, 'credit_note', await invoices.portalCreditNoteId(ctx, c.req.param('id')));
     return fileResponse(ctx, pdf.file!, { inline: c.req.query('inline') === '1' });
   });
+
+  r.get('/payments', async (c) => c.json({ data: await payments.listPortalPayments(c.var.ctx) }));
+  r.get('/payments/:id/receipt', async (c) => {
+    const ctx = c.var.ctx;
+    const pdf = await documentPdf(ctx, 'receipt', await payments.portalPaymentId(ctx, c.req.param('id')));
+    return fileResponse(ctx, pdf.file!, { inline: c.req.query('inline') === '1' });
+  });
+  r.get('/payment-attempts/:id', async (c) =>
+    c.json({ data: await payments.getPortalAttempt(c.var.ctx, c.req.param('id')) }),
+  );
   return r;
 }

@@ -507,3 +507,17 @@ The **Next step** line must be specific enough that a fresh session can continue
   'receipt', paymentId)`; scope by finance area. "Attempt status page": check `payment_attempts` in migrations/0006 — if no
   attempts exist until P6, build the read-only status page for attempts in the caller's scope (pending/succeeded/failed) and
   test it with inserted attempts. Add "Payments" either as a tab of Invoices or its own menu item.
+
+## 2026-11-06 19:35 UTC · P5.5 Portal payments & receipts ✅
+- `modules/payments/portal.ts`: `listPortalPayments` (with the invoices each paid), `portalPaymentId` (receipt PDF),
+  `getPortalAttempt` (client-safe phase/message, masked phone, method, invoice, resulting receipt). Routes
+  `/api/v1/portal/payments`, `/payments/:id/receipt` (`?inline=1`), `/payment-attempts/:id`. `shared/payment-methods.ts` labels.
+- Pages /portal/payments (history + receipt links) and /portal/payments/attempts/[id] (`AttemptStatus` island polls while
+  waiting). Menu: Payments (finance roles); desktop menu from `lg`, wrapping row below. Overview payment activity links here.
+- Tests: integration `portal-payments.test.ts` (2: list scope + allocations, receipt PDF + isolation; attempt phases, no provider
+  details leak, other client/member/staff refused) · e2e portal-auth spec (payments list, receipt PDF, failed attempt page; axe +
+  375/768/1440 reviewed). verify: integration 248 green.
+- Next step: P5.6 Portal projects (milestones, client updates, progress, deliverables download, messages; AC: internal items
+  never visible, with a test). Scope by `portalAreaClientIds(ctx, 'projects')`. Check `project_messages` and `project_files`
+  (client_visible) in migrations/0007 and the admin projects service for message posting + notifications (notifyClientUsers /
+  staff). Add "Projects" menu item; link overview project rows + project_update activity.

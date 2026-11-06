@@ -1,0 +1,63 @@
+---
+import PortalLayout from '../../../layouts/PortalLayout.astro';
+import StatusPill from '../../../components/portal/StatusPill.astro';
+import { loadPortalPage } from '../../../server/lib/portal-page';
+import { listPortalPayments } from '../../../server/modules/payments';
+import { formatMoney } from '../../../shared/money';
+import { paymentMethodLabel } from '../../../shared/payment-methods';
+import { formatLongDate } from '../../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const page = await loadPortalPage(ctx, Astro.request, { area: 'finance' });
+if (page instanceof Response) return page;
+const payments = await listPortalPayments(ctx);
+const STATUS = {
+  completed: { label: 'Received', tone: 'success' },
+  partially_refunded: { label: 'Part refunded', tone: 'warning' },
+  refunded: { label: 'Refunded', tone: 'neutral' },
+  reversed: { label: 'Reversed', tone: 'danger' },
+} as const;
+---
+
+<PortalLayout title="Payments" page={page} active="payments">
+  <h1 class="text-2xl font-bold tracking-display md:text-3xl">Payments</h1>
+  <p class="mt-1 text-ink-600">Every payment we have received from you, with its receipt.</p>
+  {payments.length === 0 ? (
+    <p class="mt-6 max-w-2xl rounded-lg border border-line bg-surface p-6 text-ink-600">No payments yet.</p>
+  ) : (
+    <ul class="mt-6 divide-y divide-line rounded-lg border border-line bg-surface" aria-label="Payments">
+      {payments.map((p) => (
+        <li class="flex flex-wrap items-start justify-between gap-x-6 gap-y-2 px-5 py-4">
+          <div class="min-w-0">
+            <p class="font-semibold text-ink-950">
+              {formatLongDate(p.receivedAt)} · <span class="font-mono">{p.receiptNumber}</span>
+            </p>
+            <p class="mt-0.5 text-sm text-ink-600">
+              {paymentMethodLabel(p.method)}
+              {p.invoices.length ? ' · for ' : ''}
+              {p.invoices.map((i, n) => (
+                <>
+                  {n > 0 ? ', ' : ''}
+                  <a href={`/portal/invoices/${i.id}`} class="font-mono text-brand-600 underline">
+                    {i.number}
+                  </a>
+                </>
+              ))}
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1 sm:flex-col sm:items-end">
+            <p class="font-mono font-semibold tabular-nums text-ink-950">{formatMoney(p.amountMinor, p.currency)}</p>
+            <StatusPill {...STATUS[p.status]} />
+            <a
+              href={`/api/v1/portal/payments/${p.id}/receipt`}
+              download
+              class="text-sm font-semibold text-brand-600 underline underline-offset-2"
+            >
+              Receipt<span class="sr-only"> {p.receiptNumber}</span>
+            </a>
+          </div>
+        </li>
+      ))}
+    </ul>
+  )}
+</PortalLayout>

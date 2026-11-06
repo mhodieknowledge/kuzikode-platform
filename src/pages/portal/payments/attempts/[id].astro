@@ -1,0 +1,25 @@
+---
+import PortalLayout from '../../../../layouts/PortalLayout.astro';
+import { AttemptStatus } from '../../../../components/portal/AttemptStatus';
+import { loadPortalPage } from '../../../../server/lib/portal-page';
+import { getPortalAttempt } from '../../../../server/modules/payments';
+import { AppError } from '../../../../server/lib/errors';
+
+const { ctx } = Astro.locals;
+const page = await loadPortalPage(ctx, Astro.request, { area: 'finance' });
+if (page instanceof Response) return page;
+let attempt;
+try {
+  attempt = await getPortalAttempt(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND') return new Response(null, { status: 404 });
+  throw err;
+}
+---
+
+<PortalLayout title="Payment status" page={page} active="payments">
+  <h1 class="sr-only">Payment status</h1>
+  <div class="mx-auto max-w-xl rounded-lg border border-line bg-surface p-6 md:p-8">
+    <AttemptStatus client:load initial={attempt} />
+  </div>
+</PortalLayout>

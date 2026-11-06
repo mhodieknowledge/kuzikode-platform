@@ -65,7 +65,7 @@ const tabs = [
               </p>
               <p class="mt-0.5 text-sm text-ink-800">{c.reason}</p>
             </div>
-            <div class="flex flex-col items-end gap-1">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 sm:flex-col sm:items-end">
               <p class="font-mono font-semibold tabular-nums text-ink-950">{formatMoney(c.totalMinor, c.currency)}</p>
               <a
                 href={`/api/v1/portal/credit-notes/${c.id}/pdf`}
@@ -106,7 +106,7 @@ const tabs = [
                 {multiClient ? ` · ${i.clientName}` : ''}
               </p>
             </div>
-            <div class="flex flex-col items-end gap-1">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 sm:flex-col sm:items-end">
               <p class="font-mono font-semibold tabular-nums text-ink-950">
                 {formatMoney(open ? i.balanceMinor : i.totalMinor, i.currency)}
               </p>

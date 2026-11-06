@@ -70,6 +70,16 @@ export default async function globalSetup() {
      ON CONFLICT(id) DO NOTHING;`,
     `UPDATE invoices SET status = CASE id WHEN 'inv_e2e_portal_1' THEN 'issued' ELSE 'partially_paid' END
      WHERE id IN ('inv_e2e_portal_1', 'inv_e2e_portal_2') AND status = 'draft';`,
+    `INSERT INTO payments (id, receipt_number, client_id, provider_key, method, amount_minor, currency, received_at, reference)
+     VALUES ('pay_e2e_portal_1', 'RCT-E2E-P001', ${q(E2E_PORTAL_USER.clientId)}, 'manual', 'bank_transfer', 20000, 'USD', '2026-08-20T10:00:00.000Z', 'FT-E2E-1')
+     ON CONFLICT(id) DO NOTHING;`,
+    `INSERT INTO payment_allocations (id, payment_id, invoice_id, amount_minor, currency)
+     VALUES ('pal_e2e_portal_1', 'pay_e2e_portal_1', 'inv_e2e_portal_2', 20000, 'USD') ON CONFLICT(id) DO NOTHING;`,
+    `INSERT INTO payment_provider_accounts (id, provider_key, label, mode, secret_prefix)
+     VALUES ('ppa_e2e_mock', 'mock', 'Mock (e2e)', 'test', 'MOCK') ON CONFLICT(id) DO NOTHING;`,
+    `INSERT INTO payment_attempts (id, invoice_id, client_id, provider_key, account_id, flow, method_code, payer_phone_masked, amount_minor, currency, status, merchant_reference, idempotency_key)
+     VALUES ('pat_e2e_portal_failed', 'inv_e2e_portal_2', ${q(E2E_PORTAL_USER.clientId)}, 'mock', 'ppa_e2e_mock', 'express', 'ecocash', '077****111', 25000, 'USD', 'failed', 'pat_e2e_portal_failed', 'e2e-portal-failed')
+     ON CONFLICT(id) DO NOTHING;`,
     // The portal quotation spec accepts it, so it is reset to "sent" on every run.
     `INSERT INTO quotations (id, number, client_id, title, currency, status, issue_date, valid_until, subtotal_minor, total_minor, sent_at,
        client_snapshot, business_snapshot)

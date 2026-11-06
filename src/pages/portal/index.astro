@@ -27,7 +27,13 @@ const KIND_LABEL: Record<PortalActivityKind, string> = {
 const card = 'rounded-lg border border-line bg-surface p-5 md:p-6';
 /** Activity items link to their detail page once that portal section exists. */
 const activityHref = (a: { kind: PortalActivityKind; id: string }): string | undefined =>
-  a.kind === 'quotation' ? `/portal/quotations/${a.id}` : a.kind === 'invoice' ? `/portal/invoices/${a.id}` : undefined;
+  a.kind === 'quotation'
+    ? `/portal/quotations/${a.id}`
+    : a.kind === 'invoice'
+      ? `/portal/invoices/${a.id}`
+      : a.kind === 'payment'
+        ? '/portal/payments'
+        : undefined;
 ---
 
 <PortalLayout title="Overview" page={page} active="overview">

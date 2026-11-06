@@ -253,3 +253,40 @@ test('a client sees what they owe, opens an overdue invoice and finds how to pay
   await page.goto('/portal/invoices?show=credit-notes');
   await expect(page.getByText('There are no credit notes.')).toBeVisible();
 });
+
+test('a client sees their payments with receipts and the status of a failed online attempt (P5.5)', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await portalSignIn(page, E2E_PORTAL_USER.email, E2E_PASSWORD);
+  await page
+    .getByRole('navigation', { name: 'Portal navigation' })
+    .first()
+    .getByRole('link', { name: 'Payments' })
+    .click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Payments' })).toBeVisible();
+  const row = page.getByRole('listitem').filter({ hasText: 'RCT-E2E-P001' });
+  await expect(row).toContainText('Bank transfer');
+  await expect(row).toContainText('INV-E2E-P002');
+  await expect(row).toContainText('$200.00');
+  await expect(row.getByRole('link', { name: /Receipt/ })).toHaveAttribute(
+    'href',
+    '/api/v1/portal/payments/pay_e2e_portal_1/receipt',
+  );
+  const receipt = await page.request.get('/api/v1/portal/payments/pay_e2e_portal_1/receipt');
+  expect(receipt.status()).toBe(200);
+  expect(receipt.headers()['content-type']).toBe('application/pdf');
+  await expectAccessible(page);
+  await screenshots(page, 'portal-payments');
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/portal/payments/attempts/pat_e2e_portal_failed');
+  await expect(page.getByRole('heading', { name: 'Payment not completed' })).toBeVisible();
+  await expect(page.getByText('Nothing was taken from your account.')).toBeVisible();
+  await expect(page.getByText('EcoCash · 077****111')).toBeVisible();
+  await expectAccessible(page);
+  await screenshots(page, 'portal-attempt');
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.getByRole('link', { name: 'Back to invoice INV-E2E-P002' }).click();
+  await expect(page).toHaveURL(/\/portal\/invoices\/inv_e2e_portal_2$/);
+});

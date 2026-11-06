@@ -27,7 +27,7 @@ const KIND_LABEL: Record<PortalActivityKind, string> = {
 const card = 'rounded-lg border border-line bg-surface p-5 md:p-6';
 /** Activity items link to their detail page once that portal section exists. */
 const activityHref = (a: { kind: PortalActivityKind; id: string }): string | undefined =>
-  a.kind === 'quotation' ? `/portal/quotations/${a.id}` : undefined;
+  a.kind === 'quotation' ? `/portal/quotations/${a.id}` : a.kind === 'invoice' ? `/portal/invoices/${a.id}` : undefined;
 ---
 
 <PortalLayout title="Overview" page={page} active="overview">
@@ -78,7 +78,9 @@ const activityHref = (a: { kind: PortalActivityKind; id: string }): string | und
                     {formatMoney(b.outstandingMinor, b.currency)}
                   </p>
                   <p class="mt-2 text-sm text-ink-600">
-                    {b.openInvoices} open {b.openInvoices === 1 ? 'invoice' : 'invoices'}
+                    <a href="/portal/invoices" class="underline underline-offset-2 hover:text-ink-950">
+                      {b.openInvoices} open {b.openInvoices === 1 ? 'invoice' : 'invoices'}
+                    </a>
                   </p>
                   {b.overdueMinor > 0 ? (
                     <p class="mt-1 text-sm font-semibold text-danger-700">

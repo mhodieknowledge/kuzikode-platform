@@ -490,3 +490,20 @@ The **Next step** line must be specific enough that a fresh session can continue
   (`src/pages/i/[token].astro`, `InvoiceDocument.astro`, `invoiceIdForToken`), scope by `portalAreaClientIds(ctx, 'finance')`.
   "Pay now" must lead to the payment flow: check what `/i/[token]` does for paying today (P6 builds checkout) and link to the same
   place; don't render a dead button. Add "Invoices" to PortalLayout items when `page.areas.finance`; link overview invoice activity.
+
+## 2026-11-06 19:25 UTC · P5.4 Portal invoices & credit notes ✅
+- `modules/invoices/portal.ts`: `listPortalInvoices` (open first; `show=open`), `getPortalInvoice` (items, non-reversed payments,
+  credit notes, payment instructions while open, effective overdue), `listPortalCreditNotes`, `portalInvoiceId`,
+  `portalCreditNoteId`; all scoped by the finance area, never drafts. Routes `/api/v1/portal/invoices[/:id[/pdf]]`,
+  `/api/v1/portal/credit-notes[/:id/pdf]` (`?inline=1`).
+- Pages /portal/invoices (To pay / All / Credit notes) and /portal/invoices/[id] (status, "to pay" panel with bank details,
+  InvoiceDocument, payments received, credit notes with PDFs). Menu "Invoices" for finance roles; overview balance + invoice
+  activity link here. No "Pay now" yet (P6.3c), see DECISIONS.
+- e2e fixtures: portal invoices are inserted as drafts, given lines, then issued (lines are locked after issue).
+- Tests: integration `portal-invoices.test.ts` (4: scope/order/drafts/other clients 404 incl. PDFs, detail with payment + credit
+  note + bank details, PDF attachment/inline, credit note PDF isolation, effective overdue, member role has no invoices) · e2e
+  portal-auth spec (list → overdue invoice → how to pay; axe + 375/768/1440 reviewed). verify: integration 246 green.
+- Next step: P5.5 Portal payments & receipts (history, receipt PDFs, attempt status page). Payments table + `documentPdf(ctx,
+  'receipt', paymentId)`; scope by finance area. "Attempt status page": check `payment_attempts` in migrations/0006 — if no
+  attempts exist until P6, build the read-only status page for attempts in the caller's scope (pending/succeeded/failed) and
+  test it with inserted attempts. Add "Payments" either as a tab of Invoices or its own menu item.

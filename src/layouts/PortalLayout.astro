@@ -8,12 +8,13 @@ import type { PortalPage } from '../server/lib/portal-page';
 interface Props {
   title: string;
   page: PortalPage;
-  active?: 'overview' | 'quotations' | 'account';
+  active?: 'overview' | 'quotations' | 'invoices' | 'account';
 }
 const { title, page, active } = Astro.props;
 const items: { key: NonNullable<Props['active']>; label: string; href: string }[] = [
   { key: 'overview', label: 'Overview', href: '/portal' },
   ...(page.areas.quotations ? [{ key: 'quotations' as const, label: 'Quotations', href: '/portal/quotations' }] : []),
+  ...(page.areas.finance ? [{ key: 'invoices' as const, label: 'Invoices', href: '/portal/invoices' }] : []),
   { key: 'account', label: 'Account', href: '/portal/account' },
 ];
 const clientLabel = page.clients.map((c) => c.name).join(', ');

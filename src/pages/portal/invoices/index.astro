@@ -1,0 +1,123 @@
+---
+import PortalLayout from '../../../layouts/PortalLayout.astro';
+import StatusPill from '../../../components/portal/StatusPill.astro';
+import { loadPortalPage } from '../../../server/lib/portal-page';
+import { listPortalCreditNotes, listPortalInvoices } from '../../../server/modules/invoices';
+import { formatMoney } from '../../../shared/money';
+import { CREDIT_APPLIED_LABEL, portalInvoiceStatus } from '../../../shared/portal';
+import { formatLongDate } from '../../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const page = await loadPortalPage(ctx, Astro.request, { area: 'finance' });
+if (page instanceof Response) return page;
+const param = Astro.url.searchParams.get('show');
+const show: 'open' | 'all' | 'credit-notes' = param === 'all' || param === 'credit-notes' ? param : 'open';
+const invoices = show === 'credit-notes' ? [] : await listPortalInvoices(ctx, { show });
+const credits = show === 'credit-notes' ? await listPortalCreditNotes(ctx) : [];
+const multiClient = page.clients.length > 1;
+const tabs = [
+  { key: 'open', label: 'To pay', href: '/portal/invoices' },
+  { key: 'all', label: 'All invoices', href: '/portal/invoices?show=all' },
+  { key: 'credit-notes', label: 'Credit notes', href: '/portal/invoices?show=credit-notes' },
+] as const;
+---
+
+<PortalLayout title="Invoices" page={page} active="invoices">
+  <h1 class="text-2xl font-bold tracking-display md:text-3xl">Invoices</h1>
+  <nav aria-label="Filter invoices" class="mt-4">
+    <ul class="flex flex-wrap gap-2">
+      {tabs.map((t) => (
+        <li>
+          <a
+            href={t.href}
+            aria-current={show === t.key ? 'page' : undefined}
+            class:list={[
+              'inline-flex h-9 items-center rounded-full border px-4 text-sm font-semibold',
+              show === t.key
+                ? 'border-brand-600 bg-brand-600 text-white'
+                : 'border-line bg-surface text-ink-800 hover:border-ink-400',
+            ]}
+          >
+            {t.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+  {show === 'credit-notes' ? (
+    credits.length === 0 ? (
+      <p class="mt-6 max-w-2xl rounded-lg border border-line bg-surface p-6 text-ink-600">There are no credit notes.</p>
+    ) : (
+      <ul class="mt-6 divide-y divide-line rounded-lg border border-line bg-surface" aria-label="Credit notes">
+        {credits.map((c) => (
+          <li class="flex flex-wrap items-start justify-between gap-x-6 gap-y-2 px-5 py-4">
+            <div class="min-w-0">
+              <p class="font-semibold text-ink-950">
+                <span class="font-mono">{c.number}</span>
+                {c.status === 'void' ? <span class="ml-2 text-sm font-normal text-ink-600">(cancelled)</span> : null}
+              </p>
+              <p class="mt-0.5 text-sm text-ink-600">
+                {formatLongDate(c.issuedAt)} · for{' '}
+                <a href={`/portal/invoices/${c.invoiceId}`} class="font-mono text-brand-600 underline">
+                  {c.invoiceNumber}
+                </a>{' '}
+                · {CREDIT_APPLIED_LABEL[c.appliedTo]}
+              </p>
+              <p class="mt-0.5 text-sm text-ink-800">{c.reason}</p>
+            </div>
+            <div class="flex flex-col items-end gap-1">
+              <p class="font-mono font-semibold tabular-nums text-ink-950">{formatMoney(c.totalMinor, c.currency)}</p>
+              <a
+                href={`/api/v1/portal/credit-notes/${c.id}/pdf`}
+                download
+                class="text-sm font-semibold text-brand-600 underline underline-offset-2"
+              >
+                PDF<span class="sr-only"> of credit note {c.number}</span>
+              </a>
+            </div>
+          </li>
+        ))}
+      </ul>
+    )
+  ) : invoices.length === 0 ? (
+    <p
+      class="mt-6 max-w-2xl rounded-lg border border-line bg-surface p-6 text-ink-600"
+      data-testid="portal-no-invoices"
+    >
+      {show === 'open' ? 'You have nothing to pay right now.' : 'There are no invoices yet.'}
+    </p>
+  ) : (
+    <ul class="mt-6 divide-y divide-line rounded-lg border border-line bg-surface" aria-label="Invoices">
+      {invoices.map((i) => {
+        const st = portalInvoiceStatus(i.status, i.overdue);
+        const open = i.balanceMinor > 0 && i.status !== 'void';
+        return (
+          <li class="relative flex flex-wrap items-start justify-between gap-x-6 gap-y-2 px-5 py-4 hover:bg-canvas">
+            <div class="min-w-0">
+              <a
+                href={`/portal/invoices/${i.id}`}
+                class="font-mono font-semibold text-ink-950 after:absolute after:inset-0 hover:underline"
+              >
+                {i.number}
+              </a>
+              <p class="mt-0.5 text-sm text-ink-600">
+                {i.issueDate ? formatLongDate(i.issueDate) : ''}
+                {open && i.dueDate ? ` · due ${formatLongDate(i.dueDate)}` : ''}
+                {multiClient ? ` · ${i.clientName}` : ''}
+              </p>
+            </div>
+            <div class="flex flex-col items-end gap-1">
+              <p class="font-mono font-semibold tabular-nums text-ink-950">
+                {formatMoney(open ? i.balanceMinor : i.totalMinor, i.currency)}
+              </p>
+              {open && i.balanceMinor !== i.totalMinor ? (
+                <p class="text-[12px] text-ink-600">of {formatMoney(i.totalMinor, i.currency)}</p>
+              ) : null}
+              <StatusPill {...st} />
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  )}
+</PortalLayout>

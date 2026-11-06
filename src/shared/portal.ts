@@ -16,3 +16,17 @@ export function portalQuotationStatus(status: QuotationStatus, open: boolean): {
       return { label: 'Expired', tone: 'warning' };
   }
 }
+
+export function portalInvoiceStatus(status: string, overdue: boolean): { label: string; tone: Tone } {
+  if (status === 'void') return { label: 'Cancelled', tone: 'neutral' };
+  if (status === 'paid') return { label: 'Paid', tone: 'success' };
+  if (overdue) return { label: 'Overdue', tone: 'danger' };
+  if (status === 'partially_paid') return { label: 'Part paid', tone: 'warning' };
+  return { label: 'Due', tone: 'info' };
+}
+
+export const CREDIT_APPLIED_LABEL: Record<'invoice' | 'client_credit' | 'refund', string> = {
+  invoice: 'Taken off the invoice',
+  client_credit: 'Kept as credit for future invoices',
+  refund: 'Refunded',
+};

@@ -84,7 +84,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P5.1 Portal auth UX** (accept invite, login, reset, verify email, sessions, profile, optional approved registration flow off by default). AC: tests + no auto-linking by email. A completed registration raises `client.registered` for `clients.view` staff, with a test (carried over from P4.16).
 - [x] **P5.2 Portal overview** (outstanding balance per currency, open quotations, active projects, recent activity). AC: visual QA.
 - [x] **P5.3 Quotations** (list, view, PDF, accept/reject). AC: isolation tests.
-- [ ] **P5.4 Invoices & credit notes** (list, view, PDF, Pay now). AC: isolation tests.
+- [x] **P5.4 Invoices & credit notes** (list, view, PDF, Pay now). AC: isolation tests.
 - [ ] **P5.5 Payments & receipts** (history, receipt PDFs, attempt status page). AC: tests.
 - [ ] **P5.6 Projects** (milestones, client updates, progress, deliverables download, messages). AC: internal items never visible (test).
 - [ ] **P5.7 Support** (create, reply, attachments, status). Also the portal "Your services" page (data from `clientServices`, P4.20) with "Request cancellation" creating a support request (docs/12 §A.3). AC: tests.

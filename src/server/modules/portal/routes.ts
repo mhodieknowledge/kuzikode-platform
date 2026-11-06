@@ -7,6 +7,7 @@ import type { ApiEnv } from '../../middleware/request-context';
 import { jsonBody, query } from '../../middleware/validate';
 import { documentPdf } from '../documents/service';
 import { fileResponse } from '../files/service';
+import * as invoices from '../invoices/portal';
 import * as quotations from '../quotations/service';
 import { portalOverview } from './service';
 
@@ -56,6 +57,52 @@ export function portalRoutes() {
     const id = await quotations.portalQuotationId(ctx, c.req.param('id'));
     const pdf = await documentPdf(ctx, 'quotation', id);
     return fileResponse(ctx, pdf.file!);
+  });
+
+  r.get('/invoices', async (c) => c.json({ data: await invoices.listPortalInvoices(c.var.ctx, query(c, listQuery)) }));
+  r.get('/invoices/:id', async (c) => {
+    const d = await invoices.getPortalInvoice(c.var.ctx, c.req.param('id'));
+    const i = d.invoice;
+    return c.json({
+      data: {
+        invoice: {
+          id: i.id,
+          number: i.number,
+          status: i.status,
+          currency: i.currency,
+          issueDate: i.issue_date,
+          dueDate: i.due_date,
+          subtotalMinor: i.subtotal_minor,
+          discountMinor: i.discount_minor,
+          taxMinor: i.tax_minor,
+          totalMinor: i.total_minor,
+          paidMinor: i.amount_paid_minor,
+          creditedMinor: i.amount_credited_minor,
+          balanceMinor: i.balance_minor,
+        },
+        items: d.items.map((it) => ({
+          description: it.description,
+          quantityMilli: it.quantity_milli,
+          unitPriceMinor: it.unit_price_minor,
+          lineTotalMinor: it.line_total_minor,
+        })),
+        overdue: d.overdue,
+        payments: d.payments,
+        creditNotes: d.creditNotes,
+        payment: d.payment,
+      },
+    });
+  });
+  r.get('/invoices/:id/pdf', async (c) => {
+    const ctx = c.var.ctx;
+    const pdf = await documentPdf(ctx, 'invoice', await invoices.portalInvoiceId(ctx, c.req.param('id')));
+    return fileResponse(ctx, pdf.file!, { inline: c.req.query('inline') === '1' });
+  });
+  r.get('/credit-notes', async (c) => c.json({ data: await invoices.listPortalCreditNotes(c.var.ctx) }));
+  r.get('/credit-notes/:id/pdf', async (c) => {
+    const ctx = c.var.ctx;
+    const pdf = await documentPdf(ctx, 'credit_note', await invoices.portalCreditNoteId(ctx, c.req.param('id')));
+    return fileResponse(ctx, pdf.file!, { inline: c.req.query('inline') === '1' });
   });
   return r;
 }

@@ -19,6 +19,8 @@ export default async function globalSetup() {
   // Idempotent: roles and permissions must exist before the accounts get their roles (fresh CI database).
   execFileSync('node', ['scripts/seed.ts', '--env', 'local'], { stdio: 'pipe' });
   const hash = await hashPassword(E2E_PASSWORD);
+  const clientSnap = JSON.stringify({ name: E2E_PORTAL_USER.clientName, email: 'hello@borrowdale-florists.example' });
+  const businessSnap = JSON.stringify({ name: 'Kuzikode Technologies' });
   const now = new Date().toISOString();
   const ids = Object.values(E2E_USERS)
     .map((u) => q(u.id))
@@ -52,10 +54,22 @@ export default async function globalSetup() {
      ON CONFLICT(client_id, user_id) DO UPDATE SET status = 'active';`,
     // portal overview fixtures: two open USD invoices (one overdue), one sent quotation, one active project with a
     // client-visible milestone and update (fixed ids; never touched by other specs).
-    `INSERT INTO invoices (id, number, client_id, currency, status, issue_date, due_date, total_minor, amount_paid_minor, balance_minor, issued_at)
-     VALUES ('inv_e2e_portal_1', 'INV-E2E-P001', ${q(E2E_PORTAL_USER.clientId)}, 'USD', 'issued', '2026-10-01', '2099-12-31', 120000, 0, 120000, '2026-10-01T08:00:00.000Z'),
-            ('inv_e2e_portal_2', 'INV-E2E-P002', ${q(E2E_PORTAL_USER.clientId)}, 'USD', 'partially_paid', '2026-08-01', '2026-08-31', 45000, 20000, 25000, '2026-08-01T08:00:00.000Z')
+    // Invoices are inserted as drafts, given their lines (lines are locked after issue), then issued.
+    `INSERT INTO invoices (id, number, client_id, currency, status, issue_date, due_date, subtotal_minor, total_minor, amount_paid_minor, balance_minor, issued_at,
+       client_snapshot, business_snapshot)
+     VALUES ('inv_e2e_portal_1', 'INV-E2E-P001', ${q(E2E_PORTAL_USER.clientId)}, 'USD', 'draft', '2026-10-01', '2099-12-31', 120000, 120000, 0, 120000, '2026-10-01T08:00:00.000Z', ${q(clientSnap)}, ${q(businessSnap)}),
+            ('inv_e2e_portal_2', 'INV-E2E-P002', ${q(E2E_PORTAL_USER.clientId)}, 'USD', 'draft', '2026-08-01', '2026-08-31', 45000, 45000, 20000, 25000, '2026-08-01T08:00:00.000Z', ${q(clientSnap)}, ${q(businessSnap)})
      ON CONFLICT(id) DO NOTHING;`,
+    `INSERT INTO invoice_items (id, invoice_id, position, description, quantity_milli, unit_price_minor, line_subtotal_minor, line_discount_minor, line_tax_minor, line_total_minor)
+     SELECT 'iti_e2e_portal_1', 'inv_e2e_portal_1', 1, 'Brand refresh: logo and colour system', 1000, 120000, 120000, 0, 0, 120000
+     WHERE (SELECT status FROM invoices WHERE id = 'inv_e2e_portal_1') = 'draft'
+     ON CONFLICT(id) DO NOTHING;`,
+    `INSERT INTO invoice_items (id, invoice_id, position, description, quantity_milli, unit_price_minor, line_subtotal_minor, line_discount_minor, line_tax_minor, line_total_minor)
+     SELECT 'iti_e2e_portal_2', 'inv_e2e_portal_2', 1, 'Website care plan (3 months)', 3000, 15000, 45000, 0, 0, 45000
+     WHERE (SELECT status FROM invoices WHERE id = 'inv_e2e_portal_2') = 'draft'
+     ON CONFLICT(id) DO NOTHING;`,
+    `UPDATE invoices SET status = CASE id WHEN 'inv_e2e_portal_1' THEN 'issued' ELSE 'partially_paid' END
+     WHERE id IN ('inv_e2e_portal_1', 'inv_e2e_portal_2') AND status = 'draft';`,
     // The portal quotation spec accepts it, so it is reset to "sent" on every run.
     `INSERT INTO quotations (id, number, client_id, title, currency, status, issue_date, valid_until, subtotal_minor, total_minor, sent_at,
        client_snapshot, business_snapshot)

@@ -218,3 +218,38 @@ test('a client opens a quotation, reads it and accepts it with their name (P5.3)
   await page.goto('/portal/quotations?show=open');
   await expect(page.getByText('No quotations are waiting for your answer.')).toBeVisible();
 });
+
+test('a client sees what they owe, opens an overdue invoice and finds how to pay (P5.4)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await portalSignIn(page, E2E_PORTAL_USER.email, E2E_PASSWORD);
+  await page
+    .getByRole('navigation', { name: 'Portal navigation' })
+    .first()
+    .getByRole('link', { name: 'Invoices' })
+    .click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Invoices' })).toBeVisible();
+  const overdue = page.getByRole('listitem').filter({ hasText: 'INV-E2E-P002' });
+  await expect(overdue).toContainText('Overdue');
+  await expect(overdue).toContainText('$250.00');
+  await expect(overdue).toContainText('of $450.00');
+  await expect(page.getByRole('listitem').filter({ hasText: 'INV-E2E-P001' })).toContainText('Due');
+  await expectAccessible(page);
+  await screenshots(page, 'portal-invoices');
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await overdue.getByRole('link', { name: 'INV-E2E-P002' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'INV-E2E-P002' })).toBeVisible();
+  await expect(page.getByTestId('portal-how-to-pay')).toContainText('$250.00 to pay');
+  await expect(page.getByTestId('portal-how-to-pay')).toContainText('was due');
+  await expect(page.getByRole('cell', { name: 'Website care plan (3 months)' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Download PDF' })).toHaveAttribute(
+    'href',
+    '/api/v1/portal/invoices/inv_e2e_portal_2/pdf',
+  );
+  await expectAccessible(page);
+  await screenshots(page, 'portal-invoice');
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/portal/invoices?show=credit-notes');
+  await expect(page.getByText('There are no credit notes.')).toBeVisible();
+});

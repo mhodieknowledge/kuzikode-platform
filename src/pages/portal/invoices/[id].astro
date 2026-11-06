@@ -1,0 +1,162 @@
+---
+import PortalLayout from '../../../layouts/PortalLayout.astro';
+import InvoiceDocument from '../../../components/documents/InvoiceDocument.astro';
+import StatusPill from '../../../components/portal/StatusPill.astro';
+import { loadPortalPage } from '../../../server/lib/portal-page';
+import { getPortalInvoice } from '../../../server/modules/invoices';
+import { AppError } from '../../../server/lib/errors';
+import { formatMoney } from '../../../shared/money';
+import { CREDIT_APPLIED_LABEL, portalInvoiceStatus } from '../../../shared/portal';
+import { formatLongDate } from '../../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const page = await loadPortalPage(ctx, Astro.request, { area: 'finance' });
+if (page instanceof Response) return page;
+let data;
+try {
+  data = await getPortalInvoice(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND') return new Response(null, { status: 404 });
+  throw err;
+}
+const inv = data.invoice;
+const money = (m: number) => formatMoney(m, inv.currency, data.minorDigits);
+const st = portalInvoiceStatus(inv.status, data.overdue);
+const pdfBase = `/api/v1/portal/invoices/${inv.id}/pdf`;
+---
+
+<PortalLayout title={inv.number ?? 'Invoice'} page={page} active="invoices">
+  <p class="text-sm">
+    <a href="/portal/invoices" class="font-semibold text-brand-600 underline underline-offset-2">
+      Invoices
+    </a>
+  </p>
+  <div class="mt-4 flex max-w-4xl flex-col gap-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <p class="flex flex-wrap items-center gap-2 text-sm text-ink-600">
+        Status <StatusPill {...st} />
+      </p>
+      <a
+        href={pdfBase}
+        download
+        class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+      >
+        Download PDF
+      </a>
+    </div>
+
+    {data.payment ? (
+      <section
+        class:list={[
+          'rounded-lg border p-5 md:p-6',
+          data.overdue ? 'border-danger-600/30 bg-danger-50' : 'border-line bg-canvas',
+        ]}
+        aria-labelledby="pay-title"
+        data-testid="portal-how-to-pay"
+      >
+        <h2 id="pay-title" class="font-sans text-lg font-semibold">
+          {money(inv.balance_minor)} to pay
+          {inv.due_date ? (
+            <span class="font-normal text-ink-600">
+              {' '}
+              · {data.overdue ? 'was due' : 'due'} {formatLongDate(inv.due_date)}
+            </span>
+          ) : null}
+        </h2>
+        {data.payment.bankDetails ? (
+          <>
+            <p class="mt-2 text-sm text-ink-800">
+              Pay by bank transfer and use <strong class="font-mono">{inv.number}</strong> as the reference:
+            </p>
+            <p class="mt-2 whitespace-pre-line rounded-sm bg-surface px-4 py-3 font-mono text-sm text-ink-950">
+              {data.payment.bankDetails}
+            </p>
+          </>
+        ) : null}
+        {data.payment.contactEmail ? (
+          <p class="mt-3 text-sm text-ink-800">
+            {data.payment.bankDetails ? 'Questions about paying? ' : 'To arrange payment, email '}
+            <a href={`mailto:${data.payment.contactEmail}`} class="font-semibold text-brand-600 underline">
+              {data.payment.contactEmail}
+            </a>
+            .
+          </p>
+        ) : null}
+      </section>
+    ) : null}
+
+    <InvoiceDocument
+      number={inv.number}
+      currency={inv.currency}
+      minorDigits={data.minorDigits}
+      issueDate={inv.issue_date}
+      dueDate={inv.due_date}
+      notes={inv.notes}
+      terms={inv.terms}
+      issued={true}
+      totals={{
+        subtotal: inv.subtotal_minor,
+        discount: inv.discount_minor,
+        tax: inv.tax_minor,
+        total: inv.total_minor,
+        paid: inv.amount_paid_minor,
+        credited: inv.amount_credited_minor,
+        balance: inv.balance_minor,
+      }}
+      items={data.items}
+      client={data.client}
+      business={data.business}
+    />
+
+    {data.payments.length ? (
+      <section class="rounded-lg border border-line bg-surface p-5 md:p-6" aria-labelledby="paid-title">
+        <h2 id="paid-title" class="font-sans text-base font-semibold">
+          Payments received
+        </h2>
+        <ul class="mt-3 divide-y divide-line text-sm">
+          {data.payments.map((p) => (
+            <li class="flex justify-between gap-3 py-2 tabular-nums">
+              <span>
+                {formatLongDate(p.receivedAt)} · <span class="font-mono">{p.receiptNumber}</span>
+              </span>
+              <span class="font-medium">{money(p.appliedMinor)}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ) : null}
+
+    {data.creditNotes.length ? (
+      <section class="rounded-lg border border-line bg-surface p-5 md:p-6" aria-labelledby="credit-title">
+        <h2 id="credit-title" class="font-sans text-base font-semibold">
+          Credit notes
+        </h2>
+        <ul class="mt-3 divide-y divide-line text-sm">
+          {data.creditNotes.map((c) => (
+            <li class="flex flex-wrap items-start justify-between gap-3 py-3">
+              <div class="min-w-0">
+                <p class="font-medium text-ink-950">
+                  <span class="font-mono">{c.number}</span> · {formatLongDate(c.issuedAt)}
+                  {c.status === 'void' ? ' (cancelled)' : ''}
+                </p>
+                <p class="text-ink-600">
+                  {c.reason} · {CREDIT_APPLIED_LABEL[c.appliedTo]}
+                </p>
+              </div>
+              <div class="flex items-center gap-4">
+                <span class="font-medium tabular-nums">{money(c.totalMinor)}</span>
+                <a
+                  href={`/api/v1/portal/credit-notes/${c.id}/pdf`}
+                  download
+                  class="font-semibold text-brand-600 underline underline-offset-2"
+                >
+                  PDF<span class="sr-only"> of credit note {c.number}</span>
+                </a>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ) : null}
+  </div>
+</PortalLayout>

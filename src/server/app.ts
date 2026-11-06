@@ -21,6 +21,7 @@ import { invoiceRoutes } from './modules/invoices';
 import { paymentRoutes } from './modules/payments';
 import { projectRoutes } from './modules/projects';
 import { expenseRoutes } from './modules/expenses';
+import { supportRoutes } from './modules/support';
 
 export function createApp() {
   const app = new Hono<ApiEnv>();
@@ -42,6 +43,7 @@ export function createApp() {
   app.route('/api/v1/admin/payments', paymentRoutes());
   app.route('/api/v1/admin/projects', projectRoutes());
   app.route('/api/v1/admin/expenses', expenseRoutes());
+  app.route('/api/v1/admin/support', supportRoutes());
   app.route('/api/v1/admin/enquiries', enquiryAdminRoutes());
   app.route('/api/v1/admin/leads', leadAdminRoutes());
   app.route('/api/v1/admin', adminShellRoutes());

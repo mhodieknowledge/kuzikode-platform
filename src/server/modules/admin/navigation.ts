@@ -45,7 +45,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     items: [
       { label: 'Projects', href: '/admin/projects', anyOf: ['projects.view', 'projects.view_all'], built: true },
       { label: 'Time', href: '/admin/time', anyOf: ['time.track', 'time.view_all'], built: false },
-      { label: 'Support', href: '/admin/support', anyOf: ['support.view'], built: false },
+      { label: 'Support', href: '/admin/support', anyOf: ['support.view'], built: true },
     ],
   },
   {

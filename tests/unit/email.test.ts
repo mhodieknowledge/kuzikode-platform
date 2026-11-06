@@ -100,6 +100,12 @@ describe('templates', () => {
       message: null,
     },
     newsletter_confirmation: { link: 'https://kuzikode.example/newsletter/confirm?token=abc' },
+    support_reply: {
+      name: 'Ann',
+      reference: 'SUP-2026-0001',
+      subject: 'Email not syncing',
+      body: 'We reset the mailbox password; please try again.',
+    },
     project_update: {
       name: 'Ann',
       project: 'Online ordering website',

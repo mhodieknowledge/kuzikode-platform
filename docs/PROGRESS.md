@@ -5,13 +5,11 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phase 1, 2 and 3 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 4 (administration) in progress.
-- Last completed task: **P4.13 Expenses** (P4.1–P4.13 done).
-- **Next step:** P4.14 Support inbox — `server/modules/support` over `support_requests`/`support_messages`/`support_attachments`
-  (read migrations/0007 first): SUP reference via `numbering.support`, staff list with filters (status, priority, assignee, client),
-  thread view with client messages vs internal notes (`is_internal_note`), assignment, status changes (open/awaiting_client/resolved/
-  closed), attachments via `storeUpload` owner 'support' (portal access already checks `is_internal_note = 0`), notifications
-  `support.created`/`support.replied`, emails to the client on staff replies. Client-side creation comes with the portal (Phase 5);
-  build a staff "New request on behalf of client" form so the inbox is usable now. Nav item `Support` → `built: true`.
+- Last completed task: **P4.14 Support inbox** (P4.1–P4.14 done).
+- **Next step:** P4.15 CMS editors — pages/sections draft → preview → publish, portfolio, products, announcements, legal pages, SEO fields,
+  media library (alt text required), publish bumps `content_version`. Read `server/modules/cms` (read layer from P3.1: published reads +
+  KV cache by content_version) and docs/04 CMS tables first; AC: preview never leaks drafts publicly (preview behind admin session,
+  `noindex`, no cache). Nav items `Pages` (`/admin/cms`) and media → `built: true` when done.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 
 ---
@@ -293,4 +291,15 @@ The **Next step** line must be specific enough that a fresh session can continue
   view, void), /categories, /report. Expenses nav on.
 - Tests: integration `expenses.test.ts` (3) · e2e invoices spec records an expense with a receipt and opens the report.
   verify: unit 227 / integration 173 green; e2e 58/58 green.
+
+## 2026-11-06 09:45 UTC · P4.14 Support inbox ✅
+- `shared/support.ts`, `shared/schemas/support.ts`; `modules/support`: list (active/status/priority/assignee incl. me/none/client/
+  search, counts, "client replied" marker), thread with attachments, open a request on a client's behalf (SUP number, staff
+  notification, audit), replies (email `support_reply` to the main contact, portal-user notifications, status → waiting for the client,
+  replier auto-assigned) vs internal notes (no email/notification, status kept), attachments (multipart, ≤ 5, `storeUpload` 'document'
+  owner 'support'; internal-note files unreadable from the portal), assignment/status/priority (support.manage; assignee notified).
+- UI: /admin/support (list + filters), /new, /[id] (conversation, reply/note composer with attachments, request controls). Nav on.
+- Tests: integration `support.test.ts` (3) · e2e invoices spec opens a request, adds a note and replies. settings e2e: account-menu
+  click now retries until the island hydrates (was flaky under parallel load).
+- verify: unit 228 / integration 176 green; e2e green (invoices + settings re-run after the fixes; full run 56/58 before them).
 

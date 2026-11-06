@@ -76,7 +76,11 @@ test('billing, numbering and integrations pages; admins see numbering read-only'
 
 test('staff choose their own notification preferences; support cannot open settings', async ({ page }) => {
   await signIn(page, E2E_USERS.support.email);
-  await page.getByRole('button', { name: /Account menu/ }).click();
+  // The account menu is an island: retry the click until it has hydrated (slow under parallel runs).
+  await expect(async () => {
+    await page.getByRole('button', { name: /Account menu/ }).click();
+    await expect(page.getByRole('menuitem', { name: 'Notification preferences' })).toBeVisible({ timeout: 1_000 });
+  }).toPass({ timeout: 15_000 });
   await page.getByRole('menuitem', { name: 'Notification preferences' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Notification preferences' })).toBeVisible();
   await hydrated(page, 'Save preferences');

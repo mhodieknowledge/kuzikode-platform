@@ -443,6 +443,21 @@ const defs = {
         ],
       }),
   },
+  support_reply: {
+    schema: z.object({ name: z.string(), reference: z.string(), subject: z.string(), body: z.string() }),
+    render: (b: Brand, d: { name: string; reference: string; subject: string; body: string }) =>
+      renderEmail(b, {
+        subject: `Re: ${d.subject} [${d.reference}]`,
+        preheader: d.body.slice(0, 120),
+        heading: 'A reply to your support request',
+        blocks: [
+          { kind: 'p', text: `Hi ${d.name},` },
+          { kind: 'p', text: d.body },
+          { kind: 'kv', rows: [['Request', `${d.reference}: ${d.subject}`]] },
+          { kind: 'small', text: 'Reply to this email and we will add your message to the request.' },
+        ],
+      }),
+  },
 } as const;
 
 export type TemplateName = keyof typeof defs;

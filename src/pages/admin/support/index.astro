@@ -1,0 +1,160 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { listRequests } from '../../../server/modules/support';
+import { supportListQuery } from '../../../shared/schemas/support';
+import { SUPPORT_PRIORITY_LABEL, SUPPORT_STATUS_LABEL } from '../../../shared/support';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'support.view' });
+if (page instanceof Response) return page;
+const parsed = supportListQuery.safeParse(Object.fromEntries(Astro.url.searchParams));
+const filter = parsed.success ? parsed.data : supportListQuery.parse({});
+const result = await listRequests(ctx, filter);
+const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
+const STATUS_CLASS: Record<string, string> = {
+  open: 'bg-info-50 text-info-700',
+  awaiting_client: 'bg-warning-50 text-warning-700',
+  resolved: 'bg-success-50 text-success-700',
+  closed: 'bg-ink-950/5 text-ink-800',
+};
+const when = (iso: string) =>
+  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
+    new Date(iso),
+  );
+const pageHref = (n: number) => {
+  const q = new URLSearchParams(Astro.url.searchParams);
+  q.set('page', String(n));
+  return `/admin/support?${q.toString()}`;
+};
+const active = (result.counts['open'] ?? 0) + (result.counts['awaiting_client'] ?? 0);
+---
+
+<AdminLayout title="Support" page={page}>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold tracking-display">Support</h1>
+      <p class="mt-1 text-sm text-ink-600">
+        {active} active · {result.counts['open'] ?? 0} need a reply
+      </p>
+    </div>
+    {page.auth.permissions.has('support.reply') ? (
+      <a
+        href="/admin/support/new"
+        class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
+      >
+        New request
+      </a>
+    ) : null}
+  </div>
+  <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter support requests">
+    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+      Search
+      <input
+        name="q"
+        type="search"
+        value={filter.q ?? ''}
+        maxlength="80"
+        class={field}
+        placeholder="Reference, subject or client"
+      />
+    </label>
+    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+      Status
+      <select name="status" class={field}>
+        <option value="active" selected={!filter.status || filter.status === 'active'}>
+          Active (open, waiting)
+        </option>
+        {Object.entries(SUPPORT_STATUS_LABEL).map(([k, l]) => (
+          <option value={k} selected={filter.status === k}>
+            {l}
+          </option>
+        ))}
+        <option value="all" selected={filter.status === 'all'}>
+          All
+        </option>
+      </select>
+    </label>
+    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+      Priority
+      <select name="priority" class={field}>
+        <option value="">Any</option>
+        {Object.entries(SUPPORT_PRIORITY_LABEL).map(([k, l]) => (
+          <option value={k} selected={filter.priority === k}>
+            {l}
+          </option>
+        ))}
+      </select>
+    </label>
+    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+      Assigned
+      <select name="assignee" class={field}>
+        <option value="">Anyone</option>
+        <option value="me" selected={filter.assignee === 'me'}>
+          Me
+        </option>
+        <option value="none" selected={filter.assignee === 'none'}>
+          Unassigned
+        </option>
+      </select>
+    </label>
+    {filter.clientId ? <input type="hidden" name="clientId" value={filter.clientId} /> : null}
+    <button
+      type="submit"
+      class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+    >
+      Filter
+    </button>
+  </form>
+  <ul class="mt-6 divide-y divide-line rounded-lg border border-line bg-surface">
+    {result.items.length === 0 ? (
+      <li class="px-4 py-10 text-center text-sm text-ink-600">No support requests here.</li>
+    ) : (
+      result.items.map((r) => (
+        <li class="flex flex-wrap items-start justify-between gap-3 px-4 py-3">
+          <div class="min-w-0">
+            <a href={`/admin/support/${r.id}`} class="font-semibold text-ink-950 hover:underline">
+              {r.subject}
+            </a>
+            <p class="text-[12px] text-ink-600">
+              <span class="font-mono">{r.reference}</span> · {r.client_name} · {r.assignee ?? 'Unassigned'}
+              {r.last_message_at ? ` · ${when(r.last_message_at)}` : ''}
+              {r.last_author_type === 'client' ? ' · client replied' : ''}
+            </p>
+          </div>
+          <div class="flex gap-2">
+            {r.priority === 'urgent' || r.priority === 'high' ? (
+              <span class="rounded-full bg-danger-50 px-2 py-0.5 text-[12px] font-semibold text-danger-700">
+                {SUPPORT_PRIORITY_LABEL[r.priority]}
+              </span>
+            ) : null}
+            <span class={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${STATUS_CLASS[r.status]}`}>
+              {SUPPORT_STATUS_LABEL[r.status]}
+            </span>
+          </div>
+        </li>
+      ))
+    )}
+  </ul>
+  {result.pages > 1 ? (
+    <nav aria-label="Pagination" class="mt-4 flex items-center justify-between text-sm font-semibold">
+      {result.page > 1 ? (
+        <a href={pageHref(result.page - 1)} rel="prev" class="text-brand-600">
+          Previous
+        </a>
+      ) : (
+        <span />
+      )}
+      <span class="text-ink-600">
+        Page {result.page} of {result.pages}
+      </span>
+      {result.page < result.pages ? (
+        <a href={pageHref(result.page + 1)} rel="next" class="text-brand-600">
+          Next
+        </a>
+      ) : (
+        <span />
+      )}
+    </nav>
+  ) : null}
+</AdminLayout>

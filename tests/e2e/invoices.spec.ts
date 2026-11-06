@@ -158,6 +158,28 @@ test('draft invoice → issued and emailed → client views and downloads the PD
   await expect(page.getByRole('heading', { level: 2, name: 'By category' })).toBeVisible();
   await expectAccessible(page);
 
+  // Support (P4.14): a request taken by phone, an internal note and a reply.
+  await page.goto('/admin/support/new');
+  await hydrated(page, 'Open request');
+  const clientSelect = page.getByRole('combobox', { name: /^Client/ });
+  const clientOption = clientSelect.locator('option', { hasText: clientName });
+  await clientSelect.selectOption((await clientOption.getAttribute('value'))!);
+  await page.getByLabel('Subject').fill('Menu prices need updating');
+  await page.getByLabel('What the client needs').fill('Called in: three prices changed on the drinks menu.');
+  await page.getByRole('button', { name: 'Open request' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Menu prices need updating' })).toBeVisible();
+  await hydrated(page, 'Send reply');
+  await page.getByRole('checkbox', { name: 'Internal note' }).click();
+  await page.getByRole('textbox', { name: 'Internal note' }).fill('Prices are in the shared sheet.');
+  await page.getByRole('button', { name: 'Add note' }).click();
+  await expect(page.getByText('Prices are in the shared sheet.')).toBeVisible();
+  await hydrated(page, 'Send reply');
+  await page.getByLabel('Reply to the client').fill('Updated. Please take a look.');
+  await page.getByRole('button', { name: 'Send reply' }).click();
+  await expect(page.getByText(/Waiting for the client/).first()).toBeVisible();
+  await expectAccessible(page);
+  await screenshots(page, 'admin-support-request');
+
   await client.reload();
   await expect(client.getByText('Paid in full. Thank you.')).toBeVisible();
   await clientContext.close();

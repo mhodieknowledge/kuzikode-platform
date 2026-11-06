@@ -56,3 +56,8 @@ Things only the owner can do. The agent keeps building around them and records e
   `/legal/accessibility` are honest drafts marked "awaiting legal review". Have a Zimbabwean lawyer review them (data protection under the
   Cyber and Data Protection Act [Chapter 12:07], retention periods, liability limits), then edit them in Admin → Website → Legal pages
   and remove the "draft" line. Enquiry retention (24 months) and application retention (12 months) are defaults you can change.
+- [ ] **Site imagery (P3.18), raised 2026-11-06:** every generator is out of budget. The Workers AI free 10,000 neurons/day was already spent
+  at 12:00 UTC (another Worker on the account may be using Workers AI), and the OpenAI key returns "no credits remaining". **Do one of:**
+  add a few dollars of OpenAI API credit (≈ 20 images at medium quality), or switch the Cloudflare account to Workers Paid ($5/month), or
+  upload your own photos in Admin → Website → Media. The pipeline is ready: `npm run img:gen -- --id <slot> --provider openai`. The site
+  already looks finished without these images (sections without a photo render their text-only layout).

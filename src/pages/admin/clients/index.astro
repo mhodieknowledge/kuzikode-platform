@@ -1,0 +1,165 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { allTags, listClients } from '../../../server/modules/clients';
+import { clientListQuery } from '../../../shared/schemas/clients';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'clients.view' });
+if (page instanceof Response) return page;
+const parsed = clientListQuery.safeParse(Object.fromEntries(Astro.url.searchParams));
+const filter = parsed.success ? parsed.data : clientListQuery.parse({});
+const [result, tags] = await Promise.all([listClients(ctx, filter), allTags(ctx)]);
+const canCreate = page.auth.permissions.has('clients.create');
+const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
+const pageHref = (n: number) => {
+  const q = new URLSearchParams(Astro.url.searchParams);
+  q.set('page', String(n));
+  return `/admin/clients?${q.toString()}`;
+};
+---
+
+<AdminLayout title="Clients" page={page}>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold tracking-display">Clients</h1>
+      <p class="mt-1 text-sm text-ink-600">
+        {result.total} {result.total === 1 ? 'client' : 'clients'}
+      </p>
+    </div>
+    {canCreate ? (
+      <a
+        href="/admin/clients/new"
+        class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
+      >
+        New client
+      </a>
+    ) : null}
+  </div>
+  <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter clients">
+    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+      Search
+      <input
+        name="q"
+        type="search"
+        value={filter.q ?? ''}
+        maxlength="80"
+        class={field}
+        placeholder="Name, number or email"
+      />
+    </label>
+    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+      Status
+      <select name="status" class={field}>
+        <option value="active" selected={filter.status === 'active'}>
+          Active
+        </option>
+        <option value="archived" selected={filter.status === 'archived'}>
+          Archived
+        </option>
+        <option value="all" selected={filter.status === 'all'}>
+          All
+        </option>
+      </select>
+    </label>
+    {tags.length > 0 ? (
+      <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+        Tag
+        <select name="tag" class={field}>
+          <option value="">Any</option>
+          {tags.map((t) => (
+            <option value={t} selected={filter.tag === t}>
+              {t}
+            </option>
+          ))}
+        </select>
+      </label>
+    ) : null}
+    <button
+      type="submit"
+      class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+    >
+      Filter
+    </button>
+  </form>
+  <div class="mt-6 overflow-x-auto rounded-lg border border-line bg-surface">
+    <table class="w-full text-left text-sm">
+      <caption class="sr-only">Clients</caption>
+      <thead class="bg-canvas text-[13px] text-ink-600">
+        <tr>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Client
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Main contact
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Email
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Tags
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Currency
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {result.items.length === 0 ? (
+          <tr>
+            <td colspan="5" class="px-4 py-10 text-center text-ink-600">
+              {filter.q || filter.tag || filter.status !== 'active'
+                ? 'No clients match these filters.'
+                : 'No clients yet.'}
+            </td>
+          </tr>
+        ) : (
+          result.items.map((c) => (
+            <tr class="border-t border-line">
+              <td class="px-4 py-3">
+                <a href={`/admin/clients/${c.id}`} class="font-semibold text-ink-950 hover:underline">
+                  {c.displayName}
+                </a>
+                <span class="block font-mono text-[12px] text-ink-600">
+                  {c.number}
+                  {c.status === 'archived' ? ' · archived' : ''}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-ink-800">{c.primaryContact ?? '—'}</td>
+              <td class="px-4 py-3 text-ink-800">{c.email ?? '—'}</td>
+              <td class="px-4 py-3">
+                {c.tags.map((t) => (
+                  <span class="mr-1 inline-flex rounded-full bg-ink-950/5 px-2 py-0.5 text-[12px] text-ink-800">
+                    {t}
+                  </span>
+                ))}
+              </td>
+              <td class="px-4 py-3 text-ink-800">{c.defaultCurrency}</td>
+            </tr>
+          ))
+        )}
+      </tbody>
+    </table>
+  </div>
+  {result.pages > 1 ? (
+    <nav aria-label="Pagination" class="mt-4 flex items-center justify-between text-sm font-semibold">
+      {result.page > 1 ? (
+        <a href={pageHref(result.page - 1)} rel="prev" class="text-brand-600">
+          Previous
+        </a>
+      ) : (
+        <span />
+      )}
+      <span class="text-ink-600">
+        Page {result.page} of {result.pages}
+      </span>
+      {result.page < result.pages ? (
+        <a href={pageHref(result.page + 1)} rel="next" class="text-brand-600">
+          Next
+        </a>
+      ) : (
+        <span />
+      )}
+    </nav>
+  ) : null}
+</AdminLayout>

@@ -184,3 +184,9 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Pages: /admin/settings (general), /billing (logo, documents, invoicing defaults, currencies, tax rates), /numbering, /website (pricing switch, booking link, careers), /integrations (payment accounts status/mode, email status + test send, recent emails), /admin/account/notifications; islands `components/admin/SettingsAdmin.tsx`, `SettingsNav.astro`, `SettingsSections.astro`; Settings nav item built.
 - Tests: integration `settings.test.ts` (6), e2e `settings.spec.ts` (3, incl. public site showing a saved change immediately). Full e2e: 54 passed.
 - Next step: P4.4 Clients (CRUD, contacts, notes, tags, archive, detail tabs, credits balance, portal access tab: invite contact, approve/revoke links). P3.18 imagery still pending on the Workers AI quota (retry after ~16:00 UTC).
+
+## 2026-11-06 · P4.4 Clients ✅
+- Module `server/modules/clients` (create with gap-free number + main contact, update, archive/restore, guarded delete, list with search/tag/status + pagination, detail with contacts/notes/credit balances/portal access/related counts, contacts CRUD, notes, portal invite + approve/revoke), schemas `shared/schemas/clients.ts`, routes `/api/v1/admin/clients/*`.
+- UI: /admin/clients (filters, pagination), /admin/clients/new, /admin/clients/[id] (Overview, Contacts, Notes, Portal access tabs), /admin/clients/[id]/edit; islands `components/admin/ClientsAdmin.tsx`; Clients nav item built.
+- Tests: integration `clients.test.ts` (5), e2e `clients.spec.ts` (2; docs/08 step 3 "admin creates a client"). Full e2e: 56 passed.
+- Next step: P4.5 Enquiries & leads (inbox, triage, spam, lead pipeline list + board, assignment, follow-ups, activities, convert lead → client). Enquiry briefs from the wizard (`ProjectBrief` JSON) should render nicely in the enquiry detail. P3.18 imagery still pending (Workers AI quota; retry after ~16:00 UTC).

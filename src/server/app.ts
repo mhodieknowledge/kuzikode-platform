@@ -13,6 +13,7 @@ import { publicNewsletterRoutes } from './modules/newsletter';
 import { publicCareersRoutes } from './modules/careers';
 import { adminShellRoutes } from './modules/admin';
 import { settingsRoutes } from './modules/settings';
+import { clientRoutes } from './modules/clients';
 
 export function createApp() {
   const app = new Hono<ApiEnv>();
@@ -26,6 +27,7 @@ export function createApp() {
   app.route('/api/v1/admin/users', userRoutes());
   app.route('/api/v1/admin/roles', roleRoutes());
   app.route('/api/v1/admin/settings', settingsRoutes());
+  app.route('/api/v1/admin/clients', clientRoutes());
   app.route('/api/v1/admin', adminShellRoutes());
   app.route('/api/v1/public', publicEnquiryRoutes());
   app.route('/api/v1/public', publicNewsletterRoutes());

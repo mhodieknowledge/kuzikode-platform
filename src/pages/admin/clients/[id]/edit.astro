@@ -1,0 +1,59 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { ClientForm } from '../../../../components/admin/ClientsAdmin';
+import { loadAdminPage } from '../../../../server/lib/admin-page';
+import { AppError } from '../../../../server/lib/errors';
+import { getClient } from '../../../../server/modules/clients';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'clients.update' });
+if (page instanceof Response) return page;
+let data;
+try {
+  data = await getClient(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND')
+    return new Response(null, { status: 404, statusText: 'Not found' });
+  throw err;
+}
+const c = data.client;
+const { results } = await ctx.db
+  .prepare('SELECT code FROM currencies WHERE active = 1 OR code = ? ORDER BY is_default DESC, code')
+  .bind(c.defaultCurrency)
+  .all<{ code: string }>();
+---
+
+<AdminLayout title={`Edit ${c.displayName}`} page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/clients" class="hover:text-ink-950 hover:underline">
+      Clients
+    </a>{' '}
+    /{' '}
+    <a href={`/admin/clients/${c.id}`} class="hover:text-ink-950 hover:underline">
+      {c.displayName}
+    </a>{' '}
+    / <span class="text-ink-950">Edit</span>
+  </nav>
+  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">Edit {c.displayName}</h1>
+  <div class="max-w-3xl">
+    <ClientForm
+      client:load
+      initial={{
+        id: c.id,
+        type: c.type,
+        displayName: c.displayName,
+        legalName: c.legalName,
+        email: c.email,
+        phone: c.phone,
+        website: c.website,
+        taxNumber: c.taxNumber,
+        billingAddress: c.billingAddress,
+        defaultCurrency: c.defaultCurrency,
+        paymentTermsDays: c.paymentTermsDays,
+        notes: c.notes,
+        tags: c.tags,
+      }}
+      currencies={results.map((r) => r.code)}
+    />
+  </div>
+</AdminLayout>

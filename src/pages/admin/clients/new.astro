@@ -1,0 +1,41 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { ClientForm } from '../../../components/admin/ClientsAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { getSettings, settingNumber, settingText } from '../../../server/modules/cms';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'clients.create' });
+if (page instanceof Response) return page;
+const settings = await getSettings(ctx);
+const { results } = await ctx.db
+  .prepare('SELECT code FROM currencies WHERE active = 1 ORDER BY is_default DESC, code')
+  .all<{ code: string }>();
+const initial = {
+  type: 'business' as const,
+  displayName: '',
+  legalName: null,
+  email: null,
+  phone: null,
+  website: null,
+  taxNumber: null,
+  billingAddress: { country: 'Zimbabwe' },
+  defaultCurrency: settingText(settings, 'currency.default') ?? 'USD',
+  paymentTermsDays: settingNumber(settings, 'invoice.default_terms_days', 14),
+  notes: null,
+  tags: [],
+};
+---
+
+<AdminLayout title="New client" page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/clients" class="hover:text-ink-950 hover:underline">
+      Clients
+    </a>{' '}
+    / <span class="text-ink-950">New</span>
+  </nav>
+  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">New client</h1>
+  <div class="max-w-3xl">
+    <ClientForm client:load initial={initial} currencies={results.map((r) => r.code)} />
+  </div>
+</AdminLayout>

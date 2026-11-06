@@ -24,6 +24,13 @@ export const E2E_USERS = {
     role: 'admin',
     mustChange: false,
   },
+  clientsAdmin: {
+    id: 'usr_e2e_clients',
+    email: 'e2e-clients@example.com',
+    name: 'Cleo Clients',
+    role: 'admin',
+    mustChange: false,
+  },
   newcomer: {
     id: 'usr_e2e_newcomer',
     email: 'e2e-newcomer@example.com',

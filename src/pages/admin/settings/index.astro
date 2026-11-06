@@ -13,7 +13,7 @@ const canEdit = page.auth.permissions.has('settings.manage');
 ---
 
 <AdminLayout title="Settings" page={page}>
-  <SettingsNav current="general" />
+  <SettingsNav current="general" canExport={page.auth.permissions.has('data.export')} />
   {canEdit ? null : (
     <p class="mt-4 text-sm text-ink-600">You can view settings. Ask an administrator to change them.</p>
   )}

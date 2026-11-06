@@ -101,6 +101,13 @@ export const E2E_USERS = {
     role: 'admin',
     mustChange: false,
   },
+  reportsAdmin: {
+    id: 'usr_e2e_reports',
+    email: 'e2e-reports@example.com',
+    name: 'Rudo Reports',
+    role: 'admin',
+    mustChange: false,
+  },
   newcomer: {
     id: 'usr_e2e_newcomer',
     email: 'e2e-newcomer@example.com',

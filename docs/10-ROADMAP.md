@@ -78,7 +78,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P4.21 Careers admin** (postings, custom questions, pipeline kanban, ratings, notes, templated emails, bulk reject, retention job, Hiring Manager role). AC: tests.
 - [x] **P4.22 Content admin** for insights, industries, FAQ, testimonials (consent enforced), technologies, newsletter list/export. AC: tests.
 - [x] **P4.23 Time tracking** (entries, timer, timesheet, bill unbilled time to invoice). AC: concurrent billing test.
-- [ ] **P4.18 Reports & export** (revenue, ageing, conversion, expenses, indicative profit, CSV, data export per module, audit log viewer + export). AC: tests on aggregates.
+- [x] **P4.18 Reports & export** (revenue, ageing, conversion, expenses, indicative profit, CSV, data export per module, audit log viewer + export). AC: tests on aggregates.
 
 ## Phase 5 — Client portal
 - [ ] **P5.1 Portal auth UX** (accept invite, login, reset, verify email, sessions, profile, optional approved registration flow off by default). AC: tests + no auto-linking by email. A completed registration raises `client.registered` for `clients.view` staff, with a test (carried over from P4.16).

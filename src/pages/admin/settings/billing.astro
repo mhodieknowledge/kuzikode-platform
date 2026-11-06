@@ -20,7 +20,7 @@ const canEdit = page.auth.permissions.has('settings.manage');
 ---
 
 <AdminLayout title="Billing settings" page={page}>
-  <SettingsNav current="billing" />
+  <SettingsNav current="billing" canExport={page.auth.permissions.has('data.export')} />
   <div class="mt-6 flex max-w-4xl flex-col gap-6">
     <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="logo-title">
       <h2 id="logo-title" class="font-sans text-base font-semibold">

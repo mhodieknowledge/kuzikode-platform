@@ -26,6 +26,7 @@ import { expenseRoutes } from './modules/expenses';
 import { supportRoutes } from './modules/support';
 import { cmsAdminRoutes, contentAdminRoutes } from './modules/cms';
 import { timeRoutes } from './modules/timetracking';
+import { reportRoutes } from './modules/reports';
 
 export function createApp() {
   const app = new Hono<ApiEnv>();
@@ -57,6 +58,7 @@ export function createApp() {
   app.route('/api/v1/admin/content', contentAdminRoutes());
   app.route('/api/v1/admin/enquiries', enquiryAdminRoutes());
   app.route('/api/v1/admin/leads', leadAdminRoutes());
+  app.route('/api/v1/admin', reportRoutes());
   app.route('/api/v1/admin', adminShellRoutes());
   app.route('/api/v1/public', publicEnquiryRoutes());
   app.route('/api/v1/public', publicNewsletterRoutes());

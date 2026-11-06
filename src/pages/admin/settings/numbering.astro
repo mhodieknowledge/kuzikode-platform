@@ -13,7 +13,7 @@ const canEdit = page.auth.permissions.has('numbering.manage');
 ---
 
 <AdminLayout title="Numbering" page={page}>
-  <SettingsNav current="numbering" />
+  <SettingsNav current="numbering" canExport={page.auth.permissions.has('data.export')} />
   <section class="mt-6 max-w-5xl rounded-lg border border-line bg-surface p-6" aria-labelledby="num-title">
     <h2 id="num-title" class="font-sans text-base font-semibold">
       Document numbers

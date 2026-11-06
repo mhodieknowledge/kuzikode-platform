@@ -38,7 +38,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
       { label: 'Subscriptions', href: '/admin/subscriptions', anyOf: ['subscriptions.view'], built: true },
       { label: 'Managed services', href: '/admin/assets', anyOf: ['client_assets.manage'], built: true },
       { label: 'Expenses', href: '/admin/expenses', anyOf: ['expenses.view'], built: true },
-      { label: 'Reports', href: '/admin/reports', anyOf: ['reports.view'], built: false },
+      { label: 'Reports', href: '/admin/reports', anyOf: ['reports.view'], built: true },
     ],
   },
   {
@@ -65,7 +65,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     items: [
       { label: 'Users', href: '/admin/users', anyOf: ['users.view'], built: true },
       { label: 'Settings', href: '/admin/settings', anyOf: ['settings.view'], built: true },
-      { label: 'Audit log', href: '/admin/audit', anyOf: ['audit.view'], built: false },
+      { label: 'Audit log', href: '/admin/audit', anyOf: ['audit.view'], built: true },
     ],
   },
 ];

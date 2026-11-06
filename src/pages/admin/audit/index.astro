@@ -1,0 +1,171 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { auditFilters, listAudit } from '../../../server/modules/audit';
+import { auditQuery } from '../../../shared/schemas/reports';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'audit.view' });
+if (page instanceof Response) return page;
+const p = Astro.url.searchParams;
+const filter = auditQuery.parse(Object.fromEntries([...p.entries()].filter(([, v]) => v !== '')));
+const [data, options] = await Promise.all([listAudit(ctx, filter), auditFilters(ctx)]);
+const qs = (over: Record<string, string | number | undefined>) => {
+  const out = new URLSearchParams();
+  const { page: _p, ...rest } = filter;
+  for (const [k, v] of Object.entries({ ...rest, ...over })) if (v !== undefined && v !== '') out.set(k, String(v));
+  const s = out.toString();
+  return s ? `?${s}` : '';
+};
+const when = (iso: string) =>
+  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
+    new Date(iso),
+  );
+const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm';
+const exportQs = qs({});
+---
+
+<AdminLayout title="Audit log" page={page}>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h1 class="text-2xl font-bold tracking-display">Audit log</h1>
+    <a
+      href={`/api/v1/admin/audit/export.csv${exportQs}`}
+      class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold hover:border-ink-400"
+      download
+    >
+      Export CSV
+    </a>
+  </div>
+  {data.financeOnly ? <p class="mt-2 text-sm text-ink-600">You see changes to financial records only.</p> : null}
+  <form
+    method="get"
+    class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-6 lg:items-end"
+    aria-label="Filter the audit log"
+  >
+    <label class="flex flex-col gap-1 text-sm font-medium">
+      Person
+      <select name="actor" class={field}>
+        <option value="">Anyone</option>
+        {options.actors.map((a) => (
+          <option value={a.id} selected={filter.actor === a.id}>
+            {a.name}
+          </option>
+        ))}
+      </select>
+    </label>
+    <label class="flex flex-col gap-1 text-sm font-medium">
+      Record type
+      <select name="entityType" class={field}>
+        <option value="">Any</option>
+        {options.entityTypes.map((t) => (
+          <option value={t} selected={filter.entityType === t}>
+            {t.replace(/_/g, ' ')}
+          </option>
+        ))}
+      </select>
+    </label>
+    <label class="flex flex-col gap-1 text-sm font-medium">
+      Action
+      <input name="action" value={filter.action ?? ''} placeholder="e.g. invoice." class={field} />
+    </label>
+    <label class="flex flex-col gap-1 text-sm font-medium">
+      From
+      <input type="date" name="from" value={filter.from ?? ''} class={field} />
+    </label>
+    <label class="flex flex-col gap-1 text-sm font-medium">
+      To
+      <input type="date" name="to" value={filter.to ?? ''} class={field} />
+    </label>
+    <button class="h-10 rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500">
+      Filter
+    </button>
+  </form>
+  {filter.entityId ? (
+    <p class="mt-3 text-sm text-ink-600">
+      Showing record <span class="font-mono">{filter.entityId}</span>.{' '}
+      <a class="font-semibold text-brand-600 hover:underline" href={`/admin/audit${qs({ entityId: undefined })}`}>
+        Show all
+      </a>
+    </p>
+  ) : null}
+  <div class="relative mt-4 overflow-x-auto rounded-lg border border-line bg-surface">
+    <table class="w-full min-w-[760px] text-sm">
+      <thead class="border-b border-line text-left text-[12px] text-ink-600">
+        <tr>
+          <th scope="col" class="px-4 py-2.5 font-semibold">
+            When (Harare)
+          </th>
+          <th scope="col" class="px-4 py-2.5 font-semibold">
+            Who
+          </th>
+          <th scope="col" class="px-4 py-2.5 font-semibold">
+            Action
+          </th>
+          <th scope="col" class="px-4 py-2.5 font-semibold">
+            Record
+          </th>
+          <th scope="col" class="px-4 py-2.5 font-semibold">
+            Details
+          </th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-line align-top">
+        {data.items.length === 0 ? (
+          <tr>
+            <td colspan="5" class="px-4 py-8 text-center text-ink-600">
+              No entries match.
+            </td>
+          </tr>
+        ) : null}
+        {data.items.map((a) => (
+          <tr>
+            <td class="px-4 py-2.5 whitespace-nowrap">{when(a.created_at)}</td>
+            <td class="px-4 py-2.5">{a.actor_name ?? (a.actor_type === 'staff' ? 'Former user' : a.actor_type)}</td>
+            <td class="px-4 py-2.5 font-mono text-[13px]">{a.action}</td>
+            <td class="px-4 py-2.5">
+              {a.entity_id ? (
+                <a
+                  class="font-mono text-[13px] hover:underline"
+                  href={`/admin/audit${qs({ entityId: a.entity_id, entityType: undefined })}`}
+                >
+                  {a.entity_type} · {a.entity_id}
+                </a>
+              ) : (
+                (a.entity_type ?? '')
+              )}
+            </td>
+            <td class="px-4 py-2.5">
+              {a.before || a.after ? (
+                <details>
+                  <summary class="cursor-pointer text-brand-600">Show</summary>
+                  {a.before ? (
+                    <pre class="mt-2 max-w-md overflow-x-auto rounded-sm bg-canvas p-2 text-[12px] whitespace-pre-wrap">Before: {a.before}</pre>
+                  ) : null}
+                  {a.after ? (
+                    <pre class="mt-2 max-w-md overflow-x-auto rounded-sm bg-canvas p-2 text-[12px] whitespace-pre-wrap">After: {a.after}</pre>
+                  ) : null}
+                </details>
+              ) : (
+                <span class="text-ink-600">–</span>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  {filter.page > 1 || data.hasMore ? (
+    <nav aria-label="Pages" class="mt-4 flex gap-4 text-sm">
+      {filter.page > 1 ? (
+        <a class="font-semibold text-brand-600 hover:underline" href={qs({ page: filter.page - 1 })}>
+          Newer
+        </a>
+      ) : null}
+      {data.hasMore ? (
+        <a class="font-semibold text-brand-600 hover:underline" href={qs({ page: filter.page + 1 })}>
+          Older
+        </a>
+      ) : null}
+    </nav>
+  ) : null}
+</AdminLayout>

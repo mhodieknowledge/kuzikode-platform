@@ -424,6 +424,19 @@ The **Next step** line must be specific enough that a fresh session can continue
   /admin/time/bill/[project] (choose entries → draft invoice), project "Time" tab. Nav: Time on.
 - Tests: integration `time.test.ts` (5, incl. 4 concurrent billing requests → one invoice per winning set, no orphans) · e2e
   `time.spec.ts`. verify: unit 232 / integration 220 green; invoices/admin-shell/settings/subscriptions e2e green.
-- Next step: P5.1 Portal auth UX (accept invite, login, reset, verify email, sessions, profile, optional approved registration off by
-  default; no auto-linking by email; `client.registered` notification for clients.view staff with a test). Read docs/07 portal sections
-  and check src/pages/portal + modules/auth for what exists.
+- Next step: P4.18 Reports & export (still open in Phase 4).
+
+## 2026-11-06 19:55 UTC · P4.18 Reports & export ✅
+- `modules/reports`: revenue by month / by client, invoiced by service, ageing buckets, quotation conversion, expenses by category,
+  indicative profit (all per currency), CSV export per report (`reports.export`, audited). `modules/audit`: audit list/filters
+  (actor, record type, record id, action or action prefix, Harare dates; finance-only scope without users.manage), CSV export
+  (audited), full data export per module (JSON) or table (CSV) for `data.export` with secrets stripped.
+  Routes: `/api/v1/admin/reports`, `/audit`, `/data-export`.
+- UI: /admin/reports (range form, revenue charts per currency, tables, export links), /admin/audit (filters, before/after details,
+  paging, export), /admin/settings/data-export (Super Admin tab in Settings). Nav: Reports + Audit log on.
+- Tests: integration `reports.test.ts` (5: exact aggregates from a 2031 fixture set incl. the Harare month boundary, failed refund,
+  reversed payment, void/draft exclusions, ageing edges at 60/90 days; API permissions + CSV content + audit; audit filters/scope/
+  export; data export whitelist + secret stripping) · e2e `reports.spec.ts`. verify: unit 232 / integration 225 green.
+- Phase 4 is complete. Next step: P5.1 Portal auth UX (accept invite, login, reset, verify email, sessions, profile, optional approved
+  registration off by default; no auto-linking by email; `client.registered` notification for clients.view staff, with a test). Read
+  docs/07 portal sections and check src/pages/portal + modules/auth for what exists.

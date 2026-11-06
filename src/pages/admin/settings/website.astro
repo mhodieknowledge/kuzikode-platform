@@ -13,7 +13,7 @@ const canEdit = page.auth.permissions.has('settings.manage');
 ---
 
 <AdminLayout title="Website settings" page={page}>
-  <SettingsNav current="website" />
+  <SettingsNav current="website" canExport={page.auth.permissions.has('data.export')} />
   <div class="mt-6 flex max-w-4xl flex-col gap-6">
     <SettingsSections sections={sections} canEdit={canEdit} />
   </div>

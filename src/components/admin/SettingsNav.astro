@@ -1,14 +1,17 @@
 ---
 interface Props {
-  current: 'general' | 'billing' | 'numbering' | 'website' | 'integrations';
+  current: 'general' | 'billing' | 'numbering' | 'website' | 'integrations' | 'export';
+  /** Show the Data export tab (Super Admin, data.export). */
+  canExport?: boolean;
 }
-const { current } = Astro.props;
+const { current, canExport = false } = Astro.props;
 const tabs = [
   ['general', 'General', '/admin/settings'],
   ['billing', 'Billing & taxes', '/admin/settings/billing'],
   ['numbering', 'Numbering', '/admin/settings/numbering'],
   ['website', 'Website', '/admin/settings/website'],
   ['integrations', 'Integrations', '/admin/settings/integrations'],
+  ...(canExport ? ([['export', 'Data export', '/admin/settings/data-export']] as const) : []),
 ] as const;
 ---
 

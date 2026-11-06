@@ -89,6 +89,7 @@ describe('templates', () => {
       link: 'https://kuzikode.example/admin/enquiries/enq_1',
     },
     application_acknowledgement: { name: 'Ann', reference: 'APP-2026-0001', position: 'Junior Web Developer' },
+    system_test: { name: 'Ann', at: '2026-11-06T10:00:00.000Z' },
     newsletter_confirmation: { link: 'https://kuzikode.example/newsletter/confirm?token=abc' },
   };
 

@@ -9,6 +9,21 @@ export const E2E_USERS = {
     role: 'support_staff',
     mustChange: false,
   },
+  // Separate accounts per spec: logins are limited to 5 per email per 15 minutes.
+  settingsAdmin: {
+    id: 'usr_e2e_settings',
+    email: 'e2e-settings@example.com',
+    name: 'Seda Settings',
+    role: 'admin',
+    mustChange: false,
+  },
+  usersAdmin: {
+    id: 'usr_e2e_users',
+    email: 'e2e-users@example.com',
+    name: 'Uma Users',
+    role: 'admin',
+    mustChange: false,
+  },
   newcomer: {
     id: 'usr_e2e_newcomer',
     email: 'e2e-newcomer@example.com',

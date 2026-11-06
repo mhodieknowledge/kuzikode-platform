@@ -1,0 +1,26 @@
+---
+import { SettingsSectionForm } from './SettingsAdmin';
+import type { SettingField } from '../../shared/settings';
+
+interface Props {
+  sections: {
+    id: string;
+    title: string;
+    description: string;
+    fields: SettingField[];
+    values: Record<string, unknown>;
+  }[];
+  canEdit: boolean;
+}
+const { sections, canEdit } = Astro.props;
+---
+
+{sections.map((s) => (
+  <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby={`sec-${s.id}`}>
+    <h2 id={`sec-${s.id}`} class="font-sans text-base font-semibold">
+      {s.title}
+    </h2>
+    <p class="mt-1 mb-5 text-sm text-ink-600">{s.description}</p>
+    <SettingsSectionForm client:visible sectionId={s.id} fields={s.fields} values={s.values} canEdit={canEdit} />
+  </section>
+))}

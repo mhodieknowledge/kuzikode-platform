@@ -1,0 +1,139 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import SettingsNav from '../../../components/admin/SettingsNav.astro';
+import { PaymentAccountForm, TestEmailButton } from '../../../components/admin/SettingsAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { integrations } from '../../../server/modules/settings';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'settings.view' });
+if (page instanceof Response) return page;
+const info = await integrations(ctx);
+const canPay = page.auth.permissions.has('payment_settings.manage');
+const canEmail = page.auth.permissions.has('settings.manage');
+const fmt = (iso: string) =>
+  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
+    new Date(iso),
+  );
+const badge = (ok: boolean) => (ok ? 'bg-success-50 text-success-700' : 'bg-warning-50 text-warning-700');
+---
+
+<AdminLayout title="Integrations" page={page}>
+  <SettingsNav current="integrations" />
+  <div class="mt-6 flex max-w-4xl flex-col gap-6">
+    <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="pay-title">
+      <h2 id="pay-title" class="font-sans text-base font-semibold">
+        Payment gateways
+      </h2>
+      <p class="mt-1 text-sm text-ink-600">
+        Keys are stored as Worker secrets and never shown here.{' '}
+        {canPay ? '' : 'Only a Super Administrator can change these accounts.'}
+      </p>
+      <ul class="mt-4 flex flex-col gap-4">
+        {info.payments.map((p) => (
+          <li class="rounded-md border border-line p-4">
+            <div class="flex flex-wrap items-center gap-2">
+              <p class="font-semibold text-ink-950">{p.label}</p>
+              <span class="rounded-full bg-ink-950/5 px-2 py-0.5 text-[12px] font-semibold text-ink-800">
+                {p.mode === 'live' ? 'Live' : 'Test mode'}
+              </span>
+              <span class:list={['rounded-full px-2 py-0.5 text-[12px] font-semibold', badge(p.secretsConfigured)]}>
+                {p.secretsConfigured ? 'Keys configured' : 'Keys not configured'}
+              </span>
+              {p.enabled ? null : (
+                <span class="rounded-full bg-ink-950/5 px-2 py-0.5 text-[12px] font-semibold text-ink-600">
+                  Disabled
+                </span>
+              )}
+            </div>
+            <p class="mt-1 text-[13px] text-ink-600">
+              {p.provider} · {p.currencies.join(', ') || 'no currencies'}
+              {p.note ? ` · ${p.note}` : ''}
+            </p>
+            {canPay ? (
+              <PaymentAccountForm
+                client:visible
+                id={p.id}
+                label={p.label}
+                enabled={p.enabled}
+                mode={p.mode}
+                secretsConfigured={p.secretsConfigured}
+              />
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </section>
+    <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="mail-title">
+      <h2 id="mail-title" class="font-sans text-base font-semibold">
+        Email
+      </h2>
+      <dl class="mt-4 grid gap-2 text-sm sm:grid-cols-2">
+        <div>
+          <dt class="text-ink-600">Provider</dt>
+          <dd class="font-medium text-ink-950">
+            {info.email.provider === 'resend' ? 'Resend' : 'Development log (emails are not sent)'}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-ink-600">From</dt>
+          <dd class="font-medium text-ink-950">{info.email.from}</dd>
+        </div>
+        <div>
+          <dt class="text-ink-600">Resend API key</dt>
+          <dd>
+            <span
+              class:list={['rounded-full px-2 py-0.5 text-[12px] font-semibold', badge(info.email.resendConfigured)]}
+            >
+              {info.email.resendConfigured ? 'Configured' : 'Not configured'}
+            </span>
+          </dd>
+        </div>
+      </dl>
+      {canEmail ? (
+        <div class="mt-5">
+          <TestEmailButton client:visible />
+        </div>
+      ) : null}
+      <h3 class="mt-6 text-sm font-semibold text-ink-950">Recent emails</h3>
+      {info.email.recent.length === 0 ? (
+        <p class="mt-2 text-sm text-ink-600">No emails yet.</p>
+      ) : (
+        <div class="mt-2 overflow-x-auto">
+          <table class="w-full text-left text-[13px]">
+            <caption class="sr-only">Last 10 emails</caption>
+            <thead class="text-ink-600">
+              <tr>
+                <th scope="col" class="py-2 pr-4 font-semibold">
+                  When
+                </th>
+                <th scope="col" class="py-2 pr-4 font-semibold">
+                  To
+                </th>
+                <th scope="col" class="py-2 pr-4 font-semibold">
+                  Template
+                </th>
+                <th scope="col" class="py-2 font-semibold">
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {info.email.recent.map((e) => (
+                <tr class="border-t border-line">
+                  <td class="py-2 pr-4">{fmt(e.at)}</td>
+                  <td class="py-2 pr-4">{e.to}</td>
+                  <td class="py-2 pr-4 font-mono">{e.template}</td>
+                  <td class="py-2">
+                    {e.status}
+                    {e.error ? ` · ${e.error}` : ''}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  </div>
+</AdminLayout>

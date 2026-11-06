@@ -292,7 +292,7 @@ export default function StartProjectWizard(props: Props) {
                   i === d.step
                     ? 'bg-brand-600 text-white'
                     : i < d.step
-                      ? 'bg-brand-50 text-brand-700'
+                      ? 'bg-brand-50 text-brand-600'
                       : 'bg-ink-950/5 text-ink-600',
                 )}
                 aria-hidden="true"

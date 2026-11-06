@@ -34,7 +34,7 @@ export default function UserMenu({ name, email }: { name: string; email: string 
       items={[
         { label: 'Security & password', href: '/admin/account/security' },
         { label: 'Signed-in devices', href: '/admin/account/sessions' },
-        { label: 'Notifications', href: '/admin/notifications' },
+        { label: 'Notification preferences', href: '/admin/account/notifications' },
         { label: 'Sign out', onSelect: () => void signOut(), danger: true },
       ]}
     />

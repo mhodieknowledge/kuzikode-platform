@@ -63,7 +63,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     label: 'Administration',
     items: [
       { label: 'Users', href: '/admin/users', anyOf: ['users.view'], built: true },
-      { label: 'Settings', href: '/admin/settings', anyOf: ['settings.view'], built: false },
+      { label: 'Settings', href: '/admin/settings', anyOf: ['settings.view'], built: true },
       { label: 'Audit log', href: '/admin/audit', anyOf: ['audit.view'], built: false },
     ],
   },

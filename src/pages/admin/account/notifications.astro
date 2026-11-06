@@ -1,0 +1,21 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { NotificationPrefsForm } from '../../../components/admin/SettingsAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { notificationPreferences } from '../../../server/modules/settings';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request);
+if (page instanceof Response) return page;
+const prefs = await notificationPreferences(ctx);
+---
+
+<AdminLayout title="Notification preferences" page={page}>
+  <h1 class="text-2xl font-bold tracking-display">Notification preferences</h1>
+  <p class="mt-1 text-sm text-ink-600">
+    Choose how you hear about each event. You only receive notifications for areas your role can see.
+  </p>
+  <div class="mt-6 max-w-3xl">
+    <NotificationPrefsForm client:load prefs={prefs.map((p) => ({ ...p }))} />
+  </div>
+</AdminLayout>

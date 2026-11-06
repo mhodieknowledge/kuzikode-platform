@@ -13,7 +13,7 @@ async function signIn(page: Page, email: string) {
 
 test('administrator invites a staff member and changes their roles', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await signIn(page, E2E_USERS.admin.email);
+  await signIn(page, E2E_USERS.usersAdmin.email);
   await page.getByRole('navigation', { name: 'Admin navigation' }).first().getByRole('link', { name: 'Users' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Users' })).toBeVisible();
   await expectAccessible(page);

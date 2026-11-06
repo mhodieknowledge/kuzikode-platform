@@ -210,6 +210,23 @@ const defs = {
         ],
       }),
   },
+  system_test: {
+    schema: z.object({ name: z.string(), at: z.string() }),
+    render: (b: Brand, d: { name: string; at: string }) =>
+      renderEmail(b, {
+        subject: `Test email from ${b.companyName}`,
+        preheader: 'Your email settings are working.',
+        heading: 'Email is working',
+        blocks: [
+          { kind: 'p', text: `Hi ${d.name},` },
+          {
+            kind: 'p',
+            text: 'This is a test sent from the admin settings. If you can read it, outgoing email is set up correctly.',
+          },
+          { kind: 'small', text: `Sent ${d.at}.` },
+        ],
+      }),
+  },
   newsletter_confirmation: {
     schema: z.object({ link: url }),
     render: (b: Brand, d: { link: string }) =>

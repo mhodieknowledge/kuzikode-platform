@@ -29,7 +29,7 @@ test('careers: open role listed, JobPosting JSON-LD, apply with a CV, nav shows 
   await screenshots(page, 'careers-posting');
 
   await page.getByRole('heading', { name: 'Apply for this role' }).scrollIntoViewIfNeeded();
-  await expect(page.locator('astro-island:has(form)').last()).not.toHaveAttribute('ssr');
+  await expect(page.locator('astro-island').filter({ hasText: 'Submit application' })).not.toHaveAttribute('ssr');
   await page.getByRole('button', { name: 'Submit application' }).click();
   await expect(page.getByText('Attach your CV as a PDF or Word document.')).toBeVisible();
   await page.getByLabel('Full name').fill('Chipo Example');

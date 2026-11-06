@@ -1,0 +1,23 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import SettingsNav from '../../../components/admin/SettingsNav.astro';
+import SettingsSections from '../../../components/admin/SettingsSections.astro';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { settingsPage } from '../../../server/modules/settings';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'settings.view' });
+if (page instanceof Response) return page;
+const sections = await settingsPage(ctx, 'general');
+const canEdit = page.auth.permissions.has('settings.manage');
+---
+
+<AdminLayout title="Settings" page={page}>
+  <SettingsNav current="general" />
+  {canEdit ? null : (
+    <p class="mt-4 text-sm text-ink-600">You can view settings. Ask an administrator to change them.</p>
+  )}
+  <div class="mt-6 flex max-w-4xl flex-col gap-6">
+    <SettingsSections sections={sections} canEdit={canEdit} />
+  </div>
+</AdminLayout>

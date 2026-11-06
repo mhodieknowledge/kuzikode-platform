@@ -51,6 +51,9 @@ Things only the owner can do. The agent keeps building around them and records e
   direct card API for merchants?"* (if yes, the agent can remove the one-time card window entirely). Until approved, cards still work through the
   one-time secure window.
 
+- [ ] **Site images (best free option):** follow `design/images/PROMPT-PACK.md`: generate the 20 images in the free Gemini app
+  (gemini.google.com), name them as listed, and upload them to `design/images/inbox/` on GitHub. The agent does the rest.
+
 ## Raised by the agent
 - [ ] **Legal review of the website drafts (P3.9):** `/legal/privacy`, `/legal/terms`, `/legal/service-terms`, `/legal/cookies`,
   `/legal/accessibility` are honest drafts marked "awaiting legal review". Have a Zimbabwean lawyer review them (data protection under the

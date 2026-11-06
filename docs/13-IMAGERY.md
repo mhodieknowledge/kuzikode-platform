@@ -35,6 +35,22 @@ result (it can see images) to judge quality. The Cloudflare connector has no ima
 Canva's video generation (`create-video`, connected). Keep it ≤ 3 MB (MP4/WebM), set a poster image, use `preload="none"` on mobile and
 respect `prefers-reduced-motion` (show the still instead). Skip it if quality isn't excellent. A still hero is fine.
 
+## 1b. Generator order (updated 2026-11-06 after real-world results)
+Findings: the Workers AI free allowance is **shared across the whole Cloudflare account** (the owner's other Worker `zimindex` also uses
+it), so it runs out after ~5 images. Gemini API image models have **no free API tier** (only the free Gemini app / AI Studio website).
+Pollinations (free, no key) is low quality and watermarked. Canva's connector returns only a 200 px thumbnail.
+
+New order:
+1. **Owner inbox (primary, free, best quality):** the owner generates images in the free Gemini app (Nano Banana 2) using
+   `design/images/PROMPT-PACK.md` and uploads them to `design/images/inbox/<slot>.png`. **At the start of every session, check
+   `design/images/inbox/`.** For each file: Read it and apply the §6 quality bar (if it fails, add a BLOCKERS line asking the owner to
+   regenerate that slot, naming the defect). If it passes, run `img:process` for that slot (crop/resize/AVIF/WebP/JPEG, manifest with
+   `"model": "owner: gemini-app"`, alt text), place it, then `git rm` the inbox file and commit. Replace earlier lower-quality images in the same slot.
+2. **Workers AI** (remaining free allowance), only for abstract/object shots, and only if the owner hasn't supplied that slot.
+3. **OpenAI / Gemini API**, only if the owner adds paid credit.
+4. **Never use** Pollinations or other watermarking/low-quality services.
+Keep the PROMPT-PACK in sync with §4 if slots change. A slot without an image renders its text-only layout (never a placeholder).
+
 ## 2. Small dev script (not part of the app)
 `scripts/images/generate.mjs` (Node, run in the agent's session):
 - `npm run img:gen -- --id home-hero --size 1600x900 --variants 3` reads `design/images/prompts/home-hero.txt`, prepends the

@@ -2,6 +2,7 @@ import { createContext, type RequestContext } from '../context';
 import { publishDuePosts } from '../modules/cms/insights';
 import { pruneUnconfirmed } from '../modules/newsletter/service';
 import { applyApplicationRetention, autoClosePostings } from '../modules/careers/service';
+import { sendFollowUpReminders } from '../modules/leads/admin';
 import type { QueueMessageBody } from './outbox';
 
 export const CRON_FREQUENT = '*/5 * * * *';
@@ -77,6 +78,7 @@ export const SCHEDULE: Record<string, [name: string, task: ScheduledTask][]> = {
     ['prune-operational-data', (ctx) => pruneOperationalData(ctx)],
     ['prune-unconfirmed-newsletter', (ctx) => pruneUnconfirmed(ctx)],
     ['application-retention', (ctx) => applyApplicationRetention(ctx)],
+    ['lead-follow-up-reminders', (ctx) => sendFollowUpReminders(ctx)],
   ],
 };
 

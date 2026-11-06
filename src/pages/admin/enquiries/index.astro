@@ -1,0 +1,150 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { listEnquiries } from '../../../server/modules/leads';
+import { enquiryListQuery } from '../../../shared/schemas/leads';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'enquiries.view' });
+if (page instanceof Response) return page;
+const parsed = enquiryListQuery.safeParse(Object.fromEntries(Astro.url.searchParams));
+const filter = parsed.success ? parsed.data : enquiryListQuery.parse({});
+const result = await listEnquiries(ctx, filter);
+const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
+const KIND_LABEL = {
+  contact: 'Contact form',
+  wizard: 'Project request',
+  consultation: 'Consultation',
+  product_interest: 'Product interest',
+} as const;
+const STATUS_LABEL = { new: 'New', triaged: 'Lead created', spam: 'Spam', closed: 'Closed' } as const;
+const STATUS_CLASS = {
+  new: 'bg-brand-50 text-brand-600',
+  triaged: 'bg-info-50 text-info-700',
+  spam: 'bg-danger-50 text-danger-700',
+  closed: 'bg-ink-950/5 text-ink-800',
+} as const;
+const fmt = (iso: string) =>
+  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
+    new Date(iso),
+  );
+const pageHref = (n: number) => {
+  const q = new URLSearchParams(Astro.url.searchParams);
+  q.set('page', String(n));
+  return `/admin/enquiries?${q.toString()}`;
+};
+const views = [
+  ['', `Inbox (${(result.counts['new'] ?? 0) + (result.counts['triaged'] ?? 0)})`],
+  ['new', `New (${result.counts['new'] ?? 0})`],
+  ['closed', `Closed (${result.counts['closed'] ?? 0})`],
+  ['spam', `Spam (${result.counts['spam'] ?? 0})`],
+  ['all', 'All'],
+] as const;
+const current = filter.status ?? '';
+---
+
+<AdminLayout title="Enquiries" page={page}>
+  <h1 class="text-2xl font-bold tracking-display">Enquiries</h1>
+  <p class="mt-1 text-sm text-ink-600">Messages from the contact form, project requests and consultation bookings.</p>
+  <nav aria-label="Enquiry views" class="mt-6 overflow-x-auto border-b border-line">
+    <ul class="flex gap-1">
+      {views.map(([k, label]) => (
+        <li class="shrink-0">
+          <a
+            href={k ? `/admin/enquiries?status=${k}` : '/admin/enquiries'}
+            aria-current={current === k ? 'page' : undefined}
+            class:list={[
+              'inline-flex h-10 items-center border-b-2 px-3 text-sm font-semibold',
+              current === k ? 'border-brand-600 text-brand-600' : 'border-transparent text-ink-600 hover:text-ink-950',
+            ]}
+          >
+            {label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+  <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter enquiries">
+    {filter.status ? <input type="hidden" name="status" value={filter.status} /> : null}
+    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+      Search
+      <input
+        name="q"
+        type="search"
+        value={filter.q ?? ''}
+        maxlength="80"
+        class={field}
+        placeholder="Name, email or reference"
+      />
+    </label>
+    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+      Type
+      <select name="kind" class={field}>
+        <option value="">Any</option>
+        {Object.entries(KIND_LABEL).map(([k, l]) => (
+          <option value={k} selected={filter.kind === k}>
+            {l}
+          </option>
+        ))}
+      </select>
+    </label>
+    <button
+      type="submit"
+      class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+    >
+      Filter
+    </button>
+  </form>
+  {result.items.length === 0 ? (
+    <div class="mt-6 rounded-lg border border-line bg-surface px-6 py-12 text-center">
+      <p class="font-semibold text-ink-950">
+        {filter.q || filter.kind ? 'No enquiries match these filters.' : 'No enquiries here.'}
+      </p>
+      <p class="mt-1 text-sm text-ink-600">New enquiries from the website appear here.</p>
+    </div>
+  ) : (
+    <ul class="mt-6 divide-y divide-line rounded-lg border border-line bg-surface">
+      {result.items.map((e) => (
+        <li class="relative px-5 py-4 hover:bg-canvas">
+          <div class="flex flex-wrap items-baseline justify-between gap-2">
+            <a href={`/admin/enquiries/${e.id}`} class="font-semibold text-ink-950 after:absolute after:inset-0">
+              {e.name}
+              {e.organisation ? <span class="font-normal text-ink-600"> · {e.organisation}</span> : null}
+            </a>
+            <span class="text-[12px] text-ink-600">{fmt(e.created_at)}</span>
+          </div>
+          <p class="mt-1 line-clamp-2 text-sm text-ink-800">{e.message}</p>
+          <p class="mt-2 flex flex-wrap items-center gap-2 text-[12px] text-ink-600">
+            <span class={`rounded-full px-2 py-0.5 font-semibold ${STATUS_CLASS[e.status]}`}>
+              {STATUS_LABEL[e.status]}
+            </span>
+            <span>{KIND_LABEL[e.kind]}</span>
+            <span class="font-mono">{e.reference}</span>
+            {e.budget_range ? <span>Budget: {e.budget_range}</span> : null}
+          </p>
+        </li>
+      ))}
+    </ul>
+  )}
+  {result.pages > 1 ? (
+    <nav aria-label="Pagination" class="mt-4 flex items-center justify-between text-sm font-semibold">
+      {result.page > 1 ? (
+        <a href={pageHref(result.page - 1)} rel="prev" class="text-brand-600">
+          Previous
+        </a>
+      ) : (
+        <span />
+      )}
+      <span class="text-ink-600">
+        Page {result.page} of {result.pages}
+      </span>
+      {result.page < result.pages ? (
+        <a href={pageHref(result.page + 1)} rel="next" class="text-brand-600">
+          Next
+        </a>
+      ) : (
+        <span />
+      )}
+    </nav>
+  ) : null}
+</AdminLayout>

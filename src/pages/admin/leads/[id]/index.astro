@@ -1,0 +1,244 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { ActivityForm, CompleteFollowUp, ConvertLead } from '../../../../components/admin/LeadsAdmin';
+import { loadAdminPage } from '../../../../server/lib/admin-page';
+import { businessDate } from '../../../../server/lib/dates';
+import { AppError } from '../../../../server/lib/errors';
+import { getLead, LEAD_STATUS_LABEL } from '../../../../server/modules/leads';
+import { formatMoney } from '../../../../shared/money';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'leads.view' });
+if (page instanceof Response) return page;
+let data;
+try {
+  data = await getLead(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND')
+    return new Response(null, { status: 404, statusText: 'Not found' });
+  throw err;
+}
+const { lead: l, services, activities, enquiries, client } = data;
+const perms = page.auth.permissions;
+const canManage = perms.has('leads.manage');
+const canConvert = canManage && perms.has('clients.create') && !l.client_id && l.status !== 'lost';
+const today = businessDate(ctx.now());
+const SOURCE_LABEL = {
+  website: 'Website',
+  referral: 'Referral',
+  manual: 'Added by staff',
+  social: 'Social media',
+  other: 'Other',
+} as const;
+const TYPE_LABEL = {
+  note: 'Note',
+  call: 'Call',
+  email: 'Email',
+  meeting: 'Meeting',
+  status_change: 'Stage change',
+  follow_up: 'Follow-up',
+} as const;
+const fmt = (iso: string) =>
+  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
+    new Date(iso),
+  );
+const shortDate = (d: string) =>
+  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(`${d}T00:00:00Z`));
+const openFollowUps = activities
+  .filter((a) => a.type === 'follow_up' && !a.completed_at)
+  .sort((a, b) => (a.due_on ?? '').localeCompare(b.due_on ?? ''));
+---
+
+<AdminLayout title={l.title} page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/leads" class="hover:text-ink-950 hover:underline">
+      Leads
+    </a>{' '}
+    / <span class="text-ink-950">{l.title}</span>
+  </nav>
+  <div class="mt-2 flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-display">{l.title}</h1>
+      <p class="mt-1 text-sm text-ink-600">
+        {LEAD_STATUS_LABEL[l.status]} · {SOURCE_LABEL[l.source]} · {l.assigned_name ?? 'Unassigned'}
+      </p>
+    </div>
+    <div class="flex flex-wrap items-start gap-2">
+      {canManage ? (
+        <a
+          href={`/admin/leads/${l.id}/edit`}
+          class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+        >
+          Edit
+        </a>
+      ) : null}
+      {canConvert ? <ConvertLead client:load leadId={l.id} name={l.organisation ?? l.contact_name ?? l.title} /> : null}
+    </div>
+  </div>
+  <div class="mt-6 grid max-w-5xl gap-6 lg:grid-cols-[1fr_320px]">
+    <div class="flex flex-col gap-6">
+      {canManage ? (
+        <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="act-form">
+          <h2 id="act-form" class="mb-4 font-sans text-base font-semibold">
+            Log activity
+          </h2>
+          <ActivityForm client:load leadId={l.id} />
+        </section>
+      ) : null}
+      {openFollowUps.length ? (
+        <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="fu-title">
+          <h2 id="fu-title" class="font-sans text-base font-semibold">
+            Open follow-ups
+          </h2>
+          <ul class="mt-3 divide-y divide-line">
+            {openFollowUps.map((a) => (
+              <li class="flex flex-wrap items-center justify-between gap-3 py-3">
+                <div>
+                  <p class="text-sm text-ink-950">{a.body}</p>
+                  <p
+                    class:list={[
+                      'text-[12px] font-semibold',
+                      a.due_on && a.due_on <= today ? 'text-danger-700' : 'text-ink-600',
+                    ]}
+                  >
+                    {a.due_on ? `${a.due_on < today ? 'Overdue since' : 'Due'} ${shortDate(a.due_on)}` : ''}
+                  </p>
+                </div>
+                {canManage ? <CompleteFollowUp client:visible leadId={l.id} activityId={a.id} /> : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+      <section aria-labelledby="log-title">
+        <h2 id="log-title" class="font-sans text-base font-semibold">
+          Activity
+        </h2>
+        {activities.length === 0 ? (
+          <p class="mt-2 text-sm text-ink-600">Nothing logged yet.</p>
+        ) : (
+          <ol class="mt-3 flex flex-col gap-3">
+            {activities.map((a) => (
+              <li class="rounded-lg border border-line bg-surface p-4">
+                <p class="text-[12px] font-semibold text-ink-600">
+                  {TYPE_LABEL[a.type]}
+                  {a.type === 'follow_up' && a.due_on ? ` for ${shortDate(a.due_on)}` : ''}
+                  {a.type === 'follow_up' && a.completed_at ? ' · done' : ''}
+                </p>
+                {a.body ? <p class="mt-1 text-sm whitespace-pre-line text-ink-950">{a.body}</p> : null}
+                <p class="mt-2 text-[12px] text-ink-600">
+                  {a.user_name ?? 'System'} · {fmt(a.created_at)}
+                </p>
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
+    </div>
+    <aside class="flex flex-col gap-6">
+      {client ? (
+        <section class="rounded-lg border border-success-700/30 bg-success-50 p-6" aria-labelledby="cl-title">
+          <h2 id="cl-title" class="font-sans text-base font-semibold text-success-700">
+            Converted
+          </h2>
+          <a href={`/admin/clients/${client.id}`} class="mt-2 block text-sm font-semibold text-ink-950 hover:underline">
+            {client.display_name}
+          </a>
+          <p class="font-mono text-[12px] text-ink-600">{client.client_number}</p>
+        </section>
+      ) : null}
+      <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="ld-title">
+        <h2 id="ld-title" class="font-sans text-base font-semibold">
+          Details
+        </h2>
+        <dl class="mt-3 grid gap-3 text-sm">
+          <div>
+            <dt class="text-ink-600">Contact</dt>
+            <dd class="font-medium">{l.contact_name ?? '—'}</dd>
+          </div>
+          <div>
+            <dt class="text-ink-600">Organisation</dt>
+            <dd class="font-medium">{l.organisation ?? '—'}</dd>
+          </div>
+          <div>
+            <dt class="text-ink-600">Email</dt>
+            <dd class="font-medium break-all">
+              {l.email ? (
+                <a href={`mailto:${l.email}`} class="text-brand-600 hover:underline">
+                  {l.email}
+                </a>
+              ) : (
+                '—'
+              )}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-ink-600">Phone</dt>
+            <dd class="font-medium">
+              {l.phone ? (
+                <a href={`tel:${l.phone.replace(/[^\d+]/g, '')}`} class="text-brand-600 hover:underline">
+                  {l.phone}
+                </a>
+              ) : (
+                '—'
+              )}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-ink-600">Estimated value</dt>
+            <dd class="tnum font-medium">
+              {l.estimated_value_minor != null && l.currency ? formatMoney(l.estimated_value_minor, l.currency) : '—'}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-ink-600">Next follow-up</dt>
+            <dd class="font-medium">{l.next_follow_up_on ? shortDate(l.next_follow_up_on) : '—'}</dd>
+          </div>
+          {services.length ? (
+            <div>
+              <dt class="text-ink-600">Services</dt>
+              <dd class="font-medium">{services.map((s) => s.name).join(', ')}</dd>
+            </div>
+          ) : null}
+          {l.status === 'lost' && l.lost_reason ? (
+            <div>
+              <dt class="text-ink-600">Lost because</dt>
+              <dd class="font-medium">{l.lost_reason}</dd>
+            </div>
+          ) : null}
+          <div>
+            <dt class="text-ink-600">Created</dt>
+            <dd class="font-medium">{fmt(l.created_at)}</dd>
+          </div>
+        </dl>
+        {l.notes ? (
+          <div class="mt-4">
+            <h3 class="text-sm font-semibold text-ink-950">Notes</h3>
+            <p class="mt-1 text-sm whitespace-pre-line text-ink-800">{l.notes}</p>
+          </div>
+        ) : null}
+      </section>
+      {enquiries.length ? (
+        <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="enq-title">
+          <h2 id="enq-title" class="font-sans text-base font-semibold">
+            Enquiries
+          </h2>
+          <ul class="mt-2 flex flex-col gap-1 text-sm">
+            {enquiries.map((e) => (
+              <li>
+                {perms.has('enquiries.view') ? (
+                  <a href={`/admin/enquiries/${e.id}`} class="font-mono font-semibold text-brand-600 hover:underline">
+                    {e.reference}
+                  </a>
+                ) : (
+                  <span class="font-mono">{e.reference}</span>
+                )}
+                <span class="text-[12px] text-ink-600"> · {fmt(e.created_at)}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+    </aside>
+  </div>
+</AdminLayout>

@@ -84,6 +84,24 @@ export async function createClient(
   input: ClientData,
   primaryContact?: ContactData,
 ): Promise<{ id: string; number: string }> {
+  const built = await buildCreateClient(ctx, input, primaryContact);
+  await new Batch(ctx.db).addAll(built.statements).run();
+  const row = await ctx.db
+    .prepare('SELECT client_number FROM clients WHERE id = ?')
+    .bind(built.id)
+    .first<{ client_number: string }>();
+  return { id: built.id, number: row!.client_number };
+}
+
+/**
+ * Statements that create a client (number allocation, row, main contact, audit) for a caller's own atomic batch,
+ * e.g. converting a lead. They must run in order in ONE batch.
+ */
+export async function buildCreateClient(
+  ctx: RequestContext,
+  input: ClientData,
+  primaryContact?: ContactData,
+): Promise<{ id: string; contactId: string | null; statements: D1PreparedStatement[] }> {
   assertCan(ctx, 'clients.create');
   await assertCurrency(ctx, input.defaultCurrency);
   const settings = await getSettings(ctx);
@@ -94,53 +112,43 @@ export async function createClient(
   const now = ctx.now().toISOString();
   const id = newId('cli', ctx.now().getTime());
   const contactId = primaryContact ? newId('con', ctx.now().getTime()) : null;
-  await new Batch(ctx.db)
-    .addAll(sequenceStatements(ctx.db, key))
-    .add(
-      stmt(
-        ctx.db,
-        `INSERT INTO clients (id, client_number, type, display_name, legal_name, email, phone, website, tax_number, billing_address,
+  const statements: D1PreparedStatement[] = [
+    ...sequenceStatements(ctx.db, key),
+    stmt(
+      ctx.db,
+      `INSERT INTO clients (id, client_number, type, display_name, legal_name, email, phone, website, tax_number, billing_address,
            physical_address, default_currency, payment_terms_days, notes, tags, status, created_by, created_at, updated_at)
          VALUES (?, ${num.sql}, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?)`,
-        id,
-        ...num.params,
-        input.type,
-        input.displayName,
-        input.legalName ?? null,
-        input.email?.toLowerCase() ?? null,
-        input.phone ?? null,
-        input.website ?? null,
-        input.taxNumber ?? null,
-        addressJson(input.billingAddress),
-        addressJson(input.physicalAddress),
-        input.defaultCurrency,
-        input.paymentTermsDays,
-        input.notes ?? null,
-        JSON.stringify([...new Set(input.tags)]),
-        ctx.actor.userId,
-        now,
-        now,
-      ),
-    )
-    .addAll(
-      primaryContact && contactId
-        ? [insertContactStmt(ctx, id, contactId, { ...primaryContact, isPrimary: true })]
-        : [],
-    )
-    .add(
-      auditStmt(ctx, {
-        action: 'client.created',
-        entityType: 'client',
-        entityId: id,
-        after: { displayName: input.displayName, type: input.type },
-      }),
-    )
-    .run();
-  const row = await ctx.db
-    .prepare('SELECT client_number FROM clients WHERE id = ?')
-    .bind(id)
-    .first<{ client_number: string }>();
-  return { id, number: row!.client_number };
+      id,
+      ...num.params,
+      input.type,
+      input.displayName,
+      input.legalName ?? null,
+      input.email?.toLowerCase() ?? null,
+      input.phone ?? null,
+      input.website ?? null,
+      input.taxNumber ?? null,
+      addressJson(input.billingAddress),
+      addressJson(input.physicalAddress),
+      input.defaultCurrency,
+      input.paymentTermsDays,
+      input.notes ?? null,
+      JSON.stringify([...new Set(input.tags)]),
+      ctx.actor.userId,
+      now,
+      now,
+    ),
+    ...(primaryContact && contactId
+      ? [insertContactStmt(ctx, id, contactId, { ...primaryContact, isPrimary: true })]
+      : []),
+    auditStmt(ctx, {
+      action: 'client.created',
+      entityType: 'client',
+      entityId: id,
+      after: { displayName: input.displayName, type: input.type },
+    }),
+  ];
+  return { id, contactId, statements };
 }
 
 export async function updateClient(ctx: RequestContext, id: string, input: ClientData): Promise<void> {

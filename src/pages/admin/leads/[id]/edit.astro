@@ -1,0 +1,60 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { LeadForm } from '../../../../components/admin/LeadsAdmin';
+import { loadAdminPage } from '../../../../server/lib/admin-page';
+import { AppError } from '../../../../server/lib/errors';
+import { getLead, leadFormOptions } from '../../../../server/modules/leads';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'leads.manage' });
+if (page instanceof Response) return page;
+let data;
+try {
+  data = await getLead(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND')
+    return new Response(null, { status: 404, statusText: 'Not found' });
+  throw err;
+}
+const { lead: l, services } = data;
+const options = await leadFormOptions(ctx);
+// Keep a deactivated assignee selectable so saving doesn't silently unassign.
+const staff =
+  l.assigned_to && !options.staff.some((s) => s.id === l.assigned_to)
+    ? [...options.staff, { id: l.assigned_to, name: l.assigned_name ?? 'Former staff member' }]
+    : options.staff;
+const initial = {
+  id: l.id,
+  title: l.title,
+  source: l.source,
+  status: l.status,
+  contactName: l.contact_name,
+  email: l.email,
+  phone: l.phone,
+  organisation: l.organisation,
+  assignedTo: l.assigned_to,
+  estimatedValueMinor: l.estimated_value_minor,
+  currency: l.currency ?? options.currencies[0] ?? 'USD',
+  nextFollowUpOn: l.next_follow_up_on,
+  lostReason: l.lost_reason,
+  notes: l.notes,
+  serviceIds: services.map((s) => s.id),
+};
+---
+
+<AdminLayout title={`Edit ${l.title}`} page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/leads" class="hover:text-ink-950 hover:underline">
+      Leads
+    </a>{' '}
+    /{' '}
+    <a href={`/admin/leads/${l.id}`} class="hover:text-ink-950 hover:underline">
+      {l.title}
+    </a>{' '}
+    / <span class="text-ink-950">Edit</span>
+  </nav>
+  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">Edit lead</h1>
+  <div class="max-w-3xl">
+    <LeadForm client:load initial={initial} staff={staff} services={options.services} currencies={options.currencies} />
+  </div>
+</AdminLayout>

@@ -11,7 +11,8 @@ const q = (s: string) => `'${s.replace(/'/g, "''")}'`;
 /**
  * Prepares the LOCAL D1 used by `wrangler dev` (never a remote database):
  * - per-IP rate limits are cleared (state persists between local runs and every request comes from localhost);
- * - fixed e2e staff accounts are (re)created with a known password and no sessions or failed-login history.
+ * - fixed e2e staff accounts are (re)created with a known password and no sessions or failed-login history;
+ * - a fixed website enquiry is reset to untriaged.
  */
 export default async function globalSetup() {
   wrangler('d1', 'migrations', 'apply', 'DB', '--local');
@@ -36,6 +37,12 @@ export default async function globalSetup() {
          failed_login_count = 0, locked_until = NULL;`,
       `INSERT INTO user_roles (user_id, role_id) SELECT ${q(u.id)}, id FROM roles WHERE key = ${q(u.role)};`,
     ]),
+    // A fixed website enquiry for leads.spec, reset to untriaged on every run (avoids the public form's rate limit).
+    `INSERT INTO enquiries (id, reference, kind, name, email, phone, organisation, category, service_id, budget_range, message, consent_at, status)
+     VALUES ('enq_e2e_lead', 'ENQ-E2E-0001', 'contact', 'Tendai Moyo', 'tendai@harare-bakery.example', '+263 77 123 4567',
+       'Harare Bakery', 'web-development', (SELECT id FROM services WHERE slug = 'e-commerce'), '$1,500 – $5,000',
+       'We would like an online shop for our bakery with EcoCash payments and delivery booking.', ${q(now)}, 'new')
+     ON CONFLICT(id) DO UPDATE SET status = 'new', lead_id = NULL, updated_at = ${q(now)};`,
   ].join('\n');
   const dir = mkdtempSync(join(tmpdir(), 'kz-e2e-'));
   try {

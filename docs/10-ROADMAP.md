@@ -60,7 +60,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P4.2 Users & roles.** Invite staff, deactivate, assign roles, permissions matrix view (super admin edits custom roles), audit. AC: tests for each guard.
 - [x] **P4.3 Settings.** Company, branding/logo, addresses/contacts, socials, numbering, currencies, taxes, providers (status only for secrets), email status + test send, notification prefs. AC: numbering can't be lowered. All changes audited.
 - [x] **P4.4 Clients** (CRUD, contacts, notes, tags, archive, detail tabs, credits balance, portal access tab: invite contact, approve/revoke links). AC: integration tests + e2e step 3.
-- [ ] **P4.5 Enquiries & leads** (inbox, triage, spam, lead pipeline list + board view, assignment, follow-ups, activities, convert to client). AC: e2e step 2. Conversion test.
+- [x] **P4.5 Enquiries & leads** (inbox, triage, spam, lead pipeline list + board view, assignment, follow-ups, activities, convert to client). AC: e2e step 2. Conversion test.
 - [ ] **P4.6 Services management** (categories, services, pricing models, statuses, featured, drag sort, SEO). AC: changes appear on public site after publish.
 - [ ] **P4.7 Quotations** (editor with LineItemEditor, versions, send, PDF, public link, accept/reject, expire cron, duplicate, void, convert to invoice idempotent, create project). AC: docs/08 tests incl. concurrent convert.
 - [ ] **P4.8 PDF engine** (pdf-lib layout kit, branding, quotation/invoice/receipt/credit note, TEST watermark outside prod, R2 storage, never regenerate issued docs). AC: PDF tests. CPU timing recorded.

@@ -150,6 +150,22 @@ export const SETTING_SECTIONS: SettingSection[] = [
         max: 180,
         help: 'Default 30. Staff are notified; client services are never suspended automatically.',
       },
+      {
+        key: 'time.default_hourly_rate_minor',
+        label: 'Default hourly rate for time tracking (cents)',
+        type: 'int',
+        min: 0,
+        max: 10_000_000,
+        help: 'Used for new time entries without their own rate. 2500 means 25.00 per hour.',
+      },
+      {
+        key: 'time.default_currency',
+        label: 'Time tracking currency',
+        type: 'text',
+        max: 3,
+        help: 'Used when a project has no currency of its own, e.g. USD.',
+        pattern: { regex: '^[A-Z]{3}$', message: 'Use a three-letter currency code like USD.' },
+      },
     ],
   },
   {

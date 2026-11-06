@@ -12,6 +12,10 @@ import {
 import { loadAdminPage } from '../../../../server/lib/admin-page';
 import { AppError } from '../../../../server/lib/errors';
 import { getProject, staffOptions } from '../../../../server/modules/projects';
+import { projectTime, trackingOptions } from '../../../../server/modules/timetracking';
+import { EntryDialogButton } from '../../../../components/admin/TimeAdmin';
+import { businessDate } from '../../../../server/lib/dates';
+import { formatMinutes } from '../../../../shared/schemas/time';
 import { PROJECT_STATUS_LABEL } from '../../../../shared/projects';
 import { formatMoney } from '../../../../shared/money';
 import { formatLongDate } from '../../../../shared/service-display';
@@ -50,8 +54,14 @@ const TABS = [
   ['messages', `Messages (${messages.length})`],
   ['activity', 'Activity'],
 ] as const;
+const perms = page.auth.permissions;
+const timeVisible = perms.has('time.track') || perms.has('time.view_all') || perms.has('time.bill');
+const ALL_TABS = timeVisible ? ([...TABS.slice(0, 5), ['time', 'Time'], TABS[5]] as const) : TABS;
 const tabParam = Astro.url.searchParams.get('tab');
-const tab = TABS.some(([k]) => k === tabParam) ? tabParam! : 'overview';
+const tab = ALL_TABS.some(([k]) => k === tabParam) ? tabParam! : 'overview';
+const time = tab === 'time' ? await projectTime(ctx, p.id) : null;
+const timeProjects =
+  tab === 'time' && perms.has('time.track') ? (await trackingOptions(ctx)).filter((o) => o.id === p.id) : [];
 const when = (iso: string) =>
   new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
     new Date(iso),
@@ -132,7 +142,7 @@ const card = 'rounded-lg border border-line bg-surface p-5';
     </div>
   </div>
   <nav aria-label="Project sections" class="mt-6 flex gap-6 overflow-x-auto border-b border-line">
-    {TABS.map(([k, l]) => (
+    {ALL_TABS.map(([k, l]) => (
       <a
         href={`/admin/projects/${p.id}?tab=${k}`}
         class={tabClass(tab === k)}
@@ -328,6 +338,88 @@ const card = 'rounded-lg border border-line bg-surface p-5';
         <section class={card} aria-label="New message">
           <MessageComposer client:load projectId={p.id} />
         </section>
+      </div>
+    ) : null}
+
+    {tab === 'time' && time ? (
+      <div class="flex flex-col gap-6">
+        <section class={card} aria-labelledby="time-h">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 id="time-h" class="text-lg font-semibold">
+                Time
+              </h2>
+              <p class="text-sm text-ink-600">
+                {formatMinutes(time.totalMinutes)} logged{time.seesEveryone ? '' : ' by you'}
+                {time.unbilled
+                  .map((u) => ` · ${formatMinutes(u.minutes)} unbilled (${formatMoney(u.amountMinor, u.currency)})`)
+                  .join('')}
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              {timeProjects.length ? (
+                <EntryDialogButton client:load projects={timeProjects} today={businessDate(ctx.now())} />
+              ) : null}
+              {perms.has('time.bill') && time.unbilled.length ? (
+                <a
+                  href={`/admin/time/bill/${p.id}`}
+                  class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
+                >
+                  Bill unbilled time
+                </a>
+              ) : null}
+            </div>
+          </div>
+        </section>
+        <div class="relative overflow-x-auto rounded-lg border border-line bg-surface">
+          <table class="w-full min-w-[640px] text-sm">
+            <thead class="border-b border-line text-left text-[12px] text-ink-600">
+              <tr>
+                <th scope="col" class="px-4 py-2.5 font-semibold">
+                  Date
+                </th>
+                <th scope="col" class="px-4 py-2.5 font-semibold">
+                  Person
+                </th>
+                <th scope="col" class="px-4 py-2.5 font-semibold">
+                  Work
+                </th>
+                <th scope="col" class="px-4 py-2.5 text-right font-semibold">
+                  Time
+                </th>
+                <th scope="col" class="px-4 py-2.5 font-semibold">
+                  Billing
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-line">
+              {time.entries.length === 0 ? (
+                <tr>
+                  <td colspan="5" class="px-4 py-8 text-center text-ink-600">
+                    No time logged yet.
+                  </td>
+                </tr>
+              ) : null}
+              {time.entries.map((e) => (
+                <tr>
+                  <td class="px-4 py-2.5 whitespace-nowrap">{e.entry_date}</td>
+                  <td class="px-4 py-2.5">{e.user_name}</td>
+                  <td class="px-4 py-2.5 text-ink-600">
+                    {[e.task_title, e.description].filter(Boolean).join(': ') || 'Project work'}
+                  </td>
+                  <td class="tnum px-4 py-2.5 text-right">{formatMinutes(e.minutes ?? 0)}</td>
+                  <td class="px-4 py-2.5 text-ink-600">
+                    {e.invoice_id
+                      ? `Billed${e.invoice_number ? ` · ${e.invoice_number}` : ' · draft'}`
+                      : e.billable
+                        ? 'Unbilled'
+                        : 'Not billable'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     ) : null}
 

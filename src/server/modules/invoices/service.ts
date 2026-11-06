@@ -279,13 +279,15 @@ function insertItemStmt(
   invoiceId: string,
   it: PricedLine,
   period: { start: string; end: string } | null = null,
+  onlyIfInvoiceExists = false,
 ) {
   return stmt(
     ctx.db,
     `INSERT INTO invoice_items (id, invoice_id, position, service_id, package_id, description, quantity_milli, unit_price_minor,
        discount_type, discount_value, tax_rate_id, tax_rate_bp, tax_inclusive, line_subtotal_minor, line_discount_minor,
        line_tax_minor, line_total_minor, period_start, period_end)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+     ${onlyIfInvoiceExists ? 'WHERE EXISTS (SELECT 1 FROM invoices WHERE id = ?)' : ''}`,
     it.id,
     invoiceId,
     it.position,
@@ -305,6 +307,7 @@ function insertItemStmt(
     it.total,
     period?.start ?? null,
     period?.end ?? null,
+    ...(onlyIfInvoiceExists ? [invoiceId] : []),
   );
 }
 
@@ -323,8 +326,14 @@ export async function createInvoice(ctx: RequestContext, input: InvoiceInput): P
 export async function draftInvoiceStatements(
   ctx: RequestContext,
   input: InvoiceInput,
-  extra: { subscriptionId?: string; periods?: ({ start: string; end: string } | null)[]; auditAction?: string } = {},
-): Promise<{ id: string; totalMinor: number; statements: D1PreparedStatement[] }> {
+  extra: {
+    subscriptionId?: string;
+    periods?: ({ start: string; end: string } | null)[];
+    auditAction?: string;
+    /** Only create the invoice when this SQL condition holds when the batch runs (lines, history and audit follow it). */
+    guard?: { sql: string; params: unknown[] };
+  } = {},
+): Promise<{ id: string; totalMinor: number; itemIds: string[]; statements: D1PreparedStatement[] }> {
   const { items, totals } = await priceLines(ctx, input, 'iit');
   const settings = await getSettings(ctx);
   const client = await ctx.db
@@ -339,7 +348,7 @@ export async function draftInvoiceStatements(
       `INSERT INTO invoices (id, client_id, contact_id, subscription_id, currency, issue_date, due_date, payment_terms_days, notes,
            terms, discount_type, discount_value, subtotal_minor, discount_minor, tax_minor, total_minor, balance_minor, status,
            created_by, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', ?, ?, ?)`,
+         SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', ?, ?, ? ${extra.guard ? `WHERE ${extra.guard.sql}` : ''}`,
       id,
       input.clientId,
       input.contactId ?? null,
@@ -360,22 +369,35 @@ export async function draftInvoiceStatements(
       ctx.actor.userId,
       now,
       now,
+      ...(extra.guard?.params ?? []),
     ),
-    ...items.map((it, i) => insertItemStmt(ctx, id, it, extra.periods?.[i] ?? null)),
-    historyStmt(ctx, id, null, 'draft', extra.subscriptionId ? 'Created by subscription billing' : 'Created'),
-    auditStmt(ctx, {
-      action: extra.auditAction ?? 'invoice.created',
-      entityType: 'invoice',
-      entityId: id,
-      after: {
-        clientId: input.clientId,
-        totalMinor: totals.totalMinor,
-        currency: input.currency,
-        ...(extra.subscriptionId ? { subscriptionId: extra.subscriptionId } : {}),
+    ...items.map((it, i) => insertItemStmt(ctx, id, it, extra.periods?.[i] ?? null, Boolean(extra.guard))),
+    historyStmt(
+      ctx,
+      id,
+      null,
+      'draft',
+      extra.subscriptionId ? 'Created by subscription billing' : 'Created',
+      extra.guard ? { sql: 'EXISTS (SELECT 1 FROM invoices WHERE id = ?)', params: [id] } : undefined,
+    ),
+    auditWhen(
+      ctx,
+      {
+        action: extra.auditAction ?? 'invoice.created',
+        entityType: 'invoice',
+        entityId: id,
+        after: {
+          clientId: input.clientId,
+          totalMinor: totals.totalMinor,
+          currency: input.currency,
+          ...(extra.subscriptionId ? { subscriptionId: extra.subscriptionId } : {}),
+        },
       },
-    }),
+      'EXISTS (SELECT 1 FROM invoices WHERE id = ?)',
+      id,
+    ),
   ];
-  return { id, totalMinor: totals.totalMinor, statements };
+  return { id, totalMinor: totals.totalMinor, itemIds: items.map((it) => it.id), statements };
 }
 
 export async function updateInvoice(ctx: RequestContext, id: string, input: InvoiceInput): Promise<void> {
@@ -412,6 +434,16 @@ export async function updateInvoice(ctx: RequestContext, id: string, input: Invo
         inv.updated_at,
       ),
       'update',
+    )
+    // Time billed to this draft stays billed to it, but loses its line link while the lines are replaced (P4.23).
+    .add(
+      stmt(
+        ctx.db,
+        "UPDATE time_entries SET invoice_item_id = NULL WHERE invoice_id = ? AND EXISTS (SELECT 1 FROM invoices WHERE id = ? AND status = 'draft' AND updated_at = ?)",
+        id,
+        id,
+        now,
+      ),
     )
     // Lines are replaced only when the guarded update above went through (same batch, so all or nothing).
     .add(
@@ -471,6 +503,8 @@ export async function deleteDraft(ctx: RequestContext, id: string): Promise<void
   const inv = await loadRow(ctx, id);
   if (inv.status !== 'draft' || inv.number) throw conflict('Only unissued drafts can be deleted.');
   const res = await new Batch(ctx.db)
+    // Time billed to the draft becomes unbilled again (P4.23).
+    .add(stmt(ctx.db, 'UPDATE time_entries SET invoice_id = NULL, invoice_item_id = NULL WHERE invoice_id = ?', id))
     .add(stmt(ctx.db, 'DELETE FROM invoice_items WHERE invoice_id = ?', id))
     .add(stmt(ctx.db, 'DELETE FROM invoice_status_history WHERE invoice_id = ?', id))
     .add(stmt(ctx.db, "DELETE FROM invoices WHERE id = ? AND status = 'draft' AND number IS NULL", id), 'delete')
@@ -1010,6 +1044,15 @@ export async function voidInvoice(ctx: RequestContext, id: string, reason: strin
       'void',
     )
     .add(historyStmt(ctx, id, inv.status, 'void', reason, done))
+    // Time billed on a voided invoice can be billed again (P4.23).
+    .add(
+      stmt(
+        ctx.db,
+        `UPDATE time_entries SET invoice_id = NULL, invoice_item_id = NULL WHERE invoice_id = ? AND ${done.sql}`,
+        id,
+        ...done.params,
+      ),
+    )
     .add(
       auditWhen(
         ctx,

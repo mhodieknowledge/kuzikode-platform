@@ -414,3 +414,16 @@ The **Next step** line must be specific enough that a fresh session can continue
   testimonials consent copy, newsletter without export for Content Manager, axe + 375/768/1440). verify: unit 232 / integration 215 green.
 - Next step: P4.23 Time tracking (entries, timer, timesheet, bill unbilled time to invoice; concurrent billing test). Check
   migrations for `time_entries` and the `time.*` permissions first.
+
+## 2026-11-06 19:20 UTC · P4.23 Time tracking ✅
+- `shared/schemas/time.ts`; `modules/timetracking` (+ `/api/v1/admin/time/*`): entries CRUD (own unless time.view_all, billed locked),
+  timer start/stop/discard, weekly timesheet, project time summary, unbilled-by-project, `billUnbilledTime` (guarded batch → new
+  draft invoice, entries linked to their lines). Invoices: `draftInvoiceStatements({ guard })` + `itemIds`; draft edit clears time
+  line links, draft delete and void release billed time. Settings: default hourly rate + time currency on the billing page.
+- UI: /admin/time (My time with timer + log/edit dialog, Timesheet with week nav and person picker for time.view_all, Unbilled time),
+  /admin/time/bill/[project] (choose entries → draft invoice), project "Time" tab. Nav: Time on.
+- Tests: integration `time.test.ts` (5, incl. 4 concurrent billing requests → one invoice per winning set, no orphans) · e2e
+  `time.spec.ts`. verify: unit 232 / integration 220 green; invoices/admin-shell/settings/subscriptions e2e green.
+- Next step: P5.1 Portal auth UX (accept invite, login, reset, verify email, sessions, profile, optional approved registration off by
+  default; no auto-linking by email; `client.registered` notification for clients.view staff with a test). Read docs/07 portal sections
+  and check src/pages/portal + modules/auth for what exists.

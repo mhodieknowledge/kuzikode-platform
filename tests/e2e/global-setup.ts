@@ -42,6 +42,14 @@ export default async function globalSetup() {
     "DELETE FROM service_categories WHERE slug GLOB 'workshops-[0-9]*';",
     // quotations.spec uses a tax line; the seed ships VAT inactive until the owner confirms registration.
     "UPDATE tax_rates SET active = 1 WHERE id = 'tax_vat';",
+    // time.spec: a client and an active project with the time e2e user on the team; unbilled time is reset each run.
+    `INSERT INTO clients (id, client_number, type, display_name, default_currency, email)
+     VALUES ('cli_e2e_time', 'CL-E2E-TIME', 'business', 'Mbare Motors (e2e)', 'USD', 'accounts@mbare-motors.example')
+     ON CONFLICT(id) DO NOTHING;`,
+    `INSERT INTO projects (id, reference, client_id, name, status, currency)
+     VALUES ('prj_e2e_time', 'PRJ-E2E-TIME', 'cli_e2e_time', 'Parts catalogue', 'active', 'USD') ON CONFLICT(id) DO NOTHING;`,
+    "INSERT OR IGNORE INTO project_members (project_id, user_id, role) VALUES ('prj_e2e_time', 'usr_e2e_time', 'lead');",
+    "DELETE FROM time_entries WHERE project_id = 'prj_e2e_time' AND invoice_id IS NULL;",
     // A fixed website enquiry for leads.spec, reset to untriaged on every run (avoids the public form's rate limit).
     `INSERT INTO enquiries (id, reference, kind, name, email, phone, organisation, category, service_id, budget_range, message, consent_at, status)
      VALUES ('enq_e2e_lead', 'ENQ-E2E-0001', 'contact', 'Tendai Moyo', 'tendai@harare-bakery.example', '+263 77 123 4567',

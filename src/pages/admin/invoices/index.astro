@@ -1,0 +1,182 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { listInvoices } from '../../../server/modules/invoices';
+import { invoiceListQuery } from '../../../shared/schemas/invoices';
+import { INVOICE_STATUS_LABEL } from '../../../shared/invoices';
+import { formatMoney } from '../../../shared/money';
+import { formatLongDate } from '../../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'invoices.view' });
+if (page instanceof Response) return page;
+const parsed = invoiceListQuery.safeParse(Object.fromEntries(Astro.url.searchParams));
+const filter = parsed.success ? parsed.data : invoiceListQuery.parse({});
+const result = await listInvoices(ctx, filter);
+const canCreate = page.auth.permissions.has('invoices.create');
+const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
+const STATUS_CLASS: Record<string, string> = {
+  draft: 'bg-ink-950/5 text-ink-800',
+  issued: 'bg-info-50 text-info-700',
+  partially_paid: 'bg-warning-50 text-warning-700',
+  paid: 'bg-success-50 text-success-700',
+  overdue: 'bg-danger-50 text-danger-700',
+  void: 'bg-ink-950/5 text-ink-800 line-through',
+};
+const pageHref = (n: number) => {
+  const q = new URLSearchParams(Astro.url.searchParams);
+  q.set('page', String(n));
+  return `/admin/invoices?${q.toString()}`;
+};
+---
+
+<AdminLayout title="Invoices" page={page}>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold tracking-display">Invoices</h1>
+      <p class="mt-1 text-sm text-ink-600">
+        {result.total} {result.total === 1 ? 'invoice' : 'invoices'}
+      </p>
+    </div>
+    {canCreate ? (
+      <a
+        href="/admin/invoices/new"
+        class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
+      >
+        New invoice
+      </a>
+    ) : null}
+  </div>
+  {result.outstanding.length ? (
+    <dl class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {result.outstanding.map((o) => (
+        <div class="rounded-lg border border-line bg-surface p-4">
+          <dt class="text-[13px] font-semibold text-ink-600">Outstanding ({o.currency})</dt>
+          <dd class="tnum mt-1 text-xl font-bold text-ink-950">{formatMoney(o.balance, o.currency)}</dd>
+          {o.overdue > 0 ? (
+            <dd class="tnum mt-1 text-[13px] font-medium text-danger-700">
+              {formatMoney(o.overdue, o.currency)} overdue
+            </dd>
+          ) : null}
+        </div>
+      ))}
+    </dl>
+  ) : null}
+  <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter invoices">
+    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+      Search
+      <input
+        name="q"
+        type="search"
+        value={filter.q ?? ''}
+        maxlength="80"
+        class={field}
+        placeholder="Number or client"
+      />
+    </label>
+    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+      Status
+      <select name="status" class={field}>
+        <option value="open" selected={!filter.status || filter.status === 'open'}>
+          Open (draft, issued, part paid, overdue)
+        </option>
+        {Object.entries(INVOICE_STATUS_LABEL).map(([k, l]) => (
+          <option value={k} selected={filter.status === k}>
+            {l}
+          </option>
+        ))}
+        <option value="all" selected={filter.status === 'all'}>
+          All
+        </option>
+      </select>
+    </label>
+    {filter.clientId ? <input type="hidden" name="clientId" value={filter.clientId} /> : null}
+    <button
+      type="submit"
+      class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+    >
+      Filter
+    </button>
+  </form>
+  <div class="mt-6 overflow-x-auto rounded-lg border border-line bg-surface">
+    <table class="w-full text-left text-sm">
+      <caption class="sr-only">Invoices</caption>
+      <thead class="bg-canvas text-[13px] text-ink-600">
+        <tr>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Invoice
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Client
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Status
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Due
+          </th>
+          <th scope="col" class="px-4 py-3 text-right font-semibold">
+            Total
+          </th>
+          <th scope="col" class="px-4 py-3 text-right font-semibold">
+            Balance
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {result.items.length === 0 ? (
+          <tr>
+            <td colspan="6" class="px-4 py-10 text-center text-ink-600">
+              {filter.q || filter.status ? 'No invoices match these filters.' : 'No open invoices.'}
+            </td>
+          </tr>
+        ) : (
+          result.items.map((q) => (
+            <tr class="border-t border-line">
+              <td class="px-4 py-3">
+                <a href={`/admin/invoices/${q.id}`} class="font-mono font-semibold text-ink-950 hover:underline">
+                  {q.number ?? 'Draft invoice'}
+                </a>
+                <span class="block text-[12px] text-ink-600">
+                  {q.issue_date ? `Issued ${formatLongDate(q.issue_date)}` : 'Not issued'}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-ink-800">{q.client_name}</td>
+              <td class="px-4 py-3">
+                <span class={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${STATUS_CLASS[q.status]}`}>
+                  {INVOICE_STATUS_LABEL[q.status]}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-ink-800">{q.due_date ? formatLongDate(q.due_date) : '—'}</td>
+              <td class="tnum px-4 py-3 text-right text-ink-800">{formatMoney(q.total_minor, q.currency)}</td>
+              <td class="tnum px-4 py-3 text-right font-medium text-ink-950">
+                {q.status === 'draft' || q.status === 'void' ? '—' : formatMoney(q.balance_minor, q.currency)}
+              </td>
+            </tr>
+          ))
+        )}
+      </tbody>
+    </table>
+  </div>
+  {result.pages > 1 ? (
+    <nav aria-label="Pagination" class="mt-4 flex items-center justify-between text-sm font-semibold">
+      {result.page > 1 ? (
+        <a href={pageHref(result.page - 1)} rel="prev" class="text-brand-600">
+          Previous
+        </a>
+      ) : (
+        <span />
+      )}
+      <span class="text-ink-600">
+        Page {result.page} of {result.pages}
+      </span>
+      {result.page < result.pages ? (
+        <a href={pageHref(result.page + 1)} rel="next" class="text-brand-600">
+          Next
+        </a>
+      ) : (
+        <span />
+      )}
+    </nav>
+  ) : null}
+</AdminLayout>

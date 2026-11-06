@@ -1,9 +1,10 @@
 import type { RequestContext } from '../../context';
+import type { Permission } from '../../../shared/permissions';
 import { editorOptions } from './service';
 
 /** Serialisable props for the QuotationEditor island (clients, contacts, currencies, taxes, catalogue picker). */
-export async function editorProps(ctx: RequestContext) {
-  const o = await editorOptions(ctx);
+export async function editorProps(ctx: RequestContext, permission: Permission = 'quotations.view') {
+  const o = await editorOptions(ctx, permission);
   const catalogue = [
     ...o.packages.map((p) => ({
       value: `pkg:${p.id}`,

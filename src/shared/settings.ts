@@ -14,6 +14,8 @@ export interface SettingField {
   help?: string;
   max?: number;
   min?: number;
+  /** Extra format rule for text fields (blank always allowed). */
+  pattern?: { regex: string; message: string };
 }
 
 export interface SettingSection {
@@ -118,6 +120,17 @@ export const SETTING_SECTIONS: SettingSection[] = [
     fields: [
       { key: 'invoice.default_terms_days', label: 'Invoice payment terms (days)', type: 'int', min: 0, max: 120 },
       { key: 'invoice.default_terms_text', label: 'Invoice terms text', type: 'textarea', max: 1000 },
+      {
+        key: 'invoice.reminder_schedule',
+        label: 'Payment reminder schedule',
+        type: 'text',
+        max: 60,
+        help: 'Days relative to the due date, separated by commas: -3 means three days before, 0 on the day, 7 a week after. Leave blank for -3, 0, 7, 14.',
+        pattern: {
+          regex: '^-?\\d{1,2}(\\s*,\\s*-?\\d{1,2}){0,7}$',
+          message: 'Use whole days separated by commas, like -3, 0, 7, 14.',
+        },
+      },
       { key: 'quotation.default_validity_days', label: 'Quotation validity (days)', type: 'int', min: 1, max: 365 },
       { key: 'quotation.default_terms_text', label: 'Quotation terms text', type: 'textarea', max: 1000 },
       { key: 'payments.allow_partial', label: 'Allow clients to pay part of an invoice online', type: 'bool' },
@@ -201,8 +214,10 @@ function fieldSchema(f: SettingField): z.ZodType {
       );
     case 'tel':
       return text(f.max).refine((v) => v === '' || /^[+\d][\d\s()-]{6,}$/.test(v), 'Enter a valid phone number.');
-    default:
-      return text(f.max);
+    default: {
+      const p = f.pattern;
+      return p ? text(f.max).refine((v) => v === '' || new RegExp(p.regex).test(v), p.message) : text(f.max);
+    }
   }
 }
 

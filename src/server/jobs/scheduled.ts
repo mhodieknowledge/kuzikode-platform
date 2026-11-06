@@ -1,4 +1,5 @@
 import { expireQuotations } from '../modules/quotations';
+import { markOverdue, sendReminders } from '../modules/invoices/service';
 import { createContext, type RequestContext } from '../context';
 import { publishDuePosts } from '../modules/cms/insights';
 import { pruneUnconfirmed } from '../modules/newsletter/service';
@@ -8,6 +9,8 @@ import type { QueueMessageBody } from './outbox';
 
 export const CRON_FREQUENT = '*/5 * * * *';
 export const CRON_NIGHTLY = '17 2 * * *';
+/** 07:41 in Harare: client-facing emails (payment reminders) go out in business hours. */
+export const CRON_MORNING = '41 5 * * *';
 
 /** A scheduled task: runs inside its own try/catch so one failure never stops the others. */
 export type ScheduledTask = (
@@ -81,7 +84,9 @@ export const SCHEDULE: Record<string, [name: string, task: ScheduledTask][]> = {
     ['application-retention', (ctx) => applyApplicationRetention(ctx)],
     ['lead-follow-up-reminders', (ctx) => sendFollowUpReminders(ctx)],
     ['expire-quotations', (ctx) => expireQuotations(ctx)],
+    ['mark-overdue-invoices', (ctx) => markOverdue(ctx)],
   ],
+  [CRON_MORNING]: [['invoice-reminders', (ctx) => sendReminders(ctx)]],
 };
 
 export async function runScheduled(

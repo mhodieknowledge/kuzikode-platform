@@ -14,12 +14,13 @@ import { conflict, notFound, validationError } from '../../lib/errors';
 import { sanitizeHtml } from '../../lib/html-sanitize';
 import { newId } from '../../lib/ids';
 import { assertCan } from '../../lib/policies';
-import { computeDocument, type DiscountType } from '../../lib/pricing';
+import { type DiscountType } from '../../lib/pricing';
+import { priceLines, type PricedLine } from '../../lib/line-pricing';
 import { numberSqlExpr, sequenceKey, sequenceStatements } from '../../lib/sequences';
 import { dispatch, enqueue } from '../../jobs/outbox';
-import { parseQuantityMilli } from '../../../shared/money';
 import { canTransition, OPEN_FOR_RESPONSE, REVISABLE, type QuotationStatus } from '../../../shared/quotations';
 import type { QuotationInput } from '../../../shared/schemas/quotations';
+import type { Permission } from '../../../shared/permissions';
 import { getSettings, settingNumber, settingText } from '../cms';
 import { notifyStaffWithPermission, notifyUser } from '../notifications';
 
@@ -119,117 +120,7 @@ export const publicLink = (ctx: RequestContext, id: string): Promise<string> => 
 
 // ---------------------------------------------------------------- pricing of the lines
 
-interface ComputedItem {
-  id: string;
-  position: number;
-  serviceId: string | null;
-  packageId: string | null;
-  description: string;
-  quantityMilli: number;
-  unitPriceMinor: number;
-  discountType: DiscountType;
-  discountValue: number;
-  taxRateId: string | null;
-  taxRateBp: number;
-  taxInclusive: boolean;
-  isRecurring: boolean;
-  recurringInterval: 'month' | 'year' | null;
-  subtotal: number;
-  discount: number;
-  tax: number;
-  total: number;
-}
-
-async function priceInput(ctx: RequestContext, input: QuotationInput) {
-  const taxIds = [...new Set(input.items.map((i) => i.taxRateId).filter((x): x is string => !!x))];
-  const serviceIds = [...new Set(input.items.map((i) => i.serviceId).filter((x): x is string => !!x))];
-  const packageIds = [...new Set(input.items.map((i) => i.packageId).filter((x): x is string => !!x))];
-  const [taxes, services, packages, client, contact, currency] = await ctx.db.batch([
-    ctx.db
-      .prepare(
-        'SELECT id, rate_bp, inclusive FROM tax_rates WHERE active = 1 AND id IN (SELECT value FROM json_each(?))',
-      )
-      .bind(JSON.stringify(taxIds)),
-    ctx.db
-      .prepare('SELECT id FROM services WHERE id IN (SELECT value FROM json_each(?))')
-      .bind(JSON.stringify(serviceIds)),
-    ctx.db
-      .prepare('SELECT id, service_id FROM service_packages WHERE id IN (SELECT value FROM json_each(?))')
-      .bind(JSON.stringify(packageIds)),
-    ctx.db.prepare("SELECT id FROM clients WHERE id = ? AND status = 'active'").bind(input.clientId),
-    ctx.db
-      .prepare('SELECT id FROM client_contacts WHERE id = ? AND client_id = ?')
-      .bind(input.contactId ?? '', input.clientId),
-    ctx.db.prepare('SELECT code FROM currencies WHERE code = ? AND active = 1').bind(input.currency),
-  ]);
-  const taxMap = new Map(
-    ((taxes?.results ?? []) as { id: string; rate_bp: number; inclusive: number }[]).map((t) => [t.id, t]),
-  );
-  const fields: Record<string, string[]> = {};
-  if (!(client?.results ?? []).length) fields['clientId'] = ['Choose an active client.'];
-  if (input.contactId && !(contact?.results ?? []).length) fields['contactId'] = ['Choose a contact of this client.'];
-  if (!(currency?.results ?? []).length) fields['currency'] = ['Choose an active currency.'];
-  if ((services?.results ?? []).length !== serviceIds.length)
-    fields['items'] = ['A line refers to an unknown service.'];
-  if ((packages?.results ?? []).length !== packageIds.length)
-    fields['items'] = ['A line refers to an unknown package.'];
-  input.items.forEach((it, i) => {
-    if (it.taxRateId && !taxMap.has(it.taxRateId)) fields[`items.${i}.taxRateId`] = ['Choose an active tax rate.'];
-  });
-  if (Object.keys(fields).length) throw validationError(fields);
-
-  const lines = input.items.map((it) => {
-    const tax = it.taxRateId ? taxMap.get(it.taxRateId)! : null;
-    return {
-      it,
-      quantityMilli: parseQuantityMilli(it.quantity),
-      taxRateBp: tax?.rate_bp ?? 0,
-      taxInclusive: tax?.inclusive === 1,
-    };
-  });
-  let doc;
-  try {
-    doc = computeDocument({
-      lines: lines.map((l) => ({
-        quantityMilli: l.quantityMilli,
-        unitPriceMinor: l.it.unitPriceMinor,
-        discount: { type: l.it.discountType, value: l.it.discountValue },
-        taxRateBp: l.taxRateBp,
-        taxInclusive: l.taxInclusive,
-      })),
-      discount: { type: input.discountType, value: input.discountValue },
-    });
-  } catch (err) {
-    throw validationError({ items: [err instanceof Error ? err.message : 'The amounts are out of range.'] });
-  }
-  const base = newId('qit', ctx.now().getTime());
-  const items: ComputedItem[] = lines.map((l, i) => {
-    const r = doc.lines[i]!;
-    return {
-      id: `${base}_${i}`,
-      position: i,
-      serviceId: l.it.serviceId ?? null,
-      packageId: l.it.packageId ?? null,
-      description: l.it.description,
-      quantityMilli: l.quantityMilli,
-      unitPriceMinor: l.it.unitPriceMinor,
-      discountType: l.it.discountType,
-      discountValue: l.it.discountType === 'none' ? 0 : l.it.discountValue,
-      taxRateId: l.it.taxRateId ?? null,
-      taxRateBp: l.taxRateBp,
-      taxInclusive: l.taxInclusive,
-      isRecurring: l.it.isRecurring,
-      recurringInterval: l.it.isRecurring ? (l.it.recurringInterval ?? null) : null,
-      subtotal: r.subtotalMinor,
-      discount: r.discountMinor,
-      tax: r.taxMinor,
-      total: r.totalMinor,
-    };
-  });
-  return { items, totals: doc };
-}
-
-function insertItemStmt(ctx: RequestContext, quotationId: string, it: ComputedItem) {
+function insertItemStmt(ctx: RequestContext, quotationId: string, it: PricedLine) {
   return stmt(
     ctx.db,
     `INSERT INTO quotation_items (id, quotation_id, ${ITEM_COLUMNS})
@@ -385,7 +276,7 @@ export async function getQuotation(ctx: RequestContext, id: string) {
 
 export async function createQuotation(ctx: RequestContext, input: QuotationInput): Promise<{ id: string }> {
   assertCan(ctx, 'quotations.create');
-  const { items, totals } = await priceInput(ctx, input);
+  const { items, totals } = await priceLines(ctx, input, 'qit');
   const id = newId('quo', ctx.now().getTime());
   const now = ctx.now().toISOString();
   await new Batch(ctx.db)
@@ -436,7 +327,7 @@ export async function updateQuotation(ctx: RequestContext, id: string, input: Qu
   assertCan(ctx, 'quotations.update');
   const before = await loadRow(ctx, id);
   if (before.status !== 'draft') throw conflict('Only drafts can be edited. Revise the quotation to change it.');
-  const { items, totals } = await priceInput(ctx, input);
+  const { items, totals } = await priceLines(ctx, input, 'qit');
   const now = ctx.now().toISOString();
   const res = await new Batch(ctx.db)
     .add(
@@ -629,7 +520,7 @@ async function copyAsDraft(ctx: RequestContext, q: QuotationRow, opts: { revisio
 // ---------------------------------------------------------------- send
 
 /** Current client + business details (frozen into the quotation at first send; used live for draft previews). */
-export async function snapshots(ctx: RequestContext, q: QuotationRow) {
+export async function snapshots(ctx: RequestContext, q: { client_id: string; contact_id: string | null }) {
   const settings = await getSettings(ctx);
   const [client, contact] = await ctx.db.batch([
     ctx.db
@@ -1168,8 +1059,8 @@ export async function expireQuotations(ctx: RequestContext): Promise<number> {
 // ---------------------------------------------------------------- editor options
 
 /** Choices for the editor: active clients (with contacts), currencies, tax rates, services and priced packages. */
-export async function editorOptions(ctx: RequestContext) {
-  assertCan(ctx, 'quotations.view');
+export async function editorOptions(ctx: RequestContext, permission: Permission = 'quotations.view') {
+  assertCan(ctx, permission);
   const [clients, contacts, currencies, taxes, services, packages] = await ctx.db.batch([
     ctx.db.prepare(
       "SELECT id, display_name AS name, client_number AS number, default_currency AS currency FROM clients WHERE status = 'active' ORDER BY display_name LIMIT 2000",

@@ -52,6 +52,13 @@ export const E2E_USERS = {
     role: 'admin',
     mustChange: false,
   },
+  invoicesAdmin: {
+    id: 'usr_e2e_invoices',
+    email: 'e2e-invoices@example.com',
+    name: 'Ivy Invoices',
+    role: 'admin',
+    mustChange: false,
+  },
   newcomer: {
     id: 'usr_e2e_newcomer',
     email: 'e2e-newcomer@example.com',

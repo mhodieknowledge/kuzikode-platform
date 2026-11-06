@@ -107,8 +107,8 @@ export function fromApiLine(i: {
   discount_type: DiscountType;
   discount_value: number;
   tax_rate_id: string | null;
-  is_recurring: number;
-  recurring_interval: 'month' | 'year' | null;
+  is_recurring?: number;
+  recurring_interval?: 'month' | 'year' | null;
 }): EditorLine {
   return newLine({
     serviceId: i.service_id,
@@ -122,7 +122,7 @@ export function fromApiLine(i: {
     discountAmountMinor: i.discount_type === 'amount' ? i.discount_value : null,
     taxRateId: i.tax_rate_id,
     isRecurring: i.is_recurring === 1,
-    recurringInterval: i.recurring_interval,
+    recurringInterval: i.recurring_interval ?? null,
   });
 }
 
@@ -136,6 +136,7 @@ export function LineItemEditor({
   docDiscount,
   onDocDiscount,
   errors,
+  allowRecurring = true,
 }: {
   lines: EditorLine[];
   onChange: (lines: EditorLine[]) => void;
@@ -146,6 +147,8 @@ export function LineItemEditor({
   docDiscount: { type: DiscountType; percent: string; amountMinor: number | null };
   onDocDiscount: (d: { type: DiscountType; percent: string; amountMinor: number | null }) => void;
   errors: Record<string, string[]>;
+  /** Invoices bill one period; recurring billing is set up with subscriptions. */
+  allowRecurring?: boolean;
 }) {
   const [pick, setPick] = useState('');
   const set = (i: number, patch: Partial<EditorLine>) =>
@@ -204,8 +207,8 @@ export function LineItemEditor({
         description: c.description,
         quantity: String(c.quantity),
         unitPriceMinor: samePrice ? c.priceMinor : null,
-        isRecurring: c.isRecurring,
-        recurringInterval: c.interval,
+        isRecurring: allowRecurring && c.isRecurring,
+        recurringInterval: allowRecurring ? c.interval : null,
       }),
     ]);
     setPick('');
@@ -324,25 +327,27 @@ export function LineItemEditor({
                     ]}
                   />
                 </Field>
-                <Field label="Billing" error={err('recurringInterval')}>
-                  <Select
-                    value={l.isRecurring ? (l.recurringInterval ?? 'month') : 'once'}
-                    onChange={(e) =>
-                      set(
-                        i,
-                        e.target.value === 'once'
-                          ? { isRecurring: false, recurringInterval: null }
-                          : { isRecurring: true, recurringInterval: e.target.value as 'month' | 'year' },
-                      )
-                    }
-                    aria-label={`Line ${i + 1} billing`}
-                    options={[
-                      { value: 'once', label: 'One-off' },
-                      { value: 'month', label: 'Monthly' },
-                      { value: 'year', label: 'Yearly' },
-                    ]}
-                  />
-                </Field>
+                {allowRecurring ? (
+                  <Field label="Billing" error={err('recurringInterval')}>
+                    <Select
+                      value={l.isRecurring ? (l.recurringInterval ?? 'month') : 'once'}
+                      onChange={(e) =>
+                        set(
+                          i,
+                          e.target.value === 'once'
+                            ? { isRecurring: false, recurringInterval: null }
+                            : { isRecurring: true, recurringInterval: e.target.value as 'month' | 'year' },
+                        )
+                      }
+                      aria-label={`Line ${i + 1} billing`}
+                      options={[
+                        { value: 'once', label: 'One-off' },
+                        { value: 'month', label: 'Monthly' },
+                        { value: 'year', label: 'Yearly' },
+                      ]}
+                    />
+                  </Field>
+                ) : null}
                 <div className="flex items-end justify-end sm:col-span-4">
                   <p className="tnum text-sm text-ink-800">
                     Line total: <span className="font-semibold text-ink-950">{line ? fmt(line.totalMinor) : '—'}</span>

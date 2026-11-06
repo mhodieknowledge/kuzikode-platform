@@ -118,8 +118,10 @@ const title = q.number ?? `Draft: ${q.title}`;
       role="status"
       class="mt-4 rounded-sm border border-success-700/30 bg-success-50 px-4 py-3 text-sm text-success-700"
     >
-      Converted to a draft invoice{invoice.number ? ` (${invoice.number})` : ''}. It can be finished and issued from
-      Invoices.
+      Converted to {invoice.number ? `invoice ${invoice.number}` : 'a draft invoice'}.{' '}
+      <a href={`/admin/invoices/${invoice.id}`} class="font-semibold underline">
+        Open the invoice
+      </a>
     </p>
   ) : null}
   <div class="mt-6 grid gap-6 xl:grid-cols-[1fr_300px]">

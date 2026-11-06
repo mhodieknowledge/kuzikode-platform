@@ -6,6 +6,7 @@ import { requireAuth, withAuth } from '../../middleware/auth';
 import type { ApiEnv } from '../../middleware/request-context';
 import type { DocumentKind } from '../../pdf';
 import { downloadAudit, fileResponse } from '../files/service';
+import { invoiceIdForToken } from '../invoices/service';
 import { DOCUMENT_KINDS, VIEW_PERMISSION, documentPdf, pdfResponse, quotationIdForToken } from './service';
 
 const KIND_PATH: Record<string, DocumentKind> = {
@@ -33,18 +34,24 @@ export function documentRoutes() {
   return r;
 }
 
-/** `/api/v1/public/quotations/:token/pdf` — the client's download from the public link. */
+/** `/api/v1/public/{quotations|invoices}/:token/pdf` — the client's download from the public link. */
 export function publicDocumentRoutes() {
   const r = new Hono<ApiEnv>();
-  r.get('/quotations/:token/pdf', async (c) => {
-    const ctx = c.var.ctx;
-    await enforce(ctx, { key: `document-pdf:ip:${ctx.ip}`, limit: 60, windowSeconds: 3600 });
-    const id = await quotationIdForToken(ctx, c.req.param('token'));
-    if (!id) throw notFound();
-    const pdf = await documentPdf(ctx, 'quotation', id);
-    const res = await fileResponse(ctx, pdf.file!);
-    res.headers.set('x-robots-tag', 'noindex, nofollow');
-    return res;
-  });
+  const lookups = {
+    quotations: ['quotation', quotationIdForToken],
+    invoices: ['invoice', invoiceIdForToken],
+  } as const;
+  for (const [path, [kind, lookup]] of Object.entries(lookups)) {
+    r.get(`/${path}/:token/pdf`, async (c) => {
+      const ctx = c.var.ctx;
+      await enforce(ctx, { key: `document-pdf:ip:${ctx.ip}`, limit: 60, windowSeconds: 3600 });
+      const id = await lookup(ctx, c.req.param('token'));
+      if (!id) throw notFound();
+      const pdf = await documentPdf(ctx, kind, id);
+      const res = await fileResponse(ctx, pdf.file!);
+      res.headers.set('x-robots-tag', 'noindex, nofollow');
+      return res;
+    });
+  }
   return r;
 }

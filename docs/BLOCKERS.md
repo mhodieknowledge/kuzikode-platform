@@ -40,6 +40,7 @@ Things only the owner can do. The agent keeps building around them and records e
 - [ ] **Real team photos** (optional): if you want a team section, upload real photos. AI faces are never used for staff.
 - [ ] **Booking (optional):** create a free Cal.com account and put the booking link in Settings.
 - [ ] **WhatsApp business number** for the chat button (Settings → Contact).
+- [ ] **Invoice payment details** (added 2026-11-06): in Admin → Settings → Billing → Documents, enter your **bank transfer details** (bank, account name, account number, branch) and a short footer line. They print on every invoice PDF from then on; invoices already issued keep the details they were issued with.
 
 - [ ] **Note on the Cloudflare connector:** it's connected, but the agent still needs the **API token** above. GitHub Actions deploys and
   `wrangler` (Workers, Queues, secrets, migrations, domains) can't use the connector. You **don't** need to create any Workers, databases or

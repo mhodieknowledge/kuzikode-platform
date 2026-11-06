@@ -1,0 +1,61 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { InvoiceEditor } from '../../../../components/admin/InvoicesAdmin';
+import { fromApiLine } from '../../../../components/admin/LineItemEditor';
+import { loadAdminPage } from '../../../../server/lib/admin-page';
+import { AppError } from '../../../../server/lib/errors';
+import { getInvoice } from '../../../../server/modules/invoices';
+import { editorProps } from '../../../../server/modules/quotations';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'invoices.update' });
+if (page instanceof Response) return page;
+let data;
+try {
+  data = await getInvoice(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND')
+    return new Response(null, { status: 404, statusText: 'Not found' });
+  throw err;
+}
+const inv = data.invoice;
+if (inv.status !== 'draft') return Astro.redirect(`/admin/invoices/${inv.id}`, 303);
+const props = await editorProps(ctx, 'invoices.create');
+if (data.client && !props.clients.some((c) => c.id === data.client!.id))
+  props.clients.push({
+    id: data.client.id,
+    name: `${data.client.display_name} (archived)`,
+    number: data.client.client_number,
+    currency: inv.currency,
+  });
+const initial = {
+  clientId: inv.client_id,
+  contactId: inv.contact_id,
+  currency: inv.currency,
+  issueDate: inv.issue_date,
+  dueDate: inv.due_date,
+  paymentTermsDays: inv.payment_terms_days,
+  notes: inv.notes,
+  terms: inv.terms,
+  discountType: inv.discount_type,
+  discountValue: inv.discount_value,
+  lines: data.items.map(fromApiLine),
+};
+---
+
+<AdminLayout title="Edit draft invoice" page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/invoices" class="hover:text-ink-950 hover:underline">
+      Invoices
+    </a>{' '}
+    /{' '}
+    <a href={`/admin/invoices/${inv.id}`} class="hover:text-ink-950 hover:underline">
+      Draft
+    </a>{' '}
+    / <span class="text-ink-950">Edit</span>
+  </nav>
+  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">Edit draft invoice</h1>
+  <div class="max-w-4xl">
+    <InvoiceEditor client:load id={inv.id} initial={initial} {...props} />
+  </div>
+</AdminLayout>

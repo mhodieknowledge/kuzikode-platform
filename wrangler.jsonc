@@ -16,7 +16,7 @@
     "enabled": true,
   },
   "triggers": {
-    "crons": ["*/5 * * * *", "17 2 * * *"],
+    "crons": ["*/5 * * * *", "17 2 * * *", "41 5 * * *"],
   },
   "vars": {
     "APP_ENV": "development",
@@ -86,7 +86,7 @@
         "ADMIN_ALERT_EMAIL": "",
       },
       "triggers": {
-        "crons": ["*/5 * * * *", "17 2 * * *"],
+        "crons": ["*/5 * * * *", "17 2 * * *", "41 5 * * *"],
       },
       "d1_databases": [
         {
@@ -146,7 +146,7 @@
         "ADMIN_ALERT_EMAIL": "",
       },
       "triggers": {
-        "crons": ["*/5 * * * *", "17 2 * * *"],
+        "crons": ["*/5 * * * *", "17 2 * * *", "41 5 * * *"],
       },
       "routes": [],
       "d1_databases": [

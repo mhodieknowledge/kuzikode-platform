@@ -5,13 +5,13 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phase 1, 2 and 3 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 4 (administration) in progress.
-- Last completed task: **P4.8 PDF engine** (P4.1–P4.8 done).
-- **Next step:** P4.9 Invoices — module `server/modules/invoices` (draft editor reusing `LineItemEditor`, issue with snapshot + gap-free
-  number + public token via `lib/public-links.ts` `documentToken(ctx, 'invoice', id)` (the PDF already prints `/i/<token>`), queue
-  `pdf.generate` {kind:'invoice'} in the issue batch, send/resend email, manual payments + allocations (receipt PDF via kind 'receipt'),
-  overpayment → client credit, apply credit, void rules, status history, overdue cron, reminder schedule with dedupe), admin pages
-  `/admin/invoices*` with "Download PDF" → `/api/v1/admin/documents/invoices/:id/pdf`, public `/i/[token]` + a public invoice PDF route
-  in `modules/documents/routes.ts`. Then P4.10 credit notes (PDF kind 'credit_note' is ready).
+- Last completed task: **P4.9 Invoices** (P4.1–P4.9 done).
+- **Next step:** P4.10 Credit notes — `server/modules/credit-notes` (or inside invoices): create from an issued invoice (full or
+  partial lines/amounts, reason), gap-free `numbering.credit_note` number (conditional sequence bump like `issueInvoice`), lines into
+  `credit_note_items`, `applied_to` = 'invoice' (reduce `amount_credited_minor`/`balance_minor` guarded by balance, re-derive status via
+  `deriveStatus`), 'client_credit' (insert `client_credits` source_type 'credit_note') or 'refund' (record only; refunds module P4.11),
+  history + audit + `pdf.generate` {kind:'credit_note'} in one batch; credit-note list on /admin/invoices/[id] with PDF links
+  (`/api/v1/admin/documents/credit-notes/:id/pdf`). Balance tests: credit note reduces balance; a fully credited invoice is `paid`.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 
 ---
@@ -228,4 +228,22 @@ The **Next step** line must be specific enough that a fresh session can continue
   verify: unit 213 / integration 149 green; e2e quotations green.
 - CPU (Node 22, warm, wall ≈ CPU): typical 3-line quotation ≈ 5 ms median; 40 lines ≈ 10 ms. Rendered off the request path (queue) and
   once per document, so within docs/02 §4.
+
+## 2026-11-06 08:35 UTC · P4.9 Invoices ✅
+- Shared: `shared/invoices.ts` (statuses, transitions, `deriveStatus` from money + due date, void rule, reminder schedule parsing,
+  manual methods), `shared/schemas/invoices.ts`. Line pricing moved to `server/lib/line-pricing.ts` (quotations + invoices).
+- `modules/invoices`: list (+ outstanding/overdue per currency), detail (payments, credits, history, reminders, available credit), draft
+  create/update (guarded by `updated_at`)/delete, issue (conditional sequence bump → gap-free number, snapshots, token, history, audit,
+  PDF + email jobs in one batch), resend, manual payments (receipt number, allocation up to balance, overpayment → `client_credits`,
+  receipt PDF + email, optimistic retry on balance change), apply credit (ledger-sum guard), void (no money applied), public view by
+  token, `markOverdue` (nightly) and `sendReminders` (new 07:41 Harare cron; latest reached offset only, once per kind; skipped at send
+  time if paid). Email templates `invoice_issued`, `invoice_reminder`, `payment_receipt` + resolvers; `SkipEmail` for stale jobs.
+- UI: /admin/invoices (filters, outstanding tiles), /new (also "New invoice" on client page), /[id] (document, actions: issue with
+  optional email, record payment with overpayment notice, apply credit, resend, PDF, copy link, void, delete), /[id]/edit, public
+  /i/[token] (status notice, payments received, PDF). LineItemEditor `allowRecurring={false}`; Invoices nav item on; quotation page
+  links to its invoice. Setting `invoice.reminder_schedule` (validated).
+- Tests: unit `invoices.test.ts` (7) · integration `invoices.test.ts` (8: issue/snapshot/immutability/email/PDF, 20 concurrent issues
+  → 20 sequential numbers + double issue no gap, partial/exact/over payments + credit applied, 4 concurrent payments, void rules,
+  overdue + reminders run twice, quotation → invoice, permissions) · e2e `invoices.spec.ts` (draft → issue → email → client /i/ +
+  PDF → part paid → paid). verify: unit 223 / integration 157 green.
 

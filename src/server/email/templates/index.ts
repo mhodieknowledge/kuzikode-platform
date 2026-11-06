@@ -293,6 +293,142 @@ const defs = {
         ],
       }),
   },
+  invoice_issued: {
+    schema: z.object({
+      name: z.string(),
+      number: z.string(),
+      total: z.string(),
+      dueDate: z.string(),
+      link: url,
+      message: z.string().nullable().optional(),
+    }),
+    render: (
+      b: Brand,
+      d: {
+        name: string;
+        number: string;
+        total: string;
+        dueDate: string;
+        link: string;
+        message?: string | null | undefined;
+      },
+    ) =>
+      renderEmail(b, {
+        subject: `Invoice ${d.number} from ${b.companyName}`,
+        preheader: `Invoice ${d.number} for ${d.total}, due ${d.dueDate}.`,
+        heading: 'Your invoice',
+        blocks: [
+          { kind: 'p', text: `Hi ${d.name},` },
+          ...(d.message ? [{ kind: 'p' as const, text: d.message }] : []),
+          {
+            kind: 'p',
+            text: 'Please find your invoice below. You can view it online and download a PDF copy from the link.',
+          },
+          {
+            kind: 'kv',
+            rows: [
+              ['Invoice', d.number],
+              ['Amount due', d.total],
+              ['Due date', d.dueDate],
+            ],
+          },
+          { kind: 'button', text: 'View invoice', href: d.link },
+          {
+            kind: 'small',
+            text: 'Please quote the invoice number with your payment. Reply to this email with any questions.',
+          },
+        ],
+      }),
+  },
+  invoice_reminder: {
+    schema: z.object({
+      name: z.string(),
+      number: z.string(),
+      balance: z.string(),
+      dueDate: z.string(),
+      overdue: z.boolean(),
+      link: url,
+    }),
+    render: (
+      b: Brand,
+      d: { name: string; number: string; balance: string; dueDate: string; overdue: boolean; link: string },
+    ) =>
+      renderEmail(b, {
+        subject: d.overdue
+          ? `Reminder: invoice ${d.number} is overdue`
+          : `Reminder: invoice ${d.number} is due ${d.dueDate}`,
+        preheader: `${d.balance} outstanding on invoice ${d.number}.`,
+        heading: d.overdue ? 'Your invoice is overdue' : 'A friendly payment reminder',
+        blocks: [
+          { kind: 'p', text: `Hi ${d.name},` },
+          {
+            kind: 'p',
+            text: d.overdue
+              ? `Our records show that invoice ${d.number} was due on ${d.dueDate} and still has a balance outstanding.`
+              : `This is a reminder that invoice ${d.number} is due on ${d.dueDate}.`,
+          },
+          {
+            kind: 'kv',
+            rows: [
+              ['Invoice', d.number],
+              ['Balance due', d.balance],
+              ['Due date', d.dueDate],
+            ],
+          },
+          { kind: 'button', text: 'View invoice', href: d.link },
+          {
+            kind: 'small',
+            text: 'If you have already paid, thank you, and please ignore this reminder. Reply to this email if anything is unclear.',
+          },
+        ],
+      }),
+  },
+  payment_receipt: {
+    schema: z.object({
+      name: z.string(),
+      receiptNumber: z.string(),
+      amount: z.string(),
+      receivedOn: z.string(),
+      invoiceNumber: z.string(),
+      balance: z.string(),
+      credit: z.string().nullable(),
+      link: url,
+    }),
+    render: (
+      b: Brand,
+      d: {
+        name: string;
+        receiptNumber: string;
+        amount: string;
+        receivedOn: string;
+        invoiceNumber: string;
+        balance: string;
+        credit: string | null;
+        link: string;
+      },
+    ) =>
+      renderEmail(b, {
+        subject: `Payment received: receipt ${d.receiptNumber}`,
+        preheader: `Thank you. We received ${d.amount} for invoice ${d.invoiceNumber}.`,
+        heading: 'Thank you for your payment',
+        blocks: [
+          { kind: 'p', text: `Hi ${d.name},` },
+          { kind: 'p', text: `We have received your payment of ${d.amount}. Your receipt details are below.` },
+          {
+            kind: 'kv',
+            rows: [
+              ['Receipt', d.receiptNumber],
+              ['Date received', d.receivedOn],
+              ['Invoice', d.invoiceNumber],
+              ['Balance remaining', d.balance],
+              ...(d.credit ? ([['Held as account credit', d.credit]] as [string, string][]) : []),
+            ],
+          },
+          { kind: 'button', text: 'View invoice', href: d.link },
+          { kind: 'small', text: 'Keep this email for your records.' },
+        ],
+      }),
+  },
 } as const;
 
 export type TemplateName = keyof typeof defs;

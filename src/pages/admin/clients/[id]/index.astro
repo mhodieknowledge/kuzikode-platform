@@ -91,6 +91,14 @@ const address = c.billingAddress
           New quotation
         </a>
       ) : null}
+      {page.auth.permissions.has('invoices.create') && c.status === 'active' ? (
+        <a
+          href={`/admin/invoices/new?clientId=${c.id}`}
+          class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+        >
+          New invoice
+        </a>
+      ) : null}
       {canEdit ? (
         <a
           href={`/admin/clients/${c.id}/edit`}

@@ -4,7 +4,7 @@ import { brandFor, emailProvider, EmailProviderError } from '../../email';
 import { isTemplate, renderTemplate } from '../../email/templates';
 import { newId } from '../../lib/ids';
 import { PermanentJobError, type JobHandler } from '../types';
-import { EMAIL_RESOLVERS } from './email-resolvers';
+import { EMAIL_RESOLVERS, SkipEmail } from './email-resolvers';
 
 export const sendEmailPayload = z.object({
   template: z.string(),
@@ -32,7 +32,16 @@ export const sendEmailHandler: JobHandler = async (ctx: RequestContext, payload,
   if (existing && existing.status !== 'queued' && existing.status !== 'failed') return;
 
   const resolver = EMAIL_RESOLVERS[p.template];
-  const data = resolver ? await resolver(ctx, p.data) : p.data;
+  let data: Record<string, unknown>;
+  try {
+    data = resolver ? await resolver(ctx, p.data) : p.data;
+  } catch (err) {
+    if (err instanceof SkipEmail) {
+      ctx.logger.info('email skipped', { template: p.template, reason: err.message });
+      return; // nothing to send any more: the job completes without an email
+    }
+    throw err;
+  }
   let rendered;
   try {
     rendered = renderTemplate(p.template, await brandFor(ctx), data);

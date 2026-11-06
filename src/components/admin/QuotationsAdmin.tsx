@@ -3,7 +3,6 @@ import { useState, type FormEvent } from 'react';
 import type { DiscountType } from '../../shared/pricing';
 import { minorToDecimalString } from '../../shared/money';
 import {
-  ApiError,
   apiFetch,
   Button,
   Checkbox,
@@ -25,36 +24,7 @@ import {
   type EditorLine,
   type TaxOption,
 } from './LineItemEditor';
-
-function useAction() {
-  const [errors, setErrors] = useState<Record<string, string[]>>({});
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const run = async (fn: () => Promise<void>) => {
-    setBusy(true);
-    setErrors({});
-    setError(null);
-    try {
-      await fn();
-    } catch (err) {
-      if (err instanceof ApiError) {
-        setErrors(err.fields);
-        setError(err.status === 422 ? 'Please check the highlighted fields.' : err.message);
-      } else setError('Something went wrong. Please try again.');
-    } finally {
-      setBusy(false);
-    }
-  };
-  return { errors, error, busy, run };
-}
-
-function Alert({ message }: { message: string | null }) {
-  return message ? (
-    <p role="alert" className="rounded-sm border border-danger-600/30 bg-danger-50 px-4 py-3 text-sm text-danger-700">
-      {message}
-    </p>
-  ) : null;
-}
+import { Alert, useAction } from './actions';
 
 export interface QuotationEditorProps {
   id?: string;

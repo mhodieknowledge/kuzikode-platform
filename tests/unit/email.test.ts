@@ -100,6 +100,32 @@ describe('templates', () => {
       message: null,
     },
     newsletter_confirmation: { link: 'https://kuzikode.example/newsletter/confirm?token=abc' },
+    invoice_issued: {
+      name: 'Ann',
+      number: 'INV-2026-00001',
+      total: '$500.00',
+      dueDate: '13 November 2026',
+      link: 'https://example.com/i/abc',
+      message: null,
+    },
+    invoice_reminder: {
+      name: 'Ann',
+      number: 'INV-2026-00001',
+      balance: '$250.00',
+      dueDate: '13 November 2026',
+      overdue: true,
+      link: 'https://example.com/i/abc',
+    },
+    payment_receipt: {
+      name: 'Ann',
+      receiptNumber: 'RCT-2026-00001',
+      amount: '$600.00',
+      receivedOn: '6 November 2026',
+      invoiceNumber: 'INV-2026-00001',
+      balance: '$0.00',
+      credit: '$100.00',
+      link: 'https://example.com/i/abc',
+    },
   };
 
   it.each(TEMPLATE_NAMES)('%s renders HTML and text with the branded layout', (name) => {

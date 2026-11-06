@@ -1,0 +1,239 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import InvoiceDocument from '../../../../components/documents/InvoiceDocument.astro';
+import { InvoiceActions } from '../../../../components/admin/InvoicesAdmin';
+import { loadAdminPage } from '../../../../server/lib/admin-page';
+import { businessDate } from '../../../../server/lib/dates';
+import { AppError } from '../../../../server/lib/errors';
+import { getSettings, settingText } from '../../../../server/modules/cms';
+import { getInvoice, publicLink } from '../../../../server/modules/invoices';
+import type { BusinessSnapshot, ClientSnapshot } from '../../../../server/modules/quotations';
+import { canVoid, INVOICE_STATUS_LABEL, OPEN_INVOICE_STATUSES } from '../../../../shared/invoices';
+import { formatMoney } from '../../../../shared/money';
+import { formatLongDate } from '../../../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'invoices.view' });
+if (page instanceof Response) return page;
+let data;
+try {
+  data = await getInvoice(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND')
+    return new Response(null, { status: 404, statusText: 'Not found' });
+  throw err;
+}
+const { invoice: inv, items, client, contact, history, payments, creditsApplied, reminders, quotation } = data;
+const perms = page.auth.permissions;
+const settings = await getSettings(ctx);
+const link = inv.status === 'draft' ? null : await publicLink(ctx, inv.id);
+const open = OPEN_INVOICE_STATUSES.includes(inv.status) && inv.balance_minor > 0;
+const clientParty: ClientSnapshot = inv.client_snapshot
+  ? (JSON.parse(inv.client_snapshot) as ClientSnapshot)
+  : {
+      name: client?.display_name ?? '—',
+      legalName: null,
+      number: client?.client_number ?? '',
+      email: client?.email ?? null,
+      phone: null,
+      taxNumber: null,
+      address: null,
+      contact: contact ? { name: contact.name, email: contact.email } : null,
+    };
+const business: BusinessSnapshot = inv.business_snapshot
+  ? (JSON.parse(inv.business_snapshot) as BusinessSnapshot)
+  : {
+      name: settingText(settings, 'company.name') ?? 'Kuzikode Technologies',
+      legalName: settingText(settings, 'company.legal_name') ?? null,
+      registrationNumber: null,
+      taxNumber: settingText(settings, 'company.tax_number') ?? null,
+      address: settingText(settings, 'contact.address') ?? null,
+      email: settingText(settings, 'contact.billing_email') ?? settingText(settings, 'contact.email') ?? null,
+      phone: settingText(settings, 'contact.phone') ?? null,
+    };
+const hasEmail = !!(clientParty.contact?.email ?? clientParty.email ?? contact?.email ?? client?.email);
+const can = {
+  edit: inv.status === 'draft' && perms.has('invoices.update'),
+  issue: inv.status === 'draft' && perms.has('invoices.issue'),
+  send: inv.status !== 'draft' && inv.status !== 'void' && hasEmail && perms.has('invoices.send'),
+  pay: open && perms.has('payments.record_manual'),
+  credit: open && data.creditAvailable > 0 && perms.has('payments.record_manual'),
+  void: canVoid(inv.status, inv.amount_paid_minor, inv.amount_credited_minor) && perms.has('invoices.void'),
+  delete: inv.status === 'draft' && !inv.number && perms.has('invoices.update'),
+};
+const money = (m: number) => formatMoney(m, inv.currency, data.minorDigits);
+const when = (iso: string) =>
+  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
+    new Date(iso),
+  );
+const label = (s: string | null) => (s ? (INVOICE_STATUS_LABEL[s as keyof typeof INVOICE_STATUS_LABEL] ?? s) : '');
+const METHOD: Record<string, string> = {
+  bank_transfer: 'Bank transfer',
+  cash: 'Cash',
+  ecocash: 'EcoCash',
+  onemoney: 'OneMoney',
+  innbucks: 'InnBucks',
+  card: 'Card',
+  other: 'Other',
+};
+const REMINDER = (k: string) =>
+  k === 'due'
+    ? 'On the due date'
+    : k.startsWith('before_')
+      ? `${k.slice(7)} days before due`
+      : `${k.slice(6)} days overdue`;
+---
+
+<AdminLayout title={inv.number ?? 'Draft invoice'} page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/invoices" class="hover:text-ink-950 hover:underline">
+      Invoices
+    </a>{' '}
+    / <span class="text-ink-950">{inv.number ?? 'Draft'}</span>
+  </nav>
+  <div class="mt-2 flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <p class="font-mono text-2xl font-bold tracking-display">{inv.number ?? 'Draft invoice'}</p>
+      <p class="mt-1 text-sm text-ink-600">
+        {INVOICE_STATUS_LABEL[inv.status]} ·{' '}
+        <a href={`/admin/clients/${inv.client_id}`} class="text-brand-600 hover:underline">
+          {client?.display_name}
+        </a>
+        {quotation ? (
+          <>
+            {' '}
+            · from{' '}
+            <a href={`/admin/quotations/${quotation.id}`} class="text-brand-600 hover:underline">
+              {quotation.number}
+            </a>
+          </>
+        ) : null}
+      </p>
+    </div>
+    <InvoiceActions
+      client:load
+      id={inv.id}
+      number={inv.number}
+      status={inv.status}
+      currency={inv.currency}
+      minorDigits={data.minorDigits}
+      balanceMinor={inv.balance_minor}
+      creditAvailableMinor={data.creditAvailable}
+      hasEmail={hasEmail}
+      publicLink={link}
+      today={businessDate(ctx.now())}
+      can={can}
+    />
+  </div>
+  {inv.status === 'void' ? (
+    <p role="status" class="mt-4 rounded-sm border border-line bg-surface px-4 py-3 text-sm text-ink-800">
+      Voided{inv.voided_at ? ` on ${formatLongDate(inv.voided_at)}` : ''}: {inv.void_reason}
+    </p>
+  ) : null}
+  <div class="mt-6 grid gap-6 xl:grid-cols-[1fr_320px]">
+    <InvoiceDocument
+      number={inv.number}
+      currency={inv.currency}
+      minorDigits={data.minorDigits}
+      issueDate={inv.issue_date}
+      dueDate={inv.due_date}
+      notes={inv.notes}
+      terms={inv.terms}
+      issued={inv.status !== 'draft'}
+      totals={{
+        subtotal: inv.subtotal_minor,
+        discount: inv.discount_minor,
+        tax: inv.tax_minor,
+        total: inv.total_minor,
+        paid: inv.amount_paid_minor,
+        credited: inv.amount_credited_minor,
+        balance: inv.balance_minor,
+      }}
+      items={items}
+      client={clientParty}
+      business={business}
+    />
+    <aside class="flex flex-col gap-6">
+      {inv.status !== 'draft' ? (
+        <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="pay-title">
+          <h2 id="pay-title" class="font-sans text-base font-semibold">
+            Payments and credits
+          </h2>
+          {payments.length === 0 && creditsApplied.length === 0 ? (
+            <p class="mt-2 text-sm text-ink-600">Nothing received yet.</p>
+          ) : (
+            <ul class="mt-3 flex flex-col gap-3 text-sm">
+              {payments.map((p) => (
+                <li>
+                  <p class="tnum flex justify-between gap-2 font-medium text-ink-950">
+                    <span>{METHOD[p.method] ?? p.method}</span>
+                    <span>{money(p.applied_minor)}</span>
+                  </p>
+                  <p class="text-[12px] text-ink-600">
+                    {formatLongDate(p.received_at)} ·{' '}
+                    <a
+                      href={`/api/v1/admin/documents/receipts/${p.id}/pdf`}
+                      download
+                      class="font-mono text-brand-600 hover:underline"
+                    >
+                      {p.receipt_number}
+                    </a>
+                    {p.reference ? ` · ${p.reference}` : ''}
+                    {p.payment_minor > p.applied_minor
+                      ? ` · ${money(p.payment_minor - p.applied_minor)} to credit`
+                      : ''}
+                  </p>
+                </li>
+              ))}
+              {creditsApplied.map((c) => (
+                <li>
+                  <p class="tnum flex justify-between gap-2 font-medium text-ink-950">
+                    <span>Account credit</span>
+                    <span>{money(-c.amount_minor)}</span>
+                  </p>
+                  <p class="text-[12px] text-ink-600">{formatLongDate(c.created_at)}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+          {data.creditAvailable > 0 && open ? (
+            <p class="mt-3 text-[13px] text-info-700">The client has {money(data.creditAvailable)} credit available.</p>
+          ) : null}
+        </section>
+      ) : null}
+      <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="hist-title">
+        <h2 id="hist-title" class="font-sans text-base font-semibold">
+          History
+        </h2>
+        <ol class="mt-3 flex flex-col gap-3 text-sm">
+          {history.map((h) => (
+            <li>
+              <p class="font-medium text-ink-950">
+                {h.from_status ? `${label(h.from_status)} → ${label(h.to_status)}` : label(h.to_status)}
+              </p>
+              <p class="text-[12px] text-ink-600">
+                {when(h.created_at)}
+                {h.actor ? ` · ${h.actor}` : ''}
+                {h.reason ? ` · ${h.reason}` : ''}
+              </p>
+            </li>
+          ))}
+        </ol>
+      </section>
+      {reminders.length ? (
+        <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="rem-title">
+          <h2 id="rem-title" class="font-sans text-base font-semibold">
+            Reminders sent
+          </h2>
+          <ul class="mt-3 flex flex-col gap-2 text-sm">
+            {reminders.map((r) => (
+              <li>
+                {REMINDER(r.kind)} <span class="text-[12px] text-ink-600">· {when(r.sent_at)}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+    </aside>
+  </div>
+</AdminLayout>

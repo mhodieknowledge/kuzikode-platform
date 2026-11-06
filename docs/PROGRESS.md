@@ -4,11 +4,15 @@ The agent appends a new entry at the top after every task, and always before a s
 The **Next step** line must be specific enough that a fresh session can continue without guessing.
 
 ## Current status
-- Phase: 1 — inspection & planning
-- Phase: 2 complete → starting Phase 3 (public website)
-- Last completed task: P3.9 (P3.1–P3.9 done; P1.6 done)
-- **Next step:** P3.10 SEO: meta/canonical/OG/Twitter in `src/components/BaseHead.astro` (props: ogImage, type), JSON-LD helper (`src/components/JsonLd.astro`: Organization, WebSite, Service per division, BreadcrumbList, CreativeWork for case studies), `src/pages/sitemap.xml.ts` + `robots.txt.ts` (disallow /admin /portal /api /q/ /i/ /pay /dev), OG images (generated SVG→PNG at build in `public/brand/og/`), 404/500 pages (`src/pages/404.astro`, `500.astro`), `tests/e2e/public.spec.ts` SEO assertions. Then P3.11 edge cache, P3.12 packages/pricing.
-- Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh (non-exempt calls this month: ~3/15) · CI status: green (GitHub Actions run #1, verify + e2e, ~3 min)
+- Phase 1, 2 and 3 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 4 (administration) in progress.
+- Last completed task: **P4.8 PDF engine** (P4.1–P4.8 done).
+- **Next step:** P4.9 Invoices — module `server/modules/invoices` (draft editor reusing `LineItemEditor`, issue with snapshot + gap-free
+  number + public token via `lib/public-links.ts` `documentToken(ctx, 'invoice', id)` (the PDF already prints `/i/<token>`), queue
+  `pdf.generate` {kind:'invoice'} in the issue batch, send/resend email, manual payments + allocations (receipt PDF via kind 'receipt'),
+  overpayment → client credit, apply credit, void rules, status history, overdue cron, reminder schedule with dedupe), admin pages
+  `/admin/invoices*` with "Download PDF" → `/api/v1/admin/documents/invoices/:id/pdf`, public `/i/[token]` + a public invoice PDF route
+  in `modules/documents/routes.ts`. Then P4.10 credit notes (PDF kind 'credit_note' is ready).
+- Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 
 ---
 
@@ -208,3 +212,20 @@ The **Next step** line must be specific enough that a fresh session can continue
 - UI: /admin/quotations (filters), /new (from client or lead), /[id] (document preview, history, versions, actions), /[id]/edit; public /q/[token] (document + accept/decline); `components/admin/LineItemEditor.tsx`, `QuotationsAdmin.tsx`, `forms/QuotationResponse.tsx`, `documents/QuotationDocument.astro`; "New quotation" on client and converted-lead pages; Quotations nav item built.
 - Tests: unit `quotations.test.ts` (state machine + schemas), integration `quotations.test.ts` (4: pricing/number/snapshot/email/read-only, public view/accept/convert ×5 concurrent → one invoice, revise/-v2/reject/expire/void/delete, package price copy + validation + permissions), e2e `quotations.spec.ts` (docs/08 flows 4–6 up to conversion; issuing the invoice comes with P4.9). Full e2e: 57 of 57 passed.
 - Next step: P4.8 PDF engine (pdf-lib layout kit, quotation/invoice/receipt/credit note, TEST watermark outside prod, R2 storage, never regenerate issued docs), then add the PDF download to /admin/quotations/[id] and /q/[token]. Check pdf-lib runs on workerd first. P3.18 imagery still pending (Workers AI quota).
+
+## 2026-11-06 08:20 UTC · P4.8 PDF engine ✅
+- `src/server/pdf/`: `layout.ts` (Composer over pdf-lib: A4, Helvetica standard fonts with safe character replacement, word wrap, page
+  breaks, brand bar, vector Kuzikode mark or uploaded PNG/JPEG logo, footer with "Page x of y", TEST/DRAFT watermark), `document.ts`
+  (one renderer: header, parties, table with repeated header + split of over-tall rows, totals, sections), builders `quotation.ts`,
+  `invoice.ts`, `receipt.ts`, `credit-note.ts`, `common.ts` (parties, line-item table, HTML → text).
+- `modules/documents`: `ensureStoredPdf` (render once → R2 via `storeGenerated` → guarded link; concurrent losers delete their copy),
+  `documentPdf` (drafts = unstored preview), watermark rule, routes `GET /api/v1/admin/documents/:kind/:id/pdf` (permission per kind,
+  audited `file.downloaded`) and `GET /api/v1/public/quotations/:token/pdf` (rate-limited, noindex). Job `pdf.generate` (queued by
+  quotation send; permanent failure for missing records). `lib/public-links.ts` shared token derivation (quotation links unchanged).
+- UI: "Preview PDF"/"Download PDF" on /admin/quotations/[id]; "Download PDF" on /q/[token].
+- Tests: unit `pdf.test.ts` (9) · integration `documents.test.ts` (5, on workerd: job, single file, bytes unchanged after settings
+  change, public token, concurrency ×5, permissions, invoice/receipt/credit note from rows) · e2e quotations spec downloads both PDFs.
+  verify: unit 213 / integration 149 green; e2e quotations green.
+- CPU (Node 22, warm, wall ≈ CPU): typical 3-line quotation ≈ 5 ms median; 40 lines ≈ 10 ms. Rendered off the request path (queue) and
+  once per document, so within docs/02 §4.
+

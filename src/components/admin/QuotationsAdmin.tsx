@@ -316,6 +316,13 @@ export function QuotationActions({
             Duplicate
           </Button>
         ) : null}
+        <a
+          href={`/api/v1/admin/documents/quotations/${id}/pdf${status === 'draft' ? '?inline=1' : ''}`}
+          {...(status === 'draft' ? { target: '_blank', rel: 'noopener' } : { download: true })}
+          className="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+        >
+          {status === 'draft' ? 'Preview PDF' : 'Download PDF'}
+        </a>
         {publicLink ? (
           <Button
             variant="ghost"

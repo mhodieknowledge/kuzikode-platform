@@ -135,7 +135,7 @@ export async function storeUpload(
 export async function storeGenerated(
   ctx: RequestContext,
   input: { bytes: Bytes; filename: string; mime: string; ownerType: OwnerType; ownerId: string | null },
-): Promise<Omit<StoredFile, 'type' | 'width' | 'height'>> {
+): Promise<Omit<StoredFile, 'type' | 'width' | 'height'> & { key: string }> {
   const now = ctx.now();
   const id = newId('fil', now.getTime());
   const key = `generated/${now.toISOString().slice(0, 7)}/${randomToken(24)}`;
@@ -147,6 +147,7 @@ export async function storeGenerated(
   });
   return {
     id,
+    key,
     name: input.filename,
     mime: input.mime,
     size: input.bytes.length,

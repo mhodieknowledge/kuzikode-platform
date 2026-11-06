@@ -7,7 +7,8 @@
 import type { RequestContext } from '../../context';
 import { Batch, stmt } from '../../db/client';
 import { auditStmt, auditWhen } from '../../lib/audit';
-import { hmacSha256Base64Url, sha256Hex } from '../../lib/crypto';
+import { sha256Hex } from '../../lib/crypto';
+import { documentLink, documentToken } from '../../lib/public-links';
 import { addDays, businessDate, businessYear } from '../../lib/dates';
 import { conflict, notFound, validationError } from '../../lib/errors';
 import { sanitizeHtml } from '../../lib/html-sanitize';
@@ -59,6 +60,7 @@ export interface QuotationRow {
   void_reason: string | null;
   client_snapshot: string | null;
   business_snapshot: string | null;
+  pdf_file_id: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -111,14 +113,9 @@ const ITEM_COLUMNS = `position, service_id, package_id, description, quantity_mi
 // ---------------------------------------------------------------- tokens & links
 
 /** The public token is derived (HMAC of the id), so the same link can be shown or re-sent; only its hash is stored. */
-async function publicToken(ctx: RequestContext, id: string) {
-  const token = await hmacSha256Base64Url(ctx.config.hmacSecret, `quotation:${id}`);
-  return { token, hash: await sha256Hex(token) };
-}
+const publicToken = (ctx: RequestContext, id: string) => documentToken(ctx, 'quotation', id);
 
-export async function publicLink(ctx: RequestContext, id: string): Promise<string> {
-  return `${ctx.config.siteOrigin}/q/${(await publicToken(ctx, id)).token}`;
-}
+export const publicLink = (ctx: RequestContext, id: string): Promise<string> => documentLink(ctx, 'quotation', id);
 
 // ---------------------------------------------------------------- pricing of the lines
 
@@ -631,7 +628,8 @@ async function copyAsDraft(ctx: RequestContext, q: QuotationRow, opts: { revisio
 
 // ---------------------------------------------------------------- send
 
-async function snapshots(ctx: RequestContext, q: QuotationRow) {
+/** Current client + business details (frozen into the quotation at first send; used live for draft previews). */
+export async function snapshots(ctx: RequestContext, q: QuotationRow) {
   const settings = await getSettings(ctx);
   const [client, contact] = await ctx.db.batch([
     ctx.db
@@ -752,13 +750,21 @@ export async function sendQuotation(
     },
     idempotencyKey: `email:quotation:${id}:${now}`,
   });
+  // The PDF is generated in the background once per content state: a resend that moves the validity date gets a new
+  // file (the earlier one is kept, not overwritten).
+  const pdf = enqueue(ctx, {
+    type: 'pdf.generate',
+    payload: { kind: 'quotation', id },
+    idempotencyKey: `pdf:quotation:${id}:${validUntil}`,
+  });
   const res = await batch
     .add(
       stmt(
         ctx.db,
         `UPDATE quotations SET number = ${numberSql.sql}, status = CASE WHEN status = 'viewed' THEN 'viewed' ELSE 'sent' END,
            issue_date = COALESCE(issue_date, ?), valid_until = ?, sent_at = ?, public_token_hash = ?,
-           client_snapshot = COALESCE(client_snapshot, ?), business_snapshot = COALESCE(business_snapshot, ?), updated_at = ?
+           client_snapshot = COALESCE(client_snapshot, ?), business_snapshot = COALESCE(business_snapshot, ?), updated_at = ?,
+           pdf_file_id = CASE WHEN valid_until IS ? THEN pdf_file_id ELSE NULL END
          WHERE id = ? AND status = ? AND superseded_by_id IS NULL`,
         ...numberSql.params,
         today,
@@ -768,18 +774,21 @@ export async function sendQuotation(
         JSON.stringify(snap.client),
         JSON.stringify(snap.business),
         now,
+        validUntil,
         id,
         q.status,
       ),
       'send',
     )
     .add(email.stmt)
-    // The email only stays queued when the guarded update above changed the quotation (the audit row is conditional too).
+    .add(pdf.stmt)
+    // The jobs only stay queued when the guarded update above changed the quotation (the audit row is conditional too).
     .add(
       stmt(
         ctx.db,
-        `DELETE FROM outbox WHERE id = ? AND NOT EXISTS (SELECT 1 FROM quotations WHERE id = ? AND sent_at = ?)`,
+        `DELETE FROM outbox WHERE id IN (?, ?) AND NOT EXISTS (SELECT 1 FROM quotations WHERE id = ? AND sent_at = ?)`,
         email.id,
+        pdf.id,
         id,
         now,
       ),
@@ -801,7 +810,7 @@ export async function sendQuotation(
     .run();
   if (res.changes('send') !== 1) throw conflict('This quotation changed while sending. Reload and try again.');
   const sent = await loadRow(ctx, id);
-  dispatch(ctx, [email.id]);
+  dispatch(ctx, [email.id, pdf.id]);
   return { number: sent.number!, link };
 }
 

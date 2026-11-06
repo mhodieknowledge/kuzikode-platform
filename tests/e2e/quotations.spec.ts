@@ -64,6 +64,11 @@ test('quotation with 3 lines, discount and tax → sent by email → accepted on
   const number = (await numberText.textContent())!.trim();
   await expectAccessible(page);
   await screenshots(page, 'admin-quotation-detail');
+  const adminPdf = await page.request.get(
+    (await page.getByRole('link', { name: 'Download PDF' }).getAttribute('href'))!,
+  );
+  expect(adminPdf.status()).toBe(200);
+  expect(adminPdf.headers()['content-disposition']).toContain(`${number}.pdf`);
 
   // The email is captured by the development mailbox.
   await expect
@@ -90,6 +95,12 @@ test('quotation with 3 lines, discount and tax → sent by email → accepted on
   await expect(client.getByText('$1,081.67').first()).toBeVisible();
   await expectAccessible(client);
   await screenshots(client, 'public-quotation');
+  // docs/08 flow 5: the client downloads the PDF (stored once, TEST-watermarked outside production).
+  const pdfHref = await client.getByRole('link', { name: 'Download PDF' }).getAttribute('href');
+  const pdf = await client.request.get(pdfHref!);
+  expect(pdf.status()).toBe(200);
+  expect(pdf.headers()['content-type']).toBe('application/pdf');
+  expect((await pdf.body()).subarray(0, 5).toString('latin1')).toBe('%PDF-');
   await hydrated(client, 'Accept quotation');
   await client.getByRole('button', { name: 'Accept quotation' }).click();
   await expect(client.getByText('Type your full name.')).toBeVisible();

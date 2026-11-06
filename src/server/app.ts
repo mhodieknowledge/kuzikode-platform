@@ -16,6 +16,7 @@ import { settingsRoutes } from './modules/settings';
 import { clientRoutes } from './modules/clients';
 import { catalogueRoutes } from './modules/catalogue';
 import { publicQuotationRoutes, quotationRoutes } from './modules/quotations';
+import { documentRoutes, publicDocumentRoutes } from './modules/documents';
 
 export function createApp() {
   const app = new Hono<ApiEnv>();
@@ -32,6 +33,7 @@ export function createApp() {
   app.route('/api/v1/admin/clients', clientRoutes());
   app.route('/api/v1/admin/catalogue', catalogueRoutes());
   app.route('/api/v1/admin/quotations', quotationRoutes());
+  app.route('/api/v1/admin/documents', documentRoutes());
   app.route('/api/v1/admin/enquiries', enquiryAdminRoutes());
   app.route('/api/v1/admin/leads', leadAdminRoutes());
   app.route('/api/v1/admin', adminShellRoutes());
@@ -39,6 +41,7 @@ export function createApp() {
   app.route('/api/v1/public', publicNewsletterRoutes());
   app.route('/api/v1/public', publicCareersRoutes());
   app.route('/api/v1/public', publicQuotationRoutes());
+  app.route('/api/v1/public', publicDocumentRoutes());
 
   app.notFound((c) => {
     const requestId = c.var.requestId ?? 'unknown';

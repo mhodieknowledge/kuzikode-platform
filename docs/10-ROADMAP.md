@@ -63,7 +63,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P4.5 Enquiries & leads** (inbox, triage, spam, lead pipeline list + board view, assignment, follow-ups, activities, convert to client). AC: e2e step 2. Conversion test.
 - [x] **P4.6 Services management** (categories, services, pricing models, statuses, featured, drag sort, SEO). AC: changes appear on public site after publish.
 - [x] **P4.7 Quotations** (editor with LineItemEditor, versions, send, PDF, public link, accept/reject, expire cron, duplicate, void, convert to invoice idempotent, create project). AC: docs/08 tests incl. concurrent convert.
-- [ ] **P4.8 PDF engine** (pdf-lib layout kit, branding, quotation/invoice/receipt/credit note, TEST watermark outside prod, R2 storage, never regenerate issued docs). AC: PDF tests. CPU timing recorded.
+- [x] **P4.8 PDF engine** (pdf-lib layout kit, branding, quotation/invoice/receipt/credit note, TEST watermark outside prod, R2 storage, never regenerate issued docs). AC: PDF tests. CPU timing recorded.
 - [ ] **P4.9 Invoices** (draft editor, issue with snapshot + number + token, send/resend, PDF, manual payments, allocations, overpayment → credit, apply client credit, void rules, status history, overdue cron, reminders schedule with dedupe). AC: all invoice tests in docs/08.
 - [ ] **P4.10 Credit notes** (from invoice, full/partial, numbering, PDF, effect on balance/credits/refund). AC: balance tests.
 - [ ] **P4.11 Payments admin** (list/filter/detail timeline, reconcile button, unmatched queue, manual refund recording). AC: tests.

@@ -54,6 +54,15 @@ const notice =
       client={data.client}
       business={data.business}
     />
+    <p class="flex justify-end">
+      <a
+        href={`/api/v1/public/quotations/${token}/pdf`}
+        download
+        class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+      >
+        Download PDF
+      </a>
+    </p>
     {data.open ? <QuotationResponse client:load token={token} total={total} /> : null}
     <p class="text-center text-[12px] text-ink-600">This page is private to you. Please don't share the link.</p>
   </div>

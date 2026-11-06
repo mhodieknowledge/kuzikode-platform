@@ -27,7 +27,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
       { label: 'Enquiries', href: '/admin/enquiries', anyOf: ['enquiries.view'], built: true },
       { label: 'Leads', href: '/admin/leads', anyOf: ['leads.view'], built: true },
       { label: 'Clients', href: '/admin/clients', anyOf: ['clients.view'], built: true },
-      { label: 'Quotations', href: '/admin/quotations', anyOf: ['quotations.view'], built: false },
+      { label: 'Quotations', href: '/admin/quotations', anyOf: ['quotations.view'], built: true },
     ],
   },
   {

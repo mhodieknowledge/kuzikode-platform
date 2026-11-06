@@ -40,6 +40,8 @@ export default async function globalSetup() {
     // Divisions left behind by an interrupted services.spec run (it normally deletes its own).
     "DELETE FROM services WHERE category_id IN (SELECT id FROM service_categories WHERE slug GLOB 'workshops-[0-9]*');",
     "DELETE FROM service_categories WHERE slug GLOB 'workshops-[0-9]*';",
+    // quotations.spec uses a tax line; the seed ships VAT inactive until the owner confirms registration.
+    "UPDATE tax_rates SET active = 1 WHERE id = 'tax_vat';",
     // A fixed website enquiry for leads.spec, reset to untriaged on every run (avoids the public form's rate limit).
     `INSERT INTO enquiries (id, reference, kind, name, email, phone, organisation, category, service_id, budget_range, message, consent_at, status)
      VALUES ('enq_e2e_lead', 'ENQ-E2E-0001', 'contact', 'Tendai Moyo', 'tendai@harare-bakery.example', '+263 77 123 4567',

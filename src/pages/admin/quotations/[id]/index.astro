@@ -1,0 +1,185 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import QuotationDocument from '../../../../components/documents/QuotationDocument.astro';
+import { QuotationActions } from '../../../../components/admin/QuotationsAdmin';
+import { loadAdminPage } from '../../../../server/lib/admin-page';
+import { businessDate } from '../../../../server/lib/dates';
+import { AppError } from '../../../../server/lib/errors';
+import { getSettings, settingText } from '../../../../server/modules/cms';
+import {
+  getQuotation,
+  publicLink,
+  type BusinessSnapshot,
+  type ClientSnapshot,
+} from '../../../../server/modules/quotations';
+import { OPEN_FOR_RESPONSE, QUOTATION_STATUS_LABEL, REVISABLE } from '../../../../shared/quotations';
+import { formatLongDate } from '../../../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'quotations.view' });
+if (page instanceof Response) return page;
+let data;
+try {
+  data = await getQuotation(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND')
+    return new Response(null, { status: 404, statusText: 'Not found' });
+  throw err;
+}
+const { quotation: q, items, client, contact, versions, invoice, createdBy } = data;
+const perms = page.auth.permissions;
+const settings = await getSettings(ctx);
+const link = q.status === 'draft' ? null : await publicLink(ctx, q.id);
+const today = businessDate(ctx.now());
+const current = !q.superseded_by_id;
+const open = OPEN_FOR_RESPONSE.includes(q.status) && current && (!q.valid_until || q.valid_until >= today);
+const can = {
+  edit: q.status === 'draft' && perms.has('quotations.update'),
+  send: q.status === 'draft' && perms.has('quotations.send'),
+  resend: OPEN_FOR_RESPONSE.includes(q.status) && current && perms.has('quotations.send'),
+  revise: REVISABLE.includes(q.status) && current && perms.has('quotations.update'),
+  duplicate: perms.has('quotations.create'),
+  respond: open && perms.has('quotations.update'),
+  void: q.status !== 'draft' && q.status !== 'void' && !invoice && perms.has('quotations.void'),
+  convert: q.status === 'accepted' && !invoice && perms.has('invoices.create'),
+  delete: q.status === 'draft' && perms.has('quotations.update'),
+};
+// Drafts show live client/business details; sent quotations show the frozen snapshots.
+const clientParty: ClientSnapshot = q.client_snapshot
+  ? (JSON.parse(q.client_snapshot) as ClientSnapshot)
+  : {
+      name: client?.display_name ?? '—',
+      legalName: null,
+      number: client?.client_number ?? '',
+      email: client?.email ?? null,
+      phone: null,
+      taxNumber: null,
+      address: null,
+      contact: contact ? { name: contact.name, email: contact.email } : null,
+    };
+const business: BusinessSnapshot = q.business_snapshot
+  ? (JSON.parse(q.business_snapshot) as BusinessSnapshot)
+  : {
+      name: settingText(settings, 'company.name') ?? 'Kuzikode Technologies',
+      legalName: settingText(settings, 'company.legal_name') ?? null,
+      registrationNumber: null,
+      taxNumber: settingText(settings, 'company.tax_number') ?? null,
+      address: settingText(settings, 'contact.address') ?? null,
+      email: settingText(settings, 'contact.billing_email') ?? settingText(settings, 'contact.email') ?? null,
+      phone: settingText(settings, 'contact.phone') ?? null,
+    };
+const when = (iso: string | null) =>
+  iso
+    ? new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
+        new Date(iso),
+      )
+    : null;
+const timeline = [
+  ['Created', when(q.created_at), createdBy],
+  ['Sent', when(q.sent_at), null],
+  ['Opened by the client', when(q.viewed_at), null],
+  ['Accepted', when(q.accepted_at), q.accepted_by_name],
+  ['Rejected', when(q.rejected_at), q.rejection_reason],
+  ['Voided', when(q.voided_at), q.void_reason],
+].filter(([, at]) => at) as [string, string, string | null][];
+const title = q.number ?? `Draft: ${q.title}`;
+---
+
+<AdminLayout title={title} page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/quotations" class="hover:text-ink-950 hover:underline">
+      Quotations
+    </a>{' '}
+    / <span class="text-ink-950">{q.number ?? 'Draft'}</span>
+  </nav>
+  <div class="mt-2 flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <p class="text-2xl font-bold tracking-display">{q.number ?? 'Draft quotation'}</p>
+      <p class="mt-1 text-sm text-ink-600">
+        {QUOTATION_STATUS_LABEL[q.status]}
+        {q.version > 1 ? ` · version ${q.version}` : ''} ·
+        <a href={`/admin/clients/${q.client_id}`} class="text-brand-600 hover:underline">
+          {client?.display_name}
+        </a>
+      </p>
+    </div>
+    <QuotationActions client:load id={q.id} number={q.number} status={q.status} publicLink={link} can={can} />
+  </div>
+  {q.superseded_by_id ? (
+    <p role="status" class="mt-4 rounded-sm border border-info-700/30 bg-info-50 px-4 py-3 text-sm text-info-700">
+      A newer version replaces this quotation.{' '}
+      <a href={`/admin/quotations/${q.superseded_by_id}`} class="font-semibold underline">
+        Open the newer version
+      </a>
+    </p>
+  ) : null}
+  {invoice ? (
+    <p
+      role="status"
+      class="mt-4 rounded-sm border border-success-700/30 bg-success-50 px-4 py-3 text-sm text-success-700"
+    >
+      Converted to a draft invoice{invoice.number ? ` (${invoice.number})` : ''}. It can be finished and issued from
+      Invoices.
+    </p>
+  ) : null}
+  <div class="mt-6 grid gap-6 xl:grid-cols-[1fr_300px]">
+    <QuotationDocument
+      number={q.number}
+      title={q.title}
+      status={q.status}
+      introHtml={q.intro_html}
+      currency={q.currency}
+      issueDate={q.issue_date}
+      validUntil={q.valid_until}
+      paymentTerms={q.payment_terms}
+      notes={q.notes}
+      terms={q.terms}
+      totals={{ subtotal: q.subtotal_minor, discount: q.discount_minor, tax: q.tax_minor, total: q.total_minor }}
+      items={items}
+      client={clientParty}
+      business={business}
+    />
+    <aside class="flex flex-col gap-6">
+      <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="tl-title">
+        <h2 id="tl-title" class="font-sans text-base font-semibold">
+          History
+        </h2>
+        <ol class="mt-3 flex flex-col gap-3 text-sm">
+          {timeline.map(([what, at, extra]) => (
+            <li>
+              <p class="font-medium text-ink-950">{what}</p>
+              <p class="text-[12px] text-ink-600">
+                {at}
+                {extra ? ` · ${extra}` : ''}
+              </p>
+            </li>
+          ))}
+        </ol>
+        {q.valid_until && q.status !== 'draft' ? (
+          <p class="mt-3 text-[12px] text-ink-600">Valid until {formatLongDate(q.valid_until)}</p>
+        ) : null}
+      </section>
+      {versions.length > 1 ? (
+        <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="v-title">
+          <h2 id="v-title" class="font-sans text-base font-semibold">
+            Versions
+          </h2>
+          <ol class="mt-3 flex flex-col gap-2 text-sm">
+            {versions.map((v) => (
+              <li>
+                {v.id === q.id ? (
+                  <span class="font-semibold">Version {v.version} (this one)</span>
+                ) : (
+                  <a href={`/admin/quotations/${v.id}`} class="font-semibold text-brand-600 hover:underline">
+                    Version {v.version}
+                  </a>
+                )}
+                <span class="text-[12px] text-ink-600"> · {QUOTATION_STATUS_LABEL[v.status]}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ) : null}
+    </aside>
+  </div>
+</AdminLayout>

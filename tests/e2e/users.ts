@@ -45,6 +45,13 @@ export const E2E_USERS = {
     role: 'content_manager',
     mustChange: false,
   },
+  quotesAdmin: {
+    id: 'usr_e2e_quotes',
+    email: 'e2e-quotes@example.com',
+    name: 'Quinn Quotes',
+    role: 'admin',
+    mustChange: false,
+  },
   newcomer: {
     id: 'usr_e2e_newcomer',
     email: 'e2e-newcomer@example.com',

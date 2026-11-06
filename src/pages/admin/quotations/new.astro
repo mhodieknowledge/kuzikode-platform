@@ -1,0 +1,55 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { QuotationEditor } from '../../../components/admin/QuotationsAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { getSettings, settingText } from '../../../server/modules/cms';
+import { editorProps } from '../../../server/modules/quotations';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'quotations.create' });
+if (page instanceof Response) return page;
+const [props, settings] = await Promise.all([editorProps(ctx), getSettings(ctx)]);
+const params = Astro.url.searchParams;
+const clientId = params.get('clientId') ?? '';
+const client = props.clients.find((c) => c.id === clientId);
+const leadId = /^led_[A-Za-z0-9_]+$/.test(params.get('leadId') ?? '') ? params.get('leadId') : null;
+const initial = {
+  clientId: client?.id ?? '',
+  contactId: null,
+  leadId,
+  enquiryId: null,
+  title: '',
+  introHtml: '',
+  currency: client?.currency ?? props.currencies[0]?.code ?? 'USD',
+  validUntil: null,
+  paymentTerms: null,
+  notes: null,
+  terms: settingText(settings, 'quotation.default_terms_text') ?? null,
+  discountType: 'none' as const,
+  discountValue: 0,
+  lines: [],
+};
+---
+
+<AdminLayout title="New quotation" page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/quotations" class="hover:text-ink-950 hover:underline">
+      Quotations
+    </a>{' '}
+    / <span class="text-ink-950">New</span>
+  </nav>
+  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">New quotation</h1>
+  {props.clients.length === 0 ? (
+    <div class="max-w-xl rounded-lg border border-line bg-surface p-6">
+      <p class="font-semibold">Add a client first</p>
+      <p class="mt-1 text-sm text-ink-600">Quotations are made for a client record.</p>
+      <a href="/admin/clients/new" class="mt-4 inline-flex text-sm font-semibold text-brand-600 hover:underline">
+        New client
+      </a>
+    </div>
+  ) : (
+    <div class="max-w-4xl">
+      <QuotationEditor client:load initial={initial} {...props} />
+    </div>
+  )}
+</AdminLayout>

@@ -227,6 +227,52 @@ const defs = {
         ],
       }),
   },
+  quotation_sent: {
+    schema: z.object({
+      name: z.string(),
+      number: z.string(),
+      title: z.string(),
+      total: z.string(),
+      validUntil: z.string(),
+      link: url,
+      message: z.string().nullable().optional(),
+    }),
+    render: (
+      b: Brand,
+      d: {
+        name: string;
+        number: string;
+        title: string;
+        total: string;
+        validUntil: string;
+        link: string;
+        message?: string | null | undefined;
+      },
+    ) =>
+      renderEmail(b, {
+        subject: `Quotation ${d.number}: ${d.title}`,
+        preheader: `Your quotation from ${b.companyName} (${d.total}).`,
+        heading: 'Your quotation',
+        blocks: [
+          { kind: 'p', text: `Hi ${d.name},` },
+          ...(d.message ? [{ kind: 'p' as const, text: d.message }] : []),
+          {
+            kind: 'p',
+            text: `Please find our quotation for ${d.title}. You can read it online, download it and accept or decline it from the link below.`,
+          },
+          {
+            kind: 'kv',
+            rows: [
+              ['Quotation', d.number],
+              ['Total', d.total],
+              ['Valid until', d.validUntil],
+            ],
+          },
+          { kind: 'button', text: 'View quotation', href: d.link },
+          { kind: 'small', text: 'If you have questions, reply to this email and we will get back to you.' },
+        ],
+      }),
+  },
   newsletter_confirmation: {
     schema: z.object({ link: url }),
     render: (b: Brand, d: { link: string }) =>

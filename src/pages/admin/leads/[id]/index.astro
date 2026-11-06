@@ -72,6 +72,14 @@ const openFollowUps = activities
           Edit
         </a>
       ) : null}
+      {client && perms.has('quotations.create') ? (
+        <a
+          href={`/admin/quotations/new?clientId=${client.id}&leadId=${l.id}`}
+          class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+        >
+          New quotation
+        </a>
+      ) : null}
       {canConvert ? <ConvertLead client:load leadId={l.id} name={l.organisation ?? l.contact_name ?? l.title} /> : null}
     </div>
   </div>

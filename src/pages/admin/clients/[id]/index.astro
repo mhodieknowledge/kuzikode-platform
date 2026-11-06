@@ -83,6 +83,14 @@ const address = c.billingAddress
       ) : null}
     </div>
     <div class="flex flex-wrap gap-2">
+      {page.auth.permissions.has('quotations.create') && c.status === 'active' ? (
+        <a
+          href={`/admin/quotations/new?clientId=${c.id}`}
+          class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+        >
+          New quotation
+        </a>
+      ) : null}
       {canEdit ? (
         <a
           href={`/admin/clients/${c.id}/edit`}

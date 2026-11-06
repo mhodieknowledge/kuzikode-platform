@@ -90,6 +90,15 @@ describe('templates', () => {
     },
     application_acknowledgement: { name: 'Ann', reference: 'APP-2026-0001', position: 'Junior Web Developer' },
     system_test: { name: 'Ann', at: '2026-11-06T10:00:00.000Z' },
+    quotation_sent: {
+      name: 'Ann',
+      number: 'QUO-2026-0001',
+      title: 'Website redesign',
+      total: 'US$1,200.00',
+      validUntil: '6 December 2026',
+      link: 'https://example.com/q/abc',
+      message: null,
+    },
     newsletter_confirmation: { link: 'https://kuzikode.example/newsletter/confirm?token=abc' },
   };
 

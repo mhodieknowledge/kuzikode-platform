@@ -1,3 +1,4 @@
+import { expireQuotations } from '../modules/quotations';
 import { createContext, type RequestContext } from '../context';
 import { publishDuePosts } from '../modules/cms/insights';
 import { pruneUnconfirmed } from '../modules/newsletter/service';
@@ -79,6 +80,7 @@ export const SCHEDULE: Record<string, [name: string, task: ScheduledTask][]> = {
     ['prune-unconfirmed-newsletter', (ctx) => pruneUnconfirmed(ctx)],
     ['application-retention', (ctx) => applyApplicationRetention(ctx)],
     ['lead-follow-up-reminders', (ctx) => sendFollowUpReminders(ctx)],
+    ['expire-quotations', (ctx) => expireQuotations(ctx)],
   ],
 };
 

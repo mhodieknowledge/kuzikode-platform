@@ -1,4 +1,6 @@
 import type { RequestContext } from '../../context';
+import { formatMoney } from '../../../shared/money';
+import { formatLongDate } from '../../../shared/service-display';
 
 /**
  * Some email data is only known after the business batch commits (e.g. gap-free references assigned in SQL).
@@ -29,7 +31,30 @@ const applicationReference: EmailResolver = async (ctx, data) => {
   return { ...rest, reference: row.reference };
 };
 
+const quotationDetails: EmailResolver = async (ctx, data) => {
+  const row = await ctx.db
+    .prepare('SELECT number, title, total_minor, currency, valid_until FROM quotations WHERE id = ?')
+    .bind(String(data['quotationId'] ?? ''))
+    .first<{
+      number: string | null;
+      title: string;
+      total_minor: number;
+      currency: string;
+      valid_until: string | null;
+    }>();
+  if (!row?.number) throw new Error('quotation not found or not numbered for email');
+  const { quotationId: _id, ...rest } = data;
+  return {
+    ...rest,
+    number: row.number,
+    title: row.title,
+    total: formatMoney(row.total_minor, row.currency),
+    validUntil: row.valid_until ? formatLongDate(row.valid_until) : '',
+  };
+};
+
 export const EMAIL_RESOLVERS: Record<string, EmailResolver> = {
+  quotation_sent: quotationDetails,
   application_acknowledgement: applicationReference,
   enquiry_acknowledgement: enquiryReference,
   enquiry_admin: enquiryReference,

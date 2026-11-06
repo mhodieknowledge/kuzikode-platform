@@ -1,0 +1,67 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { QuotationEditor } from '../../../../components/admin/QuotationsAdmin';
+import { fromApiLine } from '../../../../components/admin/LineItemEditor';
+import { loadAdminPage } from '../../../../server/lib/admin-page';
+import { AppError } from '../../../../server/lib/errors';
+import { editorProps, getQuotation } from '../../../../server/modules/quotations';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'quotations.update' });
+if (page instanceof Response) return page;
+let data;
+try {
+  data = await getQuotation(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND')
+    return new Response(null, { status: 404, statusText: 'Not found' });
+  throw err;
+}
+const q = data.quotation;
+if (q.status !== 'draft') return Astro.redirect(`/admin/quotations/${q.id}`, 303);
+const props = await editorProps(ctx);
+// Keep an archived client selectable on an old draft so it can still be read (saving asks for an active client).
+if (data.client && !props.clients.some((c) => c.id === data.client!.id))
+  props.clients.push({
+    id: data.client.id,
+    name: `${data.client.display_name} (archived)`,
+    number: data.client.client_number,
+    currency: data.client.default_currency,
+  });
+const initial = {
+  clientId: q.client_id,
+  contactId: q.contact_id,
+  leadId: q.lead_id,
+  enquiryId: q.enquiry_id,
+  title: q.title,
+  introHtml: q.intro_html ?? '',
+  currency: q.currency,
+  validUntil: q.valid_until,
+  paymentTerms: q.payment_terms,
+  notes: q.notes,
+  terms: q.terms,
+  discountType: q.discount_type,
+  discountValue: q.discount_value,
+  lines: data.items.map(fromApiLine),
+};
+const label = q.version > 1 ? `${q.title} (version ${q.version})` : q.title;
+---
+
+<AdminLayout title={`Edit ${q.title}`} page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/quotations" class="hover:text-ink-950 hover:underline">
+      Quotations
+    </a>{' '}
+    /{' '}
+    <a href={`/admin/quotations/${q.id}`} class="hover:text-ink-950 hover:underline">
+      {label}
+    </a>{' '}
+    / <span class="text-ink-950">Edit</span>
+  </nav>
+  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">
+    Edit draft{q.version > 1 ? ` · version ${q.version}` : ''}
+  </h1>
+  <div class="max-w-4xl">
+    <QuotationEditor client:load id={q.id} initial={initial} {...props} />
+  </div>
+</AdminLayout>

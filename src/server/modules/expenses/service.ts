@@ -3,6 +3,7 @@
  * project/client link and a receipt file in R2. Records are never deleted: a mistake is voided with a reason.
  * Reports group by category and month per currency; CSV exports carry the "not a statutory accounting system" label.
  */
+import { csvCell } from '../../lib/csv';
 import type { RequestContext } from '../../context';
 import { Batch, stmt } from '../../db/client';
 import { auditStmt, auditWhen } from '../../lib/audit';
@@ -411,12 +412,7 @@ export async function expenseReport(
   };
 }
 
-/** RFC 4180 cell; values that a spreadsheet would run as a formula are prefixed with an apostrophe. */
-export function csvCell(v: unknown): string {
-  let s = v === null || v === undefined ? '' : String(v);
-  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
-  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
+export { csvCell };
 
 export async function exportCsv(ctx: RequestContext, f: Omit<ExpenseListQuery, 'page'>): Promise<string> {
   assertCan(ctx, 'expenses.view');

@@ -26,6 +26,13 @@ describe('redact', () => {
     expect(redact('pay from 0773333333 by a@b.co')).toBe('pay from ***333 by a***@b.co');
   });
 
+  it('keeps ISO dates readable', () => {
+    expect(redact({ consentDate: '2026-10-01', at: '2026-10-01T09:00:00Z' })).toEqual({
+      consentDate: '2026-10-01',
+      at: '2026-10-01T09:00:00Z',
+    });
+  });
+
   it('keeps short numbers like amounts', () => {
     expect(maskPhone('amount 75000')).toBe('amount 75000');
   });

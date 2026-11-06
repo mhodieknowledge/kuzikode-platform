@@ -17,6 +17,8 @@ export function maskEmail(value: string): string {
 /** Masks a phone number, keeping the last 3 digits. */
 export function maskPhone(value: string): string {
   return value.replace(PHONE, (m) => {
+    // ISO dates (2026-10-01) look like digit runs but are not phone numbers.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(m)) return m;
     const digits = m.replace(/\D/g, '');
     return digits.length < 7 ? m : `***${digits.slice(-3)}`;
   });

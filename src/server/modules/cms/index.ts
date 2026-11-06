@@ -8,3 +8,4 @@ export * from './insights';
 export * from './content';
 export * from './search';
 export { cmsAdminRoutes } from './admin-routes';
+export { contentAdminRoutes } from './content-admin-routes';

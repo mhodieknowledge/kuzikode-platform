@@ -1,0 +1,42 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import ContentTabs from '../../../../components/admin/ContentTabs.astro';
+import { loadAdminPage } from '../../../../server/lib/admin-page';
+import { listIndustriesAdmin } from '../../../../server/modules/cms/content-admin';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'content.manage' });
+if (page instanceof Response) return page;
+const industries = await listIndustriesAdmin(ctx);
+---
+
+<AdminLayout title="Industries" page={page}>
+  <h1 class="text-2xl font-bold tracking-display">Content</h1>
+  <ContentTabs current="industries" permissions={page.auth.permissions} />
+  <div class="mt-6 mb-3 flex flex-wrap items-center justify-between gap-3">
+    <p class="max-w-2xl text-sm text-ink-600">
+      Industry pages describe the problems we solve for each sector. Never list clients here.
+    </p>
+    <a
+      href="/admin/content/industries/new"
+      class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
+    >
+      New industry
+    </a>
+  </div>
+  <ul class="divide-y divide-line rounded-lg border border-line bg-surface">
+    {industries.length === 0 ? <li class="px-4 py-8 text-center text-sm text-ink-600">No industries yet.</li> : null}
+    {industries.map((i) => (
+      <li class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+        <div class="min-w-0">
+          <a href={`/admin/content/industries/${i.id}`} class="font-medium text-ink-950 hover:underline">
+            {i.name}
+          </a>
+          <p class="text-[12px] text-ink-600">
+            {i.status === 'published' ? 'Published' : 'Draft'} · {i.services} linked services · /industries/{i.slug}
+          </p>
+        </div>
+      </li>
+    ))}
+  </ul>
+</AdminLayout>

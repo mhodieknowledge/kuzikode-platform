@@ -1,0 +1,74 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { PostEditor, type PostValues } from '../../../../components/admin/ContentAdmin';
+import { loadAdminPage } from '../../../../server/lib/admin-page';
+import { AppError } from '../../../../server/lib/errors';
+import { listMedia } from '../../../../server/modules/cms/admin';
+import { getPostAdmin, listPostCategoriesAdmin } from '../../../../server/modules/cms/content-admin';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'content.manage' });
+if (page instanceof Response) return page;
+const id = Astro.params.id ?? '';
+let item: Awaited<ReturnType<typeof getPostAdmin>> | null = null;
+if (id !== 'new') {
+  try {
+    item = await getPostAdmin(ctx, id);
+  } catch (err) {
+    if (err instanceof AppError && err.code === 'NOT_FOUND')
+      return new Response(null, { status: 404, statusText: 'Not found' });
+    throw err;
+  }
+}
+const [categories, media] = await Promise.all([listPostCategoriesAdmin(ctx), listMedia(ctx)]);
+const s = (k: string) => (item?.[k] as string | null | undefined) ?? null;
+const initial: PostValues = {
+  slug: s('slug') ?? '',
+  title: s('title') ?? '',
+  excerpt: s('excerpt') ?? '',
+  body: s('body') ?? '',
+  coverMediaId: s('cover_media_id'),
+  categoryId: s('category_id'),
+  tags: item?.tags ?? [],
+  authorDisplayName: s('author_display_name') ?? 'Kuzikode Technologies',
+  status: (s('status') as PostValues['status'] | null) ?? 'draft',
+  publishAt: s('publish_at'),
+  seoTitle: s('seo_title'),
+  seoDescription: s('seo_description'),
+};
+const title = item ? initial.title : 'New article';
+const saved = Astro.url.searchParams.get('saved') === '1';
+---
+
+<AdminLayout title={title} page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/content/insights" class="hover:text-ink-950 hover:underline">
+      Insights
+    </a>{' '}
+    / <span class="text-ink-950">{title}</span>
+  </nav>
+  <h1 class="mt-2 mb-4 text-2xl font-bold tracking-display">{title}</h1>
+  {saved ? (
+    <p role="status" class="mb-4 rounded-sm bg-success-50 px-4 py-3 text-sm text-success-700">
+      Saved.
+    </p>
+  ) : null}
+  <div class="max-w-4xl">
+    {item ? (
+      <PostEditor
+        client:load
+        id={id}
+        initial={initial}
+        categories={categories}
+        media={media.map((m) => ({ id: m.id, file_id: m.file_id, alt_text: m.alt_text }))}
+      />
+    ) : (
+      <PostEditor
+        client:load
+        initial={initial}
+        categories={categories}
+        media={media.map((m) => ({ id: m.id, file_id: m.file_id, alt_text: m.alt_text }))}
+      />
+    )}
+  </div>
+</AdminLayout>

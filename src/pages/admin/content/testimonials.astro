@@ -1,0 +1,29 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import ContentTabs from '../../../components/admin/ContentTabs.astro';
+import { TestimonialsManager } from '../../../components/admin/ContentAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { listTestimonialsAdmin, testimonialSources } from '../../../server/modules/cms/content-admin';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'content.manage' });
+if (page instanceof Response) return page;
+const [items, sources] = await Promise.all([listTestimonialsAdmin(ctx), testimonialSources(ctx)]);
+---
+
+<AdminLayout title="Testimonials" page={page}>
+  <h1 class="text-2xl font-bold tracking-display">Content</h1>
+  <ContentTabs current="testimonials" permissions={page.auth.permissions} />
+  <p class="mt-4 mb-4 max-w-3xl text-sm text-ink-600">
+    Only real testimonials: each one belongs to a client record and needs the client's recorded consent and its date.
+  </p>
+  <div class="max-w-3xl">
+    <TestimonialsManager
+      client:load
+      items={items as never[]}
+      clients={sources.clients}
+      projects={sources.projects}
+      today={ctx.now().toISOString().slice(0, 10)}
+    />
+  </div>
+</AdminLayout>

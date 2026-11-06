@@ -1,0 +1,23 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import ContentTabs from '../../../components/admin/ContentTabs.astro';
+import { FaqManager } from '../../../components/admin/ContentAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { listFaqsAdmin, serviceOptions } from '../../../server/modules/cms/content-admin';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'content.manage' });
+if (page instanceof Response) return page;
+const [faqs, services] = await Promise.all([listFaqsAdmin(ctx), serviceOptions(ctx)]);
+---
+
+<AdminLayout title="FAQ" page={page}>
+  <h1 class="text-2xl font-bold tracking-display">Content</h1>
+  <ContentTabs current="faq" permissions={page.auth.permissions} />
+  <p class="mt-4 mb-4 max-w-3xl text-sm text-ink-600">
+    Questions appear on /faq by category, and on related service and pricing pages.
+  </p>
+  <div class="max-w-3xl">
+    <FaqManager client:load faqs={faqs as never[]} services={services} />
+  </div>
+</AdminLayout>

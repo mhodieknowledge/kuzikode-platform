@@ -1,0 +1,23 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import ContentTabs from '../../../components/admin/ContentTabs.astro';
+import { TechnologiesManager } from '../../../components/admin/ContentAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { listTechnologiesAdmin } from '../../../server/modules/cms/content-admin';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'content.manage' });
+if (page instanceof Response) return page;
+const items = await listTechnologiesAdmin(ctx);
+---
+
+<AdminLayout title="Technologies" page={page}>
+  <h1 class="text-2xl font-bold tracking-display">Content</h1>
+  <ContentTabs current="technologies" permissions={page.auth.permissions} />
+  <p class="mt-4 mb-4 max-w-3xl text-sm text-ink-600">
+    The "Technologies we work with" strip. These are tools we use, never clients or partners.
+  </p>
+  <div class="max-w-3xl">
+    <TechnologiesManager client:load items={items as never[]} />
+  </div>
+</AdminLayout>

@@ -1,0 +1,82 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import ContentTabs from '../../../../components/admin/ContentTabs.astro';
+import { CategoriesManager } from '../../../../components/admin/ContentAdmin';
+import { loadAdminPage } from '../../../../server/lib/admin-page';
+import { listPostCategoriesAdmin, listPostsAdmin } from '../../../../server/modules/cms/content-admin';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'content.manage' });
+if (page instanceof Response) return page;
+const [posts, categories] = await Promise.all([listPostsAdmin(ctx), listPostCategoriesAdmin(ctx)]);
+const statusLabel = { draft: 'Draft', scheduled: 'Scheduled', published: 'Published' } as const;
+const when = (p: (typeof posts)[number]) =>
+  p.status === 'published' ? p.published_at : p.status === 'scheduled' ? p.publish_at : p.updated_at;
+---
+
+<AdminLayout title="Insights" page={page}>
+  <h1 class="text-2xl font-bold tracking-display">Content</h1>
+  <ContentTabs current="insights" permissions={page.auth.permissions} />
+  <div class="mt-6 grid gap-8 xl:grid-cols-[1fr_320px]">
+    <section aria-labelledby="articles-title">
+      <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <h2 id="articles-title" class="text-lg font-semibold">
+          Articles
+        </h2>
+        <a
+          href="/admin/content/insights/new"
+          class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
+        >
+          New article
+        </a>
+      </div>
+      <div class="overflow-x-auto rounded-lg border border-line bg-surface">
+        <table class="w-full min-w-[560px] text-sm">
+          <thead class="border-b border-line text-left text-[12px] text-ink-600">
+            <tr>
+              <th scope="col" class="px-4 py-2.5 font-semibold">
+                Title
+              </th>
+              <th scope="col" class="px-4 py-2.5 font-semibold">
+                Category
+              </th>
+              <th scope="col" class="px-4 py-2.5 font-semibold">
+                Status
+              </th>
+              <th scope="col" class="px-4 py-2.5 font-semibold">
+                Date (UTC)
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-line">
+            {posts.length === 0 ? (
+              <tr>
+                <td colspan="4" class="px-4 py-8 text-center text-ink-600">
+                  No articles yet.
+                </td>
+              </tr>
+            ) : null}
+            {posts.map((p) => (
+              <tr>
+                <td class="px-4 py-2.5">
+                  <a href={`/admin/content/insights/${p.id}`} class="font-medium text-ink-950 hover:underline">
+                    {p.title}
+                  </a>
+                </td>
+                <td class="px-4 py-2.5 text-ink-600">{p.category_name ?? 'None'}</td>
+                <td class="px-4 py-2.5">{statusLabel[p.status]}</td>
+                <td class="px-4 py-2.5 text-ink-600">{(when(p) ?? '').slice(0, 16).replace('T', ' ')}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <section aria-labelledby="categories-title">
+      <h2 id="categories-title" class="mb-3 text-lg font-semibold">
+        Categories
+      </h2>
+      <CategoriesManager client:load categories={categories} />
+    </section>
+  </div>
+</AdminLayout>

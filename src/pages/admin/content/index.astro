@@ -1,0 +1,11 @@
+---
+import { loadAdminPage } from '../../../server/lib/admin-page';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { anyOf: ['content.manage', 'newsletter.view'] });
+if (page instanceof Response) return page;
+return Astro.redirect(
+  page.auth.permissions.has('content.manage') ? '/admin/content/insights' : '/admin/content/newsletter',
+  303,
+);
+---

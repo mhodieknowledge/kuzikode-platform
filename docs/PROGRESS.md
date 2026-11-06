@@ -400,5 +400,17 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Tests: verify green; public e2e specs (home, about, careers, contact, services, products, public, public-layout) pass. 5 admin specs
   failed only on login rate-limiting when the whole filtered set ran together and passed when re-run on their own. Visual QA 375/768/1440 for home,
   a service page, about, careers, contact, products: no overflow, no broken images.
-- Next step: P4.22 Content admin (insights, industries, FAQ, testimonials with consent enforced, technologies, newsletter list + export).
-  Check modules/cms (content.ts, insights.ts, industries.ts) for the existing public readers first.
+- Next step: P4.22 Content admin.
+
+## 2026-11-06 18:40 UTC · P4.22 Content admin ✅
+- `shared/schemas/content-admin.ts`; `modules/cms/content-admin.ts` + `/api/v1/admin/content/*`: articles (draft/scheduled/published,
+  sanitised body, reading time, tags, cover, SEO; delete drafts only), categories, industries (challenges, linked services, icon,
+  status), FAQ, testimonials (real client + consent + date, project must match client), technologies (same-origin SVG paths only),
+  newsletter list (status/search/paging, counts) + CSV export (confirmed by default, audited). `lib/csv.ts` shared CSV helper.
+- UI: /admin/content → insights (list + categories), insights/[id|new], industries (+ editor), faq, testimonials, technologies,
+  newsletter; `ContentTabs` hides tabs without permission. Nav: Content on (content.manage or newsletter.view).
+- Fix: the redactor no longer masks ISO dates as phone numbers (unit test added).
+- Tests: integration `content-admin.test.ts` (6) · e2e `content-admin.spec.ts` (article → publish → public page → cleanup, FAQ to /faq,
+  testimonials consent copy, newsletter without export for Content Manager, axe + 375/768/1440). verify: unit 232 / integration 215 green.
+- Next step: P4.23 Time tracking (entries, timer, timesheet, bill unbilled time to invoice; concurrent billing test). Check
+  migrations for `time_entries` and the `time.*` permissions first.

@@ -87,6 +87,13 @@ export const E2E_USERS = {
     role: 'admin',
     mustChange: false,
   },
+  contentAdmin: {
+    id: 'usr_e2e_content_admin',
+    email: 'e2e-content-admin@example.com',
+    name: 'Cato Content',
+    role: 'content_manager',
+    mustChange: false,
+  },
   newcomer: {
     id: 'usr_e2e_newcomer',
     email: 'e2e-newcomer@example.com',

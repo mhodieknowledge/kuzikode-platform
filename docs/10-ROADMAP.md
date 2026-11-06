@@ -76,7 +76,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P4.19 Packages & pricing admin** (packages, features, add-ons, comparison order, price-review flag + dashboard warning, "Add package" in quotation editor). AC: price-copy test.
 - [x] **P4.20 Subscriptions & recurring billing** + **managed services register** with renewal reminders and portal "Your services". AC: double-run cron test. MRR tile correct.
 - [x] **P4.21 Careers admin** (postings, custom questions, pipeline kanban, ratings, notes, templated emails, bulk reject, retention job, Hiring Manager role). AC: tests.
-- [ ] **P4.22 Content admin** for insights, industries, FAQ, testimonials (consent enforced), technologies, newsletter list/export. AC: tests.
+- [x] **P4.22 Content admin** for insights, industries, FAQ, testimonials (consent enforced), technologies, newsletter list/export. AC: tests.
 - [ ] **P4.23 Time tracking** (entries, timer, timesheet, bill unbilled time to invoice). AC: concurrent billing test.
 - [ ] **P4.18 Reports & export** (revenue, ageing, conversion, expenses, indicative profit, CSV, data export per module, audit log viewer + export). AC: tests on aggregates.
 

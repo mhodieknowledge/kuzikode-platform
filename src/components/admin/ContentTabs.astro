@@ -1,0 +1,31 @@
+---
+/** Sub-navigation for Admin → Content (P4.22); tabs the signed-in user can't open are not shown. */
+import type { Permission } from '../../shared/permissions';
+
+interface Props {
+  current: 'insights' | 'industries' | 'faq' | 'testimonials' | 'technologies' | 'newsletter';
+  permissions: Set<Permission>;
+}
+const all = [
+  ['insights', 'Insights', '/admin/content/insights', 'content.manage'],
+  ['industries', 'Industries', '/admin/content/industries', 'content.manage'],
+  ['faq', 'FAQ', '/admin/content/faq', 'content.manage'],
+  ['testimonials', 'Testimonials', '/admin/content/testimonials', 'content.manage'],
+  ['technologies', 'Technologies', '/admin/content/technologies', 'content.manage'],
+  ['newsletter', 'Newsletter', '/admin/content/newsletter', 'newsletter.view'],
+] as const;
+const { current, permissions } = Astro.props;
+const tabs = all.filter(([, , , p]) => permissions.has(p));
+---
+
+<nav aria-label="Content" class="mt-4 flex gap-6 overflow-x-auto border-b border-line">
+  {tabs.map(([k, l, href]) => (
+    <a
+      href={href}
+      aria-current={k === current ? 'page' : undefined}
+      class={`inline-flex h-10 shrink-0 items-center border-b-2 px-1 text-sm font-semibold ${k === current ? 'border-brand-600 text-ink-950' : 'border-transparent text-ink-600 hover:text-ink-950'}`}
+    >
+      {l}
+    </a>
+  ))}
+</nav>

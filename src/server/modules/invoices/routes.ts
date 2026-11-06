@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import {
   applyCreditSchema,
+  creditNoteSchema,
   invoiceListQuery,
   invoiceSchema,
   invoiceVoidSchema,
@@ -13,6 +14,7 @@ import type { ApiEnv } from '../../middleware/request-context';
 import { jsonBody, query } from '../../middleware/validate';
 import { editorProps } from '../quotations/editor';
 import * as svc from './service';
+import { issueCreditNote } from './credit-notes';
 
 const ok = { data: { ok: true } };
 const issueSchema = z.object({ send: z.boolean().default(true), message: sendInvoiceSchema.shape.message }).strict();
@@ -61,6 +63,9 @@ export function invoiceRoutes() {
     const { amountMinor } = await jsonBody(c, applyCreditSchema);
     return c.json({ data: await svc.applyCredit(c.var.ctx, c.req.param('id'), amountMinor) });
   });
+  r.post('/:id/credit-notes', requirePermission('credit_notes.issue'), async (c) =>
+    c.json({ data: await issueCreditNote(c.var.ctx, c.req.param('id'), await jsonBody(c, creditNoteSchema)) }, 201),
+  );
   r.post('/:id/void', requirePermission('invoices.void'), async (c) => {
     const { reason } = await jsonBody(c, invoiceVoidSchema);
     await svc.voidInvoice(c.var.ctx, c.req.param('id'), reason);

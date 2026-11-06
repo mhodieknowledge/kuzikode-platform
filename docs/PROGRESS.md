@@ -5,13 +5,13 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phase 1, 2 and 3 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 4 (administration) in progress.
-- Last completed task: **P4.9 Invoices** (P4.1–P4.9 done).
-- **Next step:** P4.10 Credit notes — `server/modules/credit-notes` (or inside invoices): create from an issued invoice (full or
-  partial lines/amounts, reason), gap-free `numbering.credit_note` number (conditional sequence bump like `issueInvoice`), lines into
-  `credit_note_items`, `applied_to` = 'invoice' (reduce `amount_credited_minor`/`balance_minor` guarded by balance, re-derive status via
-  `deriveStatus`), 'client_credit' (insert `client_credits` source_type 'credit_note') or 'refund' (record only; refunds module P4.11),
-  history + audit + `pdf.generate` {kind:'credit_note'} in one batch; credit-note list on /admin/invoices/[id] with PDF links
-  (`/api/v1/admin/documents/credit-notes/:id/pdf`). Balance tests: credit note reduces balance; a fully credited invoice is `paid`.
+- Last completed task: **P4.10 Credit notes** (P4.1–P4.10 done).
+- **Next step:** P4.11 Payments admin — `/admin/payments` list/filter (status, method, provider, client, date range) over `payments`
+  (+ attempts once Phase 6 exists), detail page with timeline (payment, allocations, receipt PDF, payment_events, refunds), "Reconcile"
+  button only when the payment's account has a provider adapter (Phase 6; hide until then), unmatched queue (`payment_events` with
+  event_type 'unmatched'), manual refund recording (`refunds` row, method 'manual', optional link to a 'refund' credit note via
+  `credit_note_id`, guard: refunded total ≤ payment amount, payment status → partially_refunded/refunded, audit). Nav item "Payments"
+  in `server/modules/admin/navigation.ts` is `built: false` until then.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 
 ---
@@ -246,4 +246,16 @@ The **Next step** line must be specific enough that a fresh session can continue
   → 20 sequential numbers + double issue no gap, partial/exact/over payments + credit applied, 4 concurrent payments, void rules,
   overdue + reminders run twice, quotation → invoice, permissions) · e2e `invoices.spec.ts` (draft → issue → email → client /i/ +
   PDF → part paid → paid). verify: unit 223 / integration 157 green.
+
+## 2026-11-06 08:50 UTC · P4.10 Credit notes ✅
+- `shared/credit-notes.ts` (proportional credit per quantity, half-even; limits: balance against the invoice, money paid less earlier
+  give-backs for credit/refund, never above the invoice total), `creditNoteSchema` (item lines by quantity or free adjustments).
+- `modules/invoices/credit-notes.ts`: issue in one batch guarded by the invoice `updated_at` (conditional sequence bump → gap-free
+  CN number, credit_notes + items, invoice credited/balance/status for 'invoice', `client_credits` 'credit_note' for account credit,
+  history, audit, `pdf.generate`); remaining quantities and limits for the dialog; list on the invoice.
+- UI: "Credit note" dialog on /admin/invoices/[id] (application with limits, per-line quantities, "credit everything left", adjustment,
+  reason, live total) and a Credit notes panel with PDF links.
+- Tests: unit `credit-notes.test.ts` (3) · integration `credit-notes.test.ts` (3: partial + full credit → paid, quantity/balance caps,
+  account credit and refund limits, permanence, PDF, concurrency, permission, drafts refused) · e2e invoices spec issues a credit note.
+  verify: unit 226 / integration 160 green; invoices, quotations and admin-shell e2e green.
 

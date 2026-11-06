@@ -75,3 +75,30 @@ export const manualPaymentSchema = z
 export type ManualPaymentInput = z.output<typeof manualPaymentSchema>;
 
 export const applyCreditSchema = z.object({ amountMinor: z.number().int().min(1).max(1e12) }).strict();
+
+const quantity = z
+  .string()
+  .trim()
+  .regex(/^\d{1,9}(\.\d{1,3})?$/, 'Use a quantity with up to 3 decimal places.');
+
+export const creditNoteSchema = z
+  .object({
+    reason: z.string().trim().min(3, 'Give a reason.').max(500),
+    appliedTo: z.enum(['invoice', 'client_credit', 'refund']),
+    lines: z
+      .array(
+        z.union([
+          z.object({ invoiceItemId: id('iit'), quantity }).strict(),
+          z
+            .object({
+              description: z.string().trim().min(2, 'Describe the adjustment.').max(500),
+              amountMinor: z.number().int().min(1).max(1e12),
+            })
+            .strict(),
+        ]),
+      )
+      .min(1, 'Choose what to credit.')
+      .max(100),
+  })
+  .strict();
+export type CreditNoteInput = z.output<typeof creditNoteSchema>;

@@ -1,6 +1,7 @@
 /** Invoice islands (P4.9): the draft editor and the actions on an invoice. The server validates and authorises all. */
 import { useState, type FormEvent } from 'react';
-import { formatMoney, minorToDecimalString } from '../../shared/money';
+import { formatMoney, formatQuantity, minorToDecimalString, parseQuantityMilli } from '../../shared/money';
+import { CREDIT_APPLICATIONS, creditForQuantity, type CreditApplication } from '../../shared/credit-notes';
 import { MANUAL_PAYMENT_METHODS } from '../../shared/invoices';
 import type { DiscountType } from '../../shared/pricing';
 import {
@@ -210,6 +211,7 @@ export function InvoiceActions({
   hasEmail,
   publicLink,
   today,
+  creditOptions,
   can,
 }: {
   id: string;
@@ -222,6 +224,7 @@ export function InvoiceActions({
   hasEmail: boolean;
   publicLink: string | null;
   today: string;
+  creditOptions: CreditOptions | null;
   can: {
     edit: boolean;
     issue: boolean;
@@ -230,10 +233,13 @@ export function InvoiceActions({
     credit: boolean;
     void: boolean;
     delete: boolean;
+    creditNote: boolean;
   };
 }) {
   const a = useAction();
-  const [dialog, setDialog] = useState<null | 'issue' | 'send' | 'pay' | 'credit' | 'void' | 'delete'>(null);
+  const [dialog, setDialog] = useState<null | 'issue' | 'send' | 'pay' | 'credit' | 'void' | 'delete' | 'creditNote'>(
+    null,
+  );
   const [copied, setCopied] = useState(false);
   const [emailOnIssue, setEmailOnIssue] = useState(hasEmail);
   const [amount, setAmount] = useState<number | null>(balanceMinor > 0 ? balanceMinor : null);
@@ -283,6 +289,11 @@ export function InvoiceActions({
             }}
           >
             {copied ? 'Link copied' : 'Copy client link'}
+          </Button>
+        ) : null}
+        {can.creditNote ? (
+          <Button variant="secondary" onClick={open('creditNote')}>
+            Credit note
           </Button>
         ) : null}
         {can.void ? (
@@ -487,6 +498,27 @@ export function InvoiceActions({
         </form>
       </Dialog>
 
+      {creditOptions ? (
+        <Dialog
+          open={dialog === 'creditNote'}
+          onOpenChange={close}
+          size="lg"
+          title={`Credit note for ${label}`}
+          description="Credit notes correct an issued invoice. They are numbered, can't be edited and stay on record."
+        >
+          <CreditNoteForm
+            options={creditOptions}
+            currency={currency}
+            minorDigits={minorDigits}
+            busy={a.busy}
+            errors={a.errors}
+            error={a.error}
+            onCancel={() => setDialog(null)}
+            onSubmit={(body) => void post('/credit-notes', body)}
+          />
+        </Dialog>
+      ) : null}
+
       <ConfirmDialog
         open={dialog === 'delete'}
         onOpenChange={close}
@@ -502,5 +534,165 @@ export function InvoiceActions({
         }
       />
     </div>
+  );
+}
+
+export interface CreditOptions {
+  lines: {
+    id: string;
+    description: string;
+    quantity_milli: number;
+    remaining_milli: number;
+    line_total_minor: number;
+    line_tax_minor: number;
+  }[];
+  limits: Record<CreditApplication, number>;
+}
+
+const safeQty = (q: string) => {
+  try {
+    return q.trim() ? parseQuantityMilli(q) : 0;
+  } catch {
+    return null;
+  }
+};
+
+function CreditNoteForm({
+  options,
+  currency,
+  minorDigits,
+  busy,
+  errors,
+  error,
+  onCancel,
+  onSubmit,
+}: {
+  options: CreditOptions;
+  currency: string;
+  minorDigits: number;
+  busy: boolean;
+  errors: Record<string, string[]>;
+  error: string | null;
+  onCancel: () => void;
+  onSubmit: (body: Record<string, unknown>) => void;
+}) {
+  const available = CREDIT_APPLICATIONS.filter((c) => options.limits[c.value] > 0);
+  const [appliedTo, setAppliedTo] = useState<CreditApplication>(available[0]?.value ?? 'invoice');
+  const [qty, setQty] = useState<Record<string, string>>({});
+  const [adjustment, setAdjustment] = useState<number | null>(null);
+  const [adjustmentText, setAdjustmentText] = useState('');
+  const money = (m: number) => formatMoney(m, currency, minorDigits);
+  const lines = options.lines.filter((l) => l.remaining_milli > 0);
+  const total =
+    lines.reduce((sum, l) => {
+      const q = safeQty(qty[l.id] ?? '');
+      return q && q > 0 && q <= l.remaining_milli ? sum + creditForQuantity(l, q).totalMinor : sum;
+    }, 0) + (adjustment ?? 0);
+  const limit = options.limits[appliedTo];
+  if (!available.length)
+    return (
+      <div className="flex flex-col gap-4">
+        <p className="text-sm text-ink-800">
+          Nothing is left to credit on this invoice: it has no balance, nothing was paid that could be given back, or
+          earlier credit notes already cover its total.
+        </p>
+        <div className="flex justify-end">
+          <Button type="button" variant="ghost" onClick={onCancel}>
+            Close
+          </Button>
+        </div>
+      </div>
+    );
+  return (
+    <form
+      noValidate
+      className="flex flex-col gap-4"
+      onSubmit={(ev) => {
+        ev.preventDefault();
+        const f = new FormData(ev.currentTarget);
+        const body = [
+          ...lines
+            .filter((l) => (safeQty(qty[l.id] ?? '') ?? 0) > 0)
+            .map((l) => ({ invoiceItemId: l.id, quantity: (qty[l.id] ?? '').trim() })),
+          ...(adjustment ? [{ description: adjustmentText, amountMinor: adjustment }] : []),
+        ];
+        onSubmit({ reason: f.get('reason'), appliedTo, lines: body });
+      }}
+    >
+      <Field label="Apply the credit" required error={errors['appliedTo']}>
+        <Select
+          value={appliedTo}
+          onChange={(e) => setAppliedTo(e.target.value as CreditApplication)}
+          options={available.map((c) => ({
+            value: c.value,
+            label: `${c.label} (up to ${money(options.limits[c.value])})`,
+          }))}
+        />
+      </Field>
+      {lines.length ? (
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-1 text-sm font-medium text-ink-950">Lines to credit</legend>
+          {lines.map((l) => (
+            <div key={l.id} className="grid grid-cols-[1fr_7rem] items-end gap-3">
+              <p className="text-sm text-ink-800">
+                {l.description}
+                <span className="block text-[12px] text-ink-600">
+                  {formatQuantity(l.remaining_milli)} of {formatQuantity(l.quantity_milli)} left ·{' '}
+                  {money(l.line_total_minor)} for the full line
+                </span>
+              </p>
+              <Input
+                aria-label={`Quantity to credit: ${l.description}`}
+                inputMode="decimal"
+                placeholder="0"
+                value={qty[l.id] ?? ''}
+                onChange={(e) => setQty({ ...qty, [l.id]: e.target.value })}
+              />
+            </div>
+          ))}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="self-start"
+            onClick={() => setQty(Object.fromEntries(lines.map((l) => [l.id, formatQuantity(l.remaining_milli)])))}
+          >
+            Credit everything left
+          </Button>
+        </fieldset>
+      ) : null}
+      <div className="grid gap-3 sm:grid-cols-[1fr_10rem]">
+        <Field label="Other adjustment" hint="Optional, e.g. a goodwill discount. No tax." error={errors['lines']}>
+          <Input value={adjustmentText} onChange={(e) => setAdjustmentText(e.target.value)} maxLength={500} />
+        </Field>
+        <Field label={`Amount (${currency})`}>
+          <MoneyInput
+            valueMinor={adjustment}
+            onChangeMinor={setAdjustment}
+            currency={currency}
+            minorDigits={minorDigits}
+          />
+        </Field>
+      </div>
+      <Field label="Reason" required hint="Printed on the credit note." error={errors['reason']}>
+        <Textarea name="reason" rows={2} maxLength={500} />
+      </Field>
+      <p
+        className={`tnum text-sm font-semibold ${total > limit ? 'text-danger-700' : 'text-ink-950'}`}
+        aria-live="polite"
+      >
+        Credit total: {money(total)}
+        {total > limit ? ` (more than the ${money(limit)} allowed)` : ''}
+      </p>
+      <Alert message={error} />
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="ghost" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit" loading={busy} disabled={total <= 0 || total > limit}>
+          Issue credit note
+        </Button>
+      </div>
+    </form>
   );
 }

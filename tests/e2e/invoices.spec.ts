@@ -13,7 +13,7 @@ async function signIn(page: Page, email: string) {
 const hydrated = (page: Page, text: string) =>
   expect(page.locator('astro-island').filter({ hasText: text }).last()).not.toHaveAttribute('ssr', { timeout: 10_000 });
 
-test('draft invoice → issued and emailed → client views and downloads the PDF → part paid → paid (docs/08 flows 7–12)', async ({
+test('draft invoice → issued and emailed → client views and downloads the PDF → part paid → paid → credit note (docs/08 flows 7–12)', async ({
   page,
   browser,
 }) => {
@@ -106,6 +106,19 @@ test('draft invoice → issued and emailed → client views and downloads the PD
   await expect(page.getByText('Paid ·')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Record payment' })).toHaveCount(0);
   await expect(page.getByRole('link', { name: /^RCT-\d{4}-\d{5}$/ })).toHaveCount(2);
+
+  // A goodwill credit note on the paid invoice goes to the client's account credit (P4.10).
+  await hydrated(page, 'Credit note');
+  await page.getByRole('button', { name: 'Credit note' }).click();
+  await expect(dialog.getByLabel('Apply the credit')).toHaveValue('client_credit'); // nothing left to reduce
+  await dialog.getByLabel('Other adjustment').fill('Goodwill discount');
+  await dialog.getByLabel('Amount (USD)').fill('50');
+  await dialog.getByLabel('Reason').fill('Launch delayed by us');
+  await expect(dialog.getByText('Credit total: $50.00')).toBeVisible();
+  await expectAccessible(page);
+  await dialog.getByRole('button', { name: 'Issue credit note' }).click();
+  await expect(page.getByRole('link', { name: /^CN-\d{4}-\d{4}$/ })).toBeVisible();
+  await expect(page.getByText(/Added to account credit · Launch delayed by us/)).toBeVisible();
 
   await client.reload();
   await expect(client.getByText('Paid in full. Thank you.')).toBeVisible();

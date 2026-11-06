@@ -35,6 +35,7 @@ import type { DiscountType } from '../../../shared/pricing';
 import { getSettings, settingNumber, settingText } from '../cms';
 import { notifyStaffWithPermission } from '../notifications';
 import { snapshots, type BusinessSnapshot, type ClientSnapshot } from '../quotations/service';
+import { creditOptions, listCreditNotes } from './credit-notes';
 
 export const PAGE_SIZE = 25;
 const OPEN_SQL = `('issued','partially_paid','overdue')`;
@@ -263,6 +264,11 @@ export async function getInvoice(ctx: RequestContext, id: string) {
     createdBy: first<{ name: string }>(creator)?.name ?? null,
     minorDigits: first<{ minor_digits: number }>(digits)?.minor_digits ?? 2,
     creditAvailable: inv.status === 'void' ? 0 : await creditAvailable(ctx, inv.client_id, inv.currency),
+    creditNotes: await listCreditNotes(ctx, id),
+    creditOptions:
+      inv.status === 'draft' || inv.status === 'void'
+        ? null
+        : await creditOptions(ctx, inv, (items?.results ?? []) as InvoiceItemRow[]),
   };
 }
 

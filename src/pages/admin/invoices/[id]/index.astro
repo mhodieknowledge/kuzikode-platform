@@ -60,6 +60,12 @@ const can = {
   credit: open && data.creditAvailable > 0 && perms.has('payments.record_manual'),
   void: canVoid(inv.status, inv.amount_paid_minor, inv.amount_credited_minor) && perms.has('invoices.void'),
   delete: inv.status === 'draft' && !inv.number && perms.has('invoices.update'),
+  creditNote: !!data.creditOptions && perms.has('credit_notes.issue'),
+};
+const APPLIED: Record<string, string> = {
+  invoice: 'Reduced the balance',
+  client_credit: 'Added to account credit',
+  refund: 'To be refunded',
 };
 const money = (m: number) => formatMoney(m, inv.currency, data.minorDigits);
 const when = (iso: string) =>
@@ -122,6 +128,7 @@ const REMINDER = (k: string) =>
       hasEmail={hasEmail}
       publicLink={link}
       today={businessDate(ctx.now())}
+      creditOptions={data.creditOptions}
       can={can}
     />
   </div>
@@ -199,6 +206,32 @@ const REMINDER = (k: string) =>
           {data.creditAvailable > 0 && open ? (
             <p class="mt-3 text-[13px] text-info-700">The client has {money(data.creditAvailable)} credit available.</p>
           ) : null}
+        </section>
+      ) : null}
+      {data.creditNotes.length ? (
+        <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="cn-title">
+          <h2 id="cn-title" class="font-sans text-base font-semibold">
+            Credit notes
+          </h2>
+          <ul class="mt-3 flex flex-col gap-3 text-sm">
+            {data.creditNotes.map((cn) => (
+              <li>
+                <p class="tnum flex justify-between gap-2 font-medium text-ink-950">
+                  <a
+                    href={`/api/v1/admin/documents/credit-notes/${cn.id}/pdf`}
+                    download
+                    class="font-mono text-brand-600 hover:underline"
+                  >
+                    {cn.number}
+                  </a>
+                  <span>{money(cn.total_minor)}</span>
+                </p>
+                <p class="text-[12px] text-ink-600">
+                  {formatLongDate(cn.issued_at)} · {APPLIED[cn.applied_to]} · {cn.reason}
+                </p>
+              </li>
+            ))}
+          </ul>
         </section>
       ) : null}
       <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="hist-title">

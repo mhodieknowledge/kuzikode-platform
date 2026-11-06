@@ -1,0 +1,50 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { PostingForm } from '../../../components/admin/CareersAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'careers.manage' });
+if (page instanceof Response) return page;
+const currencies = (
+  await ctx.db
+    .prepare('SELECT code FROM currencies WHERE active = 1 ORDER BY is_default DESC, code')
+    .all<{ code: string }>()
+).results.map((r) => r.code);
+const initial = {
+  slug: '',
+  title: '',
+  department: '',
+  location: 'Harare',
+  employmentType: 'full_time' as const,
+  workplace: 'hybrid' as const,
+  salaryMinMinor: null,
+  salaryMaxMinor: null,
+  salaryCurrency: null,
+  salaryPeriod: null,
+  showSalary: false,
+  summary: '',
+  description: '',
+  responsibilities: [],
+  requirements: [],
+  niceToHaves: [],
+  offer: [],
+  howToApply: null,
+  questions: [],
+  opensAt: null,
+  closesAt: null,
+};
+---
+
+<AdminLayout title="New posting" page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/careers" class="hover:text-ink-950 hover:underline">
+      Careers
+    </a>{' '}
+    / <span class="text-ink-950">New posting</span>
+  </nav>
+  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">New posting</h1>
+  <div class="max-w-4xl">
+    <PostingForm client:load initial={initial} currencies={currencies} />
+  </div>
+</AdminLayout>

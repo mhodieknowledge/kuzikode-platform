@@ -502,6 +502,24 @@ const defs = {
         ],
       }),
   },
+  candidate_message: {
+    schema: z.object({ subject: z.string().min(1).max(200), body: z.string().min(1).max(6000), reference: z.string() }),
+    render: (b: Brand, d: { subject: string; body: string; reference: string }) => {
+      const paras = d.body
+        .split(/\n{2,}/)
+        .map((p) => p.trim())
+        .filter(Boolean);
+      return renderEmail(b, {
+        subject: d.subject,
+        preheader: (paras[1] ?? paras[0] ?? '').slice(0, 120),
+        heading: d.subject,
+        blocks: [
+          ...paras.map((text) => ({ kind: 'p' as const, text })),
+          { kind: 'small', text: `Application reference ${d.reference}. Reply to this email to reach us.` },
+        ],
+      });
+    },
+  },
   support_reply: {
     schema: z.object({ name: z.string(), reference: z.string(), subject: z.string(), body: z.string() }),
     render: (b: Brand, d: { name: string; reference: string; subject: string; body: string }) =>

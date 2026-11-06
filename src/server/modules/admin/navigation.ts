@@ -57,7 +57,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
       { label: 'Packages', href: '/admin/packages', anyOf: ['packages.manage'], built: true },
       { label: 'Content', href: '/admin/content', anyOf: ['content.manage'], built: false },
       { label: 'Media', href: '/admin/media', anyOf: ['media.manage'], built: true },
-      { label: 'Careers', href: '/admin/careers', anyOf: ['careers.view'], built: false },
+      { label: 'Careers', href: '/admin/careers', anyOf: ['careers.view'], built: true },
     ],
   },
   {

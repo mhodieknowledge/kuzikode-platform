@@ -17,7 +17,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // CMS draft preview: only for signed-in staff who may edit the website (docs/08: drafts never leak publicly).
   if (context.url.searchParams.get('preview') === '1' && !isPrivatePath(context.url.pathname)) {
     const auth = await resolveSession(ctx, context.request.headers.get('cookie'), 'admin').catch(() => null);
-    if (auth && auth.user.userType === 'staff' && auth.permissions.has('cms.manage')) ctx.preview = true;
+    const careersPage = context.url.pathname.startsWith('/careers/');
+    if (
+      auth &&
+      auth.user.userType === 'staff' &&
+      (auth.permissions.has('cms.manage') || (careersPage && auth.permissions.has('careers.view')))
+    )
+      ctx.preview = true;
   }
   const res = await next();
   if (ctx.preview) {

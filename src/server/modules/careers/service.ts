@@ -169,10 +169,23 @@ export async function listOpenPostings(ctx: RequestContext, filter: PostingFilte
 }
 
 export type PostingView =
-  { state: 'open'; posting: PublicPosting } | { state: 'closed'; posting: PublicPosting } | { state: 'gone' };
+  | { state: 'open'; posting: PublicPosting }
+  | { state: 'closed'; posting: PublicPosting }
+  | { state: 'preview'; posting: PublicPosting }
+  | { state: 'gone' };
 
 /** Closed postings show a "closed" state; 90 days after closing they are gone (410). Archived ones are gone. */
 export async function getPostingView(ctx: RequestContext, slug: string): Promise<PostingView | null> {
+  // Staff preview (`?preview=1`, careers.view): any status, read fresh, no form and no JSON-LD.
+  if (ctx.preview) {
+    const r = await ctx.db
+      .prepare('SELECT * FROM job_postings WHERE slug = ?')
+      .bind(slug)
+      .first<Omit<PostingRow, 'status'> & { status: PostingRow['status'] | 'draft' }>();
+    return r
+      ? { state: 'preview', posting: toPosting({ ...r, status: r.status === 'draft' ? 'open' : r.status }) }
+      : null;
+  }
   const posting = (await loadPostings(ctx)).find((p) => p.slug === slug);
   if (!posting) return null;
   const now = ctx.now();

@@ -1,0 +1,73 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { PostingActions, PostingForm } from '../../../components/admin/CareersAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { AppError } from '../../../server/lib/errors';
+import { getPostingAdmin } from '../../../server/modules/careers';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'careers.view' });
+if (page instanceof Response) return page;
+let p;
+try {
+  p = await getPostingAdmin(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND')
+    return new Response(null, { status: 404, statusText: 'Not found' });
+  throw err;
+}
+const canManage = page.auth.permissions.has('careers.manage');
+const currencies = (
+  await ctx.db
+    .prepare('SELECT code FROM currencies WHERE active = 1 ORDER BY is_default DESC, code')
+    .all<{ code: string }>()
+).results.map((r) => r.code);
+const { status, closedAt: _c, updatedAt: _u, ...initial } = p;
+const saved = Astro.url.searchParams.get('saved') === '1';
+const STATUS: Record<string, string> = { draft: 'Draft', open: 'Open', closed: 'Closed', archived: 'Archived' };
+---
+
+<AdminLayout title={p.title} page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/careers" class="hover:text-ink-950 hover:underline">
+      Careers
+    </a>{' '}
+    / <span class="text-ink-950">{p.title}</span>
+  </nav>
+  <div class="mt-2 mb-6 flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-display">{p.title}</h1>
+      <p class="mt-1 text-sm text-ink-600">
+        {STATUS[status]} ·
+        <a
+          href={`/careers/${p.slug}?preview=1`}
+          target="_blank"
+          rel="noopener"
+          class="font-semibold text-brand-600 underline"
+        >
+          Preview<span class="sr-only"> (opens in a new tab)</span>
+        </a>
+        ·
+        <a href={`/admin/careers/applicants?posting=${p.id}&view=board`} class="font-semibold text-brand-600 underline">
+          Applicants
+        </a>
+      </p>
+    </div>
+    {canManage ? <PostingActions client:load id={p.id} status={status} /> : null}
+  </div>
+  {saved ? (
+    <p
+      role="status"
+      class="mb-6 rounded-sm border border-success-700/30 bg-success-50 px-4 py-3 text-sm text-success-700"
+    >
+      Saved.
+    </p>
+  ) : null}
+  <div class="max-w-4xl">
+    {canManage ? (
+      <PostingForm client:load initial={initial} currencies={currencies} />
+    ) : (
+      <p class="text-sm text-ink-600">{p.summary}</p>
+    )}
+  </div>
+</AdminLayout>

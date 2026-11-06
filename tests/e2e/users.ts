@@ -73,6 +73,13 @@ export const E2E_USERS = {
     role: 'admin',
     mustChange: false,
   },
+  hiringManager: {
+    id: 'usr_e2e_hiring',
+    email: 'e2e-hiring@example.com',
+    name: 'Hana Hiring',
+    role: 'hiring_manager',
+    mustChange: false,
+  },
   invoicesAdmin: {
     id: 'usr_e2e_invoices',
     email: 'e2e-invoices@example.com',

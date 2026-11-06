@@ -12,6 +12,7 @@ if (!view) return new Response(null, { status: 404, statusText: 'Not found' });
 if (view.state === 'gone') return new Response(null, { status: 410, statusText: 'Gone' });
 const p = view.posting;
 const open = view.state === 'open';
+const preview = view.state === 'preview';
 const ld = [
   breadcrumbLd(ctx, [
     { name: 'Careers', path: '/careers' },
@@ -83,7 +84,14 @@ const sections = [
         ) : null}
         {salary ? <li class="tnum font-semibold text-ink-950">{salary}</li> : null}
       </ul>
-      {open ? null : (
+      {preview ? (
+        <p
+          role="status"
+          class="mt-6 rounded-md border border-warning-600/30 bg-warning-50 px-4 py-3 font-semibold text-warning-700"
+        >
+          Staff preview. The application form appears once the posting is open.
+        </p>
+      ) : open ? null : (
         <p
           role="status"
           class="mt-6 rounded-md border border-line bg-surface px-4 py-3 font-semibold text-ink-950"

@@ -1,0 +1,24 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { CandidateTemplatesForm } from '../../../components/admin/CareersAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { candidateTemplates } from '../../../server/modules/careers';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'careers.manage' });
+if (page instanceof Response) return page;
+const templates = await candidateTemplates(ctx);
+---
+
+<AdminLayout title="Candidate email templates" page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/careers" class="hover:text-ink-950 hover:underline">
+      Careers
+    </a>{' '}
+    / <span class="text-ink-950">Email templates</span>
+  </nav>
+  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">Candidate email templates</h1>
+  <div class="max-w-3xl">
+    <CandidateTemplatesForm client:load initial={templates} />
+  </div>
+</AdminLayout>

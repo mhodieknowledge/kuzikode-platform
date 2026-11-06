@@ -10,7 +10,7 @@ import { fileRoutes } from './modules/files';
 import { roleRoutes, userRoutes } from './modules/users';
 import { enquiryAdminRoutes, leadAdminRoutes, publicEnquiryRoutes } from './modules/leads';
 import { publicNewsletterRoutes } from './modules/newsletter';
-import { publicCareersRoutes } from './modules/careers';
+import { careersAdminRoutes, publicCareersRoutes } from './modules/careers';
 import { adminShellRoutes } from './modules/admin';
 import { settingsRoutes } from './modules/settings';
 import { clientRoutes } from './modules/clients';
@@ -42,6 +42,7 @@ export function createApp() {
   app.route('/api/v1/admin/catalogue', catalogueRoutes());
   app.route('/api/v1/admin/packages', packageRoutes());
   app.route('/api/v1/admin/subscriptions', subscriptionRoutes());
+  app.route('/api/v1/admin/careers', careersAdminRoutes());
   app.route('/api/v1/admin/assets', assetRoutes());
   app.route('/api/v1/admin/quotations', quotationRoutes());
   app.route('/api/v1/admin/documents', documentRoutes());

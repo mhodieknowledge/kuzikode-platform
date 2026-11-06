@@ -106,6 +106,11 @@ describe('templates', () => {
       subject: 'Email not syncing',
       body: 'We reset the mailbox password; please try again.',
     },
+    candidate_message: {
+      subject: 'Interview invitation: Junior Developer',
+      body: 'Hi Tino,\n\nWe would like to invite you to an interview.\n\nKind regards,\nKuzikode Technologies',
+      reference: 'APP-2026-0001',
+    },
     renewal_reminder: {
       name: 'Ann',
       item: 'Domain: baobab.co.zw',

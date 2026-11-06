@@ -1,0 +1,122 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { employmentTypeLabel, listPostingsAdmin } from '../../../server/modules/careers';
+import { formatLongDate } from '../../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'careers.view' });
+if (page instanceof Response) return page;
+const { postings, general } = await listPostingsAdmin(ctx);
+const canManage = page.auth.permissions.has('careers.manage');
+const STATUS: Record<string, { label: string; cls: string }> = {
+  draft: { label: 'Draft', cls: 'bg-ink-950/5 text-ink-800' },
+  open: { label: 'Open', cls: 'bg-success-50 text-success-700' },
+  closed: { label: 'Closed', cls: 'bg-warning-50 text-warning-700' },
+  archived: { label: 'Archived', cls: 'bg-ink-950/5 text-ink-600' },
+};
+const link =
+  'inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400';
+const scheduled = (p: (typeof postings)[number]) =>
+  p.status === 'open' && p.opensAt && p.opensAt > ctx.now().toISOString();
+---
+
+<AdminLayout title="Careers" page={page}>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold tracking-display">Careers</h1>
+      <p class="mt-1 text-sm text-ink-600">
+        Job postings and applicants. Applicant data is deleted after the retention period.
+      </p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <a href="/admin/careers/applicants?status=active&view=board" class={link}>
+        All applicants
+      </a>
+      {canManage ? (
+        <a href="/admin/careers/templates" class={link}>
+          Email templates
+        </a>
+      ) : null}
+      {canManage ? (
+        <a
+          href="/admin/careers/new"
+          class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
+        >
+          New posting
+        </a>
+      ) : null}
+    </div>
+  </div>
+  <div class="relative mt-6 overflow-x-auto rounded-lg border border-line bg-surface">
+    <table class="w-full min-w-[720px] text-left text-sm">
+      <caption class="sr-only">Job postings</caption>
+      <thead class="bg-canvas text-[13px] text-ink-600">
+        <tr>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Posting
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Status
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Closes
+          </th>
+          <th scope="col" class="px-4 py-3 text-right font-semibold">
+            Applicants
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {postings.length === 0 ? (
+          <tr>
+            <td colspan="4" class="px-4 py-8 text-center text-ink-600">
+              No postings yet.
+            </td>
+          </tr>
+        ) : (
+          postings.map((p) => (
+            <tr class="border-t border-line">
+              <td class="px-4 py-3">
+                <a href={`/admin/careers/${p.id}`} class="font-semibold text-ink-950 hover:underline">
+                  {p.title}
+                </a>
+                <span class="block text-[12px] text-ink-600">
+                  {p.department} · {employmentTypeLabel(p.employmentType)} · {p.location}
+                </span>
+              </td>
+              <td class="px-4 py-3">
+                <span class={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${STATUS[p.status]?.cls ?? ''}`}>
+                  {scheduled(p) ? 'Scheduled' : (STATUS[p.status]?.label ?? p.status)}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-ink-800">{p.closesAt ? formatLongDate(p.closesAt.slice(0, 10)) : '—'}</td>
+              <td class="px-4 py-3 text-right">
+                <a
+                  href={`/admin/careers/applicants?posting=${p.id}&view=board`}
+                  class="font-semibold text-brand-600 hover:underline"
+                >
+                  {p.applicants}
+                  {p.fresh ? ` (${p.fresh} new)` : ''}
+                  <span class="sr-only"> applicants for {p.title}</span>
+                </a>
+              </td>
+            </tr>
+          ))
+        )}
+        <tr class="border-t border-line">
+          <td class="px-4 py-3 text-ink-950">General applications ("Send us your CV")</td>
+          <td class="px-4 py-3 text-ink-600">—</td>
+          <td class="px-4 py-3 text-ink-600">—</td>
+          <td class="px-4 py-3 text-right">
+            <a href="/admin/careers/applicants?posting=general" class="font-semibold text-brand-600 hover:underline">
+              {general.applicants}
+              {general.fresh ? ` (${general.fresh} new)` : ''}
+              <span class="sr-only"> general applicants</span>
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</AdminLayout>

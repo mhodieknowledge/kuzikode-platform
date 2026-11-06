@@ -377,3 +377,15 @@ The **Next step** line must be specific enough that a fresh session can continue
   privacy) · e2e `subscriptions.spec.ts`.
 - Next step: P4.21 Careers admin (postings with custom questions, pipeline kanban, ratings, notes, templated emails, bulk reject,
   retention job already exists in modules/careers, Hiring Manager role).
+
+## 2026-11-06 13:45 UTC · P4.21 Careers admin ✅
+- `shared/schemas/careers-admin.ts`; `modules/careers/admin.ts` + `/api/v1/admin/careers/*`: postings CRUD (sanitised description,
+  ≤ 5 custom questions), status transitions, duplicate, applicant list/filters (posting/general, stage, reviewer, tag, rating,
+  search), detail (answers, CV/cover links via the authorised file route, history), stage/rating/tags/reviewer (notified) with history
+  events, notes, candidate email templates + per-email edit, bulk reject + regret, erase. Staff preview of drafts on the public page.
+- UI: /admin/careers (postings + general applications), /new, /[id] (editor + actions + preview link), /applicants (list/board),
+  /applications/[id] (details, history, panel), /templates. Nav: Careers on.
+- Tests: integration `careers-admin.test.ts` (3) · e2e `careers-admin.spec.ts` (draft → preview → open → board → stage, rating,
+  email → close → archive); careers.spec still green.
+- Next step: P4.22 Content admin (insights, industries, FAQ, testimonials with consent enforced, technologies, newsletter list +
+  export). Check modules/cms (content.ts, insights.ts, industries.ts) for the existing public readers first.

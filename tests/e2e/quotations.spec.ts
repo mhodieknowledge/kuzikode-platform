@@ -121,4 +121,37 @@ test('quotation with 3 lines, discount and tax → sent by email → accepted on
   await page.getByRole('button', { name: 'Convert to invoice' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Converted to a draft invoice' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Convert to invoice' })).toHaveCount(0);
+
+  // docs/08 step 15: a project from the quotation, with a client-visible milestone, an update and a deliverable.
+  await hydrated(page, 'Create project');
+  await page.getByRole('button', { name: 'Create project' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Online ordering website' })).toBeVisible();
+  await expect(page.getByText(/^PRJ-\d{4}-\d{4}$/).first()).toBeVisible();
+  await hydrated(page, 'Add milestone');
+  await page.getByRole('button', { name: 'Add milestone' }).click();
+  await page.getByLabel('Milestone title').fill('Design sign-off');
+  await page.getByRole('button', { name: 'Add milestone' }).last().click();
+  await expect(page.getByText('Design sign-off')).toBeVisible();
+  await expectAccessible(page);
+  await screenshots(page, 'admin-project-overview');
+
+  await page.getByRole('link', { name: /^Updates/ }).click();
+  await hydrated(page, 'Post update');
+  await page.getByLabel('Post an update').fill('Design approved. Build starts on Monday.');
+  await page.getByRole('button', { name: 'Post update' }).click();
+  await expect(page.getByText('Design approved. Build starts on Monday.')).toBeVisible();
+  await expect(page.getByText(/shared with the client/)).toBeVisible();
+
+  await page.getByRole('link', { name: /^Files/ }).click();
+  await hydrated(page, 'Upload');
+  await page.locator('input[type="file"]').setInputFiles({
+    name: 'style-guide.pdf',
+    mimeType: 'application/pdf',
+    buffer: Buffer.from('%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n'),
+  });
+  await page.getByLabel('Label').fill('Style guide');
+  await page.getByRole('button', { name: 'Upload' }).click();
+  await expect(page.getByRole('link', { name: 'Style guide' })).toBeVisible();
+  await expect(page.getByText(/deliverable · visible to the client/)).toBeVisible();
+  await expectAccessible(page);
 });

@@ -429,6 +429,20 @@ const defs = {
         ],
       }),
   },
+  project_update: {
+    schema: z.object({ name: z.string(), project: z.string(), reference: z.string(), body: z.string() }),
+    render: (b: Brand, d: { name: string; project: string; reference: string; body: string }) =>
+      renderEmail(b, {
+        subject: `Update on ${d.project} (${d.reference})`,
+        preheader: d.body.slice(0, 120),
+        heading: `An update on ${d.project}`,
+        blocks: [
+          { kind: 'p', text: `Hi ${d.name},` },
+          { kind: 'p', text: d.body },
+          { kind: 'small', text: `Project ${d.reference}. Reply to this email with any questions.` },
+        ],
+      }),
+  },
 } as const;
 
 export type TemplateName = keyof typeof defs;

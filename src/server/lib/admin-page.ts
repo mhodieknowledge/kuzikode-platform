@@ -47,7 +47,7 @@ export interface AdminPage {
 export async function loadAdminPage(
   ctx: RequestContext,
   request: Request,
-  opts: { allowStage?: Exclude<AdminStage, 'ready'>; permission?: Permission } = {},
+  opts: { allowStage?: Exclude<AdminStage, 'ready'>; permission?: Permission; anyOf?: Permission[] } = {},
 ): Promise<AdminPage | Response> {
   const url = new URL(request.url);
   const auth = await resolveSession(ctx, request.headers.get('cookie'), 'admin');
@@ -63,6 +63,7 @@ export async function loadAdminPage(
     return seeOther('/admin');
   }
   if (opts.permission && !auth.permissions.has(opts.permission)) return forbiddenPage();
+  if (opts.anyOf && !opts.anyOf.some((p) => auth.permissions.has(p))) return forbiddenPage();
   const unread = stage === 'ready' ? (await listNotifications(ctx, auth.user.id, { limit: 1 })).unread : 0;
   return {
     auth,

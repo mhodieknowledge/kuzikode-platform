@@ -224,6 +224,16 @@ async function portalCanRead(ctx: RequestContext, f: FileRow): Promise<boolean> 
   }
 }
 
+/** Project files: staff without `projects.view_all` only read files of projects they are a member of. */
+async function staffProjectScope(ctx: RequestContext, f: FileRow): Promise<boolean> {
+  if (f.owner_type !== 'project' || can(ctx, 'projects.view_all')) return true;
+  const r = await ctx.db
+    .prepare('SELECT 1 AS ok FROM project_members WHERE project_id = ? AND user_id = ?')
+    .bind(f.owner_id ?? '', ctx.actor.userId ?? '')
+    .first();
+  return !!r;
+}
+
 /** Loads a file the caller may read, or throws NOT_FOUND (never 403, to avoid enumeration). */
 export async function authorizeRead(ctx: RequestContext, id: string): Promise<FileRow> {
   const f = await getFile(ctx, id);
@@ -232,7 +242,7 @@ export async function authorizeRead(ctx: RequestContext, id: string): Promise<Fi
   const audience = ctx.auth?.session.audience;
   const allowed =
     audience === 'admin'
-      ? can(ctx, STAFF_READ_PERMISSION[f.owner_type])
+      ? can(ctx, STAFF_READ_PERMISSION[f.owner_type]) && (await staffProjectScope(ctx, f))
       : audience === 'portal'
         ? await portalCanRead(ctx, f)
         : false;

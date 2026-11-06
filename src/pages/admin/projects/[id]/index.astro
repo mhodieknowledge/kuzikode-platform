@@ -1,0 +1,354 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import {
+  FileActions,
+  FileUploader,
+  MessageComposer,
+  MilestonesPanel,
+  ProgressSettings,
+  TaskBoard,
+  UpdateComposer,
+} from '../../../../components/admin/ProjectsAdmin';
+import { loadAdminPage } from '../../../../server/lib/admin-page';
+import { AppError } from '../../../../server/lib/errors';
+import { getProject, staffOptions } from '../../../../server/modules/projects';
+import { PROJECT_STATUS_LABEL } from '../../../../shared/projects';
+import { formatMoney } from '../../../../shared/money';
+import { formatLongDate } from '../../../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { anyOf: ['projects.view', 'projects.view_all'] });
+if (page instanceof Response) return page;
+let data;
+try {
+  data = await getProject(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND')
+    return new Response(null, { status: 404, statusText: 'Not found' });
+  throw err;
+}
+const {
+  project: p,
+  client,
+  members,
+  milestones,
+  tasks,
+  updates,
+  files,
+  messages,
+  activity,
+  quotation,
+  invoices,
+} = data;
+const canManage = page.auth.permissions.has('projects.manage');
+const staff = canManage ? await staffOptions(ctx) : [];
+const TABS = [
+  ['overview', 'Overview'],
+  ['tasks', `Tasks (${tasks.length})`],
+  ['updates', `Updates (${updates.length})`],
+  ['files', `Files (${files.length})`],
+  ['messages', `Messages (${messages.length})`],
+  ['activity', 'Activity'],
+] as const;
+const tabParam = Astro.url.searchParams.get('tab');
+const tab = TABS.some(([k]) => k === tabParam) ? tabParam! : 'overview';
+const when = (iso: string) =>
+  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
+    new Date(iso),
+  );
+const kb = (n: number) =>
+  n < 1024 * 1024 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`;
+const ACTION: Record<string, string> = {
+  'project.created': 'Project created',
+  'project.created_from_quotation': 'Created from the quotation',
+  'project.updated': 'Details changed',
+  'project.settings_changed': 'Progress or notes changed',
+  'project.milestone_added': 'Milestone added',
+  'project.milestone_updated': 'Milestone updated',
+  'project.milestone_deleted': 'Milestone deleted',
+  'project.task_added': 'Task added',
+  'project.task_updated': 'Task updated',
+  'project.task_moved': 'Task moved',
+  'project.task_deleted': 'Task deleted',
+  'project.update_posted': 'Update posted',
+  'project.file_added': 'File added',
+  'project.file_visibility': 'File visibility changed',
+  'project.file_deleted': 'File deleted',
+};
+const tabClass = (active: boolean) =>
+  `inline-flex h-10 shrink-0 items-center border-b-2 px-1 text-sm font-semibold ${active ? 'border-brand-600 text-ink-950' : 'border-transparent text-ink-600 hover:text-ink-950'}`;
+const card = 'rounded-lg border border-line bg-surface p-5';
+---
+
+<AdminLayout title={p.name} page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/projects" class="hover:text-ink-950 hover:underline">
+      Projects
+    </a>{' '}
+    /<span class="font-mono text-ink-950">{p.reference}</span>
+  </nav>
+  <div class="mt-2 flex flex-wrap items-start justify-between gap-4">
+    <div class="min-w-0">
+      <h1 class="text-2xl font-bold tracking-display">{p.name}</h1>
+      <p class="mt-1 text-sm text-ink-600">
+        <span class="font-mono">{p.reference}</span> · {PROJECT_STATUS_LABEL[p.status]} ·{' '}
+        <a href={`/admin/clients/${p.client_id}`} class="text-brand-600 underline">
+          {client?.display_name}
+        </a>
+        {quotation ? (
+          <>
+            {' '}
+            · from{' '}
+            <a href={`/admin/quotations/${quotation.id}`} class="text-brand-600 underline">
+              {quotation.number}
+            </a>
+          </>
+        ) : null}
+      </p>
+    </div>
+    {canManage ? (
+      <a
+        href={`/admin/projects/${p.id}/edit`}
+        class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+      >
+        Edit project
+      </a>
+    ) : null}
+  </div>
+  <div class="mt-4 max-w-xl">
+    <p class="flex justify-between text-sm">
+      <span class="text-ink-600">Progress</span>
+      <span class="tnum font-semibold">{p.progress_pct}%</span>
+    </p>
+    <div
+      class="mt-1 h-2 rounded-full bg-ink-950/10"
+      role="progressbar"
+      aria-label="Project progress"
+      aria-valuenow={p.progress_pct}
+      aria-valuemin="0"
+      aria-valuemax="100"
+    >
+      <div class="h-2 rounded-full bg-brand-600" style={`width:${p.progress_pct}%`}></div>
+    </div>
+  </div>
+  <nav aria-label="Project sections" class="mt-6 flex gap-6 overflow-x-auto border-b border-line">
+    {TABS.map(([k, l]) => (
+      <a
+        href={`/admin/projects/${p.id}?tab=${k}`}
+        class={tabClass(tab === k)}
+        aria-current={tab === k ? 'page' : undefined}
+      >
+        {l}
+      </a>
+    ))}
+  </nav>
+
+  <div class="mt-6">
+    {tab === 'overview' ? (
+      <div class="grid gap-6 xl:grid-cols-[1fr_340px]">
+        <div class="flex flex-col gap-6">
+          <MilestonesPanel
+            client:load
+            projectId={p.id}
+            milestones={milestones}
+            invoices={invoices}
+            canManage={canManage}
+          />
+          {p.description ? (
+            <section class={card} aria-labelledby="desc-h">
+              <h2 id="desc-h" class="font-sans text-base font-semibold">
+                Description
+              </h2>
+              <p class="mt-2 text-sm whitespace-pre-line text-ink-800">{p.description}</p>
+            </section>
+          ) : null}
+        </div>
+        <aside class="flex flex-col gap-6">
+          <section class={card} aria-labelledby="facts-h">
+            <h2 id="facts-h" class="font-sans text-base font-semibold">
+              Details
+            </h2>
+            <dl class="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+              <dt class="text-ink-600">Start</dt>
+              <dd>{p.start_date ? formatLongDate(p.start_date) : '—'}</dd>
+              <dt class="text-ink-600">Target</dt>
+              <dd>{p.target_date ? formatLongDate(p.target_date) : '—'}</dd>
+              {p.completed_at ? (
+                <>
+                  <dt class="text-ink-600">Completed</dt>
+                  <dd>{formatLongDate(p.completed_at)}</dd>
+                </>
+              ) : null}
+              <dt class="text-ink-600">Budget</dt>
+              <dd class="tnum">
+                {p.budget_minor != null && p.currency ? formatMoney(p.budget_minor, p.currency) : '—'}
+              </dd>
+            </dl>
+          </section>
+          <section class={card} aria-labelledby="team-h">
+            <h2 id="team-h" class="font-sans text-base font-semibold">
+              Team
+            </h2>
+            <ul class="mt-3 flex flex-col gap-2 text-sm">
+              {members.map((m) => (
+                <li>
+                  {m.name}
+                  {m.role === 'lead' ? <span class="text-[12px] text-ink-600"> · lead</span> : null}
+                </li>
+              ))}
+            </ul>
+          </section>
+          {canManage ? (
+            <section class={card} aria-labelledby="prog-h">
+              <h2 id="prog-h" class="mb-3 font-sans text-base font-semibold">
+                Progress and notes
+              </h2>
+              <ProgressSettings
+                client:load
+                projectId={p.id}
+                mode={p.progress_mode}
+                pct={p.progress_pct}
+                notes={p.internal_notes}
+              />
+            </section>
+          ) : p.internal_notes ? (
+            <section class={card} aria-labelledby="notes-h">
+              <h2 id="notes-h" class="font-sans text-base font-semibold">
+                Internal notes
+              </h2>
+              <p class="mt-2 text-sm whitespace-pre-line text-ink-800">{p.internal_notes}</p>
+            </section>
+          ) : null}
+        </aside>
+      </div>
+    ) : null}
+
+    {tab === 'tasks' ? (
+      <TaskBoard
+        client:load
+        projectId={p.id}
+        tasks={tasks}
+        milestones={milestones.map((m) => ({ id: m.id, title: m.title }))}
+        staff={staff}
+        canManage={canManage}
+        userId={page.auth.user.id}
+      />
+    ) : null}
+
+    {tab === 'updates' ? (
+      <div class="grid gap-6 xl:grid-cols-[1fr_380px]">
+        <section class={card} aria-labelledby="upd-h">
+          <h2 id="upd-h" class="font-sans text-base font-semibold">
+            Updates
+          </h2>
+          {updates.length === 0 ? <p class="mt-2 text-sm text-ink-600">No updates yet.</p> : null}
+          <ol class="mt-3 flex flex-col divide-y divide-line">
+            {updates.map((u) => (
+              <li class="py-3">
+                <p class="text-[12px] text-ink-600">
+                  {when(u.created_at)} · {u.author} ·{' '}
+                  {u.visibility === 'client' ? 'shared with the client' : 'internal'}
+                </p>
+                <p class="mt-1 text-sm whitespace-pre-line text-ink-950">{u.body}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+        {canManage ? (
+          <section class={card} aria-label="New update">
+            <UpdateComposer client:load projectId={p.id} />
+          </section>
+        ) : null}
+      </div>
+    ) : null}
+
+    {tab === 'files' ? (
+      <div class="grid gap-6 xl:grid-cols-[1fr_380px]">
+        <section class={card} aria-labelledby="files-h">
+          <h2 id="files-h" class="font-sans text-base font-semibold">
+            Files and deliverables
+          </h2>
+          {files.length === 0 ? <p class="mt-2 text-sm text-ink-600">No files yet.</p> : null}
+          <ul class="mt-3 flex flex-col divide-y divide-line">
+            {files.map((f) => (
+              <li class="flex flex-wrap items-center justify-between gap-3 py-3">
+                <div class="min-w-0">
+                  <a href={`/api/v1/admin/files/${f.file_id}`} class="font-medium text-brand-600 hover:underline">
+                    {f.label}
+                  </a>
+                  <p class="text-[12px] text-ink-600">
+                    {f.original_name} · {kb(f.size_bytes)} · {f.kind}
+                    {f.client_visible ? ' · visible to the client' : ' · staff only'}
+                  </p>
+                </div>
+                {canManage ? (
+                  <FileActions
+                    client:visible
+                    projectId={p.id}
+                    id={f.id}
+                    label={f.label}
+                    kind={f.kind}
+                    clientVisible={f.client_visible === 1}
+                  />
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+        {canManage ? (
+          <section class={card} aria-labelledby="up-h">
+            <h2 id="up-h" class="mb-3 font-sans text-base font-semibold">
+              Upload
+            </h2>
+            <FileUploader client:load projectId={p.id} />
+          </section>
+        ) : null}
+      </div>
+    ) : null}
+
+    {tab === 'messages' ? (
+      <div class="grid gap-6 xl:grid-cols-[1fr_380px]">
+        <section class={card} aria-labelledby="msg-h">
+          <h2 id="msg-h" class="font-sans text-base font-semibold">
+            Messages with the client
+          </h2>
+          {messages.length === 0 ? <p class="mt-2 text-sm text-ink-600">No messages yet.</p> : null}
+          <ol class="mt-3 flex flex-col gap-3">
+            {messages.map((m) => (
+              <li class={`rounded-sm p-3 text-sm ${m.user_type === 'client' ? 'bg-canvas' : 'bg-brand-50'}`}>
+                <p class="text-[12px] text-ink-600">
+                  {m.author} · {when(m.created_at)}
+                  {m.user_type !== 'client' && m.read_by_client_at ? ' · read' : ''}
+                </p>
+                <p class="mt-1 whitespace-pre-line text-ink-950">{m.body}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+        <section class={card} aria-label="New message">
+          <MessageComposer client:load projectId={p.id} />
+        </section>
+      </div>
+    ) : null}
+
+    {tab === 'activity' ? (
+      <section class={card} aria-labelledby="act-h">
+        <h2 id="act-h" class="font-sans text-base font-semibold">
+          Activity
+        </h2>
+        <ol class="mt-3 flex flex-col gap-2 text-sm">
+          {activity.map((a) => (
+            <li>
+              <span class="font-medium text-ink-950">{ACTION[a.action] ?? a.action}</span>
+              <span class="text-[12px] text-ink-600">
+                {' '}
+                · {when(a.created_at)}
+                {a.actor ? ` · ${a.actor}` : ''}
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ) : null}
+  </div>
+</AdminLayout>

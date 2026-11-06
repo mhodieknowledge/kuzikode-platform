@@ -5,12 +5,11 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phase 1, 2 and 3 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 4 (administration) in progress.
-- Last completed task: **P4.11 Payments admin** (P4.1–P4.11 done).
-- **Next step:** P4.12 Projects — `server/modules/projects` (CRUD with `numbering.project` PRJ number, from accepted quotation (copy
-  lines → milestones/tasks scaffold; add the "Create project" action on /admin/quotations/[id], currently not rendered), members,
-  milestones (client-visible flag, linked invoice), tasks board/list, progress auto from milestones/tasks with manual override,
-  internal notes, client updates (+ notify), files/deliverables via `storeUpload` with `project_files.client_visible`, messages,
-  activity), admin pages `/admin/projects*`, nav item `built: true`. AC: e2e step 15 (docs/08). Read docs/04 project tables first.
+- Last completed task: **P4.12 Projects** (P4.1–P4.12 done).
+- **Next step:** P4.13 Expenses — `server/modules/expenses` (CRUD on `expenses` + `expense_categories` (seeded), amount minor +
+  currency, payment method, reference, optional project/client, receipt upload via `storeUpload` purpose 'receipt' owner 'expense',
+  void with reason instead of delete, reports by category/month/currency, CSV export with the label "Expense records. This is not a
+  statutory accounting system."), admin pages `/admin/expenses*`, nav item `built: true`. Then P4.14 Support inbox.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 
 ---
@@ -268,4 +267,18 @@ The **Next step** line must be specific enough that a fresh session can continue
 - "Reconcile" is not rendered yet: no provider adapter exists until Phase 6 (P6.x adds it with `checkPaymentStatus`).
 - Tests: integration `payments-admin.test.ts` (4: filters/detail, refund cover + limits + status, concurrent refunds, unmatched +
   permissions) · e2e invoices spec visits payments list/detail. verify: unit 226 / integration 164; full e2e 58/58 green.
+
+## 2026-11-06 09:30 UTC · P4.12 Projects ✅
+- Shared `shared/projects.ts` (statuses, labels, `autoProgress`), `shared/schemas/projects.ts`.
+- `modules/projects`: list/detail scoped (view_all or member; others 404), create (PRJ number, creator as lead), edit (members/lead),
+  progress mode + internal notes, from accepted quotation (idempotent, gap-free, one client-visible milestone + task per line),
+  milestones (client-visible, linked invoice, completed_at), tasks (board/list; assignees join the project; members may move their own
+  tasks), progress recomputed in SQL in every batch, updates (client-visible → portal notifications + `project_update` email),
+  messages, files via `storeUpload` 'deliverable' (internal files never client-visible), activity from audit_logs. Staff file reads for
+  project files now require membership unless `projects.view_all`. `loadAdminPage` accepts `anyOf`.
+- UI: /admin/projects (list with progress), /new, /[id] (tabs Overview/Tasks/Updates/Files/Messages/Activity), /[id]/edit; "Create
+  project" on accepted quotations (+ link to the created project). Projects nav on.
+- Tests: integration `projects.test.ts` (6: numbering + scoping, progress auto/manual, assignee moves, quotation → project ×3
+  concurrent, client updates/notifications/email, files + visibility + portal/staff access) · e2e quotations spec covers docs/08
+  step 15. verify: unit 227 / integration 170 green; e2e 58/58 (quotations re-run green after an a11y underline fix).
 

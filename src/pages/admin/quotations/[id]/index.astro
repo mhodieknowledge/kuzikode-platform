@@ -27,6 +27,10 @@ try {
   throw err;
 }
 const { quotation: q, items, client, contact, versions, invoice, createdBy } = data;
+const project = await ctx.db
+  .prepare('SELECT id, reference FROM projects WHERE source_quotation_id = ?')
+  .bind(q.id)
+  .first<{ id: string; reference: string }>();
 const perms = page.auth.permissions;
 const settings = await getSettings(ctx);
 const link = q.status === 'draft' ? null : await publicLink(ctx, q.id);
@@ -43,6 +47,7 @@ const can = {
   void: q.status !== 'draft' && q.status !== 'void' && !invoice && perms.has('quotations.void'),
   convert: q.status === 'accepted' && !invoice && perms.has('invoices.create'),
   delete: q.status === 'draft' && perms.has('quotations.update'),
+  project: q.status === 'accepted' && !project && perms.has('projects.manage'),
 };
 // Drafts show live client/business details; sent quotations show the frozen snapshots.
 const clientParty: ClientSnapshot = q.client_snapshot
@@ -121,6 +126,14 @@ const title = q.number ?? `Draft: ${q.title}`;
       Converted to {invoice.number ? `invoice ${invoice.number}` : 'a draft invoice'}.{' '}
       <a href={`/admin/invoices/${invoice.id}`} class="font-semibold underline">
         Open the invoice
+      </a>
+    </p>
+  ) : null}
+  {project ? (
+    <p role="status" class="mt-4 rounded-sm border border-line bg-surface px-4 py-3 text-sm text-ink-800">
+      Project {project.reference} was created from this quotation.{' '}
+      <a href={`/admin/projects/${project.id}`} class="font-semibold text-brand-600 underline">
+        Open the project
       </a>
     </p>
   ) : null}

@@ -223,6 +223,7 @@ export function QuotationActions({
     void: boolean;
     convert: boolean;
     delete: boolean;
+    project: boolean;
   };
 }) {
   const a = useAction();
@@ -266,6 +267,23 @@ export function QuotationActions({
         {can.convert ? (
           <Button loading={a.busy} onClick={() => post('/convert', {}, () => reload())}>
             Convert to invoice
+          </Button>
+        ) : null}
+        {can.project ? (
+          <Button
+            variant="secondary"
+            loading={a.busy}
+            onClick={() =>
+              a.run(async () => {
+                const res = await apiFetch<{ data: { projectId: string } }>(
+                  `/api/v1/admin/projects/from-quotation/${id}`,
+                  { body: {} },
+                );
+                window.location.assign(`/admin/projects/${res.data.projectId}`);
+              })
+            }
+          >
+            Create project
           </Button>
         ) : null}
         {can.revise ? (

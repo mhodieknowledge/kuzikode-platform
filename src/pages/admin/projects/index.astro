@@ -1,0 +1,165 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { listProjects } from '../../../server/modules/projects';
+import { projectListQuery } from '../../../shared/schemas/projects';
+import { PROJECT_STATUS_LABEL } from '../../../shared/projects';
+import { formatLongDate } from '../../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { anyOf: ['projects.view', 'projects.view_all'] });
+if (page instanceof Response) return page;
+const parsed = projectListQuery.safeParse(Object.fromEntries(Astro.url.searchParams));
+const filter = parsed.success ? parsed.data : projectListQuery.parse({});
+const result = await listProjects(ctx, filter);
+const canCreate = page.auth.permissions.has('projects.manage');
+const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
+const STATUS_CLASS: Record<string, string> = {
+  planning: 'bg-info-50 text-info-700',
+  active: 'bg-brand-50 text-brand-600',
+  on_hold: 'bg-warning-50 text-warning-700',
+  completed: 'bg-success-50 text-success-700',
+  cancelled: 'bg-ink-950/5 text-ink-800',
+};
+const pageHref = (n: number) => {
+  const q = new URLSearchParams(Astro.url.searchParams);
+  q.set('page', String(n));
+  return `/admin/projects?${q.toString()}`;
+};
+---
+
+<AdminLayout title="Projects" page={page}>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold tracking-display">Projects</h1>
+      <p class="mt-1 text-sm text-ink-600">
+        {result.total} {result.total === 1 ? 'project' : 'projects'}
+      </p>
+    </div>
+    {canCreate ? (
+      <a
+        href="/admin/projects/new"
+        class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
+      >
+        New project
+      </a>
+    ) : null}
+  </div>
+  <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter projects">
+    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+      Search
+      <input
+        name="q"
+        type="search"
+        value={filter.q ?? ''}
+        maxlength="80"
+        class={field}
+        placeholder="Reference, name or client"
+      />
+    </label>
+    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+      Status
+      <select name="status" class={field}>
+        <option value="open" selected={!filter.status || filter.status === 'open'}>
+          Open (planning, active, on hold)
+        </option>
+        {Object.entries(PROJECT_STATUS_LABEL).map(([k, l]) => (
+          <option value={k} selected={filter.status === k}>
+            {l}
+          </option>
+        ))}
+        <option value="all" selected={filter.status === 'all'}>
+          All
+        </option>
+      </select>
+    </label>
+    {filter.clientId ? <input type="hidden" name="clientId" value={filter.clientId} /> : null}
+    <button
+      type="submit"
+      class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+    >
+      Filter
+    </button>
+  </form>
+  <div class="mt-6 overflow-x-auto rounded-lg border border-line bg-surface">
+    <table class="w-full min-w-[640px] text-left text-sm">
+      <caption class="sr-only">Projects</caption>
+      <thead class="bg-canvas text-[13px] text-ink-600">
+        <tr>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Project
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Client
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Status
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Progress
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Target
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {result.items.length === 0 ? (
+          <tr>
+            <td colspan="5" class="px-4 py-10 text-center text-ink-600">
+              {filter.q || filter.status ? 'No projects match these filters.' : 'No open projects.'}
+            </td>
+          </tr>
+        ) : (
+          result.items.map((p) => (
+            <tr class="border-t border-line">
+              <td class="px-4 py-3">
+                <a href={`/admin/projects/${p.id}`} class="font-semibold text-ink-950 hover:underline">
+                  {p.name}
+                </a>
+                <span class="block font-mono text-[12px] text-ink-600">
+                  {p.reference}
+                  {p.lead ? ` · ${p.lead}` : ''}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-ink-800">{p.client_name}</td>
+              <td class="px-4 py-3">
+                <span class={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${STATUS_CLASS[p.status]}`}>
+                  {PROJECT_STATUS_LABEL[p.status]}
+                </span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="tnum text-ink-950">{p.progress_pct}%</span>
+                <span class="mt-1 block h-1.5 w-24 rounded-full bg-ink-950/10" aria-hidden="true">
+                  <span class="block h-1.5 rounded-full bg-brand-600" style={`width:${p.progress_pct}%`}></span>
+                </span>
+              </td>
+              <td class="px-4 py-3 text-ink-800">{p.target_date ? formatLongDate(p.target_date) : '—'}</td>
+            </tr>
+          ))
+        )}
+      </tbody>
+    </table>
+  </div>
+  {result.pages > 1 ? (
+    <nav aria-label="Pagination" class="mt-4 flex items-center justify-between text-sm font-semibold">
+      {result.page > 1 ? (
+        <a href={pageHref(result.page - 1)} rel="prev" class="text-brand-600">
+          Previous
+        </a>
+      ) : (
+        <span />
+      )}
+      <span class="text-ink-600">
+        Page {result.page} of {result.pages}
+      </span>
+      {result.page < result.pages ? (
+        <a href={pageHref(result.page + 1)} rel="next" class="text-brand-600">
+          Next
+        </a>
+      ) : (
+        <span />
+      )}
+    </nav>
+  ) : null}
+</AdminLayout>

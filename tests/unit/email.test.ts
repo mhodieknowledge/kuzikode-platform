@@ -100,6 +100,12 @@ describe('templates', () => {
       message: null,
     },
     newsletter_confirmation: { link: 'https://kuzikode.example/newsletter/confirm?token=abc' },
+    project_update: {
+      name: 'Ann',
+      project: 'Online ordering website',
+      reference: 'PRJ-2026-0001',
+      body: 'The design is approved. Build starts on Monday.',
+    },
     invoice_issued: {
       name: 'Ann',
       number: 'INV-2026-00001',

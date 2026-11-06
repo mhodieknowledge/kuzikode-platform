@@ -71,7 +71,7 @@ const rows: [string, string][] = [
       <h1 class="font-mono text-2xl font-bold tracking-display">{p.receipt_number}</h1>
       <p class="mt-1 text-sm text-ink-600">
         {STATUS[p.status] ?? p.status} ·{' '}
-        <a href={`/admin/clients/${p.client_id}`} class="text-brand-600 hover:underline">
+        <a href={`/admin/clients/${p.client_id}`} class="text-brand-600 underline">
           {client?.display_name}
         </a>
       </p>

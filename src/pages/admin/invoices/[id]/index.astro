@@ -102,14 +102,14 @@ const REMINDER = (k: string) =>
       <p class="font-mono text-2xl font-bold tracking-display">{inv.number ?? 'Draft invoice'}</p>
       <p class="mt-1 text-sm text-ink-600">
         {INVOICE_STATUS_LABEL[inv.status]} ·{' '}
-        <a href={`/admin/clients/${inv.client_id}`} class="text-brand-600 hover:underline">
+        <a href={`/admin/clients/${inv.client_id}`} class="text-brand-600 underline">
           {client?.display_name}
         </a>
         {quotation ? (
           <>
             {' '}
             · from{' '}
-            <a href={`/admin/quotations/${quotation.id}`} class="text-brand-600 hover:underline">
+            <a href={`/admin/quotations/${quotation.id}`} class="text-brand-600 underline">
               {quotation.number}
             </a>
           </>
@@ -173,7 +173,7 @@ const REMINDER = (k: string) =>
               {payments.map((p) => (
                 <li>
                   <p class="tnum flex justify-between gap-2 font-medium text-ink-950">
-                    <a href={`/admin/payments/${p.id}`} class="text-brand-600 hover:underline">
+                    <a href={`/admin/payments/${p.id}`} class="text-brand-600 underline">
                       {METHOD[p.method] ?? p.method}
                     </a>
                     <span>{money(p.applied_minor)}</span>

@@ -1,0 +1,58 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { ProjectForm } from '../../../../components/admin/ProjectsAdmin';
+import { loadAdminPage } from '../../../../server/lib/admin-page';
+import { AppError } from '../../../../server/lib/errors';
+import { formOptions, getProject } from '../../../../server/modules/projects';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'projects.manage' });
+if (page instanceof Response) return page;
+let data;
+try {
+  data = await getProject(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND')
+    return new Response(null, { status: 404, statusText: 'Not found' });
+  throw err;
+}
+const p = data.project;
+const opts = await formOptions(ctx);
+if (data.client && !opts.clients.some((c) => c.id === data.client!.id))
+  opts.clients.push({
+    id: data.client.id,
+    name: `${data.client.display_name} (archived)`,
+    number: data.client.client_number,
+    currency: p.currency ?? 'USD',
+  });
+const lead = data.members.find((m) => m.role === 'lead');
+const initial = {
+  clientId: p.client_id,
+  name: p.name,
+  description: p.description,
+  status: p.status,
+  startDate: p.start_date,
+  targetDate: p.target_date,
+  budgetMinor: p.budget_minor,
+  currency: p.currency,
+  leadId: lead?.user_id ?? null,
+  memberIds: data.members.filter((m) => m.role !== 'lead').map((m) => m.user_id),
+};
+---
+
+<AdminLayout title={`Edit ${p.name}`} page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/projects" class="hover:text-ink-950 hover:underline">
+      Projects
+    </a>{' '}
+    /
+    <a href={`/admin/projects/${p.id}`} class="hover:text-ink-950 hover:underline">
+      {p.reference}
+    </a>{' '}
+    /<span class="text-ink-950">Edit</span>
+  </nav>
+  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">Edit project</h1>
+  <div class="max-w-3xl">
+    <ProjectForm client:load id={p.id} initial={initial} {...opts} />
+  </div>
+</AdminLayout>

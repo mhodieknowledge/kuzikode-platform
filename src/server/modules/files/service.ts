@@ -4,7 +4,7 @@ import { auditStmt } from '../../lib/audit';
 import { hmacSha256Base64Url, sha256Hex, timingSafeEqualString, type Bytes } from '../../lib/crypto';
 import { notFound, validationError } from '../../lib/errors';
 import { newId, randomToken } from '../../lib/ids';
-import { can } from '../../lib/policies';
+import { can, portalAreaClientIds, type PortalArea } from '../../lib/policies';
 import {
   IMAGE_TYPES,
   imageSize,
@@ -176,10 +176,11 @@ export const getFile = (ctx: RequestContext, id: string) =>
  * (client-visible project files, issued documents, the client's own support attachments).
  */
 async function portalCanRead(ctx: RequestContext, f: FileRow): Promise<boolean> {
-  const ids = ctx.auth?.clientIds ?? [];
-  if (ids.length === 0 || !f.owner_id) return false;
+  if (!ctx.auth || ctx.auth.clientIds.length === 0 || !f.owner_id) return false;
   const inScope = `(SELECT value FROM json_each(?))`;
-  const scope = JSON.stringify(ids);
+  // Each kind of file follows the portal area of its owner (finance files are not shown to "member" contacts, etc.).
+  const ids = (area: PortalArea) => portalAreaClientIds(ctx, area);
+  const scopeOf = (area: PortalArea) => JSON.stringify(ids(area));
   const q = (sql: string, ...params: unknown[]) =>
     ctx.db
       .prepare(sql)
@@ -188,36 +189,40 @@ async function portalCanRead(ctx: RequestContext, f: FileRow): Promise<boolean> 
       .then((r) => !!r);
   switch (f.owner_type) {
     case 'client':
-      return ids.includes(f.owner_id);
+      return ctx.auth.clientIds.includes(f.owner_id);
     case 'project':
       return q(
         `SELECT 1 AS ok FROM project_files pf JOIN projects p ON p.id = pf.project_id
          WHERE pf.file_id = ? AND pf.client_visible = 1 AND p.client_id IN ${inScope}`,
         f.id,
-        scope,
+        scopeOf('projects'),
       );
     case 'invoice':
       return q(
         `SELECT 1 AS ok FROM invoices WHERE id = ? AND status <> 'draft' AND client_id IN ${inScope}`,
         f.owner_id,
-        scope,
+        scopeOf('finance'),
       );
     case 'quotation':
       return q(
         `SELECT 1 AS ok FROM quotations WHERE id = ? AND status NOT IN ('draft') AND client_id IN ${inScope}`,
         f.owner_id,
-        scope,
+        scopeOf('quotations'),
       );
     case 'credit_note':
-      return q(`SELECT 1 AS ok FROM credit_notes WHERE id = ? AND client_id IN ${inScope}`, f.owner_id, scope);
+      return q(
+        `SELECT 1 AS ok FROM credit_notes WHERE id = ? AND client_id IN ${inScope}`,
+        f.owner_id,
+        scopeOf('finance'),
+      );
     case 'payment':
-      return q(`SELECT 1 AS ok FROM payments WHERE id = ? AND client_id IN ${inScope}`, f.owner_id, scope);
+      return q(`SELECT 1 AS ok FROM payments WHERE id = ? AND client_id IN ${inScope}`, f.owner_id, scopeOf('finance'));
     case 'support':
       return q(
         `SELECT 1 AS ok FROM support_attachments sa JOIN support_messages m ON m.id = sa.message_id JOIN support_requests r ON r.id = m.request_id
          WHERE sa.file_id = ? AND m.is_internal_note = 0 AND r.client_id IN ${inScope}`,
         f.id,
-        scope,
+        scopeOf('support'),
       );
     default:
       return false;

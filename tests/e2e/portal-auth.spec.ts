@@ -52,6 +52,20 @@ test('a client signs in, updates their details, sees their devices and signs out
   await portalSignIn(page, E2E_PORTAL_USER.email, E2E_PASSWORD);
   await expect(page.getByRole('heading', { level: 1, name: 'Hello, Kuda' })).toBeVisible();
   await expect(page.getByText(E2E_PORTAL_USER.clientName).first()).toBeVisible();
+  // Overview (P5.2): balance per currency with the overdue part, open quotation, active project, recent activity.
+  const usd = page.getByTestId('portal-balance-USD');
+  await expect(usd).toContainText('$1,450.00');
+  await expect(usd).toContainText('2 open invoices');
+  await expect(usd).toContainText('$250.00 overdue (1 invoice)');
+  await expect(page.getByText('Online ordering website').first()).toBeVisible();
+  await expect(page.getByText('QUO-E2E-P001').first()).toBeVisible();
+  await expect(page.getByRole('progressbar', { name: 'Brand refresh progress' })).toHaveAttribute(
+    'aria-valuenow',
+    '60',
+  );
+  await expect(page.getByText('Next: Logo sign-off')).toBeVisible();
+  await expect(page.getByTestId('portal-activity')).toContainText('Update on Brand refresh');
+  await expect(page.getByTestId('portal-activity')).toContainText('Invoice INV-E2E-P001 issued');
   await expectAccessible(page);
   await screenshots(page, 'portal-overview');
 

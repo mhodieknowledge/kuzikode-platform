@@ -52,6 +52,8 @@ export interface AuthState {
   permissions: Set<Permission>;
   /** Portal only: clients this user may see (active client_user_access rows). */
   clientIds: string[];
+  /** Portal only: the access role per client (owner sees everything; see `portalAreaClientIds`). */
+  clientRoles: Record<string, repo.PortalRole>;
   /** enabled: the user has 2FA on; required: their role demands it (super admin, finance manager). */
   mfa: { enabled: boolean; required: boolean };
 }
@@ -142,7 +144,9 @@ export async function resolveSession(
         ? (await repo.permissionKeysForUser(ctx.db, user.id)).filter(isPermission)
         : [],
   );
-  const clientIds = audience === 'portal' ? await repo.activeClientIds(ctx.db, user.id) : [];
+  const access = audience === 'portal' ? await repo.activeClientAccess(ctx.db, user.id) : [];
+  const clientIds = access.map((a) => a.client_id);
+  const clientRoles = Object.fromEntries(access.map((a) => [a.client_id, a.role]));
   const mfaRow = await ctx.db
     .prepare('SELECT enabled_at FROM user_mfa WHERE user_id = ?')
     .bind(user.id)
@@ -165,6 +169,7 @@ export async function resolveSession(
     roles,
     permissions,
     clientIds,
+    clientRoles,
     mfa: { enabled: !!mfaRow?.enabled_at, required: roles.some((r) => MFA_REQUIRED_ROLES.includes(r)) },
   };
 }

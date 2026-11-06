@@ -38,3 +38,23 @@ export function clientScope(column: string, clientIds: readonly string[]): { sql
   if (clientIds.length === 0) return { sql: '1 = 0', params: [] };
   return { sql: `${column} IN (${clientIds.map(() => '?').join(', ')})`, params: [...clientIds] };
 }
+
+/**
+ * Portal areas and the client access roles that may see them (owner sees everything). Money (invoices, credit notes,
+ * payments, receipts) is for owners and billing contacts; delivery (projects, messages, deliverables) for owners and
+ * members; quotations and support for everyone linked to the client.
+ */
+export type PortalArea = 'finance' | 'projects' | 'quotations' | 'support';
+const AREA_ROLES: Record<PortalArea, readonly string[]> = {
+  finance: ['owner', 'billing'],
+  projects: ['owner', 'member'],
+  quotations: ['owner', 'member', 'billing'],
+  support: ['owner', 'member', 'billing'],
+};
+
+/** The client IDs whose `area` the portal caller may see. Empty means "nothing" (never "everything"). */
+export function portalAreaClientIds(ctx: RequestContext, area: PortalArea): string[] {
+  const ids = portalClientIds(ctx);
+  const roles = ctx.auth!.clientRoles;
+  return ids.filter((id) => AREA_ROLES[area].includes(roles[id] ?? ''));
+}

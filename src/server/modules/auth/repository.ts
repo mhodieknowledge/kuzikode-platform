@@ -69,14 +69,18 @@ export async function permissionKeysForUser(db: D1Database, userId: string): Pro
   return rows.map((r) => r.permission_key);
 }
 
-export async function activeClientIds(db: D1Database, userId: string): Promise<string[]> {
-  const rows = await all<{ client_id: string }>(
+export type PortalRole = 'owner' | 'member' | 'billing';
+
+export async function activeClientAccess(
+  db: D1Database,
+  userId: string,
+): Promise<{ client_id: string; role: PortalRole }[]> {
+  return all<{ client_id: string; role: PortalRole }>(
     db,
-    `SELECT cua.client_id FROM client_user_access cua JOIN clients c ON c.id = cua.client_id
+    `SELECT cua.client_id, cua.role FROM client_user_access cua JOIN clients c ON c.id = cua.client_id
      WHERE cua.user_id = ? AND cua.status = 'active' ORDER BY cua.created_at`,
     userId,
   );
-  return rows.map((r) => r.client_id);
 }
 
 export const findSessionByTokenHash = (db: D1Database, tokenHash: string) =>

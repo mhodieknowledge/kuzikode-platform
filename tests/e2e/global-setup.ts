@@ -50,6 +50,23 @@ export default async function globalSetup() {
     `INSERT INTO client_user_access (id, client_id, user_id, role, status)
      VALUES ('cua_e2e_portal', ${q(E2E_PORTAL_USER.clientId)}, ${q(E2E_PORTAL_USER.id)}, 'owner', 'active')
      ON CONFLICT(client_id, user_id) DO UPDATE SET status = 'active';`,
+    // portal overview fixtures: two open USD invoices (one overdue), one sent quotation, one active project with a
+    // client-visible milestone and update (fixed ids; never touched by other specs).
+    `INSERT INTO invoices (id, number, client_id, currency, status, issue_date, due_date, total_minor, amount_paid_minor, balance_minor, issued_at)
+     VALUES ('inv_e2e_portal_1', 'INV-E2E-P001', ${q(E2E_PORTAL_USER.clientId)}, 'USD', 'issued', '2026-10-01', '2099-12-31', 120000, 0, 120000, '2026-10-01T08:00:00.000Z'),
+            ('inv_e2e_portal_2', 'INV-E2E-P002', ${q(E2E_PORTAL_USER.clientId)}, 'USD', 'partially_paid', '2026-08-01', '2026-08-31', 45000, 20000, 25000, '2026-08-01T08:00:00.000Z')
+     ON CONFLICT(id) DO NOTHING;`,
+    `INSERT INTO quotations (id, number, client_id, title, currency, status, issue_date, valid_until, total_minor, sent_at)
+     VALUES ('quo_e2e_portal_1', 'QUO-E2E-P001', ${q(E2E_PORTAL_USER.clientId)}, 'Online ordering website', 'USD', 'sent', '2026-10-20', '2099-12-31', 250000, '2026-10-20T09:00:00.000Z')
+     ON CONFLICT(id) DO NOTHING;`,
+    `INSERT INTO projects (id, reference, client_id, name, status, currency, progress_pct, progress_mode, target_date)
+     VALUES ('prj_e2e_portal', 'PRJ-E2E-PORTAL', ${q(E2E_PORTAL_USER.clientId)}, 'Brand refresh', 'active', 'USD', 60, 'manual', '2099-06-30')
+     ON CONFLICT(id) DO NOTHING;`,
+    `INSERT INTO project_milestones (id, project_id, title, due_date, status, client_visible)
+     VALUES ('mil_e2e_portal', 'prj_e2e_portal', 'Logo sign-off', '2099-01-15', 'in_progress', 1) ON CONFLICT(id) DO NOTHING;`,
+    `INSERT INTO project_updates (id, project_id, author_id, body, visibility, created_at)
+     VALUES ('pup_e2e_portal', 'prj_e2e_portal', 'usr_e2e_admin', 'The first logo concepts are ready for your feedback.', 'client', '2026-10-25T10:00:00.000Z')
+     ON CONFLICT(id) DO NOTHING;`,
     // Divisions left behind by an interrupted services.spec run (it normally deletes its own).
     "DELETE FROM services WHERE category_id IN (SELECT id FROM service_categories WHERE slug GLOB 'workshops-[0-9]*');",
     "DELETE FROM service_categories WHERE slug GLOB 'workshops-[0-9]*';",

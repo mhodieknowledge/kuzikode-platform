@@ -19,6 +19,7 @@ function ctxWith(perms: readonly Permission[], userId = 'usr_dash'): RequestCont
     roles: [],
     permissions: new Set(perms),
     clientIds: [],
+    clientRoles: {},
     mfa: { enabled: true, required: false },
   } satisfies AuthState;
   return ctx;

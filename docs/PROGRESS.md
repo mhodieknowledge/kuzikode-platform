@@ -461,3 +461,17 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Next step: P5.2 Portal overview (outstanding balance per currency, open quotations, active projects, recent activity) on
   `src/pages/portal/index.astro` (keep the unlinked state). Every query scoped by `page.auth.clientIds`; add a `modules/portal`
   service for portal reads. Add nav items in `PortalLayout.astro` as sections ship.
+
+## 2026-11-06 19:05 UTC · P5.2 Portal overview ✅
+- `AuthState.clientRoles` + `portalAreaClientIds(ctx, area)` (finance / projects / quotations / support) in lib/policies; files
+  `portalCanRead` scoped per area. `modules/portal` (`portalOverview`, `GET /api/v1/portal/overview`, portal sessions only).
+- /portal: balance cards per currency (open count, overdue part), quotations waiting (count + 5), active projects (progress bar with
+  aria values, next client-visible milestone or target date), recent activity (8), contact email; unlinked state kept. Sections a
+  role can't see are not rendered.
+- Tests: integration `portal-overview.test.ts` (5: exact per-currency aggregates incl. draft/void/paid/other-client exclusions,
+  expired quotations, internal milestones/updates hidden, reversed payments hidden, billing vs member areas, file route per area,
+  unlinked + staff/anonymous refused) · e2e portal-auth spec checks the overview against fixed fixtures (global-setup) + axe +
+  375/768/1440 reviewed. verify: unit 232 / integration 238 green.
+- Next step: P5.3 Portal quotations (list, view, PDF, accept/reject; isolation tests). Reuse modules/quotations public
+  accept/reject + PDF code (`publicQuotationRoutes`, `QuotationDocument.astro`), scope with `portalAreaClientIds(ctx, 'quotations')`,
+  add "Quotations" to PortalLayout items and link the overview quotation rows + activity items to `/portal/quotations/<id>`.

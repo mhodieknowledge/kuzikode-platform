@@ -62,7 +62,7 @@ export async function createClient(name = 'Example Client (Pvt) Ltd'): Promise<{
 
 export async function createPortalUser(
   clientIds: string[],
-  opts: { email?: string; status?: string } = {},
+  opts: { email?: string; status?: string; role?: 'owner' | 'member' | 'billing' } = {},
 ): Promise<TestUser> {
   await ensureSeed();
   const id = newId('usr');
@@ -73,8 +73,8 @@ export async function createPortalUser(
     ).bind(id, email, await defaultHash(), opts.status ?? 'active', new Date().toISOString()),
     ...clientIds.map((cid) =>
       env.DB.prepare(
-        "INSERT INTO client_user_access (id, client_id, user_id, role, status) VALUES (?, ?, ?, 'owner', 'active')",
-      ).bind(newId('cua'), cid, id),
+        "INSERT INTO client_user_access (id, client_id, user_id, role, status) VALUES (?, ?, ?, ?, 'active')",
+      ).bind(newId('cua'), cid, id, opts.role ?? 'owner'),
     ),
   ]);
   return { id, email, password: DEFAULT_PASSWORD };

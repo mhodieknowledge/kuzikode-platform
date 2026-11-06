@@ -110,3 +110,31 @@ test('mobile: navigation opens in a drawer', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 2, name: 'Two-factor authentication' })).toBeVisible();
   await expectAccessible(page);
 });
+
+test('dashboard: KPI tiles, per-currency charts with a table view, lists (P4.17)', async ({ page }) => {
+  await signIn(page, E2E_USERS.admin.email, '/admin');
+  await expect(page).toHaveURL(/\/admin$/);
+  const tiles = page.getByTestId('kpi-tiles');
+  for (const label of [
+    'Revenue received (all time)',
+    'Revenue this month',
+    'Outstanding',
+    'Overdue',
+    'Pending quotations',
+  ])
+    await expect(tiles.locator(`[data-tile="${label}"]`)).toBeVisible();
+  await expect(page.getByText('Invoices issued vs paid per month')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Recent payments' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Recent activity' })).toBeVisible();
+  const table = page.locator('figure').filter({ hasText: 'Invoices issued vs paid' }).locator('details');
+  await table.locator('summary').click();
+  await expect(table.getByRole('columnheader', { name: 'Paid' })).toBeVisible();
+  await expectAccessible(page);
+  await screenshots(page, 'admin-dashboard');
+  // Support staff: no financial tiles or charts.
+  await page.context().clearCookies();
+  await signIn(page, E2E_USERS.support.email, '/admin');
+  await expect(page).toHaveURL(/\/admin$/);
+  await expect(page.getByText('Revenue received (all time)')).toHaveCount(0);
+  await expect(page.getByText('Invoices issued vs paid per month')).toHaveCount(0);
+});

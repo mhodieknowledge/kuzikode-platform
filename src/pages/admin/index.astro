@@ -2,11 +2,101 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { loadAdminPage } from '../../server/lib/admin-page';
 import { listNotifications } from '../../server/modules/notifications';
+import { getDashboard, type CurrencyAmount } from '../../server/modules/dashboard';
+import BarChart from '../../components/admin/BarChart.astro';
+import { formatMoney } from '../../shared/money';
+import { MANUAL_PAYMENT_METHODS } from '../../shared/invoices';
 
 const { ctx } = Astro.locals;
 const page = await loadAdminPage(ctx, Astro.request);
 if (page instanceof Response) return page;
-const { items } = await listNotifications(ctx, page.auth.user.id, { limit: 5 });
+const [{ items }, d] = await Promise.all([listNotifications(ctx, page.auth.user.id, { limit: 5 }), getDashboard(ctx)]);
+const dateFmt = (ymd: string) =>
+  new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(
+    new Date(`${ymd}T00:00:00Z`),
+  );
+const methods = new Map<string, string>(MANUAL_PAYMENT_METHODS.map((m) => [m.value, m.label.replace(' (manual)', '')]));
+/** Amounts per currency, never added together. */
+const perCurrency = (list: CurrencyAmount[]) => list.map((a) => formatMoney(a.amountMinor, a.currency));
+const compact = (currency: string) => (minor: number) =>
+  `${currency} ${new Intl.NumberFormat('en-GB', { notation: 'compact', maximumFractionDigits: 1 }).format(minor / 100)}`;
+const ENTITY_PATHS: Record<string, string> = {
+  client: 'clients',
+  invoice: 'invoices',
+  quotation: 'quotations',
+  project: 'projects',
+  support_request: 'support',
+  payment: 'payments',
+  enquiry: 'enquiries',
+  lead: 'leads',
+  expense: 'expenses',
+  user: 'users',
+};
+const entityLink = (type: string | null, id: string | null) =>
+  type && id && ENTITY_PATHS[type] ? `/admin/${ENTITY_PATHS[type]}/${encodeURIComponent(id)}` : null;
+const actionLabel = (a: string) => {
+  const t = a.replace(/[._]/g, ' ').trim();
+  return t.charAt(0).toUpperCase() + t.slice(1);
+};
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+interface Tile {
+  label: string;
+  values: string[];
+  note?: string;
+  href?: string;
+}
+const tiles: Tile[] = [];
+if (d.financial) {
+  const f = d.financial;
+  tiles.push(
+    { label: 'Revenue received (all time)', values: perCurrency(f.revenueAllTime), href: '/admin/payments' },
+    { label: 'Revenue this month', values: perCurrency(f.revenueThisMonth), href: '/admin/payments' },
+    {
+      label: 'Outstanding',
+      values: perCurrency(f.outstanding),
+      note: plural(
+        f.outstanding.reduce((n, a) => n + (a.count ?? 0), 0),
+        'open invoice',
+      ),
+      href: '/admin/invoices',
+    },
+    {
+      label: 'Overdue',
+      values: perCurrency(f.overdue),
+      note: plural(
+        f.overdue.reduce((n, a) => n + (a.count ?? 0), 0),
+        'overdue invoice',
+      ),
+      href: '/admin/invoices?status=overdue',
+    },
+  );
+}
+if (d.quotations)
+  tiles.push({
+    label: 'Pending quotations',
+    values: [String(d.quotations.pending)],
+    ...(d.quotations.pendingValue.length ? { note: perCurrency(d.quotations.pendingValue).join(' · ') } : {}),
+    href: '/admin/quotations',
+  });
+if (d.projects)
+  tiles.push(
+    { label: 'Active projects', values: [String(d.projects.active)], href: '/admin/projects' },
+    { label: 'Completed projects', values: [String(d.projects.completed)], href: '/admin/projects?status=completed' },
+  );
+if (d.enquiries)
+  tiles.push({
+    label: 'New enquiries (7 days)',
+    values: [String(d.enquiries.last7Days)],
+    note: `${d.enquiries.briefs7Days} project ${d.enquiries.briefs7Days === 1 ? 'brief' : 'briefs'}`,
+    href: '/admin/enquiries',
+  });
+if (d.careers)
+  tiles.push({
+    label: 'Open roles',
+    values: [String(d.careers.openRoles)],
+    note: `${d.careers.newApplicants7Days} new ${d.careers.newApplicants7Days === 1 ? 'applicant' : 'applicants'} this week`,
+  });
+const card = 'rounded-lg border border-line bg-surface p-6';
 const sections = page.nav.flatMap((g) => g.items).filter((i) => i.href !== '/admin');
 const firstName = page.auth.user.name.split(/\s+/)[0] ?? page.auth.user.name;
 const fmt = (iso: string) =>
@@ -18,6 +108,200 @@ const fmt = (iso: string) =>
 <AdminLayout title="Dashboard" page={page}>
   <h1 class="text-2xl font-bold tracking-display">Welcome, {firstName}</h1>
   <p class="mt-1 text-ink-600">Press ⌘K (Ctrl+K on Windows) to find a client, invoice, quotation or project.</p>
+  {tiles.length > 0 ? (
+    <section aria-labelledby="kpi-title" class="mt-8">
+      <h2 id="kpi-title" class="sr-only">
+        Key figures
+      </h2>
+      <ul class="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4" data-testid="kpi-tiles">
+        {tiles.map((t) => (
+          <li class="min-w-0 rounded-lg border border-line bg-surface p-4 sm:p-5" data-tile={t.label}>
+            <p class="text-[13px] font-medium text-ink-600">{t.label}</p>
+            {t.values.length === 0 ? (
+              <p class="mt-1 text-xl font-bold text-ink-600">None</p>
+            ) : (
+              t.values.map((v) => <p class="tnum mt-1 text-xl font-bold text-ink-950">{v}</p>)
+            )}
+            {t.note ? <p class="mt-1 text-[13px] text-ink-600">{t.note}</p> : null}
+            {t.href ? (
+              <a href={t.href} class="mt-2 inline-flex text-[13px] font-semibold text-brand-600 hover:underline">
+                View<span class="sr-only"> {t.label.toLowerCase()}</span>
+              </a>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </section>
+  ) : null}
+  {d.financial ? (
+    <div class="mt-6 grid gap-6 lg:grid-cols-2">
+      <section class={card} aria-label="Monthly revenue received">
+        {d.financial.charts.revenue.length === 0 ? (
+          <BarChart
+            id="revenue-none"
+            title="Revenue received per month"
+            months={d.financial.charts.months}
+            series={[{ label: 'Revenue', values: d.financial.charts.months.map(() => 0), color: 'var(--brand-600)' }]}
+            format={(v) => String(v)}
+          />
+        ) : (
+          <div class="flex flex-col gap-8">
+            {d.financial.charts.revenue.map((r) => (
+              <BarChart
+                id={`revenue-${r.currency}`}
+                title={`Revenue received per month (${r.currency})`}
+                months={d.financial!.charts.months}
+                series={[{ label: r.currency, values: r.values, color: 'var(--brand-600)' }]}
+                format={(v) => formatMoney(v, r.currency)}
+                tick={compact(r.currency)}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+      <section class={card} aria-label="Invoices issued and paid">
+        <BarChart
+          id="invoices-issued-paid"
+          title="Invoices issued vs paid per month"
+          months={d.financial.charts.months}
+          series={[
+            { label: 'Issued', values: d.financial.charts.issued, color: 'var(--brand-600)' },
+            { label: 'Paid', values: d.financial.charts.paid, color: 'var(--accent-500)' },
+          ]}
+          format={(v) => `${v} ${v === 1 ? 'invoice' : 'invoices'}`}
+          tick={(v) => (Number.isInteger(v) ? String(v) : '')}
+        />
+      </section>
+    </div>
+  ) : null}
+  <div class="mt-6 grid gap-6 lg:grid-cols-2">
+    {d.recentPayments ? (
+      <section class={card} aria-labelledby="payments-title">
+        <div class="flex items-center justify-between">
+          <h2 id="payments-title" class="font-sans text-base font-semibold">
+            Recent payments
+          </h2>
+          <a href="/admin/payments" class="text-sm font-semibold text-brand-600">
+            See all<span class="sr-only"> payments</span>
+          </a>
+        </div>
+        {d.recentPayments.length === 0 ? (
+          <p class="mt-4 text-sm text-ink-600">No payments recorded yet.</p>
+        ) : (
+          <ul class="mt-3 divide-y divide-line">
+            {d.recentPayments.map((p) => (
+              <li class="flex items-start justify-between gap-3 py-3">
+                <div class="min-w-0">
+                  <a href={`/admin/payments/${p.id}`} class="text-sm font-semibold text-ink-950 hover:underline">
+                    {p.client}
+                  </a>
+                  <p class="text-[12px] text-ink-600">
+                    {p.receiptNumber} · {methods.get(p.method) ?? p.method} · {fmt(p.receivedAt)}
+                    {p.providerReference ? ` · Ref ${p.providerReference}` : ''}
+                  </p>
+                </div>
+                <p class="tnum shrink-0 text-sm font-semibold text-ink-950">{formatMoney(p.amountMinor, p.currency)}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    ) : null}
+    {d.dueInvoices ? (
+      <section class={card} aria-labelledby="due-title">
+        <div class="flex items-center justify-between">
+          <h2 id="due-title" class="font-sans text-base font-semibold">
+            Invoices due in the next 14 days
+          </h2>
+          <a href="/admin/invoices" class="text-sm font-semibold text-brand-600">
+            See all<span class="sr-only"> invoices</span>
+          </a>
+        </div>
+        {d.dueInvoices.length === 0 ? (
+          <p class="mt-4 text-sm text-ink-600">No open invoices fall due in the next two weeks.</p>
+        ) : (
+          <ul class="mt-3 divide-y divide-line">
+            {d.dueInvoices.map((i) => (
+              <li class="flex items-start justify-between gap-3 py-3">
+                <div class="min-w-0">
+                  <a href={`/admin/invoices/${i.id}`} class="text-sm font-semibold text-ink-950 hover:underline">
+                    {i.number}
+                  </a>
+                  <p class="text-[12px] text-ink-600">
+                    {i.client} · due {dateFmt(i.dueDate)}
+                  </p>
+                </div>
+                <p class="tnum shrink-0 text-sm font-semibold text-ink-950">
+                  {formatMoney(i.balanceMinor, i.currency)}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    ) : null}
+    {d.projects ? (
+      <section class={card} aria-labelledby="milestones-title">
+        <div class="flex items-center justify-between">
+          <h2 id="milestones-title" class="font-sans text-base font-semibold">
+            Upcoming milestones
+          </h2>
+          <a href="/admin/projects" class="text-sm font-semibold text-brand-600">
+            See all<span class="sr-only"> projects</span>
+          </a>
+        </div>
+        {d.projects.upcomingMilestones.length === 0 ? (
+          <p class="mt-4 text-sm text-ink-600">No milestones are due in the next 30 days.</p>
+        ) : (
+          <ul class="mt-3 divide-y divide-line">
+            {d.projects.upcomingMilestones.map((m) => (
+              <li class="flex items-start justify-between gap-3 py-3">
+                <div class="min-w-0">
+                  <a href={`/admin/projects/${m.projectId}`} class="text-sm font-semibold text-ink-950 hover:underline">
+                    {m.title}
+                  </a>
+                  <p class="text-[12px] text-ink-600">
+                    {m.reference} · {m.projectName}
+                  </p>
+                </div>
+                <p class="shrink-0 text-[13px] text-ink-800">{dateFmt(m.dueDate)}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    ) : null}
+    {d.activity ? (
+      <section class={card} aria-labelledby="activity-title">
+        <h2 id="activity-title" class="font-sans text-base font-semibold">
+          Recent activity
+        </h2>
+        {d.activity.length === 0 ? (
+          <p class="mt-4 text-sm text-ink-600">No activity yet.</p>
+        ) : (
+          <ul class="mt-3 divide-y divide-line">
+            {d.activity.map((a) => {
+              const link = entityLink(a.entityType, a.entityId);
+              return (
+                <li class="py-3">
+                  {link ? (
+                    <a href={link} class="text-sm font-semibold text-ink-950 hover:underline">
+                      {actionLabel(a.action)}
+                    </a>
+                  ) : (
+                    <p class="text-sm font-semibold text-ink-950">{actionLabel(a.action)}</p>
+                  )}
+                  <p class="text-[12px] text-ink-600">
+                    {a.actor ?? 'System'} · {fmt(a.createdAt)}
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+    ) : null}
+  </div>
   <div class="mt-8 grid gap-6 lg:grid-cols-2">
     <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="recent-title">
       <div class="flex items-center justify-between">

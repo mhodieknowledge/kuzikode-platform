@@ -72,7 +72,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P4.14 Support inbox** (threads, internal notes, assignment, statuses, attachments). AC: tests.
 - [x] **P4.15 CMS editors** (pages/sections draft→preview→publish, portfolio, products, announcements, legal, SEO fields, media library with alt text required, publish bumps content_version). AC: preview doesn't leak drafts publicly.
 - [x] **P4.16 Notifications** (in-app list, read/unread, preferences, email dispatch per prefs, all types in PRD §4.2 J). AC: one test per type trigger.
-- [ ] **P4.17 Dashboard** (KPIs per currency, charts, recent lists, permission-filtered tiles). AC: figures match fixtures exactly in a test.
+- [x] **P4.17 Dashboard** (KPIs per currency, charts, recent lists, permission-filtered tiles). AC: figures match fixtures exactly in a test.
 - [ ] **P4.19 Packages & pricing admin** (packages, features, add-ons, comparison order, price-review flag + dashboard warning, "Add package" in quotation editor). AC: price-copy test.
 - [ ] **P4.20 Subscriptions & recurring billing** + **managed services register** with renewal reminders and portal "Your services". AC: double-run cron test. MRR tile correct.
 - [ ] **P4.21 Careers admin** (postings, custom questions, pipeline kanban, ratings, notes, templated emails, bulk reject, retention job, Hiring Manager role). AC: tests.

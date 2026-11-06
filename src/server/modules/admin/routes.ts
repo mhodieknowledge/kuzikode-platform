@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { csrfProtect, requireAuth, withAuth } from '../../middleware/auth';
 import type { ApiEnv } from '../../middleware/request-context';
 import { jsonBody, query } from '../../middleware/validate';
+import { getDashboard } from '../dashboard';
 import { listNotifications, markNotificationsRead } from '../notifications';
 import { adminSearch } from './search';
 
@@ -27,6 +28,8 @@ export function adminShellRoutes() {
     const { q } = query(c, searchQuery);
     return c.json({ data: await adminSearch(c.var.ctx, c.var.ctx.auth!, q) });
   });
+  // Figures are filtered by permission inside the service (sections the caller can't see are null).
+  r.get('/dashboard', async (c) => c.json({ data: await getDashboard(c.var.ctx) }));
   r.get('/notifications', async (c) => {
     const { limit, unread } = query(c, listQuery);
     return c.json({

@@ -334,3 +334,17 @@ The **Next step** line must be specific enough that a fresh session can continue
   preferences, email dispatch double-run, job-failed in-app only, mark-read ownership); support test now checks actor exclusion;
   e2e admin-shell covers the filter. verify: unit 229 / integration 189 green; e2e admin-shell 5/5.
 - Next step: P4.17 Dashboard (KPIs per currency, charts, recent lists, permission-filtered tiles; test figures against fixtures).
+
+## 2026-11-06 12:45 UTC · P4.17 Dashboard ✅
+- `modules/dashboard`: `getDashboard` (permission-filtered sections; null when not allowed): revenue all time / this month (net of
+  refunds, reversals excluded), outstanding + overdue per currency with counts, 12-month revenue per currency, invoices issued vs
+  paid per month, pending quotations (count + value per currency), active/completed projects (member-scoped without
+  projects.view_all), upcoming milestones (30 days), new enquiries + wizard briefs (7 days), open roles + new applicants, recent
+  payments (with provider reference), invoices due in 14 days, recent business activity. `GET /api/v1/admin/dashboard`.
+- UI: /admin KPI tiles (2-up on phones), `components/admin/BarChart.astro` (SVG, tooltips, table view), lists; notifications and
+  account cards kept below.
+- Tests: integration `dashboard.test.ts` (4: exact figures from fixtures incl. Harare month boundary, refunds, reversed/draft/void,
+  member scoping, API parity + role filtering) · e2e admin-shell dashboard test (tiles, table view, axe, 375/768/1440, support staff
+  sees no financial tiles).
+- Next step: P4.19 Packages & pricing admin (packages, features, add-ons, comparison order, price-review flag + dashboard warning
+  tile, "Add package" in the quotation editor; price-copy test).

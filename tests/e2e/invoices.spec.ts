@@ -134,6 +134,30 @@ test('draft invoice → issued and emailed → client views and downloads the PD
   await expect(page.getByRole('link', { name: 'Download receipt' })).toBeVisible();
   await expectAccessible(page);
 
+  // Expenses (P4.13): record one with a receipt, see it in the list and the report.
+  await page.goto('/admin/expenses/new');
+  await hydrated(page, 'Record expense');
+  await page.getByLabel('Category').selectOption({ label: 'Hosting & cloud' });
+  await page.getByLabel('Description').fill(`Hosting for ${clientName}`);
+  await page.getByLabel('Amount (USD)').fill('35.50');
+  await page.getByLabel('Vendor').fill('Example Cloud');
+  await page.locator('input[type="file"]').setInputFiles({
+    name: 'receipt.pdf',
+    mimeType: 'application/pdf',
+    buffer: Buffer.from('%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n'),
+  });
+  await page.getByRole('button', { name: 'Record expense' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: `$35.50 · Hosting for ${clientName}` })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'View receipt' })).toBeVisible();
+  await expectAccessible(page);
+  await page.goto(`/admin/expenses?q=${encodeURIComponent(clientName)}`);
+  await expect(page.getByRole('link', { name: `Hosting for ${clientName}` })).toBeVisible();
+  await expectAccessible(page);
+  await screenshots(page, 'admin-expenses');
+  await page.goto('/admin/expenses/report');
+  await expect(page.getByRole('heading', { level: 2, name: 'By category' })).toBeVisible();
+  await expectAccessible(page);
+
   await client.reload();
   await expect(client.getByText('Paid in full. Thank you.')).toBeVisible();
   await clientContext.close();

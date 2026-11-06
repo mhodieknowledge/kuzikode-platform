@@ -5,11 +5,13 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phase 1, 2 and 3 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 4 (administration) in progress.
-- Last completed task: **P4.12 Projects** (P4.1–P4.12 done).
-- **Next step:** P4.13 Expenses — `server/modules/expenses` (CRUD on `expenses` + `expense_categories` (seeded), amount minor +
-  currency, payment method, reference, optional project/client, receipt upload via `storeUpload` purpose 'receipt' owner 'expense',
-  void with reason instead of delete, reports by category/month/currency, CSV export with the label "Expense records. This is not a
-  statutory accounting system."), admin pages `/admin/expenses*`, nav item `built: true`. Then P4.14 Support inbox.
+- Last completed task: **P4.13 Expenses** (P4.1–P4.13 done).
+- **Next step:** P4.14 Support inbox — `server/modules/support` over `support_requests`/`support_messages`/`support_attachments`
+  (read migrations/0007 first): SUP reference via `numbering.support`, staff list with filters (status, priority, assignee, client),
+  thread view with client messages vs internal notes (`is_internal_note`), assignment, status changes (open/awaiting_client/resolved/
+  closed), attachments via `storeUpload` owner 'support' (portal access already checks `is_internal_note = 0`), notifications
+  `support.created`/`support.replied`, emails to the client on staff replies. Client-side creation comes with the portal (Phase 5);
+  build a staff "New request on behalf of client" form so the inbox is usable now. Nav item `Support` → `built: true`.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 
 ---
@@ -281,4 +283,14 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Tests: integration `projects.test.ts` (6: numbering + scoping, progress auto/manual, assignee moves, quotation → project ×3
   concurrent, client updates/notifications/email, files + visibility + portal/staff access) · e2e quotations spec covers docs/08
   step 15. verify: unit 227 / integration 170 green; e2e 58/58 (quotations re-run green after an a11y underline fix).
+
+## 2026-11-06 09:20 UTC · P4.13 Expenses ✅
+- `modules/expenses`: list with filters (status, category, currency, project, client, dates, search) and per-currency totals; record/
+  edit (project implies client; mismatches refused), void with reason (conditional audit), receipt upload (`storeUpload` 'receipt',
+  owner 'expense'), categories (unique names; used ones only deactivate), report by category and by month per currency, CSV export
+  (disclaimer line, RFC 4180 quoting, spreadsheet-formula cells prefixed with an apostrophe, audited).
+- UI: /admin/expenses (filters, totals, Report, Categories, Export CSV, Record expense), /new, /[id] (edit form with receipt or read-only
+  view, void), /categories, /report. Expenses nav on.
+- Tests: integration `expenses.test.ts` (3) · e2e invoices spec records an expense with a receipt and opens the report.
+  verify: unit 227 / integration 173 green; e2e 58/58 green.
 

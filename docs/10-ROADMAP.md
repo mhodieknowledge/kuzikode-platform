@@ -68,7 +68,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P4.10 Credit notes** (from invoice, full/partial, numbering, PDF, effect on balance/credits/refund). AC: balance tests.
 - [x] **P4.11 Payments admin** (list/filter/detail timeline, reconcile button, unmatched queue, manual refund recording). AC: tests.
 - [x] **P4.12 Projects** (CRUD, from quotation, members, milestones, tasks board/list, progress auto/manual, internal notes, client updates + notify, files/deliverables, messages, activity). AC: e2e step 15.
-- [ ] **P4.13 Expenses** (CRUD, categories, receipts, void, reports, CSV). AC: tests.
+- [x] **P4.13 Expenses** (CRUD, categories, receipts, void, reports, CSV). AC: tests.
 - [ ] **P4.14 Support inbox** (threads, internal notes, assignment, statuses, attachments). AC: tests.
 - [ ] **P4.15 CMS editors** (pages/sections draft→preview→publish, portfolio, products, announcements, legal, SEO fields, media library with alt text required, publish bumps content_version). AC: preview doesn't leak drafts publicly.
 - [ ] **P4.16 Notifications** (in-app list, read/unread, preferences, email dispatch per prefs, all types in PRD §4.2 J). AC: one test per type trigger.

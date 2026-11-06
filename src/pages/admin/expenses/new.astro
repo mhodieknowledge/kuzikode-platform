@@ -1,0 +1,39 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { ExpenseForm } from '../../../components/admin/ExpensesAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { businessDate } from '../../../server/lib/dates';
+import { formOptions } from '../../../server/modules/expenses';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'expenses.manage' });
+if (page instanceof Response) return page;
+const opts = await formOptions(ctx);
+const projectId = Astro.url.searchParams.get('projectId');
+const initial = {
+  categoryId: '',
+  expenseDate: businessDate(ctx.now()),
+  vendor: null,
+  description: '',
+  amountMinor: null,
+  currency: opts.currencies[0]?.code ?? 'USD',
+  paymentMethod: null,
+  reference: null,
+  projectId: opts.projects.some((p) => p.id === projectId) ? projectId : null,
+  clientId: null,
+  notes: null,
+};
+---
+
+<AdminLayout title="Record expense" page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/expenses" class="hover:text-ink-950 hover:underline">
+      Expenses
+    </a>{' '}
+    / <span class="text-ink-950">New</span>
+  </nav>
+  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">Record expense</h1>
+  <div class="max-w-3xl">
+    <ExpenseForm client:load initial={initial} hasReceipt={false} {...opts} />
+  </div>
+</AdminLayout>

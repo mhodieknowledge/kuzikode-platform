@@ -1,0 +1,27 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { CategoriesManager } from '../../../components/admin/ExpensesAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { listCategories } from '../../../server/modules/expenses';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'expenses.view' });
+if (page instanceof Response) return page;
+const categories = await listCategories(ctx);
+---
+
+<AdminLayout title="Expense categories" page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/expenses" class="hover:text-ink-950 hover:underline">
+      Expenses
+    </a>{' '}
+    / <span class="text-ink-950">Categories</span>
+  </nav>
+  <h1 class="mt-2 mb-2 text-2xl font-bold tracking-display">Expense categories</h1>
+  <p class="mb-6 text-sm text-ink-600">
+    Categories in use can be deactivated but not deleted, so past records keep them.
+  </p>
+  <div class="max-w-3xl">
+    <CategoriesManager client:load categories={categories} canManage={page.auth.permissions.has('expenses.manage')} />
+  </div>
+</AdminLayout>

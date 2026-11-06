@@ -1,0 +1,105 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { ExpenseForm, VoidExpense } from '../../../components/admin/ExpensesAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { AppError } from '../../../server/lib/errors';
+import { formOptions, getExpense } from '../../../server/modules/expenses';
+import { EXPENSE_PAYMENT_METHODS } from '../../../shared/schemas/expenses';
+import { formatMoney } from '../../../shared/money';
+import { formatLongDate } from '../../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'expenses.view' });
+if (page instanceof Response) return page;
+let data;
+try {
+  data = await getExpense(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND')
+    return new Response(null, { status: 404, statusText: 'Not found' });
+  throw err;
+}
+const e = data.expense;
+const canEdit = page.auth.permissions.has('expenses.manage') && e.status === 'recorded';
+const opts = canEdit ? await formOptions(ctx) : null;
+if (opts && !opts.categories.some((c) => c.id === e.category_id))
+  opts.categories.push({ id: e.category_id, name: `${e.category} (inactive)` });
+if (opts && e.project_id && !opts.projects.some((p) => p.id === e.project_id))
+  opts.projects.push({ id: e.project_id, label: `${e.project_reference} · ${e.project_name}` });
+const method = EXPENSE_PAYMENT_METHODS.find((m) => m.value === e.payment_method)?.label;
+---
+
+<AdminLayout title={e.description} page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/expenses" class="hover:text-ink-950 hover:underline">
+      Expenses
+    </a>{' '}
+    / <span class="text-ink-950">{e.description}</span>
+  </nav>
+  <div class="mt-2 flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-display">
+        {formatMoney(e.amount_minor, e.currency)} · {e.description}
+      </h1>
+      <p class="mt-1 text-sm text-ink-600">
+        {formatLongDate(e.expense_date)} · {e.category}
+        {e.status === 'void' ? ' · void' : ''}
+        {data.recordedBy ? ` · recorded by ${data.recordedBy}` : ''}
+      </p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      {e.receipt_file_id ? (
+        <a
+          href={`/api/v1/admin/files/${e.receipt_file_id}`}
+          class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+        >
+          View receipt
+        </a>
+      ) : null}
+      {canEdit ? <VoidExpense client:load id={e.id} /> : null}
+    </div>
+  </div>
+  {e.status === 'void' ? (
+    <p role="status" class="mt-4 rounded-sm border border-line bg-surface px-4 py-3 text-sm text-ink-800">
+      Voided: {e.void_reason}
+    </p>
+  ) : null}
+  <div class="mt-6 max-w-3xl">
+    {opts ? (
+      <ExpenseForm
+        client:load
+        id={e.id}
+        hasReceipt={!!e.receipt_file_id}
+        initial={{
+          categoryId: e.category_id,
+          expenseDate: e.expense_date,
+          vendor: e.vendor,
+          description: e.description,
+          amountMinor: e.amount_minor,
+          currency: e.currency,
+          paymentMethod: e.payment_method,
+          reference: e.reference,
+          projectId: e.project_id,
+          clientId: e.client_id,
+          notes: e.notes,
+        }}
+        {...opts}
+      />
+    ) : (
+      <dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 rounded-lg border border-line bg-surface p-6 text-sm">
+        <dt class="text-ink-600">Vendor</dt>
+        <dd>{e.vendor ?? '—'}</dd>
+        <dt class="text-ink-600">Payment method</dt>
+        <dd>{method ?? '—'}</dd>
+        <dt class="text-ink-600">Reference</dt>
+        <dd>{e.reference ?? '—'}</dd>
+        <dt class="text-ink-600">Project</dt>
+        <dd>{e.project_reference ? `${e.project_reference} · ${e.project_name}` : '—'}</dd>
+        <dt class="text-ink-600">Client</dt>
+        <dd>{e.client_name ?? '—'}</dd>
+        <dt class="text-ink-600">Notes</dt>
+        <dd class="whitespace-pre-line">{e.notes ?? '—'}</dd>
+      </dl>
+    )}
+  </div>
+</AdminLayout>

@@ -6,6 +6,7 @@ import type { Permission } from '../../../shared/permissions';
 import type { RequestContext } from '../../context';
 import { addDays, addMonths, businessDate } from '../../lib/dates';
 import { can } from '../../lib/policies';
+import { recurringRevenue, upcomingRenewals } from '../subscriptions';
 
 /** Harare has no DST, so a fixed offset converts stored UTC timestamps to business dates inside SQL. */
 const HARARE = '+2 hours';
@@ -49,6 +50,13 @@ export interface Dashboard {
     }[];
   };
   enquiries: null | { last7Days: number; briefs7Days: number };
+  /** Monthly / annual recurring revenue per currency (net of tax) from billing subscriptions. */
+  recurring: null | { currency: string; mrrMinor: number; arrMinor: number; count: number }[];
+  /** Subscription billing dates and register renewals in the next 30 days. */
+  renewals: null | {
+    total: number;
+    items: { kind: 'subscription' | 'asset'; id: string; name: string; date: string; client: string; href: string }[];
+  };
   /** Active packages whose prices await approval (docs/12 §D): a warning until a reviewer approves them. */
   priceReview: null | number;
   careers: null | { openRoles: number; newApplicants7Days: number };
@@ -198,6 +206,8 @@ export async function getDashboard(ctx: RequestContext): Promise<Dashboard> {
     projects: null,
     enquiries: null,
     priceReview: null,
+    recurring: null,
+    renewals: null,
     careers: null,
     recentPayments: null,
     dueInvoices: null,
@@ -271,6 +281,16 @@ export async function getDashboard(ctx: RequestContext): Promise<Dashboard> {
       .bind(weekAgo)
       .first<{ n: number; briefs: number | null }>();
     d.enquiries = { last7Days: r?.n ?? 0, briefs7Days: r?.briefs ?? 0 };
+  }
+
+  if (can(ctx, 'subscriptions.view')) d.recurring = await recurringRevenue(ctx);
+  if (anyOf(ctx, 'subscriptions.view', 'client_assets.manage')) {
+    const all = await upcomingRenewals(ctx, 30);
+    // Staff without the register see subscription dates only, and vice versa.
+    const visible = all.filter((r) =>
+      r.kind === 'subscription' ? can(ctx, 'subscriptions.view') : can(ctx, 'client_assets.manage'),
+    );
+    d.renewals = { total: visible.length, items: visible.slice(0, 6) };
   }
 
   if (anyOf(ctx, 'packages.manage', 'packages.price_review')) {

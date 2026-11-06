@@ -22,6 +22,7 @@ import { canTransition, OPEN_FOR_RESPONSE, REVISABLE, type QuotationStatus } fro
 import type { QuotationInput } from '../../../shared/schemas/quotations';
 import type { Permission } from '../../../shared/permissions';
 import { getSettings, settingNumber, settingText } from '../cms';
+import { subscriptionsFromQuotationStmt } from '../subscriptions/service';
 import { notifyStaffWithPermission, notifyUser } from '../notifications';
 
 export const PAGE_SIZE = 25;
@@ -832,6 +833,17 @@ async function respond(ctx: RequestContext, q: QuotationRow, d: Decision): Promi
         now,
         accept ? 'accepted' : 'rejected',
       ),
+    )
+    // Recurring lines become subscriptions once the client accepts (docs/12 §A.3); the guard ties them to this acceptance.
+    .addAll(
+      accept
+        ? [
+            subscriptionsFromQuotationStmt(ctx, q.id, {
+              sql: "EXISTS (SELECT 1 FROM quotations WHERE id = ? AND updated_at = ? AND status = 'accepted')",
+              params: [q.id, now],
+            }),
+          ]
+        : [],
     )
     .add(
       notifyStaffWithPermission(ctx, 'quotations.view', {

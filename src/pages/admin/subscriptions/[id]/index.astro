@@ -1,0 +1,181 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { SubscriptionActions } from '../../../../components/admin/SubscriptionsAdmin';
+import { loadAdminPage } from '../../../../server/lib/admin-page';
+import { AppError } from '../../../../server/lib/errors';
+import { ASSET_TYPE_LABELS, getSubscription, periodLabel } from '../../../../server/modules/subscriptions';
+import { formatMoney, formatQuantity } from '../../../../shared/money';
+import { formatLongDate } from '../../../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'subscriptions.view' });
+if (page instanceof Response) return page;
+let data;
+try {
+  data = await getSubscription(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND')
+    return new Response(null, { status: 404, statusText: 'Not found' });
+  throw err;
+}
+const s = data.subscription;
+const canManage = page.auth.permissions.has('subscriptions.manage');
+const STATUS: Record<string, { label: string; cls: string }> = {
+  active: { label: 'Active', cls: 'bg-success-50 text-success-700' },
+  at_risk: { label: 'At risk: an invoice is long overdue', cls: 'bg-danger-50 text-danger-700' },
+  paused: { label: 'Paused', cls: 'bg-warning-50 text-warning-700' },
+  cancelled: { label: 'Cancelled', cls: 'bg-ink-950/5 text-ink-800' },
+  ended: { label: 'Ended', cls: 'bg-ink-950/5 text-ink-800' },
+};
+const INVOICE: Record<string, string> = {
+  draft: 'Draft',
+  issued: 'Issued',
+  partially_paid: 'Part paid',
+  paid: 'Paid',
+  overdue: 'Overdue',
+  void: 'Void',
+};
+const fmt = (m: number) => formatMoney(m, s.currency);
+const saved = Astro.url.searchParams.get('saved') === '1';
+const card = 'rounded-lg border border-line bg-surface p-6';
+---
+
+<AdminLayout title={s.description} page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/subscriptions" class="hover:text-ink-950 hover:underline">
+      Subscriptions
+    </a>{' '}
+    / <span class="text-ink-950">{s.description}</span>
+  </nav>
+  <div class="mt-2 flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold tracking-display">{s.description}</h1>
+      <p class="mt-1 text-sm text-ink-600">
+        <a href={`/admin/clients/${data.client.id}`} class="font-semibold text-ink-950 hover:underline">
+          {data.client.display_name}
+        </a>
+        {data.package ? ` · ${data.package.name}` : ''}
+        {data.quotation?.number ? (
+          <>
+            {' '}
+            · from{' '}
+            <a href={`/admin/quotations/${data.quotation.id}`} class="underline">
+              {data.quotation.number}
+            </a>
+          </>
+        ) : null}
+      </p>
+      <p class="mt-2">
+        <span class={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${STATUS[s.status]?.cls ?? ''}`}>
+          {STATUS[s.status]?.label ?? s.status}
+        </span>
+      </p>
+    </div>
+    {canManage && ['active', 'at_risk', 'paused'].includes(s.status) ? (
+      <SubscriptionActions client:load id={s.id} status={s.status} />
+    ) : null}
+  </div>
+  {saved ? (
+    <p
+      role="status"
+      class="mt-4 rounded-sm border border-success-700/30 bg-success-50 px-4 py-3 text-sm text-success-700"
+    >
+      Saved. Changes apply to periods that haven't been invoiced yet.
+    </p>
+  ) : null}
+  <div class="mt-6 grid items-start gap-6 lg:grid-cols-2">
+    <section class={card} aria-labelledby="terms-title">
+      <h2 id="terms-title" class="font-sans text-base font-semibold">
+        Billing terms
+      </h2>
+      <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+        <dt class="text-ink-600">Quantity</dt>
+        <dd class="tnum text-ink-950">{formatQuantity(s.quantity_milli)}</dd>
+        <dt class="text-ink-600">Unit price</dt>
+        <dd class="tnum text-ink-950">
+          {fmt(s.unit_price_minor)} per {s.interval === 'month' ? 'month' : 'year'}
+        </dd>
+        <dt class="text-ink-600">Started</dt>
+        <dd class="text-ink-950">{formatLongDate(s.start_date)}</dd>
+        <dt class="text-ink-600">Invoices</dt>
+        <dd class="text-ink-950">
+          {s.auto_issue === 1 ? 'Issued and emailed automatically' : 'Created as drafts for review'}
+        </dd>
+        {s.cancelled_at ? (
+          <>
+            <dt class="text-ink-600">Cancelled</dt>
+            <dd class="text-ink-950">
+              {formatLongDate(s.cancelled_at)}
+              {s.cancel_reason ? ` · ${s.cancel_reason}` : ''}
+            </dd>
+          </>
+        ) : null}
+      </dl>
+    </section>
+    <section class={card} aria-labelledby="next-title">
+      <h2 id="next-title" class="font-sans text-base font-semibold">
+        Next invoice
+      </h2>
+      {data.nextInvoice ? (
+        <div class="mt-4 text-sm" data-testid="next-invoice">
+          <p class="text-ink-950">{data.nextInvoice.description}</p>
+          <p class="mt-1 text-ink-600">
+            {s.status === 'paused'
+              ? 'Not billed while paused.'
+              : `Created on or before ${formatLongDate(s.next_billing_date)}.`}
+          </p>
+          <dl class="mt-3 grid grid-cols-2 gap-y-1">
+            <dt class="text-ink-600">Subtotal</dt>
+            <dd class="tnum text-right text-ink-950">{fmt(data.nextInvoice.subtotalMinor)}</dd>
+            <dt class="text-ink-600">Tax</dt>
+            <dd class="tnum text-right text-ink-950">{fmt(data.nextInvoice.taxMinor)}</dd>
+            <dt class="font-semibold text-ink-950">Total</dt>
+            <dd class="tnum text-right font-semibold text-ink-950">{fmt(data.nextInvoice.totalMinor)}</dd>
+          </dl>
+        </div>
+      ) : (
+        <p class="mt-4 text-sm text-ink-600">No further invoices: this subscription is {s.status}.</p>
+      )}
+    </section>
+    <section class={`${card} lg:col-span-2`} aria-labelledby="history-title">
+      <h2 id="history-title" class="font-sans text-base font-semibold">
+        Invoiced periods
+      </h2>
+      {data.periods.length === 0 ? (
+        <p class="mt-4 text-sm text-ink-600">No periods invoiced yet.</p>
+      ) : (
+        <ul class="mt-3 divide-y divide-line">
+          {data.periods.map((p) => (
+            <li class="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
+              <span class="text-ink-950">{periodLabel(p.period_start, p.period_end)}</span>
+              <a href={`/admin/invoices/${p.invoice_id}`} class="font-semibold text-ink-950 hover:underline">
+                {p.number ?? 'Draft invoice'}
+              </a>
+              <span class="text-ink-600">{INVOICE[p.status] ?? p.status}</span>
+              <span class="tnum text-ink-950">{fmt(p.total_minor)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+    {data.assets.length ? (
+      <section class={`${card} lg:col-span-2`} aria-labelledby="assets-title">
+        <h2 id="assets-title" class="font-sans text-base font-semibold">
+          Linked services
+        </h2>
+        <ul class="mt-3 divide-y divide-line">
+          {data.assets.map((a) => (
+            <li class="flex flex-wrap justify-between gap-3 py-3 text-sm">
+              <a href={`/admin/assets/${a.id}`} class="font-semibold text-ink-950 hover:underline">
+                {ASSET_TYPE_LABELS[a.type] ?? a.type}: {a.name}
+              </a>
+              <span class="text-ink-600">
+                {a.renewal_date ? `Renews ${formatLongDate(a.renewal_date)}` : 'No renewal date'}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ) : null}
+  </div>
+</AdminLayout>

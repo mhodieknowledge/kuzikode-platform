@@ -134,6 +134,22 @@ export const SETTING_SECTIONS: SettingSection[] = [
       { key: 'quotation.default_validity_days', label: 'Quotation validity (days)', type: 'int', min: 1, max: 365 },
       { key: 'quotation.default_terms_text', label: 'Quotation terms text', type: 'textarea', max: 1000 },
       { key: 'payments.allow_partial', label: 'Allow clients to pay part of an invoice online', type: 'bool' },
+      {
+        key: 'subscriptions.lead_days',
+        label: 'Subscription invoices: days before the billing date',
+        type: 'int',
+        min: 0,
+        max: 60,
+        help: 'Invoices for the next period are created this many days early (default 7).',
+      },
+      {
+        key: 'subscriptions.at_risk_days',
+        label: 'Flag a subscription "at risk" after (days overdue)',
+        type: 'int',
+        min: 1,
+        max: 180,
+        help: 'Default 30. Staff are notified; client services are never suspended automatically.',
+      },
     ],
   },
   {

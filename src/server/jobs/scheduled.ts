@@ -6,6 +6,7 @@ import { pruneUnconfirmed } from '../modules/newsletter/service';
 import { applyApplicationRetention, autoClosePostings } from '../modules/careers/service';
 import { sendFollowUpReminders } from '../modules/leads/admin';
 import { dispatchNotificationEmails } from '../modules/notifications';
+import { billSubscriptions, flagAtRisk, sendRenewalReminders } from '../modules/subscriptions';
 import type { QueueMessageBody } from './outbox';
 
 export const CRON_FREQUENT = '*/5 * * * *';
@@ -87,8 +88,15 @@ export const SCHEDULE: Record<string, [name: string, task: ScheduledTask][]> = {
     ['lead-follow-up-reminders', (ctx) => sendFollowUpReminders(ctx)],
     ['expire-quotations', (ctx) => expireQuotations(ctx)],
     ['mark-overdue-invoices', (ctx) => markOverdue(ctx)],
+    // After overdue marking, so "at risk" sees today's overdue invoices.
+    ['subscriptions-at-risk', (ctx) => flagAtRisk(ctx)],
   ],
-  [CRON_MORNING]: [['invoice-reminders', (ctx) => sendReminders(ctx)]],
+  [CRON_MORNING]: [
+    // Business hours: auto-issued subscription invoices and client renewal emails go out in the morning.
+    ['subscription-billing', (ctx) => billSubscriptions(ctx)],
+    ['invoice-reminders', (ctx) => sendReminders(ctx)],
+    ['renewal-reminders', (ctx) => sendRenewalReminders(ctx)],
+  ],
 };
 
 export async function runScheduled(

@@ -360,3 +360,20 @@ The **Next step** line must be specific enough that a fresh session can continue
   popular + order, price-copy into quotations + ZWG + delete guard, add-ons + permissions) · e2e `packages.spec.ts` (2).
 - Next step: P4.20 Subscriptions & recurring billing + managed services register (renewal reminders, portal "Your services" data,
   double-run cron test, MRR/ARR + upcoming renewals tiles on the dashboard).
+
+## 2026-11-06 13:25 UTC · P4.20 Subscriptions, recurring billing & managed services ✅
+- Invoices: `draftInvoiceStatements` (shared by staff create and billing; links `subscription_id`, stamps line periods) and
+  `issueDraft` (no auth; `issueInvoice` authorises then calls it).
+- `modules/subscriptions`: list (filters, MRR summary), detail (periods history, next-invoice preview, linked services), create/edit
+  (fixed fields once billed), pause/resume (no back-billing)/cancel, `billSubscriptions` (morning cron), `flagAtRisk` (nightly),
+  `recurringRevenue`, `subscriptionsFromQuotationStmt` (quotation acceptance), `clientServices` (portal-ready, no internal notes);
+  `assets.ts`: register CRUD, `sendRenewalReminders` (morning cron, 30/14/7, `renewal_reminder` email when billable),
+  `upcomingRenewals`. Settings: `subscriptions.lead_days`, `subscriptions.at_risk_days`. Notification types: subscription.alert,
+  renewal.upcoming.
+- UI: /admin/subscriptions (+ new, [id], [id]/edit), /admin/assets (+ new, [id], 90-day renewals calendar), client "Services" tab,
+  dashboard MRR/ARR tile + "Upcoming renewals (30 days)". Nav: Subscriptions + Managed services on.
+- Tests: integration `subscriptions.test.ts` (8: anchoring/labels, double + concurrent cron runs, catch-up + auto-issue, pause/
+  resume/cancel/edit rules, at-risk flag + clear, MRR/ARR + dashboard parity, quotation → subscription, register + reminders +
+  privacy) · e2e `subscriptions.spec.ts`.
+- Next step: P4.21 Careers admin (postings with custom questions, pipeline kanban, ratings, notes, templated emails, bulk reject,
+  retention job already exists in modules/careers, Hiring Manager role).

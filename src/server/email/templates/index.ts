@@ -470,6 +470,38 @@ const defs = {
         ],
       }),
   },
+  renewal_reminder: {
+    schema: z.object({
+      name: z.string(),
+      item: z.string(),
+      renewalDate: z.string(),
+      days: z.number().int().min(0),
+      autoRenew: z.boolean(),
+    }),
+    render: (b: Brand, d: { name: string; item: string; renewalDate: string; days: number; autoRenew: boolean }) =>
+      renderEmail(b, {
+        subject: `Renewal coming up: ${d.item}`,
+        preheader: `Renews on ${d.renewalDate}.`,
+        heading: 'A renewal is coming up',
+        blocks: [
+          { kind: 'p', text: `Hi ${d.name},` },
+          {
+            kind: 'p',
+            text: d.autoRenew
+              ? `${d.item} renews automatically on ${d.renewalDate} (in ${d.days} ${d.days === 1 ? 'day' : 'days'}). You don't need to do anything.`
+              : `${d.item} is due for renewal on ${d.renewalDate} (in ${d.days} ${d.days === 1 ? 'day' : 'days'}). Reply to this email to confirm you'd like to keep it, or if anything should change.`,
+          },
+          {
+            kind: 'kv',
+            rows: [
+              ['Service', d.item],
+              ['Renewal date', d.renewalDate],
+            ],
+          },
+          { kind: 'small', text: 'We send this reminder 30, 14 and 7 days before each renewal.' },
+        ],
+      }),
+  },
   support_reply: {
     schema: z.object({ name: z.string(), reference: z.string(), subject: z.string(), body: z.string() }),
     render: (b: Brand, d: { name: string; reference: string; subject: string; body: string }) =>

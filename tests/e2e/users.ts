@@ -66,6 +66,13 @@ export const E2E_USERS = {
     role: 'admin',
     mustChange: false,
   },
+  subscriptionsAdmin: {
+    id: 'usr_e2e_subscriptions',
+    email: 'e2e-subscriptions@example.com',
+    name: 'Sue Subscriptions',
+    role: 'admin',
+    mustChange: false,
+  },
   invoicesAdmin: {
     id: 'usr_e2e_invoices',
     email: 'e2e-invoices@example.com',

@@ -274,13 +274,18 @@ export async function getInvoice(ctx: RequestContext, id: string) {
 
 // ---------------------------------------------------------------- drafts
 
-function insertItemStmt(ctx: RequestContext, invoiceId: string, it: PricedLine) {
+function insertItemStmt(
+  ctx: RequestContext,
+  invoiceId: string,
+  it: PricedLine,
+  period: { start: string; end: string } | null = null,
+) {
   return stmt(
     ctx.db,
     `INSERT INTO invoice_items (id, invoice_id, position, service_id, package_id, description, quantity_milli, unit_price_minor,
        discount_type, discount_value, tax_rate_id, tax_rate_bp, tax_inclusive, line_subtotal_minor, line_discount_minor,
-       line_tax_minor, line_total_minor)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       line_tax_minor, line_total_minor, period_start, period_end)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     it.id,
     invoiceId,
     it.position,
@@ -298,11 +303,28 @@ function insertItemStmt(ctx: RequestContext, invoiceId: string, it: PricedLine) 
     it.discount,
     it.tax,
     it.total,
+    period?.start ?? null,
+    period?.end ?? null,
   );
 }
 
 export async function createInvoice(ctx: RequestContext, input: InvoiceInput): Promise<{ id: string }> {
   assertCan(ctx, 'invoices.create');
+  const draft = await draftInvoiceStatements(ctx, input);
+  await new Batch(ctx.db).addAll(draft.statements).run();
+  return { id: draft.id };
+}
+
+/**
+ * The statements that create a draft invoice (row, lines, history, audit), for the caller's batch. Used by staff
+ * (createInvoice) and by subscription billing, which links the subscription and stamps each line's service period.
+ * No permission check here: callers authorise.
+ */
+export async function draftInvoiceStatements(
+  ctx: RequestContext,
+  input: InvoiceInput,
+  extra: { subscriptionId?: string; periods?: ({ start: string; end: string } | null)[]; auditAction?: string } = {},
+): Promise<{ id: string; totalMinor: number; statements: D1PreparedStatement[] }> {
   const { items, totals } = await priceLines(ctx, input, 'iit');
   const settings = await getSettings(ctx);
   const client = await ctx.db
@@ -311,49 +333,49 @@ export async function createInvoice(ctx: RequestContext, input: InvoiceInput): P
     .first<{ payment_terms_days: number | null }>();
   const id = newId('inv', ctx.now().getTime());
   const now = ctx.now().toISOString();
-  await new Batch(ctx.db)
-    .add(
-      stmt(
-        ctx.db,
-        `INSERT INTO invoices (id, client_id, contact_id, currency, issue_date, due_date, payment_terms_days, notes, terms,
-           discount_type, discount_value, subtotal_minor, discount_minor, tax_minor, total_minor, balance_minor, status,
+  const statements = [
+    stmt(
+      ctx.db,
+      `INSERT INTO invoices (id, client_id, contact_id, subscription_id, currency, issue_date, due_date, payment_terms_days, notes,
+           terms, discount_type, discount_value, subtotal_minor, discount_minor, tax_minor, total_minor, balance_minor, status,
            created_by, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', ?, ?, ?)`,
-        id,
-        input.clientId,
-        input.contactId ?? null,
-        input.currency,
-        input.issueDate,
-        input.dueDate,
-        input.paymentTermsDays ??
-          client?.payment_terms_days ??
-          settingNumber(settings, 'invoice.default_terms_days', 14),
-        input.notes,
-        input.terms ?? settingText(settings, 'invoice.default_terms_text') ?? null,
-        input.discountType,
-        input.discountType === 'none' ? 0 : input.discountValue,
-        totals.subtotalMinor,
-        totals.discountMinor,
-        totals.taxMinor,
-        totals.totalMinor,
-        totals.totalMinor,
-        ctx.actor.userId,
-        now,
-        now,
-      ),
-    )
-    .addAll(items.map((it) => insertItemStmt(ctx, id, it)))
-    .add(historyStmt(ctx, id, null, 'draft', 'Created'))
-    .add(
-      auditStmt(ctx, {
-        action: 'invoice.created',
-        entityType: 'invoice',
-        entityId: id,
-        after: { clientId: input.clientId, totalMinor: totals.totalMinor, currency: input.currency },
-      }),
-    )
-    .run();
-  return { id };
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', ?, ?, ?)`,
+      id,
+      input.clientId,
+      input.contactId ?? null,
+      extra.subscriptionId ?? null,
+      input.currency,
+      input.issueDate,
+      input.dueDate,
+      input.paymentTermsDays ?? client?.payment_terms_days ?? settingNumber(settings, 'invoice.default_terms_days', 14),
+      input.notes,
+      input.terms ?? settingText(settings, 'invoice.default_terms_text') ?? null,
+      input.discountType,
+      input.discountType === 'none' ? 0 : input.discountValue,
+      totals.subtotalMinor,
+      totals.discountMinor,
+      totals.taxMinor,
+      totals.totalMinor,
+      totals.totalMinor,
+      ctx.actor.userId,
+      now,
+      now,
+    ),
+    ...items.map((it, i) => insertItemStmt(ctx, id, it, extra.periods?.[i] ?? null)),
+    historyStmt(ctx, id, null, 'draft', extra.subscriptionId ? 'Created by subscription billing' : 'Created'),
+    auditStmt(ctx, {
+      action: extra.auditAction ?? 'invoice.created',
+      entityType: 'invoice',
+      entityId: id,
+      after: {
+        clientId: input.clientId,
+        totalMinor: totals.totalMinor,
+        currency: input.currency,
+        ...(extra.subscriptionId ? { subscriptionId: extra.subscriptionId } : {}),
+      },
+    }),
+  ];
+  return { id, totalMinor: totals.totalMinor, statements };
 }
 
 export async function updateInvoice(ctx: RequestContext, id: string, input: InvoiceInput): Promise<void> {
@@ -505,6 +527,18 @@ export async function issueInvoice(
 ): Promise<{ number: string; link: string; status: InvoiceStatus }> {
   assertCan(ctx, 'invoices.issue');
   if (opts.send) assertCan(ctx, 'invoices.send');
+  return issueDraft(ctx, id, opts);
+}
+
+/**
+ * Issues a draft: number, snapshots, public token, PDF job and (optionally) the email, all in one guarded batch.
+ * No permission check: `issueInvoice` authorises staff; subscription billing calls this as the system.
+ */
+export async function issueDraft(
+  ctx: RequestContext,
+  id: string,
+  opts: { send: boolean; message?: string | null },
+): Promise<{ number: string; link: string; status: InvoiceStatus }> {
   const inv = await loadRow(ctx, id);
   if (inv.status !== 'draft') throw conflict('This invoice has already been issued.');
   const items = await loadItems(ctx, id);

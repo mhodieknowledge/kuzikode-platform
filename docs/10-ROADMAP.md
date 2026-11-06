@@ -74,7 +74,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P4.16 Notifications** (in-app list, read/unread, preferences, email dispatch per prefs, all types in PRD §4.2 J). AC: one test per type trigger.
 - [x] **P4.17 Dashboard** (KPIs per currency, charts, recent lists, permission-filtered tiles). AC: figures match fixtures exactly in a test.
 - [x] **P4.19 Packages & pricing admin** (packages, features, add-ons, comparison order, price-review flag + dashboard warning, "Add package" in quotation editor). AC: price-copy test.
-- [ ] **P4.20 Subscriptions & recurring billing** + **managed services register** with renewal reminders and portal "Your services". AC: double-run cron test. MRR tile correct.
+- [x] **P4.20 Subscriptions & recurring billing** + **managed services register** with renewal reminders and portal "Your services". AC: double-run cron test. MRR tile correct.
 - [ ] **P4.21 Careers admin** (postings, custom questions, pipeline kanban, ratings, notes, templated emails, bulk reject, retention job, Hiring Manager role). AC: tests.
 - [ ] **P4.22 Content admin** for insights, industries, FAQ, testimonials (consent enforced), technologies, newsletter list/export. AC: tests.
 - [ ] **P4.23 Time tracking** (entries, timer, timesheet, bill unbilled time to invoice). AC: concurrent billing test.
@@ -87,7 +87,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [ ] **P5.4 Invoices & credit notes** (list, view, PDF, Pay now). AC: isolation tests.
 - [ ] **P5.5 Payments & receipts** (history, receipt PDFs, attempt status page). AC: tests.
 - [ ] **P5.6 Projects** (milestones, client updates, progress, deliverables download, messages). AC: internal items never visible (test).
-- [ ] **P5.7 Support** (create, reply, attachments, status). AC: tests.
+- [ ] **P5.7 Support** (create, reply, attachments, status). Also the portal "Your services" page (data from `clientServices`, P4.20) with "Request cancellation" creating a support request (docs/12 §A.3). AC: tests.
 - [ ] **P5.8 Public document pages** `/q/:token`, `/i/:token`, `/pay/return`. AC: token tests, noindex/no-store.
 
 ## Phase 6 — Payments & email integrations

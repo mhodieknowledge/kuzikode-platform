@@ -10,6 +10,8 @@ import { loadAdminPage } from '../../../../server/lib/admin-page';
 import { AppError } from '../../../../server/lib/errors';
 import { getClient } from '../../../../server/modules/clients';
 import { formatMoney } from '../../../../shared/money';
+import { ASSET_TYPE_LABELS, clientServices } from '../../../../server/modules/subscriptions';
+import { formatLongDate } from '../../../../shared/service-display';
 
 const { ctx } = Astro.locals;
 const page = await loadAdminPage(ctx, Astro.request, { permission: 'clients.view' });
@@ -27,12 +29,16 @@ const tabs = [
   ['overview', 'Overview'],
   ['contacts', `Contacts (${contacts.length})`],
   ['notes', `Notes (${notes.length})`],
+  ['services', 'Services'],
   ['portal', 'Portal access'],
 ] as const;
 const tab = tabs.some(([k]) => k === Astro.url.searchParams.get('tab'))
   ? Astro.url.searchParams.get('tab')!
   : 'overview';
 const canEdit = page.auth.permissions.has('clients.update') && c.status === 'active';
+const canSubs = page.auth.permissions.has('subscriptions.view');
+const canAssets = page.auth.permissions.has('client_assets.manage');
+const services = tab === 'services' ? await clientServices(ctx, c.id) : null;
 const canArchive = page.auth.permissions.has('clients.archive');
 const unused = !(
   related.quotations ||
@@ -243,6 +249,84 @@ const address = c.billingAddress
             ))}
           </ol>
         )}
+      </div>
+    ) : tab === 'services' && services ? (
+      <div class="grid items-start gap-6 lg:grid-cols-2">
+        <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="subs-title">
+          <div class="flex items-center justify-between gap-3">
+            <h2 id="subs-title" class="font-sans text-base font-semibold">
+              Subscriptions
+            </h2>
+            {page.auth.permissions.has('subscriptions.manage') && c.status === 'active' ? (
+              <a href={`/admin/subscriptions/new?client=${c.id}`} class="text-sm font-semibold text-brand-600">
+                New subscription
+              </a>
+            ) : null}
+          </div>
+          {services.subscriptions.length === 0 ? (
+            <p class="mt-3 text-sm text-ink-600">No active subscriptions.</p>
+          ) : (
+            <ul class="mt-3 divide-y divide-line">
+              {services.subscriptions.map((s) => (
+                <li class="flex flex-wrap items-start justify-between gap-3 py-3 text-sm">
+                  <div>
+                    {canSubs ? (
+                      <a href={`/admin/subscriptions/${s.id}`} class="font-semibold text-ink-950 hover:underline">
+                        {s.description}
+                      </a>
+                    ) : (
+                      <span class="font-semibold text-ink-950">{s.description}</span>
+                    )}
+                    <span class="block text-[12px] text-ink-600">
+                      {s.paused ? 'Paused' : `Next invoice ${formatLongDate(s.nextBillingDate!)}`}
+                    </span>
+                  </div>
+                  <span class="tnum text-ink-950">
+                    {formatMoney(s.amountMinor, s.currency)} / {s.interval === 'month' ? 'month' : 'year'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+        <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="assets-title">
+          <div class="flex items-center justify-between gap-3">
+            <h2 id="assets-title" class="font-sans text-base font-semibold">
+              Managed services
+            </h2>
+            {canAssets ? (
+              <a href={`/admin/assets/new?client=${c.id}`} class="text-sm font-semibold text-brand-600">
+                Add to register
+              </a>
+            ) : null}
+          </div>
+          {services.assets.length === 0 ? (
+            <p class="mt-3 text-sm text-ink-600">Nothing in the register for this client.</p>
+          ) : (
+            <ul class="mt-3 divide-y divide-line">
+              {services.assets.map((a) => (
+                <li class="flex flex-wrap items-start justify-between gap-3 py-3 text-sm">
+                  <div>
+                    {canAssets ? (
+                      <a href={`/admin/assets/${a.id}`} class="font-semibold text-ink-950 hover:underline">
+                        {a.name}
+                      </a>
+                    ) : (
+                      <span class="font-semibold text-ink-950">{a.name}</span>
+                    )}
+                    <span class="block text-[12px] text-ink-600">
+                      {ASSET_TYPE_LABELS[a.type] ?? a.type}
+                      {a.provider ? ` · ${a.provider}` : ''}
+                    </span>
+                  </div>
+                  <span class="text-ink-800">
+                    {a.renewalDate ? `Renews ${formatLongDate(a.renewalDate)}` : 'No renewal date'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </div>
     ) : (
       <PortalAccessPanel

@@ -1,0 +1,64 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { SubscriptionForm } from '../../../../components/admin/SubscriptionsAdmin';
+import { loadAdminPage } from '../../../../server/lib/admin-page';
+import { AppError } from '../../../../server/lib/errors';
+import { formOptions, getSubscription } from '../../../../server/modules/subscriptions';
+import { formatQuantity } from '../../../../shared/money';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'subscriptions.manage' });
+if (page instanceof Response) return page;
+let data;
+try {
+  data = await getSubscription(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND')
+    return new Response(null, { status: 404, statusText: 'Not found' });
+  throw err;
+}
+const s = data.subscription;
+if (!['active', 'at_risk', 'paused'].includes(s.status)) return Astro.redirect(`/admin/subscriptions/${s.id}`, 303);
+const opts = await formOptions(ctx);
+if (!opts.clients.some((c) => c.id === data.client.id))
+  opts.clients.unshift({ id: data.client.id, name: data.client.display_name, currency: s.currency });
+const initial = {
+  id: s.id,
+  clientId: s.client_id,
+  packageId: s.package_id,
+  description: s.description,
+  quantity: formatQuantity(s.quantity_milli),
+  unitPriceMinor: s.unit_price_minor,
+  currency: s.currency,
+  taxRateId: s.tax_rate_id,
+  interval: s.interval,
+  startDate: s.start_date,
+  nextBillingDate: s.next_billing_date,
+  autoIssue: s.auto_issue === 1,
+};
+---
+
+<AdminLayout title={`Edit ${s.description}`} page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/subscriptions" class="hover:text-ink-950 hover:underline">
+      Subscriptions
+    </a>{' '}
+    /{' '}
+    <a href={`/admin/subscriptions/${s.id}`} class="hover:text-ink-950 hover:underline">
+      {s.description}
+    </a>{' '}
+    /<span class="text-ink-950">Edit</span>
+  </nav>
+  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">Edit subscription</h1>
+  <div class="max-w-3xl">
+    <SubscriptionForm
+      client:load
+      initial={initial}
+      clients={opts.clients}
+      packages={opts.packages}
+      currencies={opts.currencies}
+      taxRates={opts.taxRates}
+      billed={data.periods.length > 0}
+    />
+  </div>
+</AdminLayout>

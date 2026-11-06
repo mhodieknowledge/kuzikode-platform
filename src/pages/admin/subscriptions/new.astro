@@ -1,0 +1,48 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { SubscriptionForm } from '../../../components/admin/SubscriptionsAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { businessDate } from '../../../server/lib/dates';
+import { formOptions } from '../../../server/modules/subscriptions';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'subscriptions.manage' });
+if (page instanceof Response) return page;
+const opts = await formOptions(ctx);
+const wanted = Astro.url.searchParams.get('client');
+const client = opts.clients.find((c) => c.id === wanted) ?? opts.clients[0];
+const initial = {
+  clientId: client?.id ?? '',
+  packageId: null,
+  description: '',
+  quantity: '1',
+  unitPriceMinor: null,
+  currency: client?.currency ?? opts.currencies[0] ?? 'USD',
+  taxRateId: null,
+  interval: 'month' as const,
+  startDate: businessDate(ctx.now()),
+  nextBillingDate: null,
+  autoIssue: false,
+};
+---
+
+<AdminLayout title="New subscription" page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/subscriptions" class="hover:text-ink-950 hover:underline">
+      Subscriptions
+    </a>{' '}
+    / <span class="text-ink-950">New</span>
+  </nav>
+  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">New subscription</h1>
+  <div class="max-w-3xl">
+    <SubscriptionForm
+      client:load
+      initial={initial}
+      clients={opts.clients}
+      packages={opts.packages}
+      currencies={opts.currencies}
+      taxRates={opts.taxRates}
+      billed={false}
+    />
+  </div>
+</AdminLayout>

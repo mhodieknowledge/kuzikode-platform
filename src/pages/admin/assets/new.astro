@@ -1,0 +1,38 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { AssetForm } from '../../../components/admin/SubscriptionsAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { formOptions } from '../../../server/modules/subscriptions';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'client_assets.manage' });
+if (page instanceof Response) return page;
+const opts = await formOptions(ctx);
+const wanted = Astro.url.searchParams.get('client');
+const initial = {
+  clientId: opts.clients.find((c) => c.id === wanted)?.id ?? opts.clients[0]?.id ?? '',
+  type: 'domain' as const,
+  name: '',
+  provider: null,
+  subscriptionId: null,
+  renewalDate: null,
+  autoRenew: false,
+  billableToClient: true,
+  costNote: null,
+  credentialsNote: null,
+  status: 'active' as const,
+};
+---
+
+<AdminLayout title="Add to register" page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/assets" class="hover:text-ink-950 hover:underline">
+      Managed services
+    </a>{' '}
+    / <span class="text-ink-950">Add</span>
+  </nav>
+  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">Add to the register</h1>
+  <div class="max-w-3xl">
+    <AssetForm client:load initial={initial} clients={opts.clients} subscriptions={opts.subscriptions} />
+  </div>
+</AdminLayout>

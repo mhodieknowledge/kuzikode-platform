@@ -71,6 +71,15 @@ if (d.financial) {
     },
   );
 }
+if (d.recurring)
+  tiles.push({
+    label: 'Recurring revenue (MRR)',
+    values: d.recurring.map((r) => `${formatMoney(r.mrrMinor, r.currency)} / mo`),
+    ...(d.recurring.length
+      ? { note: `ARR ${d.recurring.map((r) => formatMoney(r.arrMinor, r.currency)).join(' · ')}` }
+      : {}),
+    href: '/admin/subscriptions',
+  });
 if (d.quotations)
   tiles.push({
     label: 'Pending quotations',
@@ -250,6 +259,37 @@ const fmt = (iso: string) =>
                 <p class="tnum shrink-0 text-sm font-semibold text-ink-950">
                   {formatMoney(i.balanceMinor, i.currency)}
                 </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    ) : null}
+    {d.renewals ? (
+      <section class={card} aria-labelledby="renewals-title">
+        <div class="flex items-center justify-between">
+          <h2 id="renewals-title" class="font-sans text-base font-semibold">
+            Upcoming renewals (30 days)
+          </h2>
+          {d.renewals.total > d.renewals.items.length ? (
+            <span class="text-[13px] text-ink-600">{d.renewals.total} in total</span>
+          ) : null}
+        </div>
+        {d.renewals.items.length === 0 ? (
+          <p class="mt-4 text-sm text-ink-600">Nothing renews or bills in the next 30 days.</p>
+        ) : (
+          <ul class="mt-3 divide-y divide-line">
+            {d.renewals.items.map((r) => (
+              <li class="flex items-start justify-between gap-3 py-3">
+                <div class="min-w-0">
+                  <a href={r.href} class="text-sm font-semibold text-ink-950 hover:underline">
+                    {r.name}
+                  </a>
+                  <p class="text-[12px] text-ink-600">
+                    {r.client} · {r.kind === 'subscription' ? 'next invoice' : 'renewal'}
+                  </p>
+                </div>
+                <p class="shrink-0 text-[13px] text-ink-800">{dateFmt(r.date)}</p>
               </li>
             ))}
           </ul>

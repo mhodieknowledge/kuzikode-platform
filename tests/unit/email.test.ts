@@ -106,6 +106,13 @@ describe('templates', () => {
       subject: 'Email not syncing',
       body: 'We reset the mailbox password; please try again.',
     },
+    renewal_reminder: {
+      name: 'Ann',
+      item: 'Domain: baobab.co.zw',
+      renewalDate: '6 December 2026',
+      days: 30,
+      autoRenew: false,
+    },
     notification: {
       name: 'Tendai',
       label: 'New enquiry',

@@ -13,6 +13,8 @@ export const NOTIFICATION_TYPES = [
   { type: 'payment.received', label: 'Payment received', group: 'Finance' },
   { type: 'payment.failed', label: 'Payment failed', group: 'Finance' },
   { type: 'invoice.overdue', label: 'Invoice overdue', group: 'Finance' },
+  { type: 'subscription.alert', label: 'Subscription at risk or not billed', group: 'Finance' },
+  { type: 'renewal.upcoming', label: 'Domain, hosting or service renewal coming up', group: 'Finance' },
   { type: 'milestone.updated', label: 'Milestone updated', group: 'Delivery' },
   { type: 'support.created', label: 'Support request created', group: 'Delivery' },
   { type: 'support.replied', label: 'Support request replied', group: 'Delivery' },

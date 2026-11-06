@@ -1,0 +1,200 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { addDays, businessDate } from '../../../server/lib/dates';
+import { ASSET_TYPE_LABELS, listAssets } from '../../../server/modules/subscriptions';
+import { assetListQuery, ASSET_TYPES } from '../../../shared/schemas/subscriptions';
+import { formatLongDate } from '../../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'client_assets.manage' });
+if (page instanceof Response) return page;
+const parsed = assetListQuery.safeParse(Object.fromEntries(Astro.url.searchParams));
+const filter = parsed.success ? parsed.data : assetListQuery.parse({});
+const today = businessDate(ctx.now());
+const [result, upcoming] = await Promise.all([
+  listAssets(ctx, filter),
+  listAssets(ctx, { status: 'active', renewBy: addDays(today, 90), page: 1 }),
+]);
+// Renewals calendar: the next 90 days, grouped by month.
+const months = new Map<string, typeof upcoming.items>();
+for (const a of upcoming.items.filter((x) => x.renewal_date && x.renewal_date >= today)) {
+  const k = a.renewal_date!.slice(0, 7);
+  months.set(k, [...(months.get(k) ?? []), a]);
+}
+const monthName = (k: string) =>
+  new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
+    new Date(`${k}-01T00:00:00Z`),
+  );
+const overdue = (d: string | null) => !!d && d < today;
+const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
+const saved = Astro.url.searchParams.get('saved') === '1';
+const pageHref = (n: number) => {
+  const q = new URLSearchParams(Astro.url.searchParams);
+  q.set('page', String(n));
+  return `/admin/assets?${q.toString()}`;
+};
+---
+
+<AdminLayout title="Managed services" page={page}>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold tracking-display">Managed services</h1>
+      <p class="mt-1 text-sm text-ink-600">
+        Domains, hosting, email and certificates we look after. Reminders go out 30, 14 and 7 days before each renewal.
+      </p>
+    </div>
+    <a
+      href="/admin/assets/new"
+      class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
+    >
+      Add to register
+    </a>
+  </div>
+  {saved ? (
+    <p
+      role="status"
+      class="mt-4 rounded-sm border border-success-700/30 bg-success-50 px-4 py-3 text-sm text-success-700"
+    >
+      Saved.
+    </p>
+  ) : null}
+  <section class="mt-6 rounded-lg border border-line bg-surface p-6" aria-labelledby="cal-title">
+    <h2 id="cal-title" class="font-sans text-base font-semibold">
+      Renewals in the next 90 days
+    </h2>
+    {months.size === 0 ? (
+      <p class="mt-3 text-sm text-ink-600">Nothing renews in the next 90 days.</p>
+    ) : (
+      <div class="mt-3 grid gap-6 md:grid-cols-3">
+        {[...months.entries()].map(([k, items]) => (
+          <div>
+            <h3 class="text-sm font-semibold text-ink-950">{monthName(k)}</h3>
+            <ul class="mt-2 flex flex-col gap-2">
+              {items.map((a) => (
+                <li class="text-sm">
+                  <a href={`/admin/assets/${a.id}`} class="font-medium text-ink-950 hover:underline">
+                    {a.name}
+                  </a>
+                  <span class="block text-[12px] text-ink-600">
+                    {formatLongDate(a.renewal_date!)} · {a.client_name}
+                    {a.auto_renew === 1 ? ' · auto-renews' : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    )}
+  </section>
+  <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter the register">
+    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+      Search
+      <input
+        name="q"
+        type="search"
+        value={filter.q ?? ''}
+        maxlength="80"
+        class={field}
+        placeholder="Name, provider or client"
+      />
+    </label>
+    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+      Type
+      <select name="type" class={field}>
+        <option value="">Any</option>
+        {ASSET_TYPES.map((t) => (
+          <option value={t} selected={filter.type === t}>
+            {ASSET_TYPE_LABELS[t]}
+          </option>
+        ))}
+      </select>
+    </label>
+    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
+      Status
+      <select name="status" class={field}>
+        {['active', 'expired', 'cancelled', 'transferred', 'all'].map((st) => (
+          <option value={st} selected={(filter.status ?? 'active') === st}>
+            {st === 'all' ? 'All' : st.charAt(0).toUpperCase() + st.slice(1)}
+          </option>
+        ))}
+      </select>
+    </label>
+    <button
+      type="submit"
+      class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+    >
+      Filter
+    </button>
+  </form>
+  <div class="relative mt-6 overflow-x-auto rounded-lg border border-line bg-surface">
+    <table class="w-full min-w-[680px] text-left text-sm">
+      <caption class="sr-only">Managed services</caption>
+      <thead class="bg-canvas text-[13px] text-ink-600">
+        <tr>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Name
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Type
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Client
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Provider
+          </th>
+          <th scope="col" class="px-4 py-3 font-semibold">
+            Renewal
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {result.items.length === 0 ? (
+          <tr>
+            <td colspan="5" class="px-4 py-8 text-center text-ink-600">
+              {filter.q || filter.type ? 'Nothing matches these filters.' : 'The register is empty.'}
+            </td>
+          </tr>
+        ) : (
+          result.items.map((a) => (
+            <tr class="border-t border-line">
+              <td class="px-4 py-3">
+                <a href={`/admin/assets/${a.id}`} class="font-semibold text-ink-950 hover:underline">
+                  {a.name}
+                </a>
+              </td>
+              <td class="px-4 py-3 text-ink-800">{ASSET_TYPE_LABELS[a.type] ?? a.type}</td>
+              <td class="px-4 py-3 text-ink-800">{a.client_name}</td>
+              <td class="px-4 py-3 text-ink-800">{a.provider ?? '—'}</td>
+              <td
+                class:list={['px-4 py-3', overdue(a.renewal_date) ? 'font-semibold text-danger-700' : 'text-ink-800']}
+              >
+                {a.renewal_date ? formatLongDate(a.renewal_date) : '—'}
+                {overdue(a.renewal_date) ? ' (passed)' : ''}
+              </td>
+            </tr>
+          ))
+        )}
+      </tbody>
+    </table>
+  </div>
+  {result.pages > 1 ? (
+    <nav aria-label="Pages" class="mt-4 flex items-center gap-3 text-sm">
+      {result.page > 1 ? (
+        <a href={pageHref(result.page - 1)} class="font-semibold text-brand-600">
+          Previous
+        </a>
+      ) : null}
+      <span class="text-ink-600">
+        Page {result.page} of {result.pages}
+      </span>
+      {result.page < result.pages ? (
+        <a href={pageHref(result.page + 1)} class="font-semibold text-brand-600">
+          Next
+        </a>
+      ) : null}
+    </nav>
+  ) : null}
+</AdminLayout>

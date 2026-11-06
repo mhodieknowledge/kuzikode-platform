@@ -1,0 +1,74 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { AssetForm } from '../../../components/admin/SubscriptionsAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { AppError } from '../../../server/lib/errors';
+import { formOptions, getAsset } from '../../../server/modules/subscriptions';
+import { formatLongDate } from '../../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'client_assets.manage' });
+if (page instanceof Response) return page;
+let data;
+try {
+  data = await getAsset(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND')
+    return new Response(null, { status: 404, statusText: 'Not found' });
+  throw err;
+}
+const a = data.asset;
+const opts = await formOptions(ctx);
+if (!opts.clients.some((c) => c.id === a.client_id))
+  opts.clients.unshift({ id: a.client_id, name: a.client_name, currency: 'USD' });
+const initial = {
+  id: a.id,
+  clientId: a.client_id,
+  type: a.type,
+  name: a.name,
+  provider: a.provider,
+  subscriptionId: a.subscription_id,
+  renewalDate: a.renewal_date,
+  autoRenew: a.auto_renew === 1,
+  billableToClient: a.billable_to_client === 1,
+  costNote: a.cost_note,
+  credentialsNote: a.credentials_note,
+  status: a.status,
+};
+const KIND: Record<string, string> = { '30d': '30 days before', '14d': '14 days before', '7d': '7 days before' };
+---
+
+<AdminLayout title={a.name} page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/assets" class="hover:text-ink-950 hover:underline">
+      Managed services
+    </a>{' '}
+    / <span class="text-ink-950">{a.name}</span>
+  </nav>
+  <h1 class="mt-2 text-2xl font-bold tracking-display">{a.name}</h1>
+  <p class="mt-1 mb-6 text-sm text-ink-600">
+    <a href={`/admin/clients/${a.client_id}`} class="font-semibold text-ink-950 hover:underline">
+      {a.client_name}
+    </a>
+  </p>
+  <div class="grid max-w-5xl items-start gap-6 lg:grid-cols-[2fr_1fr]">
+    <AssetForm client:load initial={initial} clients={opts.clients} subscriptions={opts.subscriptions} />
+    <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="rem-title">
+      <h2 id="rem-title" class="font-sans text-base font-semibold">
+        Reminders sent
+      </h2>
+      {data.reminders.length === 0 ? (
+        <p class="mt-3 text-sm text-ink-600">None yet.</p>
+      ) : (
+        <ul class="mt-3 flex flex-col gap-2 text-sm">
+          {data.reminders.map((r) => (
+            <li>
+              <span class="text-ink-950">{KIND[r.kind] ?? r.kind}</span>
+              <span class="block text-[12px] text-ink-600">for the {formatLongDate(r.renewal_date)} renewal</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  </div>
+</AdminLayout>

@@ -56,8 +56,16 @@ export default async function globalSetup() {
      VALUES ('inv_e2e_portal_1', 'INV-E2E-P001', ${q(E2E_PORTAL_USER.clientId)}, 'USD', 'issued', '2026-10-01', '2099-12-31', 120000, 0, 120000, '2026-10-01T08:00:00.000Z'),
             ('inv_e2e_portal_2', 'INV-E2E-P002', ${q(E2E_PORTAL_USER.clientId)}, 'USD', 'partially_paid', '2026-08-01', '2026-08-31', 45000, 20000, 25000, '2026-08-01T08:00:00.000Z')
      ON CONFLICT(id) DO NOTHING;`,
-    `INSERT INTO quotations (id, number, client_id, title, currency, status, issue_date, valid_until, total_minor, sent_at)
-     VALUES ('quo_e2e_portal_1', 'QUO-E2E-P001', ${q(E2E_PORTAL_USER.clientId)}, 'Online ordering website', 'USD', 'sent', '2026-10-20', '2099-12-31', 250000, '2026-10-20T09:00:00.000Z')
+    // The portal quotation spec accepts it, so it is reset to "sent" on every run.
+    `INSERT INTO quotations (id, number, client_id, title, currency, status, issue_date, valid_until, subtotal_minor, total_minor, sent_at,
+       client_snapshot, business_snapshot)
+     VALUES ('quo_e2e_portal_1', 'QUO-E2E-P001', ${q(E2E_PORTAL_USER.clientId)}, 'Online ordering website', 'USD', 'sent', '2026-10-20', '2099-12-31', 250000, 250000, '2026-10-20T09:00:00.000Z',
+       ${q(JSON.stringify({ name: E2E_PORTAL_USER.clientName, email: 'hello@borrowdale-florists.example' }))}, ${q(JSON.stringify({ name: 'Kuzikode Technologies' }))})
+     ON CONFLICT(id) DO UPDATE SET status = 'sent', viewed_at = NULL, accepted_at = NULL, accepted_by_name = NULL, accepted_ip = NULL,
+       accepted_user_agent = NULL, rejected_at = NULL, rejection_reason = NULL, client_snapshot = excluded.client_snapshot,
+       business_snapshot = excluded.business_snapshot, subtotal_minor = excluded.subtotal_minor;`,
+    `INSERT INTO quotation_items (id, quotation_id, position, description, quantity_milli, unit_price_minor, line_subtotal_minor, line_discount_minor, line_tax_minor, line_total_minor)
+     VALUES ('qti_e2e_portal_1', 'quo_e2e_portal_1', 1, 'Online ordering website with EcoCash checkout', 1000, 250000, 250000, 0, 0, 250000)
      ON CONFLICT(id) DO NOTHING;`,
     `INSERT INTO projects (id, reference, client_id, name, status, currency, progress_pct, progress_mode, target_date)
      VALUES ('prj_e2e_portal', 'PRJ-E2E-PORTAL', ${q(E2E_PORTAL_USER.clientId)}, 'Brand refresh', 'active', 'USD', 60, 'manual', '2099-06-30')

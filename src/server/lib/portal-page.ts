@@ -7,6 +7,7 @@
 import type { RequestContext } from '../context';
 import { csrfToken, resolveSession, type AuthState } from '../modules/auth/service';
 import { seeOther } from './admin-page';
+import { PORTAL_AREAS, portalAreaClientIds, type PortalArea } from './policies';
 
 export type PortalStage = 'password' | 'mfa' | 'ready';
 
@@ -31,12 +32,14 @@ export interface PortalPage {
   csrfToken: string;
   /** Names of the clients this account can see (empty until staff link the account). */
   clients: { id: string; name: string }[];
+  /** Portal areas this account may open (from its access role per client). */
+  areas: Record<PortalArea, boolean>;
 }
 
 export async function loadPortalPage(
   ctx: RequestContext,
   request: Request,
-  opts: { allowStage?: Exclude<PortalStage, 'ready'> } = {},
+  opts: { allowStage?: Exclude<PortalStage, 'ready'>; area?: PortalArea } = {},
 ): Promise<PortalPage | Response> {
   const url = new URL(request.url);
   const auth = await resolveSession(ctx, request.headers.get('cookie'), 'portal');
@@ -58,7 +61,13 @@ export async function loadPortalPage(
           .all<{ id: string; name: string }>()
       ).results
     : [];
-  return { auth, csrfToken: await csrfToken(auth), clients };
+  const areas = Object.fromEntries(PORTAL_AREAS.map((a) => [a, portalAreaClientIds(ctx, a).length > 0])) as Record<
+    PortalArea,
+    boolean
+  >;
+  // A section the account's role doesn't cover is simply not there for them.
+  if (opts.area && !areas[opts.area]) return new Response(null, { status: 404 });
+  return { auth, csrfToken: await csrfToken(auth), clients, areas };
 }
 
 /** For the sign-in page: an already signed-in, verified portal user goes straight on. */

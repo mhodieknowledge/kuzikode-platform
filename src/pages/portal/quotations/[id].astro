@@ -1,0 +1,89 @@
+---
+import PortalLayout from '../../../layouts/PortalLayout.astro';
+import QuotationDocument from '../../../components/documents/QuotationDocument.astro';
+import { QuotationResponse } from '../../../components/forms/QuotationResponse';
+import { loadPortalPage } from '../../../server/lib/portal-page';
+import { getPortalQuotation } from '../../../server/modules/quotations';
+import { AppError } from '../../../server/lib/errors';
+import { formatMoney } from '../../../shared/money';
+import { formatLongDate } from '../../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const page = await loadPortalPage(ctx, Astro.request, { area: 'quotations' });
+if (page instanceof Response) return page;
+const id = Astro.params.id ?? '';
+let data;
+try {
+  data = await getPortalQuotation(ctx, id);
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND') return new Response(null, { status: 404 });
+  throw err;
+}
+const q = data.quotation;
+const total = formatMoney(q.total_minor, q.currency);
+const notice =
+  q.status === 'accepted'
+    ? `Accepted${q.accepted_by_name ? ` by ${q.accepted_by_name}` : ''}${q.accepted_at ? ` on ${formatLongDate(q.accepted_at)}` : ''}. Thank you.`
+    : q.status === 'rejected'
+      ? 'You declined this quotation. Contact us if you would like an updated one.'
+      : q.status === 'void'
+        ? 'This quotation has been withdrawn.'
+        : !data.open && !q.superseded_by_id
+          ? 'This quotation has expired. Contact us for an updated one.'
+          : null;
+---
+
+<PortalLayout title={q.number ?? 'Quotation'} page={page} active="quotations">
+  <p class="text-sm">
+    <a href="/portal/quotations" class="font-semibold text-brand-600 underline underline-offset-2">
+      Quotations
+    </a>
+  </p>
+  <div class="mt-4 flex max-w-4xl flex-col gap-6">
+    {data.newerVersionId ? (
+      <p role="status" class="rounded-sm border border-info-700/30 bg-info-50 px-4 py-3 text-sm text-info-700">
+        There is a newer version of this quotation.{' '}
+        <a href={`/portal/quotations/${data.newerVersionId}`} class="font-semibold underline">
+          View the latest version
+        </a>
+      </p>
+    ) : notice ? (
+      <p role="status" class="rounded-sm border border-line bg-canvas px-4 py-3 text-sm text-ink-800">
+        {notice}
+      </p>
+    ) : null}
+    <QuotationDocument
+      number={q.number}
+      title={q.title}
+      status={q.status}
+      introHtml={q.intro_html}
+      currency={q.currency}
+      issueDate={q.issue_date}
+      validUntil={q.valid_until}
+      paymentTerms={q.payment_terms}
+      notes={q.notes}
+      terms={q.terms}
+      totals={{ subtotal: q.subtotal_minor, discount: q.discount_minor, tax: q.tax_minor, total: q.total_minor }}
+      items={data.items}
+      client={data.client}
+      business={data.business}
+    />
+    <p class="flex justify-end">
+      <a
+        href={`/api/v1/portal/quotations/${q.id}/pdf`}
+        download
+        class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+      >
+        Download PDF
+      </a>
+    </p>
+    {data.open ? (
+      <QuotationResponse
+        client:load
+        endpoint={`/api/v1/portal/quotations/${q.id}/respond`}
+        total={total}
+        doneHref={`/portal/quotations/${q.id}`}
+      />
+    ) : null}
+  </div>
+</PortalLayout>

@@ -2,7 +2,20 @@
 import { useState, type FormEvent } from 'react';
 import { ApiError, apiFetch, Button, Checkbox, Field, Input, Textarea } from '../ui';
 
-export function QuotationResponse({ token, total }: { token: string; total: string }) {
+/** `token` for the public link page; `endpoint` for the signed-in portal (same body and answers). */
+export function QuotationResponse({
+  token,
+  endpoint,
+  total,
+  doneHref,
+}: {
+  token?: string;
+  endpoint?: string;
+  total: string;
+  /** When set, the page reloads to this address after answering (portal). */
+  doneHref?: string;
+}) {
+  const url = endpoint ?? `/api/v1/public/quotations/${token ?? ''}/respond`;
   const [mode, setMode] = useState<'accept' | 'reject'>('accept');
   const [agree, setAgree] = useState(false);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
@@ -20,10 +33,11 @@ export function QuotationResponse({ token, total }: { token: string; total: stri
         mode === 'accept'
           ? { decision: 'accept', name: f.get('name'), agree }
           : { decision: 'reject', reason: f.get('reason') };
-      const res = await apiFetch<{ data: { status: 'accepted' | 'rejected' } }>(
-        `/api/v1/public/quotations/${token}/respond`,
-        { body },
-      );
+      const res = await apiFetch<{ data: { status: 'accepted' | 'rejected' } }>(url, { body });
+      if (doneHref) {
+        window.location.assign(doneHref);
+        return;
+      }
       setDone(res.data.status);
     } catch (err) {
       if (err instanceof ApiError) {

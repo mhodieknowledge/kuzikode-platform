@@ -475,3 +475,18 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Next step: P5.3 Portal quotations (list, view, PDF, accept/reject; isolation tests). Reuse modules/quotations public
   accept/reject + PDF code (`publicQuotationRoutes`, `QuotationDocument.astro`), scope with `portalAreaClientIds(ctx, 'quotations')`,
   add "Quotations" to PortalLayout items and link the overview quotation rows + activity items to `/portal/quotations/<id>`.
+
+## 2026-11-06 19:15 UTC · P5.3 Portal quotations ✅
+- quotations service: `markViewed` (shared with the public link), `listPortalQuotations` (open first, `show=open` filter),
+  `getPortalQuotation`, `respondPortal`, `portalQuotationId`; all scoped by `portalAreaClientIds(ctx, 'quotations')`, never drafts.
+  Routes `/api/v1/portal/quotations[/:id[/respond|/pdf]]` (CSRF, per-user rate limit on respond).
+- Pages /portal/quotations (All / Waiting tabs, status pills with client wording) and /portal/quotations/[id] (QuotationDocument,
+  newer-version link, PDF, response form via `QuotationResponse endpoint=…`). `loadPortalPage({ area })` returns 404 for areas the
+  role can't see; PortalLayout menu shows Quotations only when allowed; overview rows + activity link to the detail page.
+- Tests: integration `portal-quotations.test.ts` (4: list scope, drafts/other clients 404 on view/PDF/respond, first view + single
+  notification, PDF headers, accept validation/CSRF/audit actor/notification/once-only, decline reason, expired refused) · e2e
+  portal-auth spec: list → detail → accept (axe + 375/768/1440 reviewed). quotations.spec still green. verify: integration 242 green.
+- Next step: P5.4 Portal invoices & credit notes (list with status, view, PDF, Pay now). Reuse invoices public page pieces
+  (`src/pages/i/[token].astro`, `InvoiceDocument.astro`, `invoiceIdForToken`), scope by `portalAreaClientIds(ctx, 'finance')`.
+  "Pay now" must lead to the payment flow: check what `/i/[token]` does for paying today (P6 builds checkout) and link to the same
+  place; don't render a dead button. Add "Invoices" to PortalLayout items when `page.areas.finance`; link overview invoice activity.

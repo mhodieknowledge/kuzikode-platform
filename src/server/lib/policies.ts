@@ -44,7 +44,8 @@ export function clientScope(column: string, clientIds: readonly string[]): { sql
  * payments, receipts) is for owners and billing contacts; delivery (projects, messages, deliverables) for owners and
  * members; quotations and support for everyone linked to the client.
  */
-export type PortalArea = 'finance' | 'projects' | 'quotations' | 'support';
+export const PORTAL_AREAS = ['finance', 'projects', 'quotations', 'support'] as const;
+export type PortalArea = (typeof PORTAL_AREAS)[number];
 const AREA_ROLES: Record<PortalArea, readonly string[]> = {
   finance: ['owner', 'billing'],
   projects: ['owner', 'member'],

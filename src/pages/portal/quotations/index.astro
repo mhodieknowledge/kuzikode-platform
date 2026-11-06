@@ -1,0 +1,81 @@
+---
+import PortalLayout from '../../../layouts/PortalLayout.astro';
+import StatusPill from '../../../components/portal/StatusPill.astro';
+import { loadPortalPage } from '../../../server/lib/portal-page';
+import { listPortalQuotations } from '../../../server/modules/quotations';
+import { formatMoney } from '../../../shared/money';
+import { portalQuotationStatus } from '../../../shared/portal';
+import { formatLongDate } from '../../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const page = await loadPortalPage(ctx, Astro.request, { area: 'quotations' });
+if (page instanceof Response) return page;
+const show = Astro.url.searchParams.get('show') === 'open' ? 'open' : 'all';
+const items = await listPortalQuotations(ctx, { show });
+const multiClient = page.clients.length > 1;
+const tab = (key: 'all' | 'open', label: string) => ({
+  key,
+  label,
+  href: key === 'all' ? '/portal/quotations' : '/portal/quotations?show=open',
+});
+const tabs = [tab('all', 'All'), tab('open', 'Waiting for your answer')];
+---
+
+<PortalLayout title="Quotations" page={page} active="quotations">
+  <h1 class="text-2xl font-bold tracking-display md:text-3xl">Quotations</h1>
+  <nav aria-label="Filter quotations" class="mt-4">
+    <ul class="flex flex-wrap gap-2">
+      {tabs.map((t) => (
+        <li>
+          <a
+            href={t.href}
+            aria-current={show === t.key ? 'page' : undefined}
+            class:list={[
+              'inline-flex h-9 items-center rounded-full border px-4 text-sm font-semibold',
+              show === t.key
+                ? 'border-brand-600 bg-brand-600 text-white'
+                : 'border-line bg-surface text-ink-800 hover:border-ink-400',
+            ]}
+          >
+            {t.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+  {items.length === 0 ? (
+    <p class="mt-6 max-w-2xl rounded-lg border border-line bg-surface p-6 text-ink-600">
+      {show === 'open'
+        ? 'No quotations are waiting for your answer.'
+        : 'There are no quotations yet. When we send you one, it appears here.'}
+    </p>
+  ) : (
+    <ul class="mt-6 divide-y divide-line rounded-lg border border-line bg-surface" aria-label="Quotations">
+      {items.map((q) => {
+        const st = portalQuotationStatus(q.status, q.open);
+        return (
+          <li class="relative flex flex-wrap items-start justify-between gap-x-6 gap-y-2 px-5 py-4 hover:bg-canvas">
+            <div class="min-w-0">
+              <a
+                href={`/portal/quotations/${q.id}`}
+                class="font-semibold text-ink-950 after:absolute after:inset-0 hover:underline"
+              >
+                {q.title}
+              </a>
+              <p class="mt-0.5 text-sm text-ink-600">
+                <span class="font-mono">{q.number}</span>
+                {q.issueDate ? ` · ${formatLongDate(q.issueDate)}` : ''}
+                {q.open && q.validUntil ? ` · valid until ${formatLongDate(q.validUntil)}` : ''}
+                {multiClient ? ` · ${q.clientName}` : ''}
+              </p>
+            </div>
+            <div class="flex flex-col items-end gap-1">
+              <p class="font-mono font-semibold tabular-nums text-ink-950">{formatMoney(q.totalMinor, q.currency)}</p>
+              <StatusPill {...st} />
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  )}
+</PortalLayout>

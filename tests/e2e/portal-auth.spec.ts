@@ -182,3 +182,39 @@ test('optional self-registration: sign up, set a password, wait for staff to lin
   const anon = await page.request.get('/portal/register');
   expect(anon.status()).toBe(404);
 });
+
+test('a client opens a quotation, reads it and accepts it with their name (P5.3)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await portalSignIn(page, E2E_PORTAL_USER.email, E2E_PASSWORD);
+  await page
+    .getByRole('navigation', { name: 'Portal navigation' })
+    .first()
+    .getByRole('link', { name: 'Quotations' })
+    .click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Quotations' })).toBeVisible();
+  const row = page.getByRole('listitem').filter({ hasText: 'QUO-E2E-P001' });
+  await expect(row).toContainText('Waiting for your answer');
+  await expect(row).toContainText('$2,500.00');
+  await expectAccessible(page);
+  await screenshots(page, 'portal-quotations');
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await row.getByRole('link', { name: 'Online ordering website' }).click();
+  await expect(page).toHaveURL(/\/portal\/quotations\/quo_e2e_portal_1$/);
+  await expect(page.getByRole('cell', { name: 'Online ordering website with EcoCash checkout' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Download PDF' })).toHaveAttribute(
+    'href',
+    '/api/v1/portal/quotations/quo_e2e_portal_1/pdf',
+  );
+  await expectAccessible(page);
+  await screenshots(page, 'portal-quotation');
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await hydrated(page, 'Accept quotation');
+  await page.getByLabel(/Your full name/).fill('Kuda Client');
+  await page.getByRole('checkbox').check();
+  await page.getByRole('button', { name: 'Accept quotation' }).click();
+  await expect(page.getByText('Accepted by Kuda Client')).toBeVisible();
+  await page.goto('/portal/quotations?show=open');
+  await expect(page.getByText('No quotations are waiting for your answer.')).toBeVisible();
+});

@@ -13,7 +13,7 @@ import { addDays, businessDate, businessYear } from '../../lib/dates';
 import { conflict, notFound, validationError } from '../../lib/errors';
 import { sanitizeHtml } from '../../lib/html-sanitize';
 import { newId } from '../../lib/ids';
-import { assertCan } from '../../lib/policies';
+import { assertCan, clientScope, portalAreaClientIds } from '../../lib/policies';
 import { type DiscountType } from '../../lib/pricing';
 import { priceLines, type PricedLine } from '../../lib/line-pricing';
 import { numberSqlExpr, sequenceKey, sequenceStatements } from '../../lib/sequences';
@@ -718,16 +718,8 @@ export interface PublicQuotation {
   newerVersionLink: string | null;
 }
 
-/** Looks a quotation up by its public token and records the first view. Drafts are never public. */
-export async function getPublicQuotation(ctx: RequestContext, token: string): Promise<PublicQuotation | null> {
-  if (!/^[A-Za-z0-9_-]{20,100}$/.test(token)) return null;
-  const hash = await sha256Hex(token);
-  const q = await ctx.db
-    .prepare("SELECT * FROM quotations WHERE public_token_hash = ? AND status <> 'draft'")
-    .bind(hash)
-    .first<QuotationRow>();
-  if (!q) return null;
-  const today = businessDate(ctx.now());
+/** The client's first look (public link or portal) moves a sent quotation to "viewed" and tells its author once. */
+async function markViewed(ctx: RequestContext, q: QuotationRow): Promise<void> {
   if (q.status === 'sent') {
     const now = ctx.now().toISOString();
     const res = await new Batch(ctx.db)
@@ -761,6 +753,19 @@ export async function getPublicQuotation(ctx: RequestContext, token: string): Pr
       q.viewed_at = now;
     }
   }
+}
+
+/** Looks a quotation up by its public token and records the first view. Drafts are never public. */
+export async function getPublicQuotation(ctx: RequestContext, token: string): Promise<PublicQuotation | null> {
+  if (!/^[A-Za-z0-9_-]{20,100}$/.test(token)) return null;
+  const hash = await sha256Hex(token);
+  const q = await ctx.db
+    .prepare("SELECT * FROM quotations WHERE public_token_hash = ? AND status <> 'draft'")
+    .bind(hash)
+    .first<QuotationRow>();
+  if (!q) return null;
+  const today = businessDate(ctx.now());
+  await markViewed(ctx, q);
   let newer: string | null = null;
   if (q.superseded_by_id) {
     const n = await ctx.db
@@ -1125,4 +1130,128 @@ export async function editorOptions(ctx: RequestContext, permission: Permission 
       min_quantity: number;
     }[],
   };
+}
+
+// ---------------------------------------------------------------- client portal (P5.3)
+
+export interface PortalQuotationListItem {
+  id: string;
+  number: string;
+  title: string;
+  currency: string;
+  totalMinor: number;
+  status: QuotationStatus;
+  issueDate: string | null;
+  validUntil: string | null;
+  /** The client can still accept or reject it. */
+  open: boolean;
+  clientName: string;
+}
+
+const isOpen = (q: Pick<QuotationRow, 'status' | 'superseded_by_id' | 'valid_until'>, today: string) =>
+  OPEN_FOR_RESPONSE.includes(q.status) && !q.superseded_by_id && (!q.valid_until || q.valid_until >= today);
+
+/** Quotations the portal caller may see: their clients, never drafts. Open ones first, then newest. */
+export async function listPortalQuotations(
+  ctx: RequestContext,
+  filter: { show: 'open' | 'all' } = { show: 'all' },
+): Promise<PortalQuotationListItem[]> {
+  const scope = clientScope('q.client_id', portalAreaClientIds(ctx, 'quotations'));
+  const today = businessDate(ctx.now());
+  const openSql = `q.status IN ('sent','viewed') AND q.superseded_by_id IS NULL AND (q.valid_until IS NULL OR q.valid_until >= ?)`;
+  const { results } = await ctx.db
+    .prepare(
+      `SELECT q.id, q.number, q.title, q.currency, q.total_minor, q.status, q.issue_date, q.valid_until, q.superseded_by_id,
+         c.display_name AS client_name
+       FROM quotations q JOIN clients c ON c.id = q.client_id
+       WHERE ${scope.sql} AND q.status <> 'draft' ${filter.show === 'open' ? `AND ${openSql}` : ''}
+       ORDER BY CASE WHEN ${openSql} THEN 0 ELSE 1 END, COALESCE(q.sent_at, q.created_at) DESC LIMIT 500`,
+    )
+    .bind(...scope.params, ...(filter.show === 'open' ? [today] : []), today)
+    .all<
+      Pick<
+        QuotationRow,
+        | 'id'
+        | 'number'
+        | 'title'
+        | 'currency'
+        | 'total_minor'
+        | 'status'
+        | 'issue_date'
+        | 'valid_until'
+        | 'superseded_by_id'
+      > & { client_name: string }
+    >();
+  return results.map((q) => ({
+    id: q.id,
+    number: q.number ?? '',
+    title: q.title,
+    currency: q.currency,
+    totalMinor: q.total_minor,
+    status: q.status,
+    issueDate: q.issue_date,
+    validUntil: q.valid_until,
+    open: isOpen(q, today),
+    clientName: q.client_name,
+  }));
+}
+
+/** A quotation in the caller's scope (404 otherwise, including drafts). */
+async function loadPortalRow(ctx: RequestContext, id: string): Promise<QuotationRow> {
+  const scope = clientScope('client_id', portalAreaClientIds(ctx, 'quotations'));
+  const q = await ctx.db
+    .prepare(`SELECT * FROM quotations WHERE id = ? AND status <> 'draft' AND ${scope.sql}`)
+    .bind(id, ...scope.params)
+    .first<QuotationRow>();
+  if (!q) throw notFound();
+  return q;
+}
+
+export interface PortalQuotation extends Omit<PublicQuotation, 'newerVersionLink'> {
+  /** The newer version's id when this one was revised (and the newer one is visible to the client). */
+  newerVersionId: string | null;
+}
+
+/** Portal view of one quotation. Opening it counts as the client's first view, like the public link. */
+export async function getPortalQuotation(ctx: RequestContext, id: string): Promise<PortalQuotation> {
+  const q = await loadPortalRow(ctx, id);
+  await markViewed(ctx, q);
+  let newer: string | null = null;
+  if (q.superseded_by_id) {
+    const n = await ctx.db
+      .prepare("SELECT id FROM quotations WHERE id = ? AND status <> 'draft' AND client_id = ?")
+      .bind(q.superseded_by_id, q.client_id)
+      .first<{ id: string }>();
+    newer = n?.id ?? null;
+  }
+  return {
+    quotation: q,
+    items: await loadItems(ctx, q.id),
+    client: JSON.parse(q.client_snapshot ?? '{}') as ClientSnapshot,
+    business: JSON.parse(q.business_snapshot ?? '{}') as BusinessSnapshot,
+    open: isOpen(q, businessDate(ctx.now())),
+    newerVersionId: newer,
+  };
+}
+
+/** The signed-in client accepts (typed name) or rejects a quotation from the portal. */
+export async function respondPortal(
+  ctx: RequestContext,
+  id: string,
+  input: { decision: 'accept' | 'reject'; name?: string | undefined; reason?: string | null | undefined },
+): Promise<QuotationStatus> {
+  const q = await loadPortalRow(ctx, id);
+  await respond(
+    ctx,
+    q,
+    input.decision === 'accept'
+      ? { decision: 'accept', name: input.name!, byStaff: false }
+      : { decision: 'reject', reason: input.reason ?? null, byStaff: false },
+  );
+  return input.decision === 'accept' ? 'accepted' : 'rejected';
+}
+
+/** For the portal PDF route: the id when the caller may download it (never drafts). */
+export async function portalQuotationId(ctx: RequestContext, id: string): Promise<string> {
+  return (await loadPortalRow(ctx, id)).id;
 }

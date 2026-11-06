@@ -1,0 +1,67 @@
+---
+import PortalLayout from '../../../layouts/PortalLayout.astro';
+import { loadPortalPage } from '../../../server/lib/portal-page';
+import { listPortalProjects } from '../../../server/modules/projects';
+import { PROJECT_STATUS_LABEL } from '../../../shared/projects';
+import { formatLongDate } from '../../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const page = await loadPortalPage(ctx, Astro.request, { area: 'projects' });
+if (page instanceof Response) return page;
+const projects = await listPortalProjects(ctx);
+const multiClient = page.clients.length > 1;
+---
+
+<PortalLayout title="Projects" page={page} active="projects">
+  <h1 class="text-2xl font-bold tracking-display md:text-3xl">Projects</h1>
+  {projects.length === 0 ? (
+    <p class="mt-6 max-w-2xl rounded-lg border border-line bg-surface p-6 text-ink-600">
+      There are no projects yet. Once work starts, you can follow it here.
+    </p>
+  ) : (
+    <ul class="mt-6 grid gap-4 md:grid-cols-2" aria-label="Projects">
+      {projects.map((p) => (
+        <li class="relative rounded-lg border border-line bg-surface p-5 hover:border-ink-400">
+          <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <a
+              href={`/portal/projects/${p.id}`}
+              class="font-semibold text-ink-950 after:absolute after:inset-0 hover:underline"
+            >
+              {p.name}
+            </a>
+            <span class="text-sm text-ink-600">{PROJECT_STATUS_LABEL[p.status]}</span>
+          </div>
+          <p class="mt-0.5 text-sm text-ink-600">
+            <span class="font-mono">{p.reference}</span>
+            {multiClient ? ` · ${p.clientName}` : ''}
+          </p>
+          <div class="mt-3 flex items-center gap-3">
+            <div
+              class="h-2 flex-1 overflow-hidden rounded-full bg-ink-950/10"
+              role="progressbar"
+              aria-label={`${p.name} progress`}
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow={p.progressPct}
+            >
+              <div class="h-full rounded-full bg-brand-600" style={`width:${p.progressPct}%`} />
+            </div>
+            <span class="w-10 text-right font-mono text-sm tabular-nums text-ink-800">{p.progressPct}%</span>
+          </div>
+          <p class="mt-2 text-sm text-ink-600">
+            {p.completedAt
+              ? `Completed ${formatLongDate(p.completedAt)}`
+              : p.targetDate
+                ? `Target date ${formatLongDate(p.targetDate)}`
+                : ''}
+            {p.unreadMessages > 0 ? (
+              <span class="ml-2 rounded-full bg-brand-600 px-2 py-0.5 text-[12px] font-semibold text-white">
+                {p.unreadMessages} new {p.unreadMessages === 1 ? 'message' : 'messages'}
+              </span>
+            ) : null}
+          </p>
+        </li>
+      ))}
+    </ul>
+  )}
+</PortalLayout>

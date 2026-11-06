@@ -193,7 +193,7 @@ async function portalCanRead(ctx: RequestContext, f: FileRow): Promise<boolean> 
     case 'project':
       return q(
         `SELECT 1 AS ok FROM project_files pf JOIN projects p ON p.id = pf.project_id
-         WHERE pf.file_id = ? AND pf.client_visible = 1 AND p.client_id IN ${inScope}`,
+         WHERE pf.file_id = ? AND pf.client_visible = 1 AND pf.kind <> 'internal' AND p.client_id IN ${inScope}`,
         f.id,
         scopeOf('projects'),
       );

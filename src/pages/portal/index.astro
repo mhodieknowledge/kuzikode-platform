@@ -25,15 +25,14 @@ const KIND_LABEL: Record<PortalActivityKind, string> = {
   project_update: 'Project update',
 };
 const card = 'rounded-lg border border-line bg-surface p-5 md:p-6';
-/** Activity items link to their detail page once that portal section exists. */
-const activityHref = (a: { kind: PortalActivityKind; id: string }): string | undefined =>
-  a.kind === 'quotation'
-    ? `/portal/quotations/${a.id}`
-    : a.kind === 'invoice'
-      ? `/portal/invoices/${a.id}`
-      : a.kind === 'payment'
-        ? '/portal/payments'
-        : undefined;
+/** Every activity item opens its record. */
+const ACTIVITY_PATH: Record<PortalActivityKind, (id: string) => string> = {
+  quotation: (id) => `/portal/quotations/${id}`,
+  invoice: (id) => `/portal/invoices/${id}`,
+  payment: () => '/portal/payments',
+  project_update: (id) => `/portal/projects/${id}`,
+};
+const activityHref = (a: { kind: PortalActivityKind; targetId: string }) => ACTIVITY_PATH[a.kind](a.targetId);
 ---
 
 <PortalLayout title="Overview" page={page} active="overview">
@@ -147,7 +146,12 @@ const activityHref = (a: { kind: PortalActivityKind; id: string }): string | und
                 {overview.projects.items.map((p) => (
                   <li class="px-5 py-4">
                     <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                      <p class="font-semibold text-ink-950">{p.name}</p>
+                      <a
+                        href={`/portal/projects/${p.id}`}
+                        class="font-semibold text-ink-950 underline-offset-2 hover:underline"
+                      >
+                        {p.name}
+                      </a>
                       <p class="text-sm text-ink-600">{PROJECT_STATUS_LABEL[p.status]}</p>
                     </div>
                     <div class="mt-2 flex items-center gap-3">
@@ -194,13 +198,9 @@ const activityHref = (a: { kind: PortalActivityKind; id: string }): string | und
                     {KIND_LABEL[a.kind]} · <time datetime={a.at}>{day(a.at)}</time>
                   </p>
                   <p class="mt-0.5 font-medium text-ink-950">
-                    {activityHref(a) ? (
-                      <a href={activityHref(a)} class="underline-offset-2 hover:underline">
-                        {a.title}
-                      </a>
-                    ) : (
-                      a.title
-                    )}
+                    <a href={activityHref(a)} class="underline-offset-2 hover:underline">
+                      {a.title}
+                    </a>
                   </p>
                   {a.detail ? <p class="mt-0.5 line-clamp-2 text-sm text-ink-600">{a.detail}</p> : null}
                 </div>

@@ -521,3 +521,19 @@ The **Next step** line must be specific enough that a fresh session can continue
   never visible, with a test). Scope by `portalAreaClientIds(ctx, 'projects')`. Check `project_messages` and `project_files`
   (client_visible) in migrations/0007 and the admin projects service for message posting + notifications (notifyClientUsers /
   staff). Add "Projects" menu item; link overview project rows + project_update activity.
+
+## 2026-11-06 19:45 UTC · P5.6 Portal projects ✅
+- `modules/projects/portal.ts`: `listPortalProjects` (unread team messages), `getPortalProject` (client-visible milestones,
+  client updates, shared non-internal files, thread; marks team messages read), `postPortalMessage` (rate-limited, notifies
+  members + creator, audited). Staff `postMessage` now notifies the client's portal users. File route: `internal` project files
+  never served to the portal. Notification type `project.message`. Routes `/api/v1/portal/projects[/:id[/messages]]`.
+- Pages /portal/projects (cards with progress + unread badge) and /portal/projects/[id] (progress + milestones, updates, messages
+  with `ProjectMessageForm`, deliverables). Menu "Projects" (projects roles). Overview: project rows and every activity item now
+  link to their record (`targetId` on activity).
+- Tests: integration `portal-projects.test.ts` (4: internal tasks/updates/milestones/files/budget/description never returned,
+  hidden + internal files 404, unread → read, message notifies team only + audit, other client/billing/staff refused, staff
+  message notifies client) · e2e portal-auth spec (projects → project → send message; axe + 375/768/1440 reviewed).
+  verify: integration 252 green.
+- Next step: P5.7 Portal support (create, reply, attachments, status) + "Your services" page (clientServices from P4.20) with
+  "Request cancellation" creating a support request (docs/12 §A.3). Check modules/support (admin side, attachments via
+  `support_attachments`, is_internal_note) and modules/subscriptions for `clientServices`.

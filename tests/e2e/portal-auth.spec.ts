@@ -290,3 +290,37 @@ test('a client sees their payments with receipts and the status of a failed onli
   await page.getByRole('link', { name: 'Back to invoice INV-E2E-P002' }).click();
   await expect(page).toHaveURL(/\/portal\/invoices\/inv_e2e_portal_2$/);
 });
+
+test('a client follows a project and writes to the team (P5.6)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await portalSignIn(page, E2E_PORTAL_USER.email, E2E_PASSWORD);
+  await page
+    .getByRole('navigation', { name: 'Portal navigation' })
+    .first()
+    .getByRole('link', { name: 'Projects' })
+    .click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Projects' })).toBeVisible();
+  await expect(page.getByRole('progressbar', { name: 'Brand refresh progress' })).toHaveAttribute(
+    'aria-valuenow',
+    '60',
+  );
+  await expectAccessible(page);
+  await screenshots(page, 'portal-projects');
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.getByRole('link', { name: 'Brand refresh' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Brand refresh' })).toBeVisible();
+  await expect(page.getByRole('list', { name: 'Milestones' })).toContainText('Logo sign-off');
+  await expect(page.getByTestId('project-updates')).toContainText(
+    'The first logo concepts are ready for your feedback.',
+  );
+  await expect(page.getByText('Files the team shares with you appear here.')).toBeVisible();
+
+  const text = `We like concept B best (${Date.now()}).`;
+  await hydrated(page, 'Send message');
+  await page.getByLabel('Message to the Kuzikode team').fill(text);
+  await page.getByRole('button', { name: 'Send message' }).click();
+  await expect(page.getByTestId('project-messages')).toContainText(text);
+  await expectAccessible(page);
+  await screenshots(page, 'portal-project');
+});

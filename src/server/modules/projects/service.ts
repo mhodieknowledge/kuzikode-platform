@@ -919,7 +919,7 @@ export async function postUpdate(ctx: RequestContext, projectId: string, input: 
 }
 
 export async function postMessage(ctx: RequestContext, projectId: string, body: string) {
-  await loadProject(ctx, projectId);
+  const p = await loadProject(ctx, projectId);
   const id = newId('pmg', ctx.now().getTime());
   const now = ctx.now().toISOString();
   await new Batch(ctx.db)
@@ -934,6 +934,17 @@ export async function postMessage(ctx: RequestContext, projectId: string, body: 
         now,
         now,
       ),
+    )
+    .add(
+      notifyClientUsers(ctx, p.client_id, {
+        type: 'project.message',
+        title: `New message from Kuzikode on ${p.name}`,
+        body: body.slice(0, 200),
+        link: `/portal/projects/${projectId}`,
+        entityType: 'project',
+        entityId: projectId,
+        dedupeKey: `project_message:${id}`,
+      }),
     )
     .add(touch(ctx, projectId))
     .run();

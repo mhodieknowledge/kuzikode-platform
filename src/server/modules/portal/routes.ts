@@ -9,9 +9,11 @@ import { documentPdf } from '../documents/service';
 import { fileResponse } from '../files/service';
 import * as invoices from '../invoices/portal';
 import * as payments from '../payments/portal';
+import * as projects from '../projects/portal';
 import * as quotations from '../quotations/service';
 import { portalOverview } from './service';
 
+const messageSchema = z.object({ body: z.string().trim().min(1, 'Write a message.').max(5000) }).strict();
 const listQuery = z.object({ show: z.enum(['open', 'all']).default('all') }).strict();
 
 /** `/api/v1/portal/*`: client portal reads and actions, portal sessions only (docs/07 §5). */
@@ -114,6 +116,17 @@ export function portalRoutes() {
   });
   r.get('/payment-attempts/:id', async (c) =>
     c.json({ data: await payments.getPortalAttempt(c.var.ctx, c.req.param('id')) }),
+  );
+
+  r.get('/projects', async (c) => c.json({ data: await projects.listPortalProjects(c.var.ctx) }));
+  r.get('/projects/:id', async (c) => c.json({ data: await projects.getPortalProject(c.var.ctx, c.req.param('id')) }));
+  r.post('/projects/:id/messages', async (c) =>
+    c.json(
+      {
+        data: await projects.postPortalMessage(c.var.ctx, c.req.param('id'), (await jsonBody(c, messageSchema)).body),
+      },
+      201,
+    ),
   );
   return r;
 }

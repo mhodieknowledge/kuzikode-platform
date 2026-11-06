@@ -40,6 +40,8 @@ export type PortalActivityKind = 'invoice' | 'quotation' | 'payment' | 'project_
 export interface PortalActivity {
   kind: PortalActivityKind;
   id: string;
+  /** The record to open: the document, payment, or (for updates) the project. */
+  targetId: string;
   at: string;
   title: string;
   detail: string | null;
@@ -99,17 +101,17 @@ export async function portalOverview(ctx: RequestContext): Promise<PortalOvervie
     ctx.db
       .prepare(
         `SELECT * FROM (
-           SELECT 'invoice' AS kind, id, issued_at AS at, 'Invoice ' || number || ' issued' AS title, NULL AS detail,
+           SELECT 'invoice' AS kind, id, id AS target, issued_at AS at, 'Invoice ' || number || ' issued' AS title, NULL AS detail,
              currency, total_minor AS amount FROM invoices
              WHERE ${fin.sql} AND status <> 'draft' AND status <> 'void' AND issued_at IS NOT NULL
            UNION ALL
-           SELECT 'quotation', id, sent_at, 'Quotation ' || number || ' sent', title, currency, total_minor FROM quotations
+           SELECT 'quotation', id, id, sent_at, 'Quotation ' || number || ' sent', title, currency, total_minor FROM quotations
              WHERE ${quo.sql} AND status NOT IN ('draft','void') AND sent_at IS NOT NULL
            UNION ALL
-           SELECT 'payment', id, received_at, 'Payment received, receipt ' || receipt_number, NULL, currency, amount_minor
+           SELECT 'payment', id, id, received_at, 'Payment received, receipt ' || receipt_number, NULL, currency, amount_minor
              FROM payments WHERE ${fin.sql} AND status <> 'reversed'
            UNION ALL
-           SELECT 'project_update', u.id, u.created_at, 'Update on ' || p.name, substr(u.body, 1, 280), NULL, NULL
+           SELECT 'project_update', u.id, p.id, u.created_at, 'Update on ' || p.name, substr(u.body, 1, 280), NULL, NULL
              FROM project_updates u JOIN projects p ON p.id = u.project_id
              WHERE ${prj.sql} AND u.visibility = 'client'
          ) ORDER BY at DESC LIMIT ${ACTIVITY_LIMIT}`,
@@ -145,6 +147,7 @@ export async function portalOverview(ctx: RequestContext): Promise<PortalOvervie
   type ActivityRow = {
     kind: PortalActivityKind;
     id: string;
+    target: string;
     at: string;
     title: string;
     detail: string | null;
@@ -195,6 +198,7 @@ export async function portalOverview(ctx: RequestContext): Promise<PortalOvervie
     activity: ((activity?.results ?? []) as ActivityRow[]).map((a) => ({
       kind: a.kind,
       id: a.id,
+      targetId: a.target,
       at: a.at,
       title: a.title,
       detail: a.detail,

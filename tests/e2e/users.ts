@@ -59,6 +59,13 @@ export const E2E_USERS = {
     role: 'content_manager',
     mustChange: false,
   },
+  packagesAdmin: {
+    id: 'usr_e2e_packages',
+    email: 'e2e-packages@example.com',
+    name: 'Pat Packages',
+    role: 'admin',
+    mustChange: false,
+  },
   invoicesAdmin: {
     id: 'usr_e2e_invoices',
     email: 'e2e-invoices@example.com',

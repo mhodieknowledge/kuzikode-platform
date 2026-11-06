@@ -108,6 +108,22 @@ const fmt = (iso: string) =>
 <AdminLayout title="Dashboard" page={page}>
   <h1 class="text-2xl font-bold tracking-display">Welcome, {firstName}</h1>
   <p class="mt-1 text-ink-600">Press ⌘K (Ctrl+K on Windows) to find a client, invoice, quotation or project.</p>
+  {d.priceReview ? (
+    <div
+      role="status"
+      class="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-warning-600/30 bg-warning-50 px-5 py-4"
+    >
+      <p class="text-sm text-warning-700">
+        <strong class="font-semibold">
+          {d.priceReview} {d.priceReview === 1 ? 'package price is' : 'package prices are'} awaiting review.
+        </strong>{' '}
+        Until approved they are suggested launch prices.
+      </p>
+      <a href="/admin/packages?review=1" class="text-sm font-semibold text-warning-700 underline underline-offset-2">
+        Review prices
+      </a>
+    </div>
+  ) : null}
   {tiles.length > 0 ? (
     <section aria-labelledby="kpi-title" class="mt-8">
       <h2 id="kpi-title" class="sr-only">

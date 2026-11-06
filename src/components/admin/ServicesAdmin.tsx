@@ -17,7 +17,7 @@ import {
   Textarea,
 } from '../ui';
 
-function useAction() {
+export function useAction() {
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -39,7 +39,7 @@ function useAction() {
   return { errors, error, busy, run };
 }
 
-function Alert({ message }: { message: string | null }) {
+export function Alert({ message }: { message: string | null }) {
   return message ? (
     <p role="alert" className="rounded-sm border border-danger-600/30 bg-danger-50 px-4 py-3 text-sm text-danger-700">
       {message}
@@ -47,7 +47,7 @@ function Alert({ message }: { message: string | null }) {
   ) : null;
 }
 
-const STATUS_OPTIONS = [
+export const STATUS_OPTIONS = [
   { value: 'active', label: 'Active (shown)' },
   { value: 'coming_soon', label: 'Coming soon (shown, no quote button)' },
   { value: 'inactive', label: 'Hidden' },
@@ -58,12 +58,12 @@ const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
   inactive: { label: 'Hidden', cls: 'bg-ink-950/5 text-ink-800' },
 };
 
-function StatusPill({ status }: { status: string }) {
+export function StatusPill({ status }: { status: string }) {
   const s = STATUS_BADGE[status] ?? { label: status, cls: 'bg-ink-950/5 text-ink-800' };
   return <span className={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${s.cls}`}>{s.label}</span>;
 }
 
-const slugify = (s: string) =>
+export const slugify = (s: string) =>
   s
     .toLowerCase()
     .normalize('NFKD')
@@ -84,14 +84,17 @@ interface Item {
  * A reorderable list: drag by the handle, or use the Move up/down buttons (keyboard and screen-reader friendly).
  * Each change is saved at once; on failure the previous order is restored.
  */
-function Sortable<T extends Item>({
+export function Sortable<T extends Item>({
   items: initial,
   saveUrl,
+  saveBody,
   label,
   render,
 }: {
   items: T[];
   saveUrl: string;
+  /** Extra fields sent with the new order (e.g. which pricing tab). */
+  saveBody?: Record<string, unknown>;
   label: string;
   render: (item: T) => React.ReactNode;
 }) {
@@ -104,7 +107,7 @@ function Sortable<T extends Item>({
     setItems(next);
     void a.run(async () => {
       try {
-        await apiFetch(saveUrl, { body: { ids: next.map((i) => i.id) } });
+        await apiFetch(saveUrl, { body: { ...saveBody, ids: next.map((i) => i.id) } });
         setStatus(`${moved.name} moved to position ${next.indexOf(moved) + 1} of ${next.length}.`);
       } catch (err) {
         setItems(prev);
@@ -270,7 +273,7 @@ export function CatalogueList({ divisions }: { divisions: CatalogueDivision[] })
 
 // ---------------------------------------------------------------- forms
 
-function DeleteButton({ url, name, after, what }: { url: string; name: string; after: string; what: string }) {
+export function DeleteButton({ url, name, after, what }: { url: string; name: string; after: string; what: string }) {
   const [open, setOpen] = useState(false);
   const a = useAction();
   return (
@@ -297,7 +300,7 @@ function DeleteButton({ url, name, after, what }: { url: string; name: string; a
   );
 }
 
-function SlugField({
+export function SlugField({
   name,
   slug,
   setSlug,

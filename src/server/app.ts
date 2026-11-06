@@ -15,6 +15,7 @@ import { adminShellRoutes } from './modules/admin';
 import { settingsRoutes } from './modules/settings';
 import { clientRoutes } from './modules/clients';
 import { catalogueRoutes } from './modules/catalogue';
+import { packageRoutes } from './modules/packages';
 import { publicQuotationRoutes, quotationRoutes } from './modules/quotations';
 import { documentRoutes, publicDocumentRoutes } from './modules/documents';
 import { invoiceRoutes } from './modules/invoices';
@@ -38,6 +39,7 @@ export function createApp() {
   app.route('/api/v1/admin/settings', settingsRoutes());
   app.route('/api/v1/admin/clients', clientRoutes());
   app.route('/api/v1/admin/catalogue', catalogueRoutes());
+  app.route('/api/v1/admin/packages', packageRoutes());
   app.route('/api/v1/admin/quotations', quotationRoutes());
   app.route('/api/v1/admin/documents', documentRoutes());
   app.route('/api/v1/admin/invoices', invoiceRoutes());

@@ -1,0 +1,128 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { AddonsManager, PackagesList } from '../../../components/admin/PackagesAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { can } from '../../../server/lib/policies';
+import { listPackagesAdmin } from '../../../server/modules/packages';
+import { formatMoney } from '../../../shared/money';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'packages.manage' });
+if (page instanceof Response) return page;
+const [overview, { results }] = await Promise.all([
+  listPackagesAdmin(ctx),
+  ctx.db.prepare('SELECT code FROM currencies WHERE active = 1 ORDER BY is_default DESC, code').all<{ code: string }>(),
+]);
+const currencies = results.map((r) => r.code);
+const priceLabel = (p: (typeof overview.packages)[number]) => {
+  if (p.priceType === 'custom_quote' || p.priceMinor == null || !p.currency) return 'Custom quote';
+  const amount = formatMoney(p.priceMinor, p.currency);
+  const per = p.billingType === 'recurring' ? (p.interval === 'year' ? ' / year' : ' / month') : '';
+  return `${p.priceType === 'starting_from' ? 'From ' : ''}${amount}${per}`;
+};
+const packages = overview.packages.map((p) => ({
+  id: p.id,
+  name: p.name,
+  serviceName: p.serviceName,
+  tab: p.tab,
+  status: p.status,
+  price: priceLabel(p),
+  priceReviewRequired: p.priceReviewRequired,
+  mostPopular: p.mostPopular,
+}));
+const reviewOnly = Astro.url.searchParams.get('review') === '1';
+const saved = Astro.url.searchParams.get('saved') === '1';
+---
+
+<AdminLayout title="Packages & pricing" page={page}>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold tracking-display">Packages & pricing</h1>
+      <p class="mt-1 text-sm text-ink-600">
+        Priced bundles shown on /pricing and the division pages, and offered in quotations.
+      </p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <a
+        href="/pricing"
+        target="_blank"
+        rel="noopener"
+        class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+      >
+        View /pricing<span class="sr-only"> (opens in a new tab)</span>
+      </a>
+      <a
+        href="/admin/packages/new"
+        class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
+      >
+        New package
+      </a>
+    </div>
+  </div>
+  {saved ? (
+    <p
+      role="status"
+      class="mt-4 rounded-sm border border-success-700/30 bg-success-50 px-4 py-3 text-sm text-success-700"
+    >
+      Saved. The website now shows your changes.
+    </p>
+  ) : null}
+  <p class="mt-4 text-sm text-ink-800" data-testid="show-prices">
+    Public prices are <strong class="font-semibold">{overview.showPrices ? 'shown' : 'hidden'}</strong>
+    {overview.showPrices ? '.' : ' (visitors see "Request a quote").'}{' '}
+    {can(ctx, 'settings.manage') ? (
+      <a href="/admin/settings" class="font-semibold text-brand-600 underline underline-offset-2">
+        Change in Settings
+      </a>
+    ) : null}
+  </p>
+  <nav aria-label="Package view" class="mt-4 inline-flex rounded-sm border border-line bg-surface p-0.5">
+    <a
+      href="/admin/packages"
+      aria-current={!reviewOnly ? 'page' : undefined}
+      class:list={[
+        'inline-flex h-9 items-center rounded-sm px-3 text-sm font-semibold',
+        !reviewOnly ? 'bg-ink-950 text-white' : 'text-ink-800',
+      ]}
+    >
+      All packages
+    </a>
+    <a
+      href="/admin/packages?review=1"
+      aria-current={reviewOnly ? 'page' : undefined}
+      class:list={[
+        'inline-flex h-9 items-center rounded-sm px-3 text-sm font-semibold',
+        reviewOnly ? 'bg-ink-950 text-white' : 'text-ink-800',
+      ]}
+    >
+      Awaiting review ({overview.reviewCount})
+    </a>
+  </nav>
+  <div class="mt-6 flex max-w-5xl flex-col gap-6">
+    <PackagesList
+      client:load
+      packages={packages}
+      canReview={can(ctx, 'packages.price_review')}
+      reviewOnly={reviewOnly}
+    />
+    {reviewOnly ? null : (
+      <AddonsManager
+        client:visible
+        addons={overview.addons.map((a) => ({
+          id: a.id,
+          packageId: a.packageId,
+          packageName: a.packageName,
+          name: a.name,
+          description: a.description,
+          priceMinor: a.priceMinor,
+          currency: a.currency,
+          unit: a.unit,
+          billingType: a.billingType,
+          active: a.active,
+        }))}
+        packages={overview.packages.map((p) => ({ id: p.id, name: p.name }))}
+        currencies={currencies}
+      />
+    )}
+  </div>
+</AdminLayout>

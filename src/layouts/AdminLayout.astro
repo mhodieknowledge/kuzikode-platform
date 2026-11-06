@@ -80,7 +80,7 @@ const shortcuts = nav.flatMap((g) => g.items.map((i) => ({ label: i.label, href:
           <span class="text-sm text-ink-600">{userName}</span>
         ) : null}
       </header>
-      <main id="main" tabindex="-1" class="flex-1 px-4 py-6 focus:outline-none lg:px-8">
+      <main id="main" tabindex="-1" class="min-w-0 flex-1 px-4 py-6 focus:outline-none lg:px-8">
         <slot />
       </main>
     </div>

@@ -348,3 +348,15 @@ The **Next step** line must be specific enough that a fresh session can continue
   sees no financial tiles).
 - Next step: P4.19 Packages & pricing admin (packages, features, add-ons, comparison order, price-review flag + dashboard warning
   tile, "Add package" in the quotation editor; price-copy test).
+
+## 2026-11-06 13:05 UTC · P4.19 Packages & pricing admin ✅
+- `shared/schemas/packages.ts`; `modules/packages` (+ routes at `/api/v1/admin/packages`): list (all tabs, add-ons, review count,
+  show-prices state), create/edit with ordered feature rows (content_version bump + audit), delete when unused, one "most popular"
+  per tab, comparison order per tab, add-on CRUD, price review flag + approve one/all (`packages.price_review`), quotation picker and
+  `quote-lines` (prices copied at that moment, ZWG via manual price). Dashboard: price-review warning banner (`priceReview`).
+- UI: /admin/packages (tabs with drag/arrow ordering, review badges + approve, "Awaiting review" view, add-ons table + dialog),
+  /admin/packages/new, /admin/packages/[id] (package editor with feature rows); quotation editor "Add package" dialog. Nav: Packages on.
+- Tests: integration `packages-admin.test.ts` (5: CRUD/features/audit/version/cost-note privacy, price review + dashboard, most
+  popular + order, price-copy into quotations + ZWG + delete guard, add-ons + permissions) · e2e `packages.spec.ts` (2).
+- Next step: P4.20 Subscriptions & recurring billing + managed services register (renewal reminders, portal "Your services" data,
+  double-run cron test, MRR/ARR + upcoming renewals tiles on the dashboard).

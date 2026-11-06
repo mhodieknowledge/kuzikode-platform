@@ -1,0 +1,56 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { PackageForm } from '../../../components/admin/PackagesAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { can } from '../../../server/lib/policies';
+import { packageFormOptions } from '../../../server/modules/packages';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'packages.manage' });
+if (page instanceof Response) return page;
+const { services, currencies } = await packageFormOptions(ctx);
+if (services.length === 0) return Astro.redirect('/admin/services/new', 303);
+const initial = {
+  serviceId: services[0]!.id,
+  slug: '',
+  name: '',
+  tagline: null,
+  billingType: 'one_off' as const,
+  interval: null,
+  priceType: 'fixed' as const,
+  priceMinor: null,
+  currency: currencies[0] ?? 'USD',
+  priceUnit: null,
+  altPriceZwgMinor: null,
+  annualPriceMinor: null,
+  minQuantity: 1,
+  deliveryTime: null,
+  revisionRounds: null,
+  supportPeriod: null,
+  mostPopular: false,
+  tab: 'websites' as const,
+  status: 'inactive' as const,
+  costNote: null,
+  features: [],
+};
+---
+
+<AdminLayout title="New package" page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/packages" class="hover:text-ink-950 hover:underline">
+      Packages
+    </a>{' '}
+    / <span class="text-ink-950">New package</span>
+  </nav>
+  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">New package</h1>
+  <div class="max-w-4xl">
+    <PackageForm
+      client:load
+      initial={initial}
+      services={services}
+      currencies={currencies}
+      inUse={false}
+      canReview={can(ctx, 'packages.price_review')}
+    />
+  </div>
+</AdminLayout>

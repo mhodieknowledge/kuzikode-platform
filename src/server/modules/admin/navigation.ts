@@ -53,7 +53,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     items: [
       { label: 'Pages', href: '/admin/cms', anyOf: ['cms.manage'], built: true },
       { label: 'Services', href: '/admin/services', anyOf: ['services.manage'], built: true },
-      { label: 'Packages', href: '/admin/packages', anyOf: ['packages.manage'], built: false },
+      { label: 'Packages', href: '/admin/packages', anyOf: ['packages.manage'], built: true },
       { label: 'Content', href: '/admin/content', anyOf: ['content.manage'], built: false },
       { label: 'Media', href: '/admin/media', anyOf: ['media.manage'], built: true },
       { label: 'Careers', href: '/admin/careers', anyOf: ['careers.view'], built: false },

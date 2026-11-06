@@ -1,7 +1,7 @@
 /** Quotation islands (P4.7): the editor and the actions on a quotation. The server validates and authorises all. */
 import { useState, type FormEvent } from 'react';
 import type { DiscountType } from '../../shared/pricing';
-import { minorToDecimalString } from '../../shared/money';
+import { formatMoney, minorToDecimalString } from '../../shared/money';
 import {
   apiFetch,
   Button,
@@ -25,6 +25,170 @@ import {
   type TaxOption,
 } from './LineItemEditor';
 import { Alert, useAction } from './actions';
+
+interface PickerPackage {
+  id: string;
+  name: string;
+  serviceName: string;
+  priceMinor: number;
+  currency: string;
+  altPriceZwgMinor: number | null;
+  billingType: 'one_off' | 'recurring';
+  interval: 'month' | 'year' | null;
+  minQuantity: number;
+  addons: { id: string; name: string; priceMinor: number; currency: string; unit: string }[];
+}
+interface ApiLine {
+  serviceId: string | null;
+  packageId: string | null;
+  description: string;
+  quantity: string;
+  unitPriceMinor: number;
+  isRecurring: boolean;
+  recurringInterval: 'month' | 'year' | null;
+}
+
+/**
+ * "Add package": inserts a package (with what's included in the description) and chosen add-ons as ordinary lines.
+ * Prices come from the server at this moment and are copied, so later catalogue changes never alter this quotation.
+ */
+function AddPackageDialog({ currency, onAdd }: { currency: string; onAdd: (lines: EditorLine[]) => void }) {
+  const a = useAction();
+  const [open, setOpen] = useState(false);
+  const [list, setList] = useState<PickerPackage[] | null>(null);
+  const [pkgId, setPkgId] = useState('');
+  const [addons, setAddons] = useState<Record<string, number>>({});
+  const pkg = list?.find((p) => p.id === pkgId);
+  const load = () =>
+    a.run(async () => {
+      if (list) return;
+      const res = await apiFetch<{ data: PickerPackage[] }>('/api/v1/admin/packages/picker');
+      setList(res.data);
+    });
+  const price = (p: PickerPackage) =>
+    p.currency === currency
+      ? formatMoney(p.priceMinor, p.currency)
+      : currency === 'ZWG' && p.altPriceZwgMinor != null
+        ? formatMoney(p.altPriceZwgMinor, 'ZWG')
+        : `${formatMoney(p.priceMinor, p.currency)} (no ${currency} price)`;
+  const add = () =>
+    a.run(async () => {
+      if (!pkg) return;
+      const res = await apiFetch<{ data: ApiLine[] }>(`/api/v1/admin/packages/${pkg.id}/quote-lines`, {
+        body: { currency, addons: Object.entries(addons).map(([id, quantity]) => ({ id, quantity })) },
+      });
+      onAdd(
+        res.data.map((l) =>
+          newLine({
+            serviceId: l.serviceId,
+            packageId: l.packageId,
+            description: l.description,
+            quantity: l.quantity,
+            unitPriceMinor: l.unitPriceMinor,
+            isRecurring: l.isRecurring,
+            recurringInterval: l.recurringInterval,
+          }),
+        ),
+      );
+      setOpen(false);
+      setPkgId('');
+      setAddons({});
+    });
+  return (
+    <>
+      <Button
+        variant="secondary"
+        onClick={() => {
+          setOpen(true);
+          void load();
+        }}
+      >
+        Add package
+      </Button>
+      <Dialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Add a package"
+        description={`Adds the package and any add-ons as lines in ${currency}, priced as of now.`}
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button loading={a.busy} disabled={!pkg} onClick={() => void add()}>
+              Add to quotation
+            </Button>
+          </div>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          <Alert message={a.error} />
+          {list === null ? (
+            <p className="text-sm text-ink-600">Loading packages…</p>
+          ) : list.length === 0 ? (
+            <p className="text-sm text-ink-600">
+              There are no active priced packages. Add them under Website → Packages.
+            </p>
+          ) : (
+            <Field label="Package" required error={a.errors['packageId'] ?? a.errors['currency']}>
+              <Select
+                value={pkgId}
+                onChange={(e) => {
+                  setPkgId(e.target.value);
+                  setAddons({});
+                }}
+                placeholder="Choose a package"
+                options={list.map((p) => ({ value: p.id, label: `${p.serviceName} · ${p.name} · ${price(p)}` }))}
+              />
+            </Field>
+          )}
+          {pkg && pkg.addons.length > 0 ? (
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-1 text-sm font-semibold text-ink-950">Add-ons</legend>
+              {a.errors['addons'] ? (
+                <p className="text-[13px] text-danger-700">{a.errors['addons'].join(' ')}</p>
+              ) : null}
+              {pkg.addons.map((x) => {
+                const on = addons[x.id] !== undefined;
+                return (
+                  <div key={x.id} className="flex flex-wrap items-center justify-between gap-3">
+                    <Checkbox
+                      label={`${x.name} · ${formatMoney(x.priceMinor, x.currency)}${x.unit === 'each' ? '' : ` per ${x.unit}`}`}
+                      checked={on}
+                      onCheckedChange={(c) =>
+                        setAddons((m) => {
+                          const next = { ...m };
+                          if (c) next[x.id] = 1;
+                          else delete next[x.id];
+                          return next;
+                        })
+                      }
+                    />
+                    {on ? (
+                      <div className="flex items-center gap-2 text-[13px] text-ink-800">
+                        <span aria-hidden="true">Quantity</span>
+                        <Input
+                          aria-label={`Quantity of ${x.name}`}
+                          type="number"
+                          min={1}
+                          className="w-20"
+                          value={addons[x.id]}
+                          onChange={(e) =>
+                            setAddons((m) => ({ ...m, [x.id]: Math.max(1, Math.floor(Number(e.target.value)) || 1) }))
+                          }
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </fieldset>
+          ) : null}
+        </div>
+      </Dialog>
+    </>
+  );
+}
 
 export interface QuotationEditorProps {
   id?: string;
@@ -155,9 +319,20 @@ export function QuotationEditor({
         </div>
       </section>
       <section className="rounded-lg border border-line bg-surface p-6" aria-labelledby="q-lines">
-        <h2 id="q-lines" className="mb-4 font-sans text-base font-semibold">
-          Lines
-        </h2>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 id="q-lines" className="font-sans text-base font-semibold">
+            Lines
+          </h2>
+          <AddPackageDialog
+            currency={currency}
+            onAdd={(added) =>
+              setLines((cur) => [
+                ...cur.filter((l) => l.description.trim() !== '' || l.unitPriceMinor !== null),
+                ...added,
+              ])
+            }
+          />
+        </div>
         <LineItemEditor
           lines={lines}
           onChange={setLines}

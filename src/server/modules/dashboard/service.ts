@@ -49,6 +49,8 @@ export interface Dashboard {
     }[];
   };
   enquiries: null | { last7Days: number; briefs7Days: number };
+  /** Active packages whose prices await approval (docs/12 §D): a warning until a reviewer approves them. */
+  priceReview: null | number;
   careers: null | { openRoles: number; newApplicants7Days: number };
   recentPayments:
     | null
@@ -195,6 +197,7 @@ export async function getDashboard(ctx: RequestContext): Promise<Dashboard> {
     quotations: null,
     projects: null,
     enquiries: null,
+    priceReview: null,
     careers: null,
     recentPayments: null,
     dueInvoices: null,
@@ -268,6 +271,13 @@ export async function getDashboard(ctx: RequestContext): Promise<Dashboard> {
       .bind(weekAgo)
       .first<{ n: number; briefs: number | null }>();
     d.enquiries = { last7Days: r?.n ?? 0, briefs7Days: r?.briefs ?? 0 };
+  }
+
+  if (anyOf(ctx, 'packages.manage', 'packages.price_review')) {
+    const r = await db
+      .prepare("SELECT COUNT(*) AS n FROM service_packages WHERE status = 'active' AND price_review_required = 1")
+      .first<{ n: number }>();
+    d.priceReview = r?.n ?? 0;
   }
 
   if (can(ctx, 'careers.view')) {

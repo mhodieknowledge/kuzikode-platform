@@ -1,0 +1,43 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { ServiceForm } from '../../../components/admin/ServicesAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { listCatalogue } from '../../../server/modules/catalogue';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'services.manage' });
+if (page instanceof Response) return page;
+const [catalogue, { results }] = await Promise.all([
+  listCatalogue(ctx),
+  ctx.db.prepare('SELECT code FROM currencies WHERE active = 1 ORDER BY is_default DESC, code').all<{ code: string }>(),
+]);
+if (catalogue.length === 0) return Astro.redirect('/admin/services/divisions/new', 303);
+const divisions = catalogue.map((d) => ({ id: d.id, name: d.name, slug: d.slug }));
+const wanted = Astro.url.searchParams.get('division');
+const currencies = results.map((r) => r.code);
+const initial = {
+  categoryId: divisions.some((d) => d.id === wanted) ? wanted! : divisions[0]!.id,
+  slug: '',
+  name: '',
+  summary: '',
+  description: '',
+  pricingModel: 'custom_quote' as const,
+  priceMinor: null,
+  currency: currencies[0] ?? 'USD',
+  status: 'coming_soon' as const,
+  featured: false,
+};
+---
+
+<AdminLayout title="New service" page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/services" class="hover:text-ink-950 hover:underline">
+      Services
+    </a>{' '}
+    / <span class="text-ink-950">New service</span>
+  </nav>
+  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">New service</h1>
+  <div class="max-w-3xl">
+    <ServiceForm client:load initial={initial} divisions={divisions} currencies={currencies} inUse={false} />
+  </div>
+</AdminLayout>

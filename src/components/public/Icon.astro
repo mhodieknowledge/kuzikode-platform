@@ -18,6 +18,7 @@ import {
   Wallet,
   Workflow,
 } from 'lucide-react';
+import type { CmsIcon } from '../../shared/icons';
 
 const ICONS = {
   'arrow-right': ArrowRight,
@@ -35,7 +36,7 @@ const ICONS = {
   sparkles: Sparkles,
   wallet: Wallet,
   workflow: Workflow,
-} as const;
+} satisfies Record<CmsIcon, unknown>;
 
 interface Props {
   name: string | null | undefined;

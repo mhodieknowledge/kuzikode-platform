@@ -37,6 +37,9 @@ export default async function globalSetup() {
          failed_login_count = 0, locked_until = NULL;`,
       `INSERT INTO user_roles (user_id, role_id) SELECT ${q(u.id)}, id FROM roles WHERE key = ${q(u.role)};`,
     ]),
+    // Divisions left behind by an interrupted services.spec run (it normally deletes its own).
+    "DELETE FROM services WHERE category_id IN (SELECT id FROM service_categories WHERE slug GLOB 'workshops-[0-9]*');",
+    "DELETE FROM service_categories WHERE slug GLOB 'workshops-[0-9]*';",
     // A fixed website enquiry for leads.spec, reset to untriaged on every run (avoids the public form's rate limit).
     `INSERT INTO enquiries (id, reference, kind, name, email, phone, organisation, category, service_id, budget_range, message, consent_at, status)
      VALUES ('enq_e2e_lead', 'ENQ-E2E-0001', 'contact', 'Tendai Moyo', 'tendai@harare-bakery.example', '+263 77 123 4567',

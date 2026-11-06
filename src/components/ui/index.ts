@@ -17,3 +17,4 @@ export { Breadcrumbs, EmptyState, ErrorState, PageHeader, Skeleton, Timeline } f
 export { ToastProvider, useToast } from './Toast';
 export { ApiError, apiFetch, newIdempotencyKey } from './api';
 export { QrCode } from './QrCode';
+export { RichTextEditor } from './RichTextEditor';

@@ -1,0 +1,58 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { CatalogueList } from '../../../components/admin/ServicesAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { listCatalogue } from '../../../server/modules/catalogue';
+import { pricingLabel } from '../../../shared/service-display';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'services.manage' });
+if (page instanceof Response) return page;
+const catalogue = await listCatalogue(ctx);
+const divisions = catalogue.map((d) => ({
+  id: d.id,
+  name: d.name,
+  slug: d.slug,
+  status: d.status,
+  featured: d.featured,
+  services: d.services.map((s) => ({
+    id: s.id,
+    name: s.name,
+    slug: s.slug,
+    status: s.status,
+    featured: s.featured,
+    price: pricingLabel(s.pricingModel, s.priceMinor, s.currency, true),
+  })),
+}));
+const saved = Astro.url.searchParams.get('saved') === '1';
+---
+
+<AdminLayout title="Services" page={page}>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold tracking-display">Services</h1>
+      <p class="mt-1 text-sm text-ink-600">
+        Divisions and services shown on the website and offered in quotations. Changes are live as soon as you save.
+      </p>
+    </div>
+    <a
+      href="/services"
+      target="_blank"
+      rel="noopener"
+      class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+    >
+      View on website<span class="sr-only"> (opens in a new tab)</span>
+    </a>
+  </div>
+  {saved ? (
+    <p
+      role="status"
+      class="mt-4 rounded-sm border border-success-700/30 bg-success-50 px-4 py-3 text-sm text-success-700"
+    >
+      Saved. The website now shows your changes.
+    </p>
+  ) : null}
+  <div class="mt-6 max-w-4xl">
+    <CatalogueList client:load divisions={divisions} />
+  </div>
+</AdminLayout>

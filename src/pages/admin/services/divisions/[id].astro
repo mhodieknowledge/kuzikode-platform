@@ -1,0 +1,59 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { DivisionForm } from '../../../../components/admin/ServicesAdmin';
+import { loadAdminPage } from '../../../../server/lib/admin-page';
+import { AppError } from '../../../../server/lib/errors';
+import { getCategoryAdmin } from '../../../../server/modules/catalogue';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'services.manage' });
+if (page instanceof Response) return page;
+let d;
+try {
+  d = await getCategoryAdmin(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND')
+    return new Response(null, { status: 404, statusText: 'Not found' });
+  throw err;
+}
+const initial = {
+  id: d.id,
+  slug: d.slug,
+  name: d.name,
+  summary: d.summary,
+  description: d.description,
+  benefits: d.benefits,
+  deliverables: d.deliverables,
+  faq: d.faq,
+  icon: d.icon,
+  status: d.status,
+  featured: d.featured,
+  seoTitle: d.seoTitle,
+  seoDescription: d.seoDescription,
+};
+---
+
+<AdminLayout title={`Edit ${d.name}`} page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/services" class="hover:text-ink-950 hover:underline">
+      Services
+    </a>{' '}
+    / <span class="text-ink-950">{d.name}</span>
+  </nav>
+  <div class="mt-2 mb-6 flex flex-wrap items-center justify-between gap-3">
+    <h1 class="text-2xl font-bold tracking-display">{d.name}</h1>
+    {d.status !== 'inactive' ? (
+      <a
+        href={`/services/${d.slug}`}
+        target="_blank"
+        rel="noopener"
+        class="text-sm font-semibold text-brand-600 hover:underline"
+      >
+        View page<span class="sr-only"> (opens in a new tab)</span>
+      </a>
+    ) : null}
+  </div>
+  <div class="max-w-3xl">
+    <DivisionForm client:load initial={initial} />
+  </div>
+</AdminLayout>

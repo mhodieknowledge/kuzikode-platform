@@ -1,0 +1,57 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { ServiceForm } from '../../../components/admin/ServicesAdmin';
+import { loadAdminPage } from '../../../server/lib/admin-page';
+import { AppError } from '../../../server/lib/errors';
+import { getServiceAdmin, listCatalogue, serviceInUse } from '../../../server/modules/catalogue';
+
+const { ctx } = Astro.locals;
+const page = await loadAdminPage(ctx, Astro.request, { permission: 'services.manage' });
+if (page instanceof Response) return page;
+let s;
+try {
+  s = await getServiceAdmin(ctx, Astro.params.id ?? '');
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND')
+    return new Response(null, { status: 404, statusText: 'Not found' });
+  throw err;
+}
+const [catalogue, { results }, inUse] = await Promise.all([
+  listCatalogue(ctx),
+  ctx.db.prepare('SELECT code FROM currencies WHERE active = 1 ORDER BY is_default DESC, code').all<{ code: string }>(),
+  serviceInUse(ctx, s.id),
+]);
+const divisions = catalogue.map((d) => ({ id: d.id, name: d.name, slug: d.slug }));
+const currencies = results.map((r) => r.code);
+if (s.currency && !currencies.includes(s.currency)) currencies.push(s.currency);
+const initial = {
+  id: s.id,
+  categoryId: s.categoryId,
+  slug: s.slug,
+  name: s.name,
+  summary: s.summary,
+  description: s.description,
+  pricingModel: s.pricingModel,
+  priceMinor: s.priceMinor,
+  currency: s.currency,
+  status: s.status,
+  featured: s.featured,
+};
+---
+
+<AdminLayout title={`Edit ${s.name}`} page={page}>
+  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
+    <a href="/admin/services" class="hover:text-ink-950 hover:underline">
+      Services
+    </a>{' '}
+    / <span class="text-ink-950">{s.name}</span>
+  </nav>
+  <h1 class="mt-2 mb-1 text-2xl font-bold tracking-display">{s.name}</h1>
+  <p class="mb-6 text-sm text-ink-600">
+    {s.packages} {s.packages === 1 ? 'package' : 'packages'}
+    {inUse ? ' · in use, so it can be hidden but not deleted' : ''}
+  </p>
+  <div class="max-w-3xl">
+    <ServiceForm client:load initial={initial} divisions={divisions} currencies={currencies} inUse={inUse} />
+  </div>
+</AdminLayout>

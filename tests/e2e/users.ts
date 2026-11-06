@@ -38,6 +38,13 @@ export const E2E_USERS = {
     role: 'admin',
     mustChange: false,
   },
+  servicesAdmin: {
+    id: 'usr_e2e_services',
+    email: 'e2e-services@example.com',
+    name: 'Sipho Services',
+    role: 'content_manager',
+    mustChange: false,
+  },
   newcomer: {
     id: 'usr_e2e_newcomer',
     email: 'e2e-newcomer@example.com',

@@ -12,6 +12,8 @@ const font = (p) => `data:font/woff2;base64,${readFileSync(p).toString('base64')
 const manrope = font('node_modules/@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2');
 const inter = font('node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2');
 const logo = readFileSync('public/brand/logo-white.svg', 'utf8');
+// Owner-supplied abstract background (docs/13 §4 "bg-og"), processed by img:process.
+const bg = `data:image/jpeg;base64,${readFileSync('public/images/site/bg-og-1600.jpg').toString('base64')}`;
 
 const cards = [
   { file: 'default', eyebrow: 'Kuzikode Technologies', title: 'Building intelligent digital solutions.' },
@@ -29,15 +31,14 @@ const html = (c) => `<!doctype html><html><head><style>
 @font-face{font-family:Manrope;src:url(${manrope}) format('woff2');font-weight:200 800}
 @font-face{font-family:Inter;src:url(${inter}) format('woff2');font-weight:100 900}
 *{margin:0;box-sizing:border-box}
-body{width:1200px;height:630px;background:#0A0F1C;color:#fff;font-family:Inter;position:relative;overflow:hidden}
-.grid{position:absolute;inset:0;opacity:.08;background-image:linear-gradient(to right,#fff 1px,transparent 1px),linear-gradient(to bottom,#fff 1px,transparent 1px);background-size:48px 48px}
-.glow{position:absolute;right:-160px;top:-160px;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(39,71,232,.55),transparent 70%)}
+body{width:1200px;height:630px;background:#0A0F1C url(${bg}) center/cover no-repeat;color:#fff;font-family:Inter;position:relative;overflow:hidden}
+.shade{position:absolute;inset:0;background:linear-gradient(100deg,rgba(10,15,28,.7),rgba(10,15,28,.15) 75%)}
 .wrap{position:absolute;inset:72px 80px;display:flex;flex-direction:column;justify-content:space-between}
 .logo svg{height:44px;width:auto}
 .eyebrow{font-size:24px;font-weight:600;color:#5B78FF;letter-spacing:.02em}
 h1{font-family:Manrope;font-weight:800;font-size:${c.title.length > 48 ? 58 : 68}px;line-height:1.08;letter-spacing:-.02em;max-width:980px;margin-top:18px}
 .bar{height:6px;width:96px;background:#E8A33D;border-radius:3px}
-</style></head><body><div class="grid"></div><div class="glow"></div><div class="wrap">
+</style></head><body><div class="shade"></div><div class="wrap">
 <div class="logo">${logo}</div>
 <div><div class="eyebrow">${c.eyebrow}</div><h1>${c.title.replace(/&/g, '&amp;')}</h1></div>
 <div class="bar"></div></div></body></html>`;

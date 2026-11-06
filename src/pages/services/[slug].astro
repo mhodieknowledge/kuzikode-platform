@@ -3,6 +3,8 @@ import { ArrowRight, Check } from 'lucide-react';
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import Icon from '../../components/public/Icon.astro';
 import PackageCard from '../../components/public/pricing/PackageCard.astro';
+import ResponsiveImage from '../../components/ResponsiveImage.astro';
+import manifest from '../../../design/images/manifest.json';
 import {
   breadcrumbLd,
   getCategory,
@@ -20,6 +22,7 @@ const settings = await getSettings(ctx);
 const showPrices = settingBool(settings, 'pricing.show_prices');
 const { packages } = await packagesForCategory(ctx, cat.slug);
 const quotable = canRequestQuote(cat.status);
+const heroImage = `svc-${cat.slug}` in manifest.images ? `svc-${cat.slug}` : undefined;
 const ld = [
   serviceLd(ctx, cat),
   breadcrumbLd(ctx, [
@@ -51,42 +54,58 @@ const ld = [
           </li>
         </ol>
       </nav>
-      <div class="mt-6 flex items-center gap-3">
-        <span class="flex h-11 w-11 items-center justify-center rounded-sm bg-brand-50 text-brand-600">
-          <Icon name={cat.icon} size={22} />
-        </span>
-        {cat.status === 'coming_soon' ? (
-          <span class="rounded-full bg-ink-950/5 px-2.5 py-0.5 text-xs font-semibold text-ink-800">Coming soon</span>
+      <div class:list={['mt-6', heroImage && 'grid items-center gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-14']}>
+        <div>
+          <div class="flex items-center gap-3">
+            <span class="flex h-11 w-11 items-center justify-center rounded-sm bg-brand-50 text-brand-600">
+              <Icon name={cat.icon} size={22} />
+            </span>
+            {cat.status === 'coming_soon' ? (
+              <span class="rounded-full bg-ink-950/5 px-2.5 py-0.5 text-xs font-semibold text-ink-800">
+                Coming soon
+              </span>
+            ) : null}
+          </div>
+          <h1 id="division-title" class="mt-5 max-w-3xl text-4xl font-bold tracking-display md:text-5xl">
+            {cat.name}
+          </h1>
+          <p class="mt-4 max-w-2xl text-lg leading-8 text-ink-600">{cat.summary}</p>
+          {quotable ? (
+            <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+              <a
+                href={quotationHref(cat.slug)}
+                class="inline-flex h-12 items-center justify-center rounded-sm bg-brand-600 px-6 text-[15px] font-semibold text-white hover:bg-brand-500"
+              >
+                Request a quotation
+              </a>
+              <a
+                href="/pricing"
+                class="inline-flex h-12 items-center justify-center rounded-sm border border-line bg-surface px-6 text-[15px] font-semibold text-ink-950 hover:border-ink-400"
+              >
+                See pricing
+              </a>
+            </div>
+          ) : (
+            <p class="mt-8 max-w-xl text-[15px] text-ink-600">
+              We are preparing this service.{' '}
+              <a href="/contact" class="font-semibold text-brand-600 underline underline-offset-2">
+                Contact us
+              </a>{' '}
+              to hear when it opens.
+            </p>
+          )}
+        </div>
+        {heroImage ? (
+          <div class="overflow-hidden rounded-lg">
+            <ResponsiveImage
+              id={heroImage}
+              priority
+              sizes="(min-width: 1024px) 560px, 100vw"
+              class="aspect-[4/3] h-auto w-full object-cover"
+            />
+          </div>
         ) : null}
       </div>
-      <h1 id="division-title" class="mt-5 max-w-3xl text-4xl font-bold tracking-display md:text-5xl">
-        {cat.name}
-      </h1>
-      <p class="mt-4 max-w-2xl text-lg leading-8 text-ink-600">{cat.summary}</p>
-      {quotable ? (
-        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-          <a
-            href={quotationHref(cat.slug)}
-            class="inline-flex h-12 items-center justify-center rounded-sm bg-brand-600 px-6 text-[15px] font-semibold text-white hover:bg-brand-500"
-          >
-            Request a quotation
-          </a>
-          <a
-            href="/pricing"
-            class="inline-flex h-12 items-center justify-center rounded-sm border border-line bg-surface px-6 text-[15px] font-semibold text-ink-950 hover:border-ink-400"
-          >
-            See pricing
-          </a>
-        </div>
-      ) : (
-        <p class="mt-8 max-w-xl text-[15px] text-ink-600">
-          We are preparing this service.{' '}
-          <a href="/contact" class="font-semibold text-brand-600 underline underline-offset-2">
-            Contact us
-          </a>{' '}
-          to hear when it opens.
-        </p>
-      )}
     </div>
   </section>
 

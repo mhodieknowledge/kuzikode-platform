@@ -1,4 +1,5 @@
 ---
+import ResponsiveImage from '../../ResponsiveImage.astro';
 import type { SectionContent } from '../../../shared/schemas/cms';
 
 interface Props {
@@ -9,8 +10,11 @@ const { content: c } = Astro.props;
 
 <section class="bg-surface py-16 md:py-24" aria-labelledby="cta-title">
   <div class="container-content">
-    <div class="relative overflow-hidden rounded-lg bg-brand-600 px-6 py-12 text-white md:px-14 md:py-16">
-      <div aria-hidden="true" class="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-white/10 blur-2xl"></div>
+    <div class="relative overflow-hidden rounded-lg bg-ink-950 px-6 py-12 text-white md:px-14 md:py-16">
+      <div aria-hidden="true" class="pointer-events-none absolute inset-0 [&_picture]:block [&_picture]:h-full">
+        <ResponsiveImage id="bg-cta" alt="" sizes="(min-width: 1280px) 1200px, 100vw" class="h-full w-full object-cover" />
+      </div>
+      <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink-950/85 via-ink-950/55 to-ink-950/10"></div>
       <div class="relative flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
         <div class="max-w-xl">
           <h2 id="cta-title" class="text-3xl font-bold tracking-display text-white md:text-4xl">{c.title}</h2>

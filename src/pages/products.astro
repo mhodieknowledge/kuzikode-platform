@@ -1,6 +1,7 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
 import InterestForm from '../components/forms/InterestForm';
+import ResponsiveImage from '../components/ResponsiveImage.astro';
 import { getPage, listProducts } from '../server/modules/cms';
 import type { Section } from '../shared/schemas/cms';
 
@@ -15,9 +16,19 @@ const label: Record<string, string> = { in_development: 'In Development', beta: 
   description={page?.seoDescription ?? undefined}
 >
   <section class="bg-canvas py-14 md:py-20">
-    <div class="container-content">
-      <h1 class="text-4xl font-bold tracking-display md:text-5xl">{intro?.content.title ?? 'Products'}</h1>
-      {intro ? <div class="prose-kz mt-4 text-lg" set:html={intro.content.html} /> : null}
+    <div class="container-content grid items-center gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-14">
+      <div>
+        <h1 class="text-4xl font-bold tracking-display md:text-5xl">{intro?.content.title ?? 'Products'}</h1>
+        {intro ? <div class="prose-kz mt-4 text-lg" set:html={intro.content.html} /> : null}
+      </div>
+      <div class="overflow-hidden rounded-lg">
+        <ResponsiveImage
+          id="product-business-suite"
+          priority
+          sizes="(min-width: 1024px) 600px, 100vw"
+          class="aspect-[16/9] h-auto w-full object-cover"
+        />
+      </div>
     </div>
   </section>
   <section class="bg-surface py-14 md:py-20" aria-label="Products">

@@ -5,6 +5,7 @@ import Statement from '../components/public/sections/Statement.astro';
 import Values from '../components/public/sections/Values.astro';
 import ListSection from '../components/public/sections/ListSection.astro';
 import CtaBand from '../components/public/sections/CtaBand.astro';
+import PhotoPair from '../components/public/sections/PhotoPair.astro';
 import { getPage, listTeam } from '../server/modules/cms';
 import type { Section } from '../shared/schemas/cms';
 
@@ -28,12 +29,15 @@ let statementsRendered = false;
     switch (s.type) {
       case 'rich_text':
         return (
-          <RichText
-            content={s.content as Section<'rich_text'>['content']}
-            anchor={s.key}
-            asPageTitle={s.key === firstRichText}
-            tone={s.key === firstRichText ? 'canvas' : 'surface'}
-          />
+          <>
+            <RichText
+              content={s.content as Section<'rich_text'>['content']}
+              anchor={s.key}
+              asPageTitle={s.key === firstRichText}
+              tone={s.key === firstRichText ? 'canvas' : 'surface'}
+            />
+            {s.key === firstRichText ? <PhotoPair wide="about-team" narrow="about-workspace" /> : null}
+          </>
         );
       case 'statement':
         if (statementsRendered) return null;

@@ -51,7 +51,7 @@ Things only the owner can do. The agent keeps building around them and records e
   direct card API for merchants?"* (if yes, the agent can remove the one-time card window entirely). Until approved, cards still work through the
   one-time secure window.
 
-- [ ] **Site images (best free option):** follow `design/images/PROMPT-PACK.md`: generate the 20 images in the free Gemini app
+- [x] **Site images (best free option):** *(done 2026-11-06: the owner's 20 Gemini images were imported from R2 and placed)* follow `design/images/PROMPT-PACK.md`: generate the 20 images in the free Gemini app
   (gemini.google.com), name them as listed, and upload them to `design/images/inbox/` on GitHub. The agent does the rest.
 
 ## Raised by the agent
@@ -59,7 +59,11 @@ Things only the owner can do. The agent keeps building around them and records e
   `/legal/accessibility` are honest drafts marked "awaiting legal review". Have a Zimbabwean lawyer review them (data protection under the
   Cyber and Data Protection Act [Chapter 12:07], retention periods, liability limits), then edit them in Admin → Website → Legal pages
   and remove the "draft" line. Enquiry retention (24 months) and application retention (12 months) are defaults you can change.
-- [ ] **Site imagery (P3.18), raised 2026-11-06:** every generator is out of budget. The Workers AI free 10,000 neurons/day was already spent
+- [x] **Site imagery (P3.18), raised 2026-11-06:** *(resolved 2026-11-06 by the owner's images)* every generator is out of budget. The Workers AI free 10,000 neurons/day was already spent
   at 12:00 UTC (the allowance is shared with your other Workers), and the OpenAI key returns "no credits remaining". **Easiest (free):**
   the "Site images" entry above (Gemini app + `design/images/inbox/`). Alternatives: a few dollars of OpenAI API credit, or Workers Paid ($5/month). The pipeline is ready: `npm run img:gen -- --id <slot> --provider openai`. The site
   already looks finished without these images (sections without a photo render their text-only layout).
+- [ ] **Optional: delete the R2 `images` bucket (2026-11-06).** The 20 Gemini originals in the R2 bucket `images` have been processed into
+  `public/images/site/` (committed, 12 MB). The agent only read the bucket. Once you have checked the site, you can delete the bucket in the
+  Cloudflare dashboard (R2 → images → Settings → Delete). No defects found; nothing needs regenerating. Every docs/13 §4 slot is filled
+  (the "Approach" developer photo is used on /how-we-work).

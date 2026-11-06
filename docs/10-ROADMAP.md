@@ -52,7 +52,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P3.15 Insights blog** (list, post, categories/tags, RSS, Article JSON-LD, scheduled publishing) + 4 launch articles written by you. AC: RSS validates. Articles contain no invented statistics.
 - [x] **P3.16 How we work, FAQ (≥ 20 items + FAQPage schema), testimonials block (hidden when empty), technologies strip, service terms + accessibility pages, site search.** AC: tests per docs/08 additions.
 - [x] **P3.17 Engagement widgets:** WhatsApp chat button, consultation booking (Cal.com link or request form), newsletter double opt-in. AC: each hidden when unconfigured. Opt-in flow tested.
-- [ ] **P3.18 Site imagery.** Generate the ~20 images in the docs/13 §4 shot list (one-time, dev-only), review each, optimise, commit, place with `ResponsiveImage` + alt text. AC: every slot filled or deliberately imageless. Honesty rules met. Lighthouse still meets targets.
+- [x] **P3.18 Site imagery.** Generate the ~20 images in the docs/13 §4 shot list (one-time, dev-only), review each, optimise, commit, place with `ResponsiveImage` + alt text. AC: every slot filled or deliberately imageless. Honesty rules met. Lighthouse still meets targets.
 - [x] **P3.19 Careers (public)**: /careers, posting pages, application form, JobPosting JSON-LD, nav promotion when roles are open. AC: docs/08 careers tests.
 
 ## Phase 4 — Administration

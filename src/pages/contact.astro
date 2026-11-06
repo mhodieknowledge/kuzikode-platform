@@ -2,6 +2,7 @@
 import { Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
 import PublicLayout from '../layouts/PublicLayout.astro';
 import ContactForm from '../components/forms/ContactForm';
+import ResponsiveImage from '../components/ResponsiveImage.astro';
 import { getPage, getServiceCatalogue, getSettings, settingText } from '../server/modules/cms';
 import type { Section } from '../shared/schemas/cms';
 
@@ -87,6 +88,13 @@ const service = Astro.url.searchParams.get('service') ?? undefined;
           >
             Book a free consultation
           </a>
+        </div>
+        <div class="mt-8 hidden overflow-hidden rounded-lg lg:block">
+          <ResponsiveImage
+            id="contact-office"
+            sizes="(min-width: 1024px) 460px, 100vw"
+            class="aspect-[16/9] h-auto w-full object-cover"
+          />
         </div>
       </div>
       <div class="rounded-lg border border-line bg-surface p-6 md:p-8">

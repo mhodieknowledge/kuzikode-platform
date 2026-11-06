@@ -36,7 +36,13 @@ const firstRichText = sections.find((s) => s.type === 'rich_text')?.key;
       case 'process':
         return <Process content={s.content as Section<'process'>['content']} />;
       case 'features':
-        return <Features content={s.content as Section<'features'>['content']} anchor={s.key} />;
+        return (
+          <Features
+            content={s.content as Section<'features'>['content']}
+            anchor={s.key}
+            imageId={s.key === 'engagement' ? 'home-developer' : undefined}
+          />
+        );
       case 'values':
         return <Values content={s.content as Section<'values'>['content']} anchor={s.key} tone="canvas" />;
       case 'list':

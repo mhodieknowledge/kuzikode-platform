@@ -3,6 +3,7 @@ import PublicLayout from '../layouts/PublicLayout.astro';
 import Hero from '../components/public/sections/Hero.astro';
 import ServicesGrid from '../components/public/sections/ServicesGrid.astro';
 import Features from '../components/public/sections/Features.astro';
+import WorkGallery from '../components/public/sections/WorkGallery.astro';
 import WorkGrid from '../components/public/sections/WorkGrid.astro';
 import Process from '../components/public/sections/Process.astro';
 import Values from '../components/public/sections/Values.astro';
@@ -47,11 +48,22 @@ const sections = page.sections as Section[];
       case 'services_grid':
         return <ServicesGrid content={s.content as Section<'services_grid'>['content']} categories={categories} />;
       case 'features':
-        return <Features content={s.content as Section<'features'>['content']} anchor={s.key} />;
+        return (
+          <Features
+            content={s.content as Section<'features'>['content']}
+            anchor={s.key}
+            imageId={s.key === 'why' ? 'home-approach' : undefined}
+          />
+        );
       case 'work_grid':
         return <WorkGrid content={s.content as Section<'work_grid'>['content']} items={featured} />;
       case 'process':
-        return <Process content={s.content as Section<'process'>['content']} />;
+        return (
+          <>
+            <Process content={s.content as Section<'process'>['content']} />
+            <WorkGallery />
+          </>
+        );
       case 'values':
         return <Values content={s.content as Section<'values'>['content']} anchor={s.key} />;
       case 'products_grid':

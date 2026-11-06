@@ -389,3 +389,16 @@ The **Next step** line must be specific enough that a fresh session can continue
   email → close → archive); careers.spec still green.
 - Next step: P4.22 Content admin (insights, industries, FAQ, testimonials with consent enforced, technologies, newsletter list +
   export). Check modules/cms (content.ts, insights.ts, industries.ts) for the existing public readers first.
+
+## 2026-11-06 17:45 UTC · Owner image import + P3.18 Site imagery ✅
+- Connectors present (Figma, Canva, Cloudflare). Downloaded the owner's 20 Gemini images read-only from R2 `images` (account checked) to the
+  session scratchpad (originals never committed), viewed each one, mapped them to the 20 PROMPT-PACK slots; all passed the §6 bar.
+- `img:process` now takes owner uploads (`--src`, `--model`, `--category`, `--focus`, empty `--alt` for decorative); 20 images → AVIF/WebP/JPEG
+  at 640/1024/full, LQIP, manifest rebuilt (12 MB in public/images/site). OG cards re-rendered on the `bg-og` background.
+- Placement: Hero, Features (home `why`, how-we-work `engagement`), new `WorkGallery.astro` + `PhotoPair.astro`, services/[slug] hero,
+  about, careers, contact, products, `CtaBand` background. Removed the owner's `imgs/` folder.
+- Tests: verify green; public e2e specs (home, about, careers, contact, services, products, public, public-layout) pass. 5 admin specs
+  failed only on login rate-limiting when the whole filtered set ran together and passed when re-run on their own. Visual QA 375/768/1440 for home,
+  a service page, about, careers, contact, products: no overflow, no broken images.
+- Next step: P4.22 Content admin (insights, industries, FAQ, testimonials with consent enforced, technologies, newsletter list + export).
+  Check modules/cms (content.ts, insights.ts, industries.ts) for the existing public readers first.

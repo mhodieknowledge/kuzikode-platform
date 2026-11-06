@@ -1,6 +1,7 @@
 ---
 import { ArrowRight, Briefcase, MapPin } from 'lucide-react';
 import PublicLayout from '../../layouts/PublicLayout.astro';
+import ResponsiveImage from '../../components/ResponsiveImage.astro';
 import { breadcrumbLd, getSettings, settingBool, settingText } from '../../server/modules/cms';
 import { employmentTypeLabel, listOpenPostings, workplaceLabel } from '../../server/modules/careers';
 import { EMPLOYMENT_TYPES, WORKPLACES } from '../../shared/schemas/careers';
@@ -26,12 +27,22 @@ const selectClass =
   description="Open roles at Kuzikode Technologies and how to apply."
 >
   <section class="bg-canvas py-14 md:py-20" aria-labelledby="careers-title">
-    <div class="container-content max-w-3xl">
-      <p class="text-[13px] font-semibold tracking-wide text-brand-600 uppercase">Careers</p>
-      <h1 id="careers-title" class="mt-3 text-4xl font-bold tracking-display md:text-5xl">
-        Work with us
-      </h1>
-      {intro ? <p class="mt-4 text-lg leading-8 text-ink-600">{intro}</p> : null}
+    <div class="container-content grid items-center gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
+      <div class="max-w-2xl">
+        <p class="text-[13px] font-semibold tracking-wide text-brand-600 uppercase">Careers</p>
+        <h1 id="careers-title" class="mt-3 text-4xl font-bold tracking-display md:text-5xl">
+          Work with us
+        </h1>
+        {intro ? <p class="mt-4 text-lg leading-8 text-ink-600">{intro}</p> : null}
+      </div>
+      <div class="overflow-hidden rounded-lg">
+        <ResponsiveImage
+          id="careers-mentoring"
+          priority
+          sizes="(min-width: 1024px) 560px, 100vw"
+          class="aspect-[3/2] h-auto w-full object-cover"
+        />
+      </div>
     </div>
   </section>
   <section class="bg-surface py-14 md:py-20" aria-labelledby="roles-title">

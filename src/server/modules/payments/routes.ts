@@ -3,6 +3,7 @@ import { z } from 'zod';
 import {
   IDEMPOTENCY_KEY,
   attemptOtpSchema,
+  publicBankTransferNoticeSchema,
   paymentAccountCreateSchema,
   paymentAccountUpdateSchema,
   paymentListQuery,
@@ -25,6 +26,7 @@ import * as config from './admin-config';
 import { documentPdf } from '../documents/service';
 import { fileResponse } from '../files/service';
 import { getPublicAttempt } from './portal';
+import { reportBankTransfer } from './checkout';
 import * as svc from './service';
 
 const pageQuery = z.object({ page: z.coerce.number().int().min(1).max(10_000).default(1) }).strict();
@@ -134,7 +136,29 @@ export function publicPaymentRoutes() {
       idempotencyKey: idempotencyKey(c),
     });
     const statusPage = new URL(await paymentReturnUrl(ctx, start.attemptId));
-    return c.json({ data: { ...start, statusPage: `${statusPage.pathname}${statusPage.search}` } }, 201);
+    // The checkout polls and posts the OTP with the same signature the gateway return link carries.
+    const base = `/api/v1/public/payment-attempts/${encodeURIComponent(start.attemptId)}`;
+    const q = `?t=${encodeURIComponent(statusPage.searchParams.get('t') ?? '')}`;
+    return c.json(
+      {
+        data: {
+          ...start,
+          statusPage: `${statusPage.pathname}${statusPage.search}`,
+          statusUrl: `${base}${q}`,
+          otpUrl: `${base}/otp${q}`,
+        },
+      },
+      201,
+    );
+  });
+  r.post('/invoices/:token/bank-transfer-notice', csrfProtect(), async (c) => {
+    const ctx = c.var.ctx;
+    await enforce(ctx, { key: `pay-notice:ip:${ctx.ip}`, limit: 10, windowSeconds: 3600 });
+    const invoiceId = await invoiceFor(ctx, c.req.param('token'));
+    const { turnstileToken, ...body } = await jsonBody(c, publicBankTransferNoticeSchema);
+    if (!(await verifyTurnstile(ctx, turnstileToken)))
+      throw validationError({ turnstile: ['Complete the security check and try again.'] });
+    return c.json({ data: await reportBankTransfer(ctx, invoiceId, body) });
   });
   r.get('/payment-attempts/:id/receipt', async (c) => {
     const ctx = c.var.ctx;

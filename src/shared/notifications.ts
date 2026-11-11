@@ -12,6 +12,7 @@ export const NOTIFICATION_TYPES = [
   { type: 'invoice.issued', label: 'Invoice issued', group: 'Finance' },
   { type: 'payment.received', label: 'Payment received', group: 'Finance' },
   { type: 'payment.failed', label: 'Payment failed', group: 'Finance' },
+  { type: 'payment.reported', label: 'Client reports a bank transfer', group: 'Finance' },
   { type: 'invoice.overdue', label: 'Invoice overdue', group: 'Finance' },
   { type: 'subscription.alert', label: 'Subscription at risk or not billed', group: 'Finance' },
   { type: 'renewal.upcoming', label: 'Domain, hosting or service renewal coming up', group: 'Finance' },

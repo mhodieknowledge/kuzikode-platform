@@ -148,3 +148,15 @@ export const E2E_PORTAL_SUPPORT_USER = {
   email: 'e2e-portal-support@example.com',
   name: 'Rudo Client',
 } as const;
+
+/** Portal user of a separate client for the checkout spec (its invoices are created fresh on every run). */
+export const E2E_CHECKOUT_USER = {
+  id: 'usr_e2e_checkout',
+  email: 'e2e-checkout@example.com',
+  name: 'Chipo Checkout',
+  clientId: 'cli_e2e_checkout',
+  clientName: 'Avondale Bakery (e2e)',
+} as const;
+
+/** Invoice ids of this run's checkout fixtures (global-setup creates them; a paid invoice can't be paid again). */
+export const checkoutInvoiceId = (run: string, slot: 'a' | 'b' | 'c' | 'd') => `inv_e2e_co_${run}_${slot}`;

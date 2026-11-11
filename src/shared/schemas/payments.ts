@@ -86,6 +86,18 @@ export const attemptOtpSchema = z
   .object({ otp: z.string().regex(/^\d{4,8}$/, 'Enter the code from your phone.') })
   .strict();
 
+/** "I've paid, notify Kuzikode" on the checkout's bank transfer panel (marks nothing paid). */
+export const bankTransferNoticeSchema = z
+  .object({
+    payerName: z.string().trim().max(120).optional(),
+    reference: z.string().trim().max(80).optional(),
+  })
+  .strict();
+export type BankTransferNoticeInput = z.infer<typeof bankTransferNoticeSchema>;
+export const publicBankTransferNoticeSchema = bankTransferNoticeSchema
+  .extend({ turnstileToken: z.string().min(1).max(2048) })
+  .strict();
+
 /** One per click, so a double-tap never starts two payments. */
 export const IDEMPOTENCY_KEY = /^[A-Za-z0-9_-]{8,100}$/;
 

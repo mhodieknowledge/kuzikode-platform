@@ -4,7 +4,15 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { encryptString, hashPassword } from '../../src/server/lib/crypto';
-import { E2E_PASSWORD, E2E_PORTAL_SUPPORT_USER, E2E_PORTAL_USER, E2E_SUPER_TOTP_SECRET, E2E_USERS } from './users';
+import {
+  E2E_CHECKOUT_USER,
+  E2E_PASSWORD,
+  E2E_PORTAL_SUPPORT_USER,
+  E2E_PORTAL_USER,
+  E2E_SUPER_TOTP_SECRET,
+  E2E_USERS,
+  checkoutInvoiceId,
+} from './users';
 
 /** `documentToken(ctx, kind, id).hash` with the local development HMAC secret (tests run without `.dev.vars`). */
 const publicTokenHash = (kind: string, id: string) =>
@@ -35,6 +43,18 @@ export default async function globalSetup() {
   const clientSnap = JSON.stringify({ name: E2E_PORTAL_USER.clientName, email: 'hello@borrowdale-florists.example' });
   const businessSnap = JSON.stringify({ name: 'Kuzikode Technologies' });
   const now = new Date().toISOString();
+  // checkout.spec (P6.3d): four fresh $25.00 invoices per run (paying one closes it for good).
+  const run = Date.now().toString(36);
+  process.env.E2E_CHECKOUT_RUN = run;
+  const coSnap = JSON.stringify({
+    name: E2E_CHECKOUT_USER.clientName,
+    email: 'orders@avondale-bakery.example',
+    phone: '+263 77 111 1111',
+  });
+  const checkoutInvoices = (['a', 'b', 'c', 'd'] as const).map((slot) => ({
+    id: checkoutInvoiceId(run, slot),
+    number: `INV-E2E-C${run.toUpperCase()}-${slot.toUpperCase()}`,
+  }));
   const ids = Object.values(E2E_USERS)
     .map((u) => q(u.id))
     .join(',');
@@ -109,6 +129,29 @@ export default async function globalSetup() {
     `INSERT INTO payment_attempts (id, invoice_id, client_id, provider_key, account_id, flow, method_code, payer_phone_masked, amount_minor, currency, status, merchant_reference, idempotency_key)
      VALUES ('pat_e2e_portal_failed', 'inv_e2e_portal_2', ${q(E2E_PORTAL_USER.clientId)}, 'mock', 'ppa_e2e_mock', 'express', 'ecocash', '077****111', 25000, 'USD', 'failed', 'pat_e2e_portal_failed', 'e2e-portal-failed')
      ON CONFLICT(id) DO NOTHING;`,
+    // checkout.spec: its own client and portal user, fresh invoices (draft → lines → issued), public links, bank details.
+    `INSERT INTO clients (id, client_number, type, display_name, default_currency, email, phone)
+     VALUES (${q(E2E_CHECKOUT_USER.clientId)}, 'CL-E2E-CHECKOUT', 'business', ${q(E2E_CHECKOUT_USER.clientName)}, 'USD', 'orders@avondale-bakery.example', '+263 77 111 1111')
+     ON CONFLICT(id) DO NOTHING;`,
+    `INSERT INTO users (id, email, name, user_type, password_hash, status, must_change_password, email_verified_at)
+     VALUES (${q(E2E_CHECKOUT_USER.id)}, ${q(E2E_CHECKOUT_USER.email)}, ${q(E2E_CHECKOUT_USER.name)}, 'client', ${q(hash)}, 'active', 0, ${q(now)})
+     ON CONFLICT(id) DO UPDATE SET password_hash = excluded.password_hash, status = 'active', phone = NULL, failed_login_count = 0, locked_until = NULL;`,
+    `DELETE FROM sessions WHERE user_id = ${q(E2E_CHECKOUT_USER.id)};`,
+    `DELETE FROM user_mfa WHERE user_id = ${q(E2E_CHECKOUT_USER.id)};`,
+    `INSERT INTO client_user_access (id, client_id, user_id, role, status)
+     VALUES ('cua_e2e_checkout', ${q(E2E_CHECKOUT_USER.clientId)}, ${q(E2E_CHECKOUT_USER.id)}, 'owner', 'active')
+     ON CONFLICT(client_id, user_id) DO UPDATE SET status = 'active';`,
+    ...checkoutInvoices.flatMap((inv, i) => [
+      `INSERT INTO invoices (id, number, client_id, currency, status, issue_date, due_date, subtotal_minor, total_minor, amount_paid_minor, balance_minor, issued_at,
+         client_snapshot, business_snapshot)
+       VALUES (${q(inv.id)}, ${q(inv.number)}, ${q(E2E_CHECKOUT_USER.clientId)}, 'USD', 'draft', '2026-11-01', '2099-12-31', 2500, 2500, 0, 2500, '2026-11-01T08:00:00.000Z', ${q(coSnap)}, ${q(businessSnap)});`,
+      `INSERT INTO invoice_items (id, invoice_id, position, description, quantity_milli, unit_price_minor, line_subtotal_minor, line_discount_minor, line_tax_minor, line_total_minor)
+       VALUES (${q(`iti_e2e_co_${run}_${i}`)}, ${q(inv.id)}, 1, 'Menu board design', 1000, 2500, 2500, 0, 0, 2500);`,
+      `UPDATE invoices SET status = 'issued', public_token_hash = ${q(publicTokenHash('invoice', inv.id))} WHERE id = ${q(inv.id)};`,
+    ]),
+    `UPDATE application_settings SET value = ${q(JSON.stringify('Kuzikode Technologies (e2e test details)\nExample Bank, Harare\nAccount 0000000000'))}
+     WHERE key = 'documents.bank_details';`,
+    "UPDATE application_settings SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT) WHERE key = 'content_version';",
     // The portal quotation spec accepts it, so it is reset to "sent" on every run.
     `INSERT INTO quotations (id, number, client_id, title, currency, status, issue_date, valid_until, subtotal_minor, total_minor, sent_at,
        client_snapshot, business_snapshot)

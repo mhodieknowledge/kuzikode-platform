@@ -5,3 +5,4 @@ export * from './portal';
 export * from './router';
 export { getMockCheckout, settleMockCheckout } from './mock-checkout';
 export * from './admin-config';
+export { checkoutView, reportBankTransfer, type CheckoutView } from './checkout';

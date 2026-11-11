@@ -5,16 +5,16 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
-- Last completed task: **P6.3c Admin: payment accounts & routing** (2026-11-11).
-- **Next step:** **P6.3d Custom checkout page** (docs/06 §3b, read it in full): shared `CheckoutPage` island used by
-  `/pay/[invoiceToken]` (public: Turnstile on Pay, signed status via `statusPage`) and `/portal/invoices/[id]/pay`; renders only
-  from `payment-options` + `AttemptStart` (no provider names in code): method tiles, phone input (prefill from client), Pay
-  button disabled while pending with `newIdempotencyKey()` per click, express waiting panel with live status (poll the status
-  endpoint every 3 s, max 10 min, then "Check again"), InnBucks code + `QrCode` (ui kit) + deep link
-  `com.innbucks.customer://purchase?paymentToken=<code>`, O'mari OTP 6 boxes (paste) → `/otp`, card → redirect (popup comes in
-  P6.3e) , bank transfer panel from settings + "I've paid, notify Kuzikode" (pending note for finance, marks nothing paid),
-  TEST PAYMENT banner when `testMode`, success with receipt link, failure with Try again / Choose another method, aria-live.
-  Add "Pay now" on `/i/[token]` and `/portal/invoices/[id]` only when `payable` (carried over from P6.3c). Playwright on the mock.
+- Last completed task: **P6.3d Custom checkout page** (2026-11-11).
+- **Next step:** **P6.3e Paynow cards on our checkout** (docs/06 §3b card rules 1–7): card tile opens the gateway card page in a
+  centred popup (`window.open` 480×720 from the click) with `tokenize=true` when the account option `tokenizationEnabled` is set;
+  initiate must accept a per-attempt `returnUrl` → new `/pay/card-return` page that `postMessage`s `{attemptId}` to `window.opener`
+  (same origin) and closes, else shows the status (same-tab fallback when the popup is blocked or width < 640). `CheckoutPage`
+  (src/components/payments) gets a "Complete card entry in the secure window…" waiting state and polls as for express. Saved
+  cards: new table (migration 0012) with AES-GCM-encrypted token (`DATA_ENCRYPTION_KEY`), masked number, expiry; captured from
+  the verified status (`token`, `tokenexpiry`, `paymentinstrument`) in `applyStatus`; never returned to the browser or logged.
+  Saved-card express payment (`vmc`/`zimswitch` + token + `merchanttrace`) from the checkout; portal management (list, default,
+  remove); opt-in auto-charge consent for subscriptions. Mock adapter needs tokenization support for the tests.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 - New entries are appended at the **bottom** of this file.
 
@@ -653,3 +653,23 @@ The **Next step** line must be specific enough that a fresh session can continue
   status, adds and removes a route; axe + 375/768/1440 reviewed (fixed: sr-only cell labels escaping the table scroll box).
 - Tests: integration `payment-config.test.ts` (4). verify: unit 325 / integration 281.
 - The portal/public "Pay now" (P6.3c AC) is delivered with the checkout page in P6.3d, since its target is that page.
+
+## 2026-11-11 13:20 UTC · P6.3d Custom checkout page ✅
+- `modules/payments/checkout.ts`: `checkoutView` (summary: first 5 lines + "and N more", total, paid + credited, amount due;
+  routed methods; bank details from Settings while open; phone prefill: portal user's phone, else the invoice's client;
+  no gateway internals) and `reportBankTransfer` ("I've paid, notify Kuzikode": `payment.reported` notification for
+  `payments.record_manual` staff, one per invoice per day, audited, marks nothing paid). Routes: public
+  `POST /api/v1/public/invoices/:token/bank-transfer-notice` (Turnstile, 10/h/IP), portal `POST /api/v1/portal/invoices/:id/bank-transfer-notice`.
+  Both pay endpoints now return `statusUrl` + `otpUrl` (public ones signed like the gateway return link).
+- `components/payments/CheckoutPage.tsx` (island) + `CheckoutSummary.astro` (server-rendered, `<noscript>` bank details); pages
+  `/pay/[invoiceToken]` and `/portal/invoices/[id]/pay`. Method tiles (radio inputs), phone check, Turnstile (public), Pay button
+  locked per click with a fresh idempotency key, waiting panel (instructions, 10-min countdown, poll every 3 s, "Still waiting? Check
+  again"), InnBucks code + QR + app link + expiry (`walletDeepLink`, per method), O'mari OTP (6 boxes, paste, backspace), card →
+  gateway page → `/pay/return`, success (receipt number, PDF link, back to invoice) / failure (Try again, Choose another method),
+  TEST PAYMENT banner, aria-live announcements, trust footer. "Pay now" on `/i/[token]` and `/portal/invoices/[id]` when payable.
+- Tests: integration `checkout.test.ts` (4: view, phone/paid invoice, status/OTP URLs portal + public, bank notice dedupe/audit/scope/
+  Turnstile/409 once paid) · e2e `checkout.spec.ts` (4: public EcoCash → paid + receipt PDF, insufficient → Try again → cancelled →
+  InnBucks code/QR/link → bank notice, portal O'mari OTP by paste with double-click = one request, card hand-off → mock page →
+  `/pay/return` paid); axe clean; 375/768/1440 screenshots reviewed. global-setup creates 4 fresh checkout invoices per run for a
+  separate e2e client/user and sets test bank details. Portal, public-documents, gateways and invoices specs re-run green.
+- Next step: P6.3e (see Current status).

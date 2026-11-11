@@ -1,0 +1,47 @@
+---
+/**
+ * Public checkout from an invoice email / public invoice link (docs/06 §3b). The token is the only key (same as /i/:token);
+ * Turnstile protects the pay action. Private: noindex + no-store (middleware, `/pay` prefix).
+ */
+import DocumentLayout from '../../layouts/DocumentLayout.astro';
+import CheckoutSummary from '../../components/payments/CheckoutSummary.astro';
+import { CheckoutPage } from '../../components/payments/CheckoutPage';
+import { publicDocumentPageLimit } from '../../server/lib/rate-limit';
+import { invoiceIdForToken } from '../../server/modules/invoices';
+import { checkoutView } from '../../server/modules/payments';
+
+const { ctx } = Astro.locals;
+const token = Astro.params.invoiceToken ?? '';
+const limited = await publicDocumentPageLimit(ctx);
+if (limited) return limited;
+const invoiceId = await invoiceIdForToken(ctx, token);
+if (!invoiceId) return new Response(null, { status: 404, statusText: 'Not found' });
+const view = await checkoutView(ctx, invoiceId);
+const t = encodeURIComponent(token);
+---
+
+<DocumentLayout title={`Pay ${view.invoice.number}`}>
+  <div class="mx-auto grid max-w-5xl gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start">
+    <div class="flex flex-col gap-4 lg:sticky lg:top-6">
+      <CheckoutSummary view={view} />
+    </div>
+    <CheckoutPage
+      client:load
+      mode="public"
+      currency={view.invoice.currency}
+      minorDigits={view.invoice.minorDigits}
+      amountDueMinor={view.invoice.amountDueMinor}
+      invoiceNumber={view.invoice.number}
+      methods={view.methods}
+      bankTransfer={view.bankTransfer}
+      phone={view.phone}
+      testMode={view.testMode}
+      endpoints={{
+        pay: `/api/v1/public/invoices/${t}/pay`,
+        bankNotice: `/api/v1/public/invoices/${t}/bank-transfer-notice`,
+      }}
+      backHref={`/i/${t}`}
+      turnstileSiteKey={ctx.config.turnstileSiteKey}
+    />
+  </div>
+</DocumentLayout>

@@ -4,6 +4,7 @@ import InvoiceDocument from '../../../components/documents/InvoiceDocument.astro
 import StatusPill from '../../../components/portal/StatusPill.astro';
 import { loadPortalPage } from '../../../server/lib/portal-page';
 import { getPortalInvoice } from '../../../server/modules/invoices';
+import { invoicePaymentOptions } from '../../../server/modules/payments';
 import { AppError } from '../../../server/lib/errors';
 import { formatMoney } from '../../../shared/money';
 import { CREDIT_APPLIED_LABEL, portalInvoiceStatus } from '../../../shared/portal';
@@ -23,6 +24,7 @@ const inv = data.invoice;
 const money = (m: number) => formatMoney(m, inv.currency, data.minorDigits);
 const st = portalInvoiceStatus(inv.status, data.overdue);
 const pdfBase = `/api/v1/portal/invoices/${inv.id}/pdf`;
+const payable = data.payment ? (await invoicePaymentOptions(ctx, inv.id)).payable : false;
 ---
 
 <PortalLayout title={inv.number ?? 'Invoice'} page={page} active="invoices">
@@ -36,13 +38,23 @@ const pdfBase = `/api/v1/portal/invoices/${inv.id}/pdf`;
       <p class="flex flex-wrap items-center gap-2 text-sm text-ink-600">
         Status <StatusPill {...st} />
       </p>
-      <a
-        href={pdfBase}
-        download
-        class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
-      >
-        Download PDF
-      </a>
+      <div class="flex flex-wrap gap-3">
+        {payable ? (
+          <a
+            href={`/portal/invoices/${inv.id}/pay`}
+            class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
+          >
+            Pay now
+          </a>
+        ) : null}
+        <a
+          href={pdfBase}
+          download
+          class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+        >
+          Download PDF
+        </a>
+      </div>
     </div>
 
     {data.payment ? (

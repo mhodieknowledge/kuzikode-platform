@@ -67,3 +67,8 @@ Things only the owner can do. The agent keeps building around them and records e
   `public/images/site/` (committed, 12 MB). The agent only read the bucket. Once you have checked the site, you can delete the bucket in the
   Cloudflare dashboard (R2 → images → Settings → Delete). No defects found; nothing needs regenerating. Every docs/13 §4 slot is filled
   (the "Approach" developer photo is used on /how-we-work).
+- [ ] **Optional: payment method logos for the checkout (2026-11-11).** Our checkout (`/pay/…`) shows each method (EcoCash, OneMoney,
+  InnBucks, O'mari, Visa/Mastercard/Zimswitch) with a neutral icon. docs/06 §3b asks for the official logos, which may only be used under
+  each brand's artwork guidelines. If you want them: download the logo packs (Paynow merchant dashboard → marketing/artwork, or each
+  brand's media page), put the SVG/PNG files in `design/images/inbox/payment-logos/` and the next build session will add them. Nothing
+  is blocked without them.

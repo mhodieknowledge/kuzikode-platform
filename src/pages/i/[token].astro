@@ -2,6 +2,7 @@
 import DocumentLayout from '../../layouts/DocumentLayout.astro';
 import InvoiceDocument from '../../components/documents/InvoiceDocument.astro';
 import { getPublicInvoice } from '../../server/modules/invoices';
+import { invoicePaymentOptions } from '../../server/modules/payments';
 import { publicDocumentPageLimit } from '../../server/lib/rate-limit';
 import { formatMoney } from '../../shared/money';
 import { formatLongDate } from '../../shared/service-display';
@@ -13,6 +14,8 @@ if (limited) return limited;
 const data = await getPublicInvoice(ctx, token);
 if (!data) return new Response(null, { status: 404, statusText: 'Not found' });
 const inv = data.invoice;
+// "Pay now" only when the invoice is open and a payment route can take it (docs/06 §3b).
+const payable = (await invoicePaymentOptions(ctx, inv.id)).payable;
 const money = (m: number) => formatMoney(m, inv.currency, data.minorDigits);
 const notice =
   inv.status === 'paid'
@@ -36,7 +39,15 @@ const notice =
         {notice}
       </p>
     ) : null}
-    <p class="flex justify-end">
+    <p class="flex flex-wrap justify-end gap-3">
+      {payable ? (
+        <a
+          href={`/pay/${token}`}
+          class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+        >
+          Pay now
+        </a>
+      ) : null}
       <a
         href={`/api/v1/public/invoices/${token}/pdf`}
         download

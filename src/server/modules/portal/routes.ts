@@ -19,7 +19,8 @@ import * as invoices from '../invoices/portal';
 import * as payments from '../payments/portal';
 import * as orchestration from '../payments/orchestration';
 import { idempotencyKey } from '../payments/routes';
-import { attemptOtpSchema, payInvoiceSchema } from '../../../shared/schemas/payments';
+import { attemptOtpSchema, bankTransferNoticeSchema, payInvoiceSchema } from '../../../shared/schemas/payments';
+import { reportBankTransfer } from '../payments/checkout';
 import * as projects from '../projects/portal';
 import * as quotations from '../quotations/service';
 import * as services from '../subscriptions/portal';
@@ -189,7 +190,24 @@ export function portalRoutes() {
       phone: body.phone,
       idempotencyKey: idempotencyKey(c),
     });
-    return c.json({ data: { ...start, statusPage: `/portal/payments/attempts/${start.attemptId}` } }, 201);
+    const base = `/api/v1/portal/payment-attempts/${encodeURIComponent(start.attemptId)}`;
+    return c.json(
+      {
+        data: {
+          ...start,
+          statusPage: `/portal/payments/attempts/${start.attemptId}`,
+          statusUrl: base,
+          otpUrl: `${base}/otp`,
+        },
+      },
+      201,
+    );
+  });
+  r.post('/invoices/:id/bank-transfer-notice', async (c) => {
+    const ctx = c.var.ctx;
+    await enforce(ctx, { key: `pay-notice:user:${ctx.actor.userId}`, limit: 10, windowSeconds: 3600 });
+    const invoiceId = await invoices.portalInvoiceId(ctx, c.req.param('id'));
+    return c.json({ data: await reportBankTransfer(ctx, invoiceId, await jsonBody(c, bankTransferNoticeSchema)) });
   });
 
   r.get('/projects', async (c) => c.json({ data: await projects.listPortalProjects(c.var.ctx) }));

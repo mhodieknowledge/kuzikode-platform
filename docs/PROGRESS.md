@@ -9,6 +9,8 @@ The **Next step** line must be specific enough that a fresh session can continue
 - **Next step:** first confirm CI is green on `main` with the new two-job workflow (verify + e2e). Then **Phase 8, P8.1 Remote
   resources** (docs/09; `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` exist in the build env): create only `kuzikode-*` resources
   (staging D1, R2, KV, Queue), put real IDs into wrangler.jsonc, record in PROGRESS. Then P8.2 staging deploy + smoke tests.
+  State on 2026-11-11 21:40 UTC: `wrangler d1 list` shows no `kuzikode-*` database yet; wrangler.jsonc still has
+  `<STAGING_D1_ID>`, `<STAGING_KV_ID>`, `<PROD_*>` placeholders (docs/09 §2–3 list every resource and name).
 - **For P8.2 (staging):** send a test email from staging (Admin → Settings → email test) and confirm `delivered` arrives through the
   Resend webhook once the owner has configured it (BLOCKERS); re-run `LIVE_RESULT_URL=https://<staging>/api/payments/callbacks/paynow/<accountId> npm run test:payments:live`
   so Paynow's result URL is reachable, and record it.

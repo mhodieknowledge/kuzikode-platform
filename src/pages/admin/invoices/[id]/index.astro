@@ -261,6 +261,7 @@ const REMINDER = (k: string) =>
         <h2 id="hist-title" class="font-sans text-base font-semibold">
           History
         </h2>
+        {history.length === 0 ? <p class="mt-1 text-sm text-ink-600">No status changes recorded.</p> : null}
         <ol class="mt-3 flex flex-col gap-3 text-sm">
           {history.map((h) => (
             <li>

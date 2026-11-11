@@ -873,3 +873,9 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Staging: `PAYNOW_TEST_AUTHEMAIL` Worker secret added (the seeded Paynow USD account reads it in test mode).
 - Backup workflow run #1 on GitHub (staging) ✅ → `BACKUP_ENCRYPTION_PASSPHRASE` GitHub secret exists.
 - verify: unit 355 / integration 308, green.
+
+## 2026-11-11 23:00 UTC · P8.6 Final screens ✅
+- `docs/screenshots/` (index README): home, service page, pricing, contact, admin dashboard, invoices, invoice detail, portal
+  overview at 1440 and 375 px, from a local build with fictional demo data; reviewed. Figma rebuild not done (DECISIONS).
+- Fix found while reviewing: the admin invoice History card was blank when an invoice had no status rows (imported or seeded data); it now
+  says "No status changes recorded."

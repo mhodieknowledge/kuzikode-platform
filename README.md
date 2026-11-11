@@ -5,7 +5,7 @@ careers and insights; CRM (enquiries, leads, clients); quotations, invoices, cre
 Paynow (EcoCash, OneMoney, InnBucks, O'mari, cards) behind a gateway-independent payments package; projects, time, support,
 expenses and reports; transactional email through an outbox and a queue.
 
-It runs entirely on Cloudflare: one Worker (Astro 5 SSR + Hono API), D1 (SQLite), R2 (files and backups), KV (cache),
+It runs entirely on Cloudflare: one Worker (Astro 7 SSR + Hono API), D1 (SQLite), R2 (files and backups), KV (cache),
 Queues (background jobs), Cron Triggers, Turnstile. Email goes through Resend.
 
 | | |

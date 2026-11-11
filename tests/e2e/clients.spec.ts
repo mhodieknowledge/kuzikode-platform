@@ -1,6 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
-import { expectAccessible, screenshots } from './helpers';
+import { expectAccessible, screenshots, ownIp } from './helpers';
 import { E2E_PASSWORD, E2E_USERS } from './users';
+
+test.use(ownIp('clients'));
 
 async function signIn(page: Page, email: string) {
   await page.goto('/admin/login');
@@ -80,7 +82,7 @@ test('admin creates a client with a main contact, adds a note, invites the conta
 });
 
 test('support staff can view clients but not create or change them', async ({ page }) => {
-  await signIn(page, E2E_USERS.support.email);
+  await signIn(page, E2E_USERS.support2.email);
   await page.goto('/admin/clients');
   await expect(page.getByRole('heading', { level: 1, name: 'Clients' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'New client' })).toHaveCount(0);

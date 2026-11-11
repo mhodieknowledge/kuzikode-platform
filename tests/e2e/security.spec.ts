@@ -6,6 +6,9 @@
  */
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 import { E2E_PASSWORD, E2E_PORTAL_USER, E2E_SECURITY_USER, E2E_USERS } from './users';
+import { ownIp } from './helpers';
+
+test.use(ownIp('security'));
 
 const hydrated = (page: Page, text: string) =>
   expect(page.locator('astro-island').filter({ hasText: text }).first()).not.toHaveAttribute('ssr', {
@@ -42,7 +45,7 @@ async function clientAFile(request: APIRequestContext, page: Page): Promise<stri
 
 test("client B can't open client A's documents, project, payments or files (404)", async ({ page, browser }) => {
   // An admin shares a file with client A, so there is something real to try to reach.
-  await signIn(page, 'admin', E2E_USERS.admin.email);
+  await signIn(page, 'admin', E2E_USERS.securityAdmin.email);
   await page.goto('/admin/projects/prj_e2e_time');
   const fileId = await clientAFile(page.request, page);
   const adminFile = await page.request.get(`/api/v1/admin/files/${fileId}`, { maxRedirects: 0 });

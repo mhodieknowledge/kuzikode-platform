@@ -9,8 +9,10 @@
 import AxeBuilder from '@axe-core/playwright';
 import { createHmac } from 'node:crypto';
 import { expect, test, type Page } from '@playwright/test';
-import { WIDTHS } from './helpers';
+import { WIDTHS, ownIp } from './helpers';
 import { E2E_PASSWORD, E2E_PORTAL_SUPPORT_USER, E2E_USERS } from './users';
+
+test.use(ownIp('sweep'));
 
 test.describe.configure({ timeout: 600_000 });
 test.use({ actionTimeout: 15_000 });
@@ -138,7 +140,7 @@ test('public pages', async ({ page }) => {
 });
 
 test('admin pages', async ({ page }) => {
-  await signIn(page, 'admin', E2E_USERS.admin.email);
+  await signIn(page, 'admin', E2E_USERS.sweepAdmin.email);
   const detail = (list: string, re: string, suffix?: string) => ({
     list,
     pattern: new RegExp(`^${re}$`),

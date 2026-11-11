@@ -1,8 +1,10 @@
 /** P6.3c: the Super Administrator manages gateway accounts and routes (2FA sign-in with the e2e TOTP secret). */
 import { expect, test } from '@playwright/test';
 import { totp } from '../../src/server/lib/totp';
-import { expectAccessible, screenshots } from './helpers';
+import { expectAccessible, screenshots, ownIp } from './helpers';
 import { E2E_PASSWORD, E2E_SUPER_TOTP_SECRET, E2E_USERS } from './users';
+
+test.use(ownIp('payment-gateways'));
 
 test('Super Admin: gateway accounts with secret status, add and remove a route', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });

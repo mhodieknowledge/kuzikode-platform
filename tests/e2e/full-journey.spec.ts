@@ -4,8 +4,10 @@
  * receipts → dashboard → project → client sees the project and downloads the deliverable.
  */
 import { expect, test, type Browser, type Page } from '@playwright/test';
-import { expectAccessible } from './helpers';
+import { expectAccessible, ownIp } from './helpers';
 import { E2E_PASSWORD, E2E_USERS } from './users';
+
+test.use(ownIp('full-journey'));
 
 test.describe.configure({ mode: 'serial', timeout: 240_000 });
 test.use({ actionTimeout: 15_000 });
@@ -23,7 +25,7 @@ const hydrated = (page: Page, text: string) =>
 async function adminSignIn(page: Page) {
   await page.goto('/admin/login');
   await expect(page.locator('astro-island:has(form)')).not.toHaveAttribute('ssr');
-  await page.getByLabel('Email').fill(E2E_USERS.admin.email);
+  await page.getByLabel('Email').fill(E2E_USERS.journeyAdmin.email);
   await page.getByLabel('Password').fill(E2E_PASSWORD);
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).toHaveURL(/\/admin$/);

@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { expectAccessible, screenshots } from './helpers';
+import { expectAccessible, screenshots, ownIp } from './helpers';
+
+test.use(ownIp('about'));
 
 test('about page renders all CMS blocks and no team section without real members', async ({ page }) => {
   expect((await page.goto('/about'))!.status()).toBe(200);

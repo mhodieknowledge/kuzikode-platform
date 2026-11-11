@@ -778,3 +778,12 @@ The **Next step** line must be specific enough that a fresh session can continue
   text escape (all 28 `overflow-x-auto` wrappers now `relative`); sidebar grids sized to their table's min width (now
   `grid-cols-1` + `minmax(0,1fr)` on 12 pages: insights, invoices, quotations, projects, clients, users, support, CMS pages…);
   account sessions at 375 px. axe and keyboard: no findings. Pricing, gateways, reports, users, content specs re-run green.
+
+## 2026-11-11 20:20 UTC · CI e2e red since run 66 → fixed
+- Cause: the e2e suite outgrew the sign-in limits it runs against (one client IP for the whole suite: 20 sign-ins / 15 min; shared
+  accounts: 5 / 15 min per email). Fix (tests only, limits unchanged): `ownIp(spec)` gives each spec file its own
+  `cf-connecting-ip` (wrangler dev passes it through; Cloudflare overwrites it on staging/production), and the newer specs use their
+  own accounts (`reconAdmin`, `journeyAdmin`, `securityAdmin`, `sweepAdmin`, `support2`).
+- Bug found on the way: with more than 99 unread notifications the bell's label ("103 unread") didn't contain its visible text
+  ("99+") → WCAG 2.5.3; the label now says "99+ unread".
+- Full e2e suite locally: 92 tests, green (7.1 min).

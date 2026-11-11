@@ -1,6 +1,8 @@
 import { fileURLToPath } from 'node:url';
 import { expect, test } from '@playwright/test';
-import { expectAccessible, screenshots } from './helpers';
+import { expectAccessible, screenshots, ownIp } from './helpers';
+
+test.use(ownIp('start-a-project'));
 
 const BRIEF = fileURLToPath(new URL('./fixtures/brief.pdf', import.meta.url));
 

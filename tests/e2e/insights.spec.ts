@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { expectAccessible, screenshots } from './helpers';
+import { expectAccessible, screenshots, ownIp } from './helpers';
+
+test.use(ownIp('insights'));
 
 test('insights index, category and tag listings', async ({ page, request }) => {
   expect((await page.goto('/insights'))!.status()).toBe(200);

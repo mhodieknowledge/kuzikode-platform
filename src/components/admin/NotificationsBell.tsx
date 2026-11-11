@@ -48,7 +48,8 @@ export default function NotificationsBell({ initialUnread }: { initialUnread: nu
         <button
           type="button"
           className="relative inline-flex h-10 w-10 items-center justify-center rounded-sm text-ink-800 hover:bg-ink-950/5"
-          aria-label={unread ? `Notifications, ${unread} unread` : 'Notifications'}
+          // The visible badge text must be part of the name (WCAG 2.5.3): "99+" above 99.
+          aria-label={unread ? `Notifications, ${unread > 99 ? '99+' : unread} unread` : 'Notifications'}
         >
           <Bell size={18} aria-hidden="true" />
           {unread ? (

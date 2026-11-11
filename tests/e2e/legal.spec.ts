@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { expectAccessible } from './helpers';
+import { expectAccessible, ownIp } from './helpers';
+
+test.use(ownIp('legal'));
 
 const PAGES = [
   ['Privacy Policy', '/legal/privacy', 'Cyber and Data Protection Act'],

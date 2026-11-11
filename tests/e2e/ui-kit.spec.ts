@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { expectAccessible, screenshots } from './helpers';
+import { expectAccessible, screenshots, ownIp } from './helpers';
+
+test.use(ownIp('ui-kit'));
 
 test.describe('UI kit (/dev/ui)', () => {
   test('renders every component, is accessible and has no horizontal scroll', async ({ page }) => {

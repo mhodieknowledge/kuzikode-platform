@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { expectAccessible, screenshots } from './helpers';
+import { expectAccessible, screenshots, ownIp } from './helpers';
+
+test.use(ownIp('pricing'));
 
 test('pricing page: tabs, packages, comparison table, add-ons, VAT note and FAQ', async ({ page }) => {
   expect((await page.goto('/pricing'))!.status()).toBe(200);

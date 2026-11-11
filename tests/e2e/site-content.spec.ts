@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { expectAccessible, screenshots } from './helpers';
+import { expectAccessible, screenshots, ownIp } from './helpers';
+
+test.use(ownIp('site-content'));
 
 test('FAQ page: 20+ questions in categories, FAQPage JSON-LD, live filter, deep links open the answer', async ({
   page,

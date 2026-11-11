@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { expectAccessible, screenshots } from './helpers';
+import { expectAccessible, screenshots, ownIp } from './helpers';
+
+test.use(ownIp('industries'));
 
 test('industries index links to 8 pages whose service and package links all resolve', async ({ page, request }) => {
   expect((await page.goto('/industries'))!.status()).toBe(200);

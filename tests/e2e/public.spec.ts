@@ -1,4 +1,7 @@
 import { expect, test } from '@playwright/test';
+import { ownIp } from './helpers';
+
+test.use(ownIp('public'));
 
 const PUBLIC = [
   '/',

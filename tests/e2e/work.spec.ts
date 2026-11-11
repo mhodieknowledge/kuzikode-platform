@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { expectAccessible } from './helpers';
+import { expectAccessible, ownIp } from './helpers';
+
+test.use(ownIp('work'));
 
 test('our work shows the honest empty state when nothing is published', async ({ page }) => {
   expect((await page.goto('/work'))!.status()).toBe(200);

@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { expectAccessible, screenshots } from './helpers';
+import { expectAccessible, screenshots, ownIp } from './helpers';
+
+test.use(ownIp('engagement'));
 
 test('WhatsApp button is hidden when no number is configured', async ({ page }) => {
   for (const path of ['/', '/pricing', '/contact']) {

@@ -4,7 +4,9 @@
  */
 import { createHmac } from 'node:crypto';
 import { expect, test } from '@playwright/test';
-import { expectAccessible, screenshots } from './helpers';
+import { expectAccessible, screenshots, ownIp } from './helpers';
+
+test.use(ownIp('public-documents'));
 
 const DEV_HMAC_SECRET = 'dev-only-hmac-secret-not-for-production-use-0001';
 const sign = (attemptId: string) =>

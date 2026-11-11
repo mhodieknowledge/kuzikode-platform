@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { expectAccessible } from './helpers';
+import { expectAccessible, ownIp } from './helpers';
+
+test.use(ownIp('products'));
 
 test('products page shows Business Suite as In Development with no purchase wording', async ({ page, request }) => {
   expect((await page.goto('/products'))!.status()).toBe(200);

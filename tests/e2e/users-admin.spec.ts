@@ -1,6 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
-import { expectAccessible, screenshots } from './helpers';
+import { expectAccessible, screenshots, ownIp } from './helpers';
 import { E2E_PASSWORD, E2E_USERS } from './users';
+
+test.use(ownIp('users-admin'));
 
 async function signIn(page: Page, email: string) {
   await page.goto('/admin/login');
@@ -46,7 +48,7 @@ test('administrator invites a staff member and changes their roles', async ({ pa
 });
 
 test('support staff cannot open the users area', async ({ page }) => {
-  await signIn(page, E2E_USERS.support.email);
+  await signIn(page, E2E_USERS.support2.email);
   const res = await page.goto('/admin/users');
   expect(res!.status()).toBe(403);
   await expect(page.getByRole('heading', { name: "You don't have access to this page" })).toBeVisible();

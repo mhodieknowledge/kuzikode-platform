@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { expectAccessible, screenshots } from './helpers';
+import { expectAccessible, screenshots, ownIp } from './helpers';
+
+test.use(ownIp('contact'));
 
 test('visitor sends an enquiry and sees a reference; quotation links preselect the service', async ({ page }) => {
   await page.goto('/contact?category=web-development&service=e-commerce');

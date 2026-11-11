@@ -1,6 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
-import { expectAccessible, screenshots } from './helpers';
+import { expectAccessible, screenshots, ownIp } from './helpers';
 import { E2E_PASSWORD, E2E_USERS } from './users';
+
+test.use(ownIp('time'));
 
 async function signIn(page: Page, email: string) {
   await page.goto('/admin/login');

@@ -1,6 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
-import { expectAccessible, screenshots } from './helpers';
+import { expectAccessible, screenshots, ownIp } from './helpers';
 import { E2E_PASSWORD, E2E_PORTAL_SUPPORT_USER, E2E_PORTAL_USER, E2E_USERS } from './users';
+
+test.use(ownIp('portal-auth'));
 
 test.use({ actionTimeout: 15_000 });
 

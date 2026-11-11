@@ -1,6 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
-import { expectAccessible, screenshots } from './helpers';
+import { expectAccessible, screenshots, ownIp } from './helpers';
 import { E2E_PASSWORD, E2E_USERS } from './users';
+
+test.use(ownIp('settings'));
 
 async function signIn(page: Page, email: string) {
   await page.goto('/admin/login');
@@ -75,7 +77,7 @@ test('billing, numbering and integrations pages; admins see numbering read-only'
 });
 
 test('staff choose their own notification preferences; support cannot open settings', async ({ page }) => {
-  await signIn(page, E2E_USERS.support.email);
+  await signIn(page, E2E_USERS.support2.email);
   // The account menu is an island: retry the click until it has hydrated (slow under parallel runs).
   await expect(async () => {
     await page.getByRole('button', { name: /Account menu/ }).click();

@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { expectAccessible, screenshots } from './helpers';
+import { expectAccessible, screenshots, ownIp } from './helpers';
+
+test.use(ownIp('home'));
 
 test.describe('home page', () => {
   test('renders every CMS section, hides Selected Work when empty, and passes the visual QA gate', async ({ page }) => {

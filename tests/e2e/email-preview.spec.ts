@@ -1,6 +1,9 @@
 /** P6.6: the development email preview lists every template and renders each one (HTML and plain text). */
 import { expect, test } from '@playwright/test';
 import { TEMPLATE_NAMES } from '../../src/server/email/templates';
+import { ownIp } from './helpers';
+
+test.use(ownIp('email-preview'));
 
 test('dev email preview: every template listed; HTML and text render', async ({ page, request }) => {
   const res = await page.goto('/dev/emails');

@@ -24,3 +24,14 @@ export async function screenshots(page: Page, name: string) {
     await page.screenshot({ path: `test-results/screens/${name}-${width}.png`, fullPage: true });
   }
 }
+
+/**
+ * Each spec file gets its own client IP (wrangler dev passes `cf-connecting-ip` through; Cloudflare always overwrites it
+ * on staging/production), so the per-IP limits (20 sign-ins / 15 min) apply per spec instead of across the whole suite.
+ * Contexts a spec opens itself with `browser.newContext()` keep the loopback IP.
+ */
+export function ownIp(spec: string): { extraHTTPHeaders: Record<string, string> } {
+  let h = 0;
+  for (const ch of spec) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return { extraHTTPHeaders: { 'cf-connecting-ip': `10.${(h >>> 16) & 255}.${(h >>> 8) & 255}.${(h & 254) + 1}` } };
+}

@@ -124,6 +124,43 @@ export const E2E_USERS = {
     role: 'admin',
     mustChange: false,
   },
+  // P6.4/P7.x specs: their own admins, so the per-email sign-in limit (5 / 15 min) is never shared with older specs.
+  reconAdmin: {
+    id: 'usr_e2e_recon',
+    email: 'e2e-recon@example.com',
+    name: 'Rita Recon',
+    role: 'admin',
+    mustChange: false,
+  },
+  journeyAdmin: {
+    id: 'usr_e2e_journey',
+    email: 'e2e-journey@example.com',
+    name: 'Jabu Journey',
+    role: 'admin',
+    mustChange: false,
+  },
+  securityAdmin: {
+    id: 'usr_e2e_secadmin',
+    email: 'e2e-secadmin@example.com',
+    name: 'Sela Security',
+    role: 'admin',
+    mustChange: false,
+  },
+  sweepAdmin: {
+    id: 'usr_e2e_sweep',
+    email: 'e2e-sweep@example.com',
+    name: 'Sweep Admin',
+    role: 'admin',
+    mustChange: false,
+  },
+  // A second support-staff account for the "support can't open X" checks in clients/settings/users specs (login limit).
+  support2: {
+    id: 'usr_e2e_support2',
+    email: 'e2e-support2@example.com',
+    name: 'Sol Support',
+    role: 'support_staff',
+    mustChange: false,
+  },
   newcomer: {
     id: 'usr_e2e_newcomer',
     email: 'e2e-newcomer@example.com',

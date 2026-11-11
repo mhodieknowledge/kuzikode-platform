@@ -7,8 +7,10 @@
  */
 import { createHmac } from 'node:crypto';
 import { expect, test, type Page } from '@playwright/test';
-import { expectAccessible, screenshots } from './helpers';
+import { expectAccessible, screenshots, ownIp } from './helpers';
 import { E2E_CHECKOUT_USER, E2E_PASSWORD, checkoutInvoiceId } from './users';
+
+test.use(ownIp('checkout'));
 
 const DEV_HMAC_SECRET = 'dev-only-hmac-secret-not-for-production-use-0001';
 const run = process.env.E2E_CHECKOUT_RUN ?? '';

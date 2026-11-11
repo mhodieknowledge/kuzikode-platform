@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { expectAccessible } from './helpers';
+import { expectAccessible, ownIp } from './helpers';
+
+test.use(ownIp('public-layout'));
 
 test.describe('public layout', () => {
   test('desktop: mega-menu opens, lists all six divisions and closes with Escape', async ({ page }) => {

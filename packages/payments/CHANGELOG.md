@@ -2,6 +2,13 @@
 
 All notable changes to this package. Versions follow semver; the interface is still settling before 1.0.
 
+## 0.3.0 — 2026-11-11
+
+- PesePay adapter (`createPesepayProvider`): AES-256-CBC envelope (matches the docs' Node reference byte for byte),
+  initiate on PesePay's page with `paymentMethodCode` preselection (EcoCash, InnBucks, O'mari; cards choose on the page),
+  check-payment, full status table, `ZiG`/`ZWG` handled per method, unsigned callbacks treated as claims (header filter
+  only), sandbox base URL in test mode.
+
 ## 0.2.0 — 2026-11-11
 
 - Paynow adapter (`createPaynowProvider`): redirect and express checkout (EcoCash, OneMoney, InnBucks code + expiry,

@@ -279,9 +279,9 @@ Re-check https://developers.pesepay.com/llms-full.txt before changes.
 | Headers / envelope | `authorization: <integration key>`, `content-type: application/json`. Bodies `{ "payload": "<base64>" }`, error responses not encrypted |
 | Encryption | AES-256-CBC, key = 32-char encryption key (UTF-8), **IV = first 16 chars of that key**, PKCS#7, base64. WebCrypto `AES-CBC` |
 | Initiate fields | `amountDetails{amount,currencyCode}`, `reasonForPayment`, `resultUrl`, `returnUrl`, opt. `merchantReference`, `paymentMethodCode`. Response: `referenceNumber`, `redirectUrl`, `pollUrl` |
-| Callback | Plain JSON with `referenceNumber`, unsigned, **never retried**. `Authorization` header = integration key (cheap filter only). Always confirm via check-payment |
+| Callback | Plain JSON with `referenceNumber`, unsigned, **never retried**, fires only on terminal statuses (not for `PARTIALLY_PAID`). `Authorization` header = integration key (cheap filter only; occasionally missing, so reconciliation must catch those). Always confirm via check-payment. Errors are plain JSON `{message, status}`; success bodies are encrypted |
 | Statuses | `SUCCESS` → succeeded (only paid state) · `INITIATED`/`PROCESSING`/`PENDING` → pending · `PARTIALLY_PAID` → partially_paid · `FAILED`/`DECLINED`/`INSUFFICIENT_FUNDS`/`AUTHORIZATION_FAILED`/`ERROR`/`SERVICE_UNAVAILABLE` → failed · `CANCELLED`/`TERMINATED` → cancelled · `TIME_OUT`/`CLOSED`/`CLOSED_PERIOD_ELAPSED` → expired · `REVERSED` → reversed |
-| Currencies | `USD`, `ZiG` (map our `ZWG`). Test env: USD only. Refund API: none |
+| Currencies | `USD` and Zimbabwe dollars, which PesePay addresses as **`ZiG` for EcoCash/PayGo and the hosted page, `ZWG` for O'mari/Zimswitch** (re-verified Nov 2026); we call both `ZWG`. Method codes (USD/ZWG): EcoCash `PZW211`/`PZW201`, InnBucks `PZW212`/—, O'mari `PZW216`/`PZW217`, Zimswitch `PZW215`/`PZW213`, Visa `PZW204`, Mastercard `PZW205`. Sandbox: USD only (EcoCash 0777777777 success / 0770000000 fail). Refund API: none |
 | Secrets | `PESEPAY_MAIN_INTEGRATION_KEY`, `PESEPAY_MAIN_ENCRYPTION_KEY` |
 
 It must pass the same conformance kit and integration tests as Paynow (with mocked HTTP), plus the opt-in live test suite when its test keys exist.

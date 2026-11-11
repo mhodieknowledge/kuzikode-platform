@@ -5,13 +5,14 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
-- Last completed task: **P6.3 Paynow adapter** (2026-11-11).
-- **Next step:** **P6.3b PesePay adapter** `packages/payments/src/providers/pesepay.ts` (docs/06 §5; WebFetch
-  https://developers.pesepay.com/llms-full.txt first): AES-256-CBC with WebCrypto (key = 32-char encryption key UTF-8, IV =
-  first 16 chars, PKCS#7, base64 `{payload}` envelope), `POST /payments/initiate`, `GET /payments/check-payment?referenceNumber=`,
-  `authorization` header = integration key, status table, `ZWG`↔`ZiG`, callback = plain JSON (header filter only, `authentic`
-  only means "worth checking"), test base URL in test mode. Conformance kit with mocked fetch + AES round-trip test. Register
-  in providers.ts. Then the integration test "switching USD from Paynow to PesePay changes only new attempts".
+- Last completed task: **P6.3b PesePay adapter** (2026-11-11).
+- **Next step:** **P6.3c Admin: payment accounts & routing** (Super Admin only; check `src/shared/permissions.ts` for a
+  suitable permission, e.g. `settings.manage` + super admin check, or add `payments.configure`): `/admin/payments/accounts`
+  page listing accounts (label, provider, mode, currencies, enabled methods, credentials found/missing via `credentialStatus`
+  names only, status note), edit account (label, mode, currencies, enabled_methods, enabled, status note; never secrets),
+  routes editor (app_key, currency or *, method or *, account, priority, enabled; add/remove), every change audited; service in
+  `modules/payments/admin-config.ts`, routes under `/api/v1/admin/payments/config`. Then the portal invoice page's "Pay now"
+  (uses `/api/v1/portal/invoices/:id/payment-options`; only render when `payable`) leading to the checkout (P6.3d).
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 - New entries are appended at the **bottom** of this file.
 
@@ -624,3 +625,16 @@ The **Next step** line must be specific enough that a fresh session can continue
   0774444444 → declined "Insufficient balance"; redirect initiate → verified www.paynow.co.zw page + poll URL. Note: Node's
   fetch here needs `NODE_USE_ENV_PROXY=1` (the container proxy). The full P6.5 suite against staging remains.
 - Next step: P6.3b (see Current status).
+
+## 2026-11-11 15:00 UTC · P6.3b PesePay adapter ✅
+- Re-verified PesePay docs (llms-full.txt): encryption, initiate, check-payment, callback, verifying callbacks, statuses,
+  method codes, errors. docs/06 §5 updated: `ZiG` vs `ZWG` per method, method codes, sandbox numbers, callback details.
+- `packages/payments/src/providers/pesepay.ts` (package 0.3.0): WebCrypto AES-256-CBC (equal to Node's createCipheriv
+  output), initiate with method preselection + per-method currency code, check-payment by reference, status table, amounts
+  read back as minor units, unsigned callbacks: `authentic` = reference present + Authorization header equals our key (the
+  app confirms by status check anyway), sandbox/production base URL by account mode, redirect/poll URLs pinned to PesePay.
+  Registered in the app.
+- Tests: package 30 new (AES vs Node reference, every status, method/currency codes, errors, callbacks, conformance kit with
+  a fake PesePay) · integration `payment-switch.test.ts`: real Paynow + PesePay adapters on faked HTTP; switching the USD route
+  moves only new attempts; the old Paynow attempt reconciles on Paynow and is recorded there. verify green.
+- Next step: P6.3c (see Current status).

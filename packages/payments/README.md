@@ -13,7 +13,7 @@ a configuration change in the app, never a code change.
 |---|---|---|
 | `mock` | Development and tests only. The app must never route to it in production. | redirect + express |
 | `paynow` | Launch gateway (`createPaynowProvider`). Credentials: `integrationId`, `integrationKey`; options: `testAuthEmail`, `tokenizationEnabled` | redirect (card entry) + express |
-| `pesepay` | Alternative (planned for the next release) | redirect |
+| `pesepay` | Alternative (`createPesepayProvider`). Credentials: `integrationKey`, `encryptionKey` (32 chars) | redirect (PesePay's page, method preselected) |
 
 ## Usage
 

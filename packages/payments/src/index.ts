@@ -1,5 +1,5 @@
 /** @kuzikode/payments — gateway-independent payment adapters. See README.md. */
-export const PAYMENTS_PACKAGE_VERSION = '0.2.0';
+export const PAYMENTS_PACKAGE_VERSION = '0.3.0';
 
 export * from './types';
 export * from './money';
@@ -29,3 +29,10 @@ export {
   verifyPaynowMessage,
   type PaynowMessage,
 } from './providers/paynow';
+export {
+  PESEPAY_STATUS_MAP,
+  createPesepayProvider,
+  mapPesepayStatus,
+  pesepayDecrypt,
+  pesepayEncrypt,
+} from './providers/pesepay';

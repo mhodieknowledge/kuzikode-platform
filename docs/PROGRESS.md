@@ -5,13 +5,13 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
-- Last completed task: **P6.2 Payments service** (2026-11-11).
-- **Next step:** **P6.3 Paynow adapter** in `packages/payments/src/providers/paynow.ts` (docs/06 §4; WebFetch-verify the Paynow
-  docs pages listed there first): fetch + WebCrypto, SHA-512 uppercase hash out/in (docs' vector as a unit test, plus the
-  validating_hash example), redirect `initiatetransaction` + express `remotetransaction` (ecocash/onemoney/innbucks/omari; our
-  `card` → redirect), `authemail` from `options.testAuthEmail` (account option `testAuthEmailSecret` names the secret; router
-  resolves `*Secret` options), poll via stored pollurl, status mapping table, `credentialFields` INTEGRATION_ID/INTEGRATION_KEY,
-  `describeConformance('paynow', …)` with mocked fetch. Register in `src/server/modules/payments/providers.ts` FACTORIES.
+- Last completed task: **P6.3 Paynow adapter** (2026-11-11).
+- **Next step:** **P6.3b PesePay adapter** `packages/payments/src/providers/pesepay.ts` (docs/06 §5; WebFetch
+  https://developers.pesepay.com/llms-full.txt first): AES-256-CBC with WebCrypto (key = 32-char encryption key UTF-8, IV =
+  first 16 chars, PKCS#7, base64 `{payload}` envelope), `POST /payments/initiate`, `GET /payments/check-payment?referenceNumber=`,
+  `authorization` header = integration key, status table, `ZWG`↔`ZiG`, callback = plain JSON (header filter only, `authentic`
+  only means "worth checking"), test base URL in test mode. Conformance kit with mocked fetch + AES round-trip test. Register
+  in providers.ts. Then the integration test "switching USD from Paynow to PesePay changes only new attempts".
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 - New entries are appended at the **bottom** of this file.
 
@@ -606,3 +606,21 @@ The **Next step** line must be specific enough that a fresh session can continue
   account; scoping + public Turnstile + signed status; mock page end to end) · unit phone normaliser. verify: unit 267 /
   integration 275 · e2e public-documents, portal-auth, invoices green.
 - Next step: P6.3 (see Current status).
+
+## 2026-11-11 14:20 UTC · P6.3 Paynow adapter ✅
+- Re-verified Paynow docs (initiate_transaction, express_checkout_transactions, status_update, polling_status, generating_hash,
+  validating_hash, test_mode). New fact recorded in docs/06 §4: polling is an empty POST; `/interface/trace` + `merchanttrace`.
+- `packages/payments/src/providers/paynow.ts` (package 0.2.0): fetch + WebCrypto SHA-512; ordered request signing; every
+  response/status update hash-verified in constant time before use (a redirect URL is never returned unverified); express
+  (EcoCash/OneMoney prompt text, InnBucks code + Harare-time expiry, O'mari OTP step + submission), `authemail` = test merchant
+  e-mail in test mode / customer e-mail in live mode, `merchanttrace` = attempt id; status by poll URL or trace; status map,
+  unknown → pending (logged); poll/OTP URLs pinned to Paynow hosts over https; errors → `ProviderError` (insufficient →
+  declined, network/5xx retryable). Registered in the app; wrong O'mari code can be retried (422).
+- Tests: package 28 new (both docs hash vectors, parsing, every status, express shapes, errors, trace, URL pinning, conformance
+  kit with a fake Paynow) · integration: seeded Paynow USD account chosen once its secrets exist, `testAuthEmailSecret`
+  resolved. verify: unit 295 / integration 276.
+- Live smoke test (adapter only, from this container, Paynow test mode, owner's USD integration): EcoCash 0771111111 → initiate
+  OK (real response hashes verified) → poll after 9 s **Paid**, $1.00, our reference; trace by merchanttrace **Paid**;
+  0774444444 → declined "Insufficient balance"; redirect initiate → verified www.paynow.co.zw page + poll URL. Note: Node's
+  fetch here needs `NODE_USE_ENV_PROXY=1` (the container proxy). The full P6.5 suite against staging remains.
+- Next step: P6.3b (see Current status).

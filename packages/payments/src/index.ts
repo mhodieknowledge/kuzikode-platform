@@ -1,5 +1,5 @@
 /** @kuzikode/payments — gateway-independent payment adapters. See README.md. */
-export const PAYMENTS_PACKAGE_VERSION = '0.1.0';
+export const PAYMENTS_PACKAGE_VERSION = '0.2.0';
 
 export * from './types';
 export * from './money';
@@ -18,3 +18,14 @@ export {
   type MockProviderOptions,
   type MockStore,
 } from './providers/mock';
+export {
+  PAYNOW_STATUS_MAP,
+  createPaynowProvider,
+  mapPaynowStatus,
+  parsePaynowDateTime,
+  parsePaynowMessage,
+  paynowHash,
+  signPaynowRequest,
+  verifyPaynowMessage,
+  type PaynowMessage,
+} from './providers/paynow';

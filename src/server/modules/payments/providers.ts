@@ -4,6 +4,7 @@
  */
 import {
   createMockProvider,
+  createPaynowProvider,
   type MockPaymentState,
   type MockStore,
   type NormalizedStatus,
@@ -85,6 +86,7 @@ export const mockProvider = (ctx: RequestContext) =>
 
 const FACTORIES: Record<string, (ctx: RequestContext) => PaymentProvider> = {
   mock: mockProvider,
+  paynow: (ctx) => createPaynowProvider({ now: () => ctx.now(), logger: ctx.logger }),
 };
 
 /** Test-only adapters (never routed in production, whatever the database says). */

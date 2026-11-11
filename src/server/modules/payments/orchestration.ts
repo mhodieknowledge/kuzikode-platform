@@ -839,6 +839,9 @@ export async function submitAttemptOtp(ctx: RequestContext, attemptId: string, o
   try {
     result = await built.provider.submitOtp(built.config, { submitUrl: ins.otp.submitUrl, otp });
   } catch (err) {
+    // A wrong code can be tried again (Paynow cancels after 5 wrong codes; the status check then shows it).
+    if (err instanceof ProviderError && (err.code === 'declined' || err.code === 'invalid_request'))
+      throw validationError({ otp: ['That code was not accepted. Check the SMS and try again.'] });
     if (err instanceof ProviderError) throw conflict('The code could not be checked. Start the payment again.');
     throw err;
   }

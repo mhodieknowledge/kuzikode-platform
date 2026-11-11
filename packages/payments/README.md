@@ -12,7 +12,7 @@ a configuration change in the app, never a code change.
 | Adapter | Status | Flows |
 |---|---|---|
 | `mock` | Development and tests only. The app must never route to it in production. | redirect + express |
-| `paynow` | Launch gateway (planned for the next release) | redirect (card entry) + express |
+| `paynow` | Launch gateway (`createPaynowProvider`). Credentials: `integrationId`, `integrationKey`; options: `testAuthEmail`, `tokenizationEnabled` | redirect (card entry) + express |
 | `pesepay` | Alternative (planned for the next release) | redirect |
 
 ## Usage

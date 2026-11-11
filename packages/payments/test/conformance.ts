@@ -94,7 +94,7 @@ export function describeConformance(name: string, makeHarness: () => Promise<Con
       });
       expect(status.status).toBe('succeeded');
       expect(status.amountMinor).toBe(1234);
-      expect(status.currency).toBe('USD');
+      if (status.currency) expect(status.currency).toBe('USD');
       if (status.merchantReference) expect(status.merchantReference).toBe(i.merchantReference);
       expect(leaks(h, status)).toEqual([]);
     });

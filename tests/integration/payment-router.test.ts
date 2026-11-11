@@ -218,4 +218,32 @@ describe('payment router (P6.1)', () => {
     });
     expect((await getMockCheckout(ctx, ext.providerReference!)).returnUrl).toBeNull();
   });
+
+  it('the seeded Paynow USD account is used once its secrets exist; test auth e-mail comes from a secret', async () => {
+    // No Paynow secrets: the seeded USD route is skipped and the mock fallback takes the payment (development).
+    expect((await resolveRoute(ctxWith(), { currency: 'USD' }))?.account.id).toBe('ppa_mock');
+    const ctx = ctxWith({
+      PAYNOW_USD_INTEGRATION_ID: '20001',
+      PAYNOW_USD_INTEGRATION_KEY: 'paynow-test-key',
+      PAYNOW_TEST_AUTHEMAIL: 'merchant@kuzikode.example',
+    });
+    const r = await resolveRoute(ctx, { currency: 'USD', methodCode: 'ecocash' });
+    expect(r?.account.id).toBe('ppa_paynow_usd');
+    expect(r?.provider.key).toBe('paynow');
+    expect(r?.config.credentials).toEqual({ integrationId: '20001', integrationKey: 'paynow-test-key' });
+    expect(r?.config.options).toMatchObject({ testAuthEmail: 'merchant@kuzikode.example', tokenizationEnabled: false });
+    expect(r?.config.options).not.toHaveProperty('testAuthEmailSecret');
+    // The seeded account enables EcoCash, OneMoney, InnBucks and cards; O'mari stays off until the merchant has it.
+    const codes = (await paymentMethodOptions(ctx, { currency: 'USD' })).map((m) => `${m.code}:${m.accountId}`);
+    expect(codes).toEqual(
+      expect.arrayContaining([
+        'ecocash:ppa_paynow_usd',
+        'onemoney:ppa_paynow_usd',
+        'innbucks:ppa_paynow_usd',
+        'card:ppa_paynow_usd',
+      ]),
+    );
+    expect(codes).toContain('omari:ppa_mock');
+    expect(credentialStatus(ctx, (await getAccount(ctx, 'ppa_paynow_usd'))!).complete).toBe(true);
+  });
 });

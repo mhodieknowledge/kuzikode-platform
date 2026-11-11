@@ -6,7 +6,7 @@ The **Next step** line must be specific enough that a fresh session can continue
 ## Current status
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
 - Last completed task: **P7.6 Link check + migration check** (2026-11-11). Phase 7 done. Phase 6 done except P6.5 `[!]` (owner's Faked Success). P6.5 is `[!]` (Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
-- **Next step:** first confirm CI is green on `main` with the new two-job workflow (verify + e2e). Then **Phase 8, P8.1 Remote
+- **Next step:** **Phase 8, P8.1 Remote
   resources** (docs/09; `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` exist in the build env): create only `kuzikode-*` resources
   (staging D1, R2, KV, Queue), put real IDs into wrangler.jsonc, record in PROGRESS. Then P8.2 staging deploy + smoke tests.
   State on 2026-11-11 21:40 UTC: `wrangler d1 list` shows no `kuzikode-*` database yet; wrangler.jsonc still has
@@ -815,3 +815,7 @@ The **Next step** line must be specific enough that a fresh session can continue
 - `tests/e2e/links.spec.ts`: crawls from `/` + sitemap (51 pages, 77 URLs): every internal page/asset < 400, no `#`/`javascript:`
   links. Green.
 - CI: runs 75–76 hit the 15-minute job timeout (suite grew to 92 e2e tests); now two parallel jobs, verify (20 min) and e2e (30 min).
+
+## 2026-11-11 21:50 UTC · CI green · session hand-off
+- CI run 78 on `main` (d7efa6f): verify job ✅ (4 min 40 s), e2e job ✅ (92 + link check, ~11 min). First green run since run 66.
+- Session ending at a phase boundary (Phases 1–7 done; P6.5 `[!]` on the owner's Faked Success). Next: P8.1 (see Current status).

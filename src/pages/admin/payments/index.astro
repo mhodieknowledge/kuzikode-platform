@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { loadAdminPage } from '../../../server/lib/admin-page';
+import { isSuperAdmin } from '../../../server/lib/policies';
 import { listPayments, listUnmatched } from '../../../server/modules/payments';
 import { paymentListQuery, PAYMENT_STATUSES } from '../../../shared/schemas/payments';
 import { MANUAL_PAYMENT_METHODS } from '../../../shared/invoices';
@@ -62,6 +63,11 @@ const tab = (active: boolean) =>
     >
       Unmatched{unmatched.total ? ` (${unmatched.total})` : ''}
     </a>
+    {isSuperAdmin(ctx) ? (
+      <a href="/admin/payments/gateways" class={tab(false)}>
+        Gateways
+      </a>
+    ) : null}
   </nav>
 
   {unmatchedView ? (

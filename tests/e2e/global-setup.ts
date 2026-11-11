@@ -3,8 +3,8 @@ import { createHash, createHmac } from 'node:crypto';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { hashPassword } from '../../src/server/lib/crypto';
-import { E2E_PASSWORD, E2E_PORTAL_SUPPORT_USER, E2E_PORTAL_USER, E2E_USERS } from './users';
+import { encryptString, hashPassword } from '../../src/server/lib/crypto';
+import { E2E_PASSWORD, E2E_PORTAL_SUPPORT_USER, E2E_PORTAL_USER, E2E_SUPER_TOTP_SECRET, E2E_USERS } from './users';
 
 /** `documentToken(ctx, kind, id).hash` with the local development HMAC secret (tests run without `.dev.vars`). */
 const publicTokenHash = (kind: string, id: string) =>
@@ -17,6 +17,8 @@ const publicTokenHash = (kind: string, id: string) =>
     .digest('hex');
 
 const wrangler = (...args: string[]) => execFileSync('npx', ['wrangler', ...args], { stdio: 'pipe' });
+/** Same as the development fallback in src/server/config.ts (local runs have no .dev.vars). */
+const DEV_DATA_KEY = 'ZGV2LW9ubHkta2V5LTMyLWJ5dGVzLWxvbmctMDAwMDA=';
 const q = (s: string) => `'${s.replace(/'/g, "''")}'`;
 
 /**
@@ -50,6 +52,9 @@ export default async function globalSetup() {
          failed_login_count = 0, locked_until = NULL;`,
       `INSERT INTO user_roles (user_id, role_id) SELECT ${q(u.id)}, id FROM roles WHERE key = ${q(u.role)};`,
     ]),
+    // The e2e Super Administrator has 2FA enrolled with a known secret (dev DATA_ENCRYPTION_KEY fallback).
+    `INSERT INTO user_mfa (user_id, totp_secret_enc, enabled_at, last_used_step)
+     VALUES (${q(E2E_USERS.superAdmin.id)}, ${q(await encryptString(DEV_DATA_KEY, E2E_SUPER_TOTP_SECRET, 'totp-secret'))}, ${q(now)}, NULL);`,
     // portal specs: one linked client account, sessions and 2FA reset; leftover self-registrations are removed.
     `INSERT INTO clients (id, client_number, type, display_name, default_currency, email)
      VALUES (${q(E2E_PORTAL_USER.clientId)}, 'CL-E2E-PORTAL', 'business', ${q(E2E_PORTAL_USER.clientName)}, 'USD', 'hello@borrowdale-florists.example')

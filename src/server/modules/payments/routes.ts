@@ -3,7 +3,10 @@ import { z } from 'zod';
 import {
   IDEMPOTENCY_KEY,
   attemptOtpSchema,
+  paymentAccountCreateSchema,
+  paymentAccountUpdateSchema,
   paymentListQuery,
+  paymentRouteSchema,
   publicPayInvoiceSchema,
   refundSchema,
 } from '../../../shared/schemas/payments';
@@ -12,11 +15,13 @@ import type { Context } from 'hono';
 import type { ApiEnv } from '../../middleware/request-context';
 import { jsonBody, query } from '../../middleware/validate';
 import { enforce } from '../../lib/rate-limit';
-import { notFound, validationError } from '../../lib/errors';
+import { forbidden, notFound, validationError } from '../../lib/errors';
+import { isSuperAdmin } from '../../lib/policies';
 import { verifyTurnstile } from '../../lib/turnstile';
 import { paymentReturnUrl } from '../../lib/public-links';
 import { invoiceIdForToken } from '../invoices/service';
 import * as orchestration from './orchestration';
+import * as config from './admin-config';
 import { documentPdf } from '../documents/service';
 import { fileResponse } from '../files/service';
 import { getPublicAttempt } from './portal';
@@ -28,6 +33,36 @@ const pageQuery = z.object({ page: z.coerce.number().int().min(1).max(10_000).de
 export function paymentRoutes() {
   const r = new Hono<ApiEnv>();
   r.use('*', withAuth('admin'), requireAuth('admin'), csrfProtect());
+  // Gateway configuration: Super Admin only (checked here before the body is read, and again in the service).
+  r.use('/config/*', async (c, next) => {
+    if (!isSuperAdmin(c.var.ctx)) throw forbidden('Only a Super Administrator can change payment gateways.');
+    await next();
+  });
+  r.use('/config', async (c, next) => {
+    if (!isSuperAdmin(c.var.ctx)) throw forbidden('Only a Super Administrator can change payment gateways.');
+    await next();
+  });
+  r.get('/config', requirePermission('settings.manage'), async (c) =>
+    c.json({ data: await config.paymentConfig(c.var.ctx) }),
+  );
+  r.post('/config/accounts', requirePermission('settings.manage'), async (c) =>
+    c.json({ data: await config.createPaymentAccount(c.var.ctx, await jsonBody(c, paymentAccountCreateSchema)) }, 201),
+  );
+  r.patch('/config/accounts/:id', requirePermission('settings.manage'), async (c) => {
+    await config.updatePaymentAccount(c.var.ctx, c.req.param('id'), await jsonBody(c, paymentAccountUpdateSchema));
+    return c.json({ data: { ok: true } });
+  });
+  r.post('/config/routes', requirePermission('settings.manage'), async (c) =>
+    c.json({ data: await config.createPaymentRoute(c.var.ctx, await jsonBody(c, paymentRouteSchema)) }, 201),
+  );
+  r.patch('/config/routes/:id', requirePermission('settings.manage'), async (c) => {
+    await config.updatePaymentRoute(c.var.ctx, c.req.param('id'), await jsonBody(c, paymentRouteSchema));
+    return c.json({ data: { ok: true } });
+  });
+  r.delete('/config/routes/:id', requirePermission('settings.manage'), async (c) => {
+    await config.deletePaymentRoute(c.var.ctx, c.req.param('id'));
+    return c.json({ data: { ok: true } });
+  });
   r.get('/', requirePermission('payments.view'), async (c) =>
     c.json({ data: await svc.listPayments(c.var.ctx, query(c, paymentListQuery)) }),
   );

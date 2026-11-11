@@ -1,7 +1,16 @@
 /** Fixed staff accounts created in the LOCAL D1 by global-setup.ts for e2e runs only (never staging/production). */
 export const E2E_PASSWORD = 'E2e-only-password-2026!';
+/** TOTP secret of the e2e Super Administrator (2FA is mandatory for that role). Local test data only. */
+export const E2E_SUPER_TOTP_SECRET = 'JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP';
 export const E2E_USERS = {
   admin: { id: 'usr_e2e_admin', email: 'e2e-admin@example.com', name: 'Eva Admin', role: 'admin', mustChange: false },
+  superAdmin: {
+    id: 'usr_e2e_super',
+    email: 'e2e-super@example.com',
+    name: 'Sipho Super',
+    role: 'super_admin',
+    mustChange: false,
+  },
   support: {
     id: 'usr_e2e_support',
     email: 'e2e-support@example.com',

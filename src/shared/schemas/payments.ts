@@ -88,3 +88,43 @@ export const attemptOtpSchema = z
 
 /** One per click, so a double-tap never starts two payments. */
 export const IDEMPOTENCY_KEY = /^[A-Za-z0-9_-]{8,100}$/;
+
+// ---------------------------------------------------------------- gateway configuration (Super Admin, P6.3c)
+
+const currencyCode = z.string().regex(/^[A-Z]{3}$/, 'Use a currency code like USD.');
+const methodCode = z.string().regex(/^[a-z][a-z0-9_]{1,30}$/);
+
+export const paymentAccountUpdateSchema = z
+  .object({
+    label: z.string().trim().min(2).max(80),
+    mode: z.enum(['test', 'live']),
+    currencies: z.array(currencyCode).max(10),
+    enabledMethods: z.array(methodCode).max(20),
+    enabled: z.boolean(),
+    statusNote: z.string().trim().max(300).nullable(),
+  })
+  .strict();
+export type PaymentAccountUpdate = z.infer<typeof paymentAccountUpdateSchema>;
+
+export const paymentAccountCreateSchema = paymentAccountUpdateSchema
+  .extend({
+    providerKey: z.string().regex(/^[a-z][a-z0-9_]{1,30}$/, 'Choose a gateway.'),
+    secretPrefix: z
+      .string()
+      .regex(/^[A-Z][A-Z0-9_]{1,40}$/, 'Capital letters, digits and _ only, e.g. PAYNOW_ZWG.')
+      .refine((v) => !v.endsWith('_'), 'Leave out the trailing _.'),
+  })
+  .strict();
+export type PaymentAccountCreate = z.infer<typeof paymentAccountCreateSchema>;
+
+export const paymentRouteSchema = z
+  .object({
+    appKey: z.string().regex(/^[a-z][a-z0-9-]{1,40}$/, 'Lower-case letters, digits and - only.'),
+    currency: z.union([z.literal('*'), currencyCode]),
+    methodCode: z.union([z.literal('*'), methodCode]),
+    accountId: z.string().min(1).max(64),
+    priority: z.coerce.number().int().min(1).max(10_000),
+    enabled: z.boolean(),
+  })
+  .strict();
+export type PaymentRouteInput = z.infer<typeof paymentRouteSchema>;

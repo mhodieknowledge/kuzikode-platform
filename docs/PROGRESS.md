@@ -5,14 +5,16 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
-- Last completed task: **P6.3b PesePay adapter** (2026-11-11).
-- **Next step:** **P6.3c Admin: payment accounts & routing** (Super Admin only; check `src/shared/permissions.ts` for a
-  suitable permission, e.g. `settings.manage` + super admin check, or add `payments.configure`): `/admin/payments/accounts`
-  page listing accounts (label, provider, mode, currencies, enabled methods, credentials found/missing via `credentialStatus`
-  names only, status note), edit account (label, mode, currencies, enabled_methods, enabled, status note; never secrets),
-  routes editor (app_key, currency or *, method or *, account, priority, enabled; add/remove), every change audited; service in
-  `modules/payments/admin-config.ts`, routes under `/api/v1/admin/payments/config`. Then the portal invoice page's "Pay now"
-  (uses `/api/v1/portal/invoices/:id/payment-options`; only render when `payable`) leading to the checkout (P6.3d).
+- Last completed task: **P6.3c Admin: payment accounts & routing** (2026-11-11).
+- **Next step:** **P6.3d Custom checkout page** (docs/06 §3b, read it in full): shared `CheckoutPage` island used by
+  `/pay/[invoiceToken]` (public: Turnstile on Pay, signed status via `statusPage`) and `/portal/invoices/[id]/pay`; renders only
+  from `payment-options` + `AttemptStart` (no provider names in code): method tiles, phone input (prefill from client), Pay
+  button disabled while pending with `newIdempotencyKey()` per click, express waiting panel with live status (poll the status
+  endpoint every 3 s, max 10 min, then "Check again"), InnBucks code + `QrCode` (ui kit) + deep link
+  `com.innbucks.customer://purchase?paymentToken=<code>`, O'mari OTP 6 boxes (paste) → `/otp`, card → redirect (popup comes in
+  P6.3e) , bank transfer panel from settings + "I've paid, notify Kuzikode" (pending note for finance, marks nothing paid),
+  TEST PAYMENT banner when `testMode`, success with receipt link, failure with Try again / Choose another method, aria-live.
+  Add "Pay now" on `/i/[token]` and `/portal/invoices/[id]` only when `payable` (carried over from P6.3c). Playwright on the mock.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 - New entries are appended at the **bottom** of this file.
 
@@ -638,3 +640,16 @@ The **Next step** line must be specific enough that a fresh session can continue
   a fake PesePay) · integration `payment-switch.test.ts`: real Paynow + PesePay adapters on faked HTTP; switching the USD route
   moves only new attempts; the old Paynow attempt reconciles on Paynow and is recorded there. verify green.
 - Next step: P6.3c (see Current status).
+
+## 2026-11-11 15:45 UTC · P6.3c Gateway accounts & routing admin ✅
+- `modules/payments/admin-config.ts`: config view (accounts with provider name, usable flag, secret names found/missing,
+  what the gateway offers; routes with account labels), create/update account (validated against the gateway's currencies
+  and methods and our active currencies, unique secret prefix), create/update/delete route (account must take the currency
+  and offer the method); every change audited in the same batch. Super Admin only (route middleware before the body is read
+  + service check); routes under `/api/v1/admin/payments/config`.
+- Page `/admin/payments/gateways` (+ "Gateways" tab for Super Admins) with `PaymentGateways` island (account dialogs,
+  routes table, add/edit/remove route).
+- e2e: new Super Admin e2e user with 2FA (known TOTP secret, local D1 only); spec signs in with a TOTP code, checks secret
+  status, adds and removes a route; axe + 375/768/1440 reviewed (fixed: sr-only cell labels escaping the table scroll box).
+- Tests: integration `payment-config.test.ts` (4). verify: unit 325 / integration 281.
+- The portal/public "Pay now" (P6.3c AC) is delivered with the checkout page in P6.3d, since its target is that page.

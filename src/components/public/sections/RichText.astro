@@ -13,7 +13,7 @@ const Heading = asPageTitle ? 'h1' : 'h2';
 ---
 
 <section class:list={['py-14 md:py-20', tone === 'canvas' ? 'bg-canvas' : 'bg-surface']} aria-labelledby={c.title ? `${anchor}-title` : undefined}>
-  <div class="container-content grid gap-8 lg:grid-cols-[1fr_2fr]">
+  <div class="container-content grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_2fr]">
     {
       c.title ? (
         <Heading id={`${anchor}-title`} class:list={['font-bold tracking-display text-ink-950', asPageTitle ? 'text-4xl md:text-5xl' : 'text-3xl']}>

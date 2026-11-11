@@ -51,7 +51,7 @@ const sheetHref = (d: string) => `/admin/time?tab=timesheet&date=${d}${sheet && 
     <h1 class="text-2xl font-bold tracking-display">Time</h1>
     {canTrack && projects.length > 0 ? <EntryDialogButton client:load projects={projects} today={today} /> : null}
   </div>
-  <nav aria-label="Time" class="mt-4 flex gap-6 overflow-x-auto border-b border-line">
+  <nav aria-label="Time" class="mt-4 flex gap-6 relative overflow-x-auto border-b border-line">
     {tabs.map(([k, l]) => (
       <a href={`/admin/time?tab=${k}`} class={tabClass(tab === k)} aria-current={tab === k ? 'page' : undefined}>
         {l}

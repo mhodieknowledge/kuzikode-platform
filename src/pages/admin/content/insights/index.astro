@@ -17,7 +17,7 @@ const when = (p: (typeof posts)[number]) =>
 <AdminLayout title="Insights" page={page}>
   <h1 class="text-2xl font-bold tracking-display">Content</h1>
   <ContentTabs current="insights" permissions={page.auth.permissions} />
-  <div class="mt-6 grid gap-8 xl:grid-cols-[1fr_320px]">
+  <div class="mt-6 grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
     <section aria-labelledby="articles-title">
       <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
         <h2 id="articles-title" class="text-lg font-semibold">
@@ -30,7 +30,7 @@ const when = (p: (typeof posts)[number]) =>
           New article
         </a>
       </div>
-      <div class="overflow-x-auto rounded-lg border border-line bg-surface">
+      <div class="relative overflow-x-auto rounded-lg border border-line bg-surface">
         <table class="w-full min-w-[560px] text-sm">
           <thead class="border-b border-line text-left text-[12px] text-ink-600">
             <tr>

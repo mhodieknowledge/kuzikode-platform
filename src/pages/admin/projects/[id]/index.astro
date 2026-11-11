@@ -141,7 +141,7 @@ const card = 'rounded-lg border border-line bg-surface p-5';
       <div class="h-2 rounded-full bg-brand-600" style={`width:${p.progress_pct}%`}></div>
     </div>
   </div>
-  <nav aria-label="Project sections" class="mt-6 flex gap-6 overflow-x-auto border-b border-line">
+  <nav aria-label="Project sections" class="mt-6 flex gap-6 relative overflow-x-auto border-b border-line">
     {ALL_TABS.map(([k, l]) => (
       <a
         href={`/admin/projects/${p.id}?tab=${k}`}
@@ -155,7 +155,7 @@ const card = 'rounded-lg border border-line bg-surface p-5';
 
   <div class="mt-6">
     {tab === 'overview' ? (
-      <div class="grid gap-6 xl:grid-cols-[1fr_340px]">
+      <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div class="flex flex-col gap-6">
           <MilestonesPanel
             client:load
@@ -246,7 +246,7 @@ const card = 'rounded-lg border border-line bg-surface p-5';
     ) : null}
 
     {tab === 'updates' ? (
-      <div class="grid gap-6 xl:grid-cols-[1fr_380px]">
+      <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <section class={card} aria-labelledby="upd-h">
           <h2 id="upd-h" class="font-sans text-base font-semibold">
             Updates
@@ -273,7 +273,7 @@ const card = 'rounded-lg border border-line bg-surface p-5';
     ) : null}
 
     {tab === 'files' ? (
-      <div class="grid gap-6 xl:grid-cols-[1fr_380px]">
+      <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <section class={card} aria-labelledby="files-h">
           <h2 id="files-h" class="font-sans text-base font-semibold">
             Files and deliverables
@@ -317,7 +317,7 @@ const card = 'rounded-lg border border-line bg-surface p-5';
     ) : null}
 
     {tab === 'messages' ? (
-      <div class="grid gap-6 xl:grid-cols-[1fr_380px]">
+      <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <section class={card} aria-labelledby="msg-h">
           <h2 id="msg-h" class="font-sans text-base font-semibold">
             Messages with the client

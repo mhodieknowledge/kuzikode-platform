@@ -116,7 +116,7 @@ const address = c.billingAddress
       {canArchive ? <ClientStatusActions client:visible clientId={c.id} status={c.status} canDelete={unused} /> : null}
     </div>
   </div>
-  <nav aria-label="Client sections" class="mt-6 overflow-x-auto border-b border-line">
+  <nav aria-label="Client sections" class="mt-6 relative overflow-x-auto border-b border-line">
     <ul class="flex gap-1">
       {tabs.map(([k, label]) => (
         <li class="shrink-0">
@@ -136,7 +136,7 @@ const address = c.billingAddress
   </nav>
   <div class="mt-6 max-w-5xl">
     {tab === 'overview' ? (
-      <div class="grid gap-6 lg:grid-cols-[1fr_320px]">
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="d-title">
           <h2 id="d-title" class="font-sans text-base font-semibold">
             Details

@@ -661,7 +661,7 @@ function CreditNoteForm({
           </Button>
         </fieldset>
       ) : null}
-      <div className="grid gap-3 sm:grid-cols-[1fr_10rem]">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_10rem]">
         <Field label="Other adjustment" hint="Optional, e.g. a goodwill discount. No tax." error={errors['lines']}>
           <Input value={adjustmentText} onChange={(e) => setAdjustmentText(e.target.value)} maxLength={500} />
         </Field>

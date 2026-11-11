@@ -443,7 +443,7 @@ export function DivisionForm({ initial }: { initial: DivisionFormValues }) {
         <Alert message={listError('benefits')[0] ?? null} />
         <ol className="mt-2 flex flex-col gap-4">
           {benefits.map((b, i) => (
-            <li key={i} className="grid gap-3 sm:grid-cols-[1fr_2fr_auto] sm:items-end">
+            <li key={i} className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_2fr_auto] sm:items-end">
               <Field label={`Benefit ${i + 1} title`}>
                 <Input
                   value={b.title}
@@ -517,7 +517,7 @@ export function DivisionForm({ initial }: { initial: DivisionFormValues }) {
         <Alert message={listError('faq')[0] ?? null} />
         <ol className="mt-2 flex flex-col gap-4">
           {faq.map((x, i) => (
-            <li key={i} className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-start">
+            <li key={i} className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
               <div className="flex flex-col gap-3">
                 <Field label={`Question ${i + 1}`}>
                   <Input

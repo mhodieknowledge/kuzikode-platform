@@ -39,7 +39,7 @@ const path = pagePath(p.key);
     </div>
     <PublishBar client:load pageKey={p.key} previewHref={`${path}?preview=1`} liveHref={path} />
   </div>
-  <div class="mt-6 grid gap-6 xl:grid-cols-[1fr_340px]">
+  <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
     <div class="flex flex-col gap-6">
       {sections.length === 0 ? <p class="text-sm text-ink-600">This page has no editable sections.</p> : null}
       {sections.map((s, i) => (

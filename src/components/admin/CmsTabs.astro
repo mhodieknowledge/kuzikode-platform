@@ -12,7 +12,7 @@ const tabs = [
 const { current } = Astro.props;
 ---
 
-<nav aria-label="Website content" class="mt-4 flex gap-6 overflow-x-auto border-b border-line">
+<nav aria-label="Website content" class="mt-4 flex gap-6 relative overflow-x-auto border-b border-line">
   {tabs.map(([k, l, href]) => (
     <a
       href={href}

@@ -37,7 +37,7 @@ const service = Astro.url.searchParams.get('service') ?? undefined;
   canonicalPath="/contact"
 >
   <section class="bg-canvas py-14 md:py-20">
-    <div class="container-content grid gap-10 lg:grid-cols-[1fr_1.5fr]">
+    <div class="container-content grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_1.5fr]">
       <div>
         <h1 class="text-4xl font-bold tracking-display md:text-5xl">{intro?.content.title ?? 'Contact us'}</h1>
         {intro ? <div class="prose-kz mt-5" set:html={intro.content.html} /> : null}

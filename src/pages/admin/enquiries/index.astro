@@ -46,7 +46,7 @@ const current = filter.status ?? '';
 <AdminLayout title="Enquiries" page={page}>
   <h1 class="text-2xl font-bold tracking-display">Enquiries</h1>
   <p class="mt-1 text-sm text-ink-600">Messages from the contact form, project requests and consultation bookings.</p>
-  <nav aria-label="Enquiry views" class="mt-6 overflow-x-auto border-b border-line">
+  <nav aria-label="Enquiry views" class="mt-6 relative overflow-x-auto border-b border-line">
     <ul class="flex gap-1">
       {views.map(([k, label]) => (
         <li class="shrink-0">

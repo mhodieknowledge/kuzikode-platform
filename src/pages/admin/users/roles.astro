@@ -56,7 +56,7 @@ const has = (role: (typeof roles)[number], p: Permission) => role.key === 'super
     ))}
   </ul>
   <h2 class="mt-10 text-lg font-bold tracking-display">Permission matrix</h2>
-  <div class="mt-4 overflow-x-auto rounded-lg border border-line bg-surface">
+  <div class="mt-4 relative overflow-x-auto rounded-lg border border-line bg-surface">
     <table class="w-full text-left text-[13px]">
       <caption class="sr-only">Which roles hold each permission</caption>
       <thead class="sticky top-0 bg-canvas text-ink-600">

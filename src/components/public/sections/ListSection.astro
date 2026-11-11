@@ -10,7 +10,7 @@ const { content: c, anchor } = Astro.props;
 ---
 
 <section class="bg-surface py-14 md:py-20" aria-labelledby={`${anchor}-title`}>
-  <div class="container-content grid gap-8 lg:grid-cols-[1fr_2fr]">
+  <div class="container-content grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_2fr]">
     <h2 id={`${anchor}-title`} class="text-3xl font-bold tracking-display text-ink-950">{c.title}</h2>
     <ul class="flex flex-col gap-4">
       {

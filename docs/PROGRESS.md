@@ -5,10 +5,10 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
-- Last completed task: **P7.2 Security suite** (2026-11-11). Phase 6 done except P6.5 `[!]` (owner's Faked Success). P6.5 is `[!]` (Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
-- **Next step:** **P7.3 Responsive + accessibility pass** on every page (3 widths, axe, keyboard): list every route under `src/pages`,
-  check which specs already screenshot/axe them (`screenshots()` + `expectAccessible()`), and add one sweep spec for the rest
-  (public, admin, portal) with fixture IDs from global-setup. Then P7.4 performance.
+- Last completed task: **P7.3 Responsive + accessibility pass** (2026-11-11). Phase 6 done except P6.5 `[!]` (owner's Faked Success). P6.5 is `[!]` (Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
+- **Next step:** **P7.4 Performance pass** (Lighthouse targets PRD §10 on Home, Services, a service page, Contact; bundle sizes; CPU
+  timings for login, invoice PDF, home SSR via `wrangler dev` timing logs; document in PROGRESS + DECISIONS). Lighthouse: Chromium is
+  at /opt/pw-browsers/chromium (`CHROME_PATH`, `--headless --no-sandbox`); `npx lighthouse` needs the npm registry (allowed).
 - **For P8.2 (staging):** send a test email from staging (Admin → Settings → email test) and confirm `delivered` arrives through the
   Resend webhook once the owner has configured it (BLOCKERS); re-run `LIVE_RESULT_URL=https://<staging>/api/payments/callbacks/paynow/<accountId> npm run test:payments:live`
   so Paynow's result URL is reachable, and record it.
@@ -767,3 +767,14 @@ The **Next step** line must be specific enough that a fresh session can continue
   missing → added + integration test. Earlier in P7.1: raw Zod message on the contact form.
 - Fixture hygiene: global-setup hides files on the portal project (portal-auth expects none); the security spec uploads to another
   client's project. verify green; security + portal-auth + checkout e2e green.
+
+## 2026-11-11 19:40 UTC · P7.3 Responsive + accessibility pass ✅
+- `tests/e2e/sweep.spec.ts`: every route (35 public/auth, 80 admin, 16 portal; detail pages from fixtures or the first linked record)
+  → loads, axe WCAG 2.1 AA has no serious/critical issues, no sideways scroll at 375/768/1440, first Tab lands on "Skip to content".
+  Collects all problems per area in one run (~4.3 min). Not swept (covered elsewhere): Super Admin pages, `/careers/apply` (off by
+  default). No record to open in the e2e DB: work/[slug] (portfolio empty by design), insights tag, time bill, careers application,
+  portal support detail.
+- First run found 5 overflow bugs, all fixed: roles permission matrix and other scroll boxes let absolutely-positioned screen-reader
+  text escape (all 28 `overflow-x-auto` wrappers now `relative`); sidebar grids sized to their table's min width (now
+  `grid-cols-1` + `minmax(0,1fr)` on 12 pages: insights, invoices, quotations, projects, clients, users, support, CMS pages…);
+  account sessions at 375 px. axe and keyboard: no findings. Pricing, gateways, reports, users, content specs re-run green.

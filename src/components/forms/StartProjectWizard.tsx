@@ -276,7 +276,7 @@ export default function StartProjectWizard(props: Props) {
   const last = d.step === WIZARD_STEPS.length - 1;
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
       <form
         onSubmit={submit}
         noValidate

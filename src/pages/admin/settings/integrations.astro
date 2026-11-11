@@ -99,7 +99,7 @@ const badge = (ok: boolean) => (ok ? 'bg-success-50 text-success-700' : 'bg-warn
       {info.email.recent.length === 0 ? (
         <p class="mt-2 text-sm text-ink-600">No emails yet.</p>
       ) : (
-        <div class="mt-2 overflow-x-auto">
+        <div class="mt-2 relative overflow-x-auto">
           <table class="w-full text-left text-[13px]">
             <caption class="sr-only">Last 10 emails</caption>
             <thead class="text-ink-600">

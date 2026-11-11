@@ -71,7 +71,7 @@ export function Tabs({
 }) {
   return (
     <RTabs.Root value={value} onValueChange={onValueChange}>
-      <RTabs.List aria-label={label} className="flex gap-1 overflow-x-auto border-b border-line">
+      <RTabs.List aria-label={label} className="flex gap-1 relative overflow-x-auto border-b border-line">
         {tabs.map((t) => (
           <RTabs.Trigger
             key={t.value}

@@ -18,7 +18,7 @@ const calUrl = raw && /^https:\/\/[^\s"'<>]+$/.test(raw) ? raw : null;
   whatsappMessage="Hi Kuzikode, I'd like to book a free consultation."
 >
   <section class="bg-canvas py-14 md:py-20" aria-labelledby="consult-title">
-    <div class="container-content grid gap-10 lg:grid-cols-[1fr_1.3fr]">
+    <div class="container-content grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_1.3fr]">
       <div>
         <span class="flex h-11 w-11 items-center justify-center rounded-sm bg-brand-50 text-brand-600">
           <CalendarClock size={22} aria-hidden="true" />

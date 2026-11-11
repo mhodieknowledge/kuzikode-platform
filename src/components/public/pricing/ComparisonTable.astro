@@ -14,7 +14,7 @@ const cell = (p: PublicPackage, key: string) => p.features.find((f) => f.key ===
 
 {
   rows.length > 0 && packages.length > 1 ? (
-    <div class="mt-10 hidden overflow-x-auto rounded-lg border border-line lg:block">
+    <div class="mt-10 hidden relative overflow-x-auto rounded-lg border border-line lg:block">
       <table class="w-full border-collapse text-left text-[15px]">
         <caption class="sr-only">{caption}</caption>
         <thead class="bg-canvas">

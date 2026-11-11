@@ -50,7 +50,7 @@ const roleName = new Map(roles.map((r) => [r.key, r.name]));
   </nav>
   <h1 class="mt-2 text-2xl font-bold tracking-display">{user.name}</h1>
   <p class="text-sm text-ink-600">{user.email}</p>
-  <div class="mt-6 grid gap-6 xl:grid-cols-[1fr_360px]">
+  <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
     <div>
       {canManage ? (
         <StaffActions

@@ -1,11 +1,22 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { paymentListQuery, refundSchema } from '../../../shared/schemas/payments';
+import {
+  IDEMPOTENCY_KEY,
+  attemptOtpSchema,
+  paymentListQuery,
+  publicPayInvoiceSchema,
+  refundSchema,
+} from '../../../shared/schemas/payments';
 import { csrfProtect, requireAuth, requirePermission, withAuth } from '../../middleware/auth';
+import type { Context } from 'hono';
 import type { ApiEnv } from '../../middleware/request-context';
 import { jsonBody, query } from '../../middleware/validate';
 import { enforce } from '../../lib/rate-limit';
-import { notFound } from '../../lib/errors';
+import { notFound, validationError } from '../../lib/errors';
+import { verifyTurnstile } from '../../lib/turnstile';
+import { paymentReturnUrl } from '../../lib/public-links';
+import { invoiceIdForToken } from '../invoices/service';
+import * as orchestration from './orchestration';
 import { documentPdf } from '../documents/service';
 import { fileResponse } from '../files/service';
 import { getPublicAttempt } from './portal';
@@ -46,9 +57,50 @@ export function publicPaymentRoutes() {
     if (!attempt) throw notFound();
     return attempt;
   };
-  r.get('/payment-attempts/:id', async (c) =>
-    c.json({ data: await load(c.var.ctx, c.req.param('id'), query(c, signatureQuery).t) }),
-  );
+  r.get('/payment-attempts/:id', async (c) => {
+    const ctx = c.var.ctx;
+    const t = query(c, signatureQuery).t;
+    const before = await load(ctx, c.req.param('id'), t);
+    // While waiting, ask the gateway (at most once per 5 s per attempt); the browser return itself proves nothing.
+    if (before.phase === 'waiting') await orchestration.checkAttempt(ctx, before.id);
+    return c.json({ data: before.phase === 'waiting' ? await load(ctx, before.id, t) : before });
+  });
+  r.post('/payment-attempts/:id/otp', csrfProtect(), async (c) => {
+    const ctx = c.var.ctx;
+    await enforce(ctx, { key: `pay-otp:ip:${ctx.ip}`, limit: 20, windowSeconds: 3600 });
+    const a = await load(ctx, c.req.param('id'), query(c, signatureQuery).t);
+    const { otp } = await jsonBody(c, attemptOtpSchema);
+    return c.json({ data: await orchestration.submitAttemptOtp(ctx, a.id, otp) });
+  });
+
+  // Paying from the public invoice link (/i/:token → checkout).
+  const invoiceFor = async (ctx: ApiEnv['Variables']['ctx'], token: string) => {
+    const id = await invoiceIdForToken(ctx, token);
+    if (!id) throw notFound();
+    return id;
+  };
+  r.get('/invoices/:token/payment-options', async (c) => {
+    const ctx = c.var.ctx;
+    await enforce(ctx, { key: `pay-options:ip:${ctx.ip}`, limit: 120, windowSeconds: 3600 });
+    return c.json({
+      data: await orchestration.invoicePaymentOptions(ctx, await invoiceFor(ctx, c.req.param('token'))),
+    });
+  });
+  r.post('/invoices/:token/pay', csrfProtect(), async (c) => {
+    const ctx = c.var.ctx;
+    await enforce(ctx, { key: `pay-start:ip:${ctx.ip}`, limit: 20, windowSeconds: 3600 });
+    const invoiceId = await invoiceFor(ctx, c.req.param('token'));
+    const body = await jsonBody(c, publicPayInvoiceSchema);
+    if (!(await verifyTurnstile(ctx, body.turnstileToken)))
+      throw validationError({ turnstile: ['Complete the security check and try again.'] });
+    const start = await orchestration.initiateInvoicePayment(ctx, invoiceId, {
+      methodCode: body.methodCode,
+      phone: body.phone,
+      idempotencyKey: idempotencyKey(c),
+    });
+    const statusPage = new URL(await paymentReturnUrl(ctx, start.attemptId));
+    return c.json({ data: { ...start, statusPage: `${statusPage.pathname}${statusPage.search}` } }, 201);
+  });
   r.get('/payment-attempts/:id/receipt', async (c) => {
     const ctx = c.var.ctx;
     const attempt = await load(ctx, c.req.param('id'), query(c, signatureQuery).t);
@@ -57,6 +109,45 @@ export function publicPaymentRoutes() {
     const res = await fileResponse(ctx, pdf.file!);
     res.headers.set('x-robots-tag', 'noindex, nofollow');
     return res;
+  });
+  return r;
+}
+
+/** The `Idempotency-Key` header every "Pay" request carries (docs/06 §3). */
+export function idempotencyKey(c: Context<ApiEnv>): string {
+  const key = c.req.header('idempotency-key') ?? '';
+  if (!IDEMPOTENCY_KEY.test(key))
+    throw validationError({ idempotencyKey: ['Missing or invalid Idempotency-Key header.'] });
+  return key;
+}
+
+/**
+ * `POST /api/payments/callbacks/:provider/:accountId` — gateway status updates. Not a browser endpoint: no session, no
+ * CSRF; authenticity is the adapter's job and the result is confirmed with a status check. Always answers 200 (the body
+ * says nothing about the outcome), so gateways stop resending and probes learn nothing.
+ */
+export function paymentCallbackRoutes() {
+  const r = new Hono<ApiEnv>();
+  r.post('/:provider/:accountId', async (c) => {
+    const ctx = c.var.ctx;
+    await enforce(ctx, { key: `pay-callback:ip:${ctx.ip}`, limit: 600, windowSeconds: 3600 });
+    const length = Number(c.req.header('content-length') ?? '0');
+    const body = length > 65_536 ? '' : (await c.req.text()).slice(0, 65_536);
+    const provider = c.req.param('provider');
+    const accountId = c.req.param('accountId');
+    if (/^[a-z][a-z0-9_]{1,30}$/.test(provider) && /^[A-Za-z0-9_-]{1,64}$/.test(accountId) && body) {
+      try {
+        await orchestration.handleCallback(ctx, provider, accountId, {
+          headers: c.req.raw.headers,
+          body,
+          contentType: c.req.header('content-type') ?? '',
+        });
+      } catch (err) {
+        // Logged for finance; reconciliation picks the attempt up again. The gateway still gets 200.
+        ctx.logger.error('payment callback processing failed', { provider, accountId, err });
+      }
+    }
+    return c.text('OK', 200);
   });
   return r;
 }

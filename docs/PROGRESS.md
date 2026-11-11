@@ -5,14 +5,13 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
-- Last completed task: **P6.1 payments package + router + mock checkout** (2026-11-11).
-- **Next step:** **P6.2 Payments service** (docs/06 §3 + §5 tests): `src/server/modules/payments/orchestration.ts` (or service.ts):
-  `paymentOptions(invoice)` via `paymentMethodOptions`, `initiate` (Idempotency-Key, attempt reuse < 30 min, `resolveRoute`,
-  `paymentReturnUrl` as returnUrl, resultUrl `/api/payments/callbacks/:provider/:accountId`), callback endpoint (parseCallback →
-  `payment_events` dedupe → confirm with checkPaymentStatus → apply), apply in one batch guarded by the attempt status UPDATE,
-  overpayment → client credit, reversal/dispute handling, `payment.failed` notification (carried over from P4.16). The mock's hosted
-  page (`settleMockCheckout`) only changes gateway state; P6.2 should also deliver a signed mock callback in-process
-  (`signMockCallback`) after settling, so the callback path is exercised in dev.
+- Last completed task: **P6.2 Payments service** (2026-11-11).
+- **Next step:** **P6.3 Paynow adapter** in `packages/payments/src/providers/paynow.ts` (docs/06 §4; WebFetch-verify the Paynow
+  docs pages listed there first): fetch + WebCrypto, SHA-512 uppercase hash out/in (docs' vector as a unit test, plus the
+  validating_hash example), redirect `initiatetransaction` + express `remotetransaction` (ecocash/onemoney/innbucks/omari; our
+  `card` → redirect), `authemail` from `options.testAuthEmail` (account option `testAuthEmailSecret` names the secret; router
+  resolves `*Secret` options), poll via stored pollurl, status mapping table, `credentialFields` INTEGRATION_ID/INTEGRATION_KEY,
+  `describeConformance('paynow', …)` with mocked fetch. Register in `src/server/modules/payments/providers.ts` FACTORIES.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 - New entries are appended at the **bottom** of this file.
 
@@ -585,3 +584,25 @@ The **Next step** line must be specific enough that a fresh session can continue
   (4: specificity/priority/skips/no route, secrets outside development, mock unreachable with production config even with the
   flag and a secret, hosted page settle-once) · e2e mock page (axe, 375/768/1440 reviewed). verify: unit 256 / integration 264.
 - Next step: P6.2 (see Current status).
+
+## 2026-11-11 13:40 UTC · P6.2 Payments service ✅
+- `invoices/service.ts`: `applyIncomingPayment` (shared core of manual + online payments: receipt number, allocation up to the
+  balance, excess → client credit, history, audit, receipt PDF + email jobs; `before`/`onlyIf` hooks for the attempt claim;
+  online payments are recorded even if the invoice was paid or voided meanwhile) and `reverseIncomingPayment` (payment marked
+  reversed/refunded, balance restored, overpayment credit withdrawn). `recordManualPayment` now calls the core.
+- `payments/orchestration.ts`: `invoicePaymentOptions` (no route → staff alert once a day), `initiateInvoicePayment`
+  (Idempotency-Key per invoice, 30-min reuse for methods without a phone, phone normalised + masked, returnUrl =
+  `paymentReturnUrl`, refused/unreachable → failed/error + payment.failed), `handleCallback` (authenticate → events with dedupe →
+  match within the account → confirm with `checkAttempt`), `checkAttempt` (5 s throttle unless forced; forced checks also
+  re-check finished attempts so a late success is recorded), `applyStatus` (state machine incl. amount/currency/reference
+  mismatch → error + review alert, partially_paid alert, disputed, reversed/refunded), `submitAttemptOtp`.
+- Routes: portal `GET /invoices/:id/payment-options`, `POST /invoices/:id/pay`, `POST /payment-attempts/:id/otp`, status GET
+  asks the gateway while waiting; public `GET /invoices/:token/payment-options`, `POST /invoices/:token/pay` (Turnstile),
+  `POST /payment-attempts/:id/otp?t=`; callbacks `POST /api/payments/callbacks/:provider/:accountId` (always 200, 64 KB cap).
+  The mock hosted page now delivers its signed callback in-process.
+- Tests: integration `payments-online.test.ts` (11: options + express + 5 concurrent callbacks → 1 payment; idempotency/reuse;
+  insufficient → failed + notification; forged and unconfirmed callbacks; missed callback via status poll; amount mismatch;
+  overpayment → credit; disputed → reversed once; O'mari OTP; route switch affects new attempts only + late success on the old
+  account; scoping + public Turnstile + signed status; mock page end to end) · unit phone normaliser. verify: unit 267 /
+  integration 275 · e2e public-documents, portal-auth, invoices green.
+- Next step: P6.3 (see Current status).

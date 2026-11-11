@@ -69,3 +69,22 @@ export const refundSchema = z
       ctx.addIssue({ code: 'custom', path: ['creditNoteId'], message: 'Choose the credit note this refund settles.' });
   });
 export type RefundInput = z.output<typeof refundSchema>;
+
+/** Starting an online payment (portal and public invoice link). */
+export const payInvoiceSchema = z
+  .object({
+    methodCode: z.string().regex(/^[a-z][a-z0-9_]{1,30}$/, 'Choose a payment method.'),
+    phone: z.string().trim().max(24).optional(),
+  })
+  .strict();
+export type PayInvoiceInput = z.infer<typeof payInvoiceSchema>;
+
+/** The public invoice link also needs the Turnstile check (docs/06 §3b). */
+export const publicPayInvoiceSchema = payInvoiceSchema.extend({ turnstileToken: z.string().min(1).max(2048) }).strict();
+
+export const attemptOtpSchema = z
+  .object({ otp: z.string().regex(/^\d{4,8}$/, 'Enter the code from your phone.') })
+  .strict();
+
+/** One per click, so a double-tap never starts two payments. */
+export const IDEMPOTENCY_KEY = /^[A-Za-z0-9_-]{8,100}$/;

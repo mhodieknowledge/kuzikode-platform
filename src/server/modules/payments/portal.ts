@@ -88,7 +88,8 @@ export interface PortalAttempt {
 const WAITING = ['created', 'initiated', 'pending'];
 const SUCCEEDED = ['succeeded', 'partially_paid'];
 
-function outcome(status: string): { phase: AttemptPhase; message: string } {
+/** Client wording for an attempt status (portal, /pay/return and the checkout share it). */
+export function attemptOutcome(status: string): { phase: AttemptPhase; message: string } {
   if (WAITING.includes(status))
     return {
       phase: 'waiting',
@@ -148,7 +149,7 @@ async function attemptRow(ctx: RequestContext, id: string, where: { sql: string;
 
 const toAttempt = (row: AttemptRow): PortalAttempt => ({
   id: row.id,
-  ...outcome(row.status),
+  ...attemptOutcome(row.status),
   method: row.method_code,
   payerPhone: row.payer_phone_masked,
   currency: row.currency,

@@ -722,36 +722,69 @@ export async function sendInvoice(
 /** Optimistic retries when another write moved the balance first (each retry re-reads and recomputes). */
 const MAX_RETRIES = 6;
 
-/**
- * Records a manual payment (bank transfer, cash, manual EcoCash…). The amount up to the balance is allocated to the
- * invoice; any excess becomes client credit in the same batch. Receipt number, payment, allocation, invoice update,
- * credit, history, audit and the receipt PDF + email jobs commit together, guarded by the balance read.
- */
-export async function recordManualPayment(
-  ctx: RequestContext,
-  id: string,
-  input: ManualPaymentInput,
-): Promise<{
+/** A payment arriving for an invoice: recorded by staff (manual) or confirmed by a gateway (online attempt). */
+export interface IncomingPayment {
+  amountMinor: number;
+  method: string;
+  providerKey: string;
+  accountId: string | null;
+  attemptId: string | null;
+  providerReference: string | null;
+  reference: string | null;
+  notes: string | null;
+  receivedAt: string;
+  recordedBy: string | null;
+  auditAction: 'payment.recorded_manual' | 'payment.received_online';
+  /**
+   * Manual payments need an open invoice with a balance. An online payment is money already taken, so it is always
+   * recorded: whatever the invoice no longer needs (paid elsewhere meanwhile, or voided) becomes client credit.
+   */
+  requireOpen: boolean;
+  /** Statements to run first in the same batch, conditioned on the same balance guard (e.g. claiming the attempt). */
+  before?: (guard: { sql: string; params: unknown[] }) => D1PreparedStatement[];
+  /** Extra condition for creating the payment (e.g. the attempt was claimed by this batch). */
+  onlyIf?: { sql: string; params: unknown[] };
+}
+
+export interface RecordedPayment {
   paymentId: string;
   receiptNumber: string;
   appliedMinor: number;
   creditMinor: number;
   status: InvoiceStatus;
-}> {
-  assertCan(ctx, 'payments.record_manual');
+  invoiceNumber: string | null;
+  currency: string;
+}
+
+/**
+ * Records a payment against an invoice in one batch: receipt number, payment, allocation (up to the balance), invoice
+ * update, any excess as client credit, status history, audit, receipt PDF + email jobs. Guarded by the balance read, so
+ * a concurrent payment makes this one re-read and recompute. Returns null when `onlyIf` did not hold.
+ */
+export async function applyIncomingPayment(
+  ctx: RequestContext,
+  id: string,
+  input: IncomingPayment,
+): Promise<RecordedPayment | null> {
   const today = businessDate(ctx.now());
-  if (input.receivedOn > today) throw validationError({ receivedOn: ['The payment date is in the future.'] });
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     const inv = await loadRow(ctx, id);
-    if (!OPEN_INVOICE_STATUSES.includes(inv.status) || inv.balance_minor <= 0)
-      throw conflict('This invoice has no balance to pay.');
-    const applied = Math.min(input.amountMinor, inv.balance_minor);
+    const open = OPEN_INVOICE_STATUSES.includes(inv.status) && inv.balance_minor > 0;
+    if (input.requireOpen && !open) throw conflict('This invoice has no balance to pay.');
+    const applied = open ? Math.min(input.amountMinor, inv.balance_minor) : 0;
     const credit = input.amountMinor - applied;
     const paid = inv.amount_paid_minor + applied;
-    const status = deriveStatus(
-      { totalMinor: inv.total_minor, paidMinor: paid, creditedMinor: inv.amount_credited_minor, dueDate: inv.due_date },
-      today,
-    );
+    const status = applied
+      ? deriveStatus(
+          {
+            totalMinor: inv.total_minor,
+            paidMinor: paid,
+            creditedMinor: inv.amount_credited_minor,
+            dueDate: inv.due_date,
+          },
+          today,
+        )
+      : inv.status;
     const settings = await getSettings(ctx);
     const format = settingText(settings, 'numbering.receipt') ?? 'RCT-{YYYY}-{SEQ:5}';
     const year = businessYear(ctx.now());
@@ -759,11 +792,13 @@ export async function recordManualPayment(
     const number = numberSqlExpr(key, format, year);
     const paymentId = newId('pay', ctx.now().getTime());
     const now = ctx.now().toISOString();
-    const receivedAt = input.receivedOn === today ? now : `${input.receivedOn}T10:00:00.000Z`;
-    const guard = {
-      sql: `EXISTS (SELECT 1 FROM invoices WHERE id = ? AND balance_minor = ? AND status IN ${OPEN_SQL})`,
-      params: [id, inv.balance_minor],
+    const balanceGuard = {
+      sql: 'EXISTS (SELECT 1 FROM invoices WHERE id = ? AND balance_minor = ? AND status = ?)',
+      params: [id, inv.balance_minor, inv.status],
     };
+    const guard = input.onlyIf
+      ? { sql: `${balanceGuard.sql} AND ${input.onlyIf.sql}`, params: [...balanceGuard.params, ...input.onlyIf.params] }
+      : balanceGuard;
     const made = { sql: 'EXISTS (SELECT 1 FROM payments WHERE id = ?)', params: [paymentId] };
     const client = JSON.parse(inv.client_snapshot ?? '{}') as ClientSnapshot;
     const { to, name } = recipient(client);
@@ -788,6 +823,7 @@ export async function recordManualPayment(
         : []),
     ];
     const res = await new Batch(ctx.db)
+      .addAll(input.before ? input.before(balanceGuard) : [])
       .add(stmt(ctx.db, 'INSERT OR IGNORE INTO sequences (key, next_value) VALUES (?, 1)', key))
       .add(
         stmt(
@@ -801,16 +837,20 @@ export async function recordManualPayment(
         stmt(
           ctx.db,
           `INSERT INTO payments (id, receipt_number, client_id, provider_key, account_id, method, amount_minor, currency,
-             received_at, status, recorded_by, reference, notes, created_at, updated_at)
-           SELECT ?, ${number.sql}, ?, 'manual', NULL, ?, ?, ?, ?, 'completed', ?, ?, ?, ?, ? WHERE ${guard.sql}`,
+             received_at, attempt_id, provider_reference, status, recorded_by, reference, notes, created_at, updated_at)
+           SELECT ?, ${number.sql}, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed', ?, ?, ?, ?, ? WHERE ${guard.sql}`,
           paymentId,
           ...number.params,
           inv.client_id,
+          input.providerKey,
+          input.accountId,
           input.method,
           input.amountMinor,
           inv.currency,
-          receivedAt,
-          ctx.actor.userId,
+          input.receivedAt,
+          input.attemptId,
+          input.providerReference,
+          input.recordedBy,
           input.reference,
           input.notes,
           now,
@@ -819,31 +859,36 @@ export async function recordManualPayment(
         ),
         'payment',
       )
-      .add(
-        stmt(
-          ctx.db,
-          `INSERT INTO payment_allocations (id, payment_id, invoice_id, amount_minor, currency, created_at)
-           SELECT ?, ?, ?, ?, ?, ? WHERE ${made.sql}`,
-          newId('pal', ctx.now().getTime()),
-          paymentId,
-          id,
-          applied,
-          inv.currency,
-          now,
-          ...made.params,
-        ),
+      .addAll(
+        applied > 0
+          ? [
+              stmt(
+                ctx.db,
+                `INSERT INTO payment_allocations (id, payment_id, invoice_id, amount_minor, currency, created_at)
+                 SELECT ?, ?, ?, ?, ?, ? WHERE ${made.sql}`,
+                newId('pal', ctx.now().getTime()),
+                paymentId,
+                id,
+                applied,
+                inv.currency,
+                now,
+                ...made.params,
+              ),
+            ]
+          : [],
       )
       .add(
         stmt(
           ctx.db,
           `UPDATE invoices SET amount_paid_minor = amount_paid_minor + ?, balance_minor = balance_minor - ?, status = ?, updated_at = ?
-           WHERE id = ? AND balance_minor = ? AND status IN ${OPEN_SQL} AND ${made.sql}`,
+           WHERE id = ? AND balance_minor = ? AND status = ? AND ${made.sql}`,
           applied,
           applied,
           status,
           now,
           id,
           inv.balance_minor,
+          inv.status,
           ...made.params,
         ),
         'invoice',
@@ -861,7 +906,7 @@ export async function recordManualPayment(
                 credit,
                 paymentId,
                 `Overpayment on ${inv.number}`,
-                ctx.actor.userId,
+                input.recordedBy,
                 now,
                 ...made.params,
               ),
@@ -886,7 +931,7 @@ export async function recordManualPayment(
         auditWhen(
           ctx,
           {
-            action: 'payment.recorded_manual',
+            action: input.auditAction,
             entityType: 'invoice',
             entityId: id,
             after: {
@@ -896,6 +941,7 @@ export async function recordManualPayment(
               creditMinor: credit,
               method: input.method,
               reference: input.reference,
+              ...(input.attemptId ? { attemptId: input.attemptId } : {}),
             },
           },
           made.sql,
@@ -903,7 +949,17 @@ export async function recordManualPayment(
         ),
       )
       .run();
-    if (res.changes('payment') !== 1) continue; // balance moved under us: re-read and recompute
+    if (res.changes('payment') !== 1) {
+      // The balance moved under us (re-read and recompute), or `onlyIf` no longer holds (nothing to do).
+      if (input.onlyIf) {
+        const still = await ctx.db
+          .prepare(`SELECT ${input.onlyIf.sql} AS ok`)
+          .bind(...input.onlyIf.params)
+          .first<{ ok: number }>();
+        if (!still?.ok) return null;
+      }
+      continue;
+    }
     if (res.changes('invoice') !== 1) throw new Error('payment recorded without invoice update');
     const p = await ctx.db
       .prepare('SELECT receipt_number FROM payments WHERE id = ?')
@@ -911,7 +967,9 @@ export async function recordManualPayment(
       .first<{ receipt_number: string }>();
     await notifyStaffWithPermission(ctx, 'payments.view', {
       type: 'payment.received',
-      title: `${formatMoney(input.amountMinor, inv.currency)} received for ${inv.number}`,
+      title: `${formatMoney(input.amountMinor, inv.currency)} received for ${inv.number}${
+        credit > 0 ? ` (${formatMoney(credit, inv.currency)} to account credit)` : ''
+      }`,
       link: `/admin/invoices/${id}`,
       entityType: 'invoice',
       entityId: id,
@@ -921,9 +979,207 @@ export async function recordManualPayment(
       ctx,
       jobs.map((j) => j.id),
     );
-    return { paymentId, receiptNumber: p!.receipt_number, appliedMinor: applied, creditMinor: credit, status };
+    return {
+      paymentId,
+      receiptNumber: p!.receipt_number,
+      appliedMinor: applied,
+      creditMinor: credit,
+      status,
+      invoiceNumber: inv.number,
+      currency: inv.currency,
+    };
   }
   throw conflict('The invoice balance kept changing. Reload and try again.');
+}
+
+/**
+ * The gateway reversed or refunded an online payment (docs/06 §3): the payment is marked (never deleted), what it paid
+ * on the invoice is owed again, and any account credit it created is withdrawn. One batch, guarded by the balance read
+ * (retried) and by the payment still being completed (a second report changes nothing → null).
+ */
+export async function reverseIncomingPayment(
+  ctx: RequestContext,
+  paymentId: string,
+  input: {
+    status: 'reversed' | 'refunded';
+    reason: string;
+    before?: (guard: { sql: string; params: unknown[] }) => D1PreparedStatement[];
+  },
+): Promise<{ invoiceId: string; restoredMinor: number; status: InvoiceStatus } | null> {
+  const today = businessDate(ctx.now());
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    const p = await ctx.db
+      .prepare('SELECT id, receipt_number, client_id, currency, amount_minor, status FROM payments WHERE id = ?')
+      .bind(paymentId)
+      .first<{
+        id: string;
+        receipt_number: string;
+        client_id: string;
+        currency: string;
+        amount_minor: number;
+        status: string;
+      }>();
+    if (!p) throw notFound();
+    if (p.status !== 'completed') return null;
+    const alloc = await ctx.db
+      .prepare(
+        'SELECT invoice_id, COALESCE(SUM(amount_minor), 0) AS n FROM payment_allocations WHERE payment_id = ? GROUP BY invoice_id',
+      )
+      .bind(paymentId)
+      .first<{ invoice_id: string; n: number }>();
+    const credited = await ctx.db
+      .prepare(
+        "SELECT COALESCE(SUM(amount_minor), 0) AS n FROM client_credits WHERE source_type = 'overpayment' AND source_id = ?",
+      )
+      .bind(paymentId)
+      .first<{ n: number }>();
+    const invoiceId =
+      alloc?.invoice_id ??
+      (
+        await ctx.db
+          .prepare('SELECT invoice_id FROM payment_attempts a JOIN payments p ON p.attempt_id = a.id WHERE p.id = ?')
+          .bind(paymentId)
+          .first<{ invoice_id: string }>()
+      )?.invoice_id;
+    if (!invoiceId) throw new Error('reversed payment has no invoice');
+    const inv = await loadRow(ctx, invoiceId);
+    const restored = alloc?.n ?? 0;
+    const paid = inv.amount_paid_minor - restored;
+    const status: InvoiceStatus =
+      restored === 0 || inv.status === 'void'
+        ? inv.status
+        : deriveStatus(
+            {
+              totalMinor: inv.total_minor,
+              paidMinor: paid,
+              creditedMinor: inv.amount_credited_minor,
+              dueDate: inv.due_date,
+            },
+            today,
+          );
+    const now = ctx.now().toISOString();
+    const guard = {
+      sql: "EXISTS (SELECT 1 FROM invoices WHERE id = ? AND balance_minor = ? AND status = ?) AND EXISTS (SELECT 1 FROM payments WHERE id = ? AND status = 'completed')",
+      params: [invoiceId, inv.balance_minor, inv.status, paymentId],
+    };
+    const done = {
+      sql: 'EXISTS (SELECT 1 FROM payments WHERE id = ? AND status = ? AND updated_at = ?)',
+      params: [paymentId, input.status, now],
+    };
+    const res = await new Batch(ctx.db)
+      .addAll(input.before ? input.before(guard) : [])
+      .add(
+        stmt(
+          ctx.db,
+          `UPDATE payments SET status = ?, notes = COALESCE(notes || char(10), '') || ?, updated_at = ? WHERE id = ? AND ${guard.sql}`,
+          input.status,
+          input.reason,
+          now,
+          paymentId,
+          ...guard.params,
+        ),
+        'payment',
+      )
+      .add(
+        stmt(
+          ctx.db,
+          `UPDATE invoices SET amount_paid_minor = amount_paid_minor - ?, balance_minor = balance_minor + ?, status = ?, updated_at = ?
+           WHERE id = ? AND balance_minor = ? AND status = ? AND ${done.sql}`,
+          restored,
+          restored,
+          status,
+          now,
+          invoiceId,
+          inv.balance_minor,
+          inv.status,
+          ...done.params,
+        ),
+      )
+      .addAll(
+        (credited?.n ?? 0) > 0
+          ? [
+              stmt(
+                ctx.db,
+                `INSERT INTO client_credits (id, client_id, currency, amount_minor, source_type, source_id, note, created_by, created_at)
+                 SELECT ?, ?, ?, ?, 'adjustment', ?, ?, NULL, ? WHERE ${done.sql}`,
+                newId('ccr', ctx.now().getTime()),
+                p.client_id,
+                p.currency,
+                -(credited?.n ?? 0),
+                paymentId,
+                `Payment ${p.receipt_number} ${input.status} by the gateway`,
+                now,
+                ...done.params,
+              ),
+            ]
+          : [],
+      )
+      .addAll(
+        status !== inv.status
+          ? [historyStmt(ctx, invoiceId, inv.status, status, `Payment ${p.receipt_number} ${input.status}`, done)]
+          : [],
+      )
+      .add(
+        auditWhen(
+          ctx,
+          {
+            action: `payment.${input.status}`,
+            entityType: 'payment',
+            entityId: paymentId,
+            before: { status: 'completed' },
+            after: { status: input.status, invoiceId, restoredMinor: restored, creditWithdrawnMinor: credited?.n ?? 0 },
+          },
+          done.sql,
+          ...done.params,
+        ),
+      )
+      .run();
+    if (res.changes('payment') === 1) return { invoiceId, restoredMinor: restored, status };
+  }
+  throw conflict('The invoice balance kept changing. Try again.');
+}
+
+/**
+ * Records a manual payment (bank transfer, cash, manual EcoCash…). The amount up to the balance is allocated to the
+ * invoice; any excess becomes client credit in the same batch (see applyIncomingPayment).
+ */
+export async function recordManualPayment(
+  ctx: RequestContext,
+  id: string,
+  input: ManualPaymentInput,
+): Promise<{
+  paymentId: string;
+  receiptNumber: string;
+  appliedMinor: number;
+  creditMinor: number;
+  status: InvoiceStatus;
+}> {
+  assertCan(ctx, 'payments.record_manual');
+  const today = businessDate(ctx.now());
+  if (input.receivedOn > today) throw validationError({ receivedOn: ['The payment date is in the future.'] });
+  const now = ctx.now().toISOString();
+  const r = await applyIncomingPayment(ctx, id, {
+    amountMinor: input.amountMinor,
+    method: input.method,
+    providerKey: 'manual',
+    accountId: null,
+    attemptId: null,
+    providerReference: null,
+    reference: input.reference,
+    notes: input.notes,
+    receivedAt: input.receivedOn === today ? now : `${input.receivedOn}T10:00:00.000Z`,
+    recordedBy: ctx.actor.userId,
+    auditAction: 'payment.recorded_manual',
+    requireOpen: true,
+  });
+  if (!r) throw new Error('manual payment not recorded');
+  return {
+    paymentId: r.paymentId,
+    receiptNumber: r.receiptNumber,
+    appliedMinor: r.appliedMinor,
+    creditMinor: r.creditMinor,
+    status: r.status,
+  };
 }
 
 /** Applies the client's available credit (same currency) to the invoice, up to its balance. */

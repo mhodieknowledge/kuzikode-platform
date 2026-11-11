@@ -17,3 +17,13 @@ export function paymentMethodLabel(code: string | null | undefined): string {
   if (!code) return 'Online payment';
   return LABELS[code] ?? code.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
 }
+
+/**
+ * A Zimbabwean mobile number in the local form gateways expect (`07XXXXXXXX`), from `0771 234 567`, `+263 77 123 4567`
+ * or `263771234567`. Null when it isn't one.
+ */
+export function normalizeZimPhone(input: string): string | null {
+  const digits = input.replace(/[\s().-]/g, '').replace(/^\+/, '');
+  const local = digits.startsWith('263') ? `0${digits.slice(3)}` : digits;
+  return /^07\d{8}$/.test(local) ? local : null;
+}

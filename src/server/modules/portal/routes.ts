@@ -17,6 +17,9 @@ import { documentPdf } from '../documents/service';
 import { fileResponse } from '../files/service';
 import * as invoices from '../invoices/portal';
 import * as payments from '../payments/portal';
+import * as orchestration from '../payments/orchestration';
+import { idempotencyKey } from '../payments/routes';
+import { attemptOtpSchema, payInvoiceSchema } from '../../../shared/schemas/payments';
 import * as projects from '../projects/portal';
 import * as quotations from '../quotations/service';
 import * as services from '../subscriptions/portal';
@@ -155,9 +158,39 @@ export function portalRoutes() {
     const pdf = await documentPdf(ctx, 'receipt', await payments.portalPaymentId(ctx, c.req.param('id')));
     return fileResponse(ctx, pdf.file!, { inline: c.req.query('inline') === '1' });
   });
-  r.get('/payment-attempts/:id', async (c) =>
-    c.json({ data: await payments.getPortalAttempt(c.var.ctx, c.req.param('id')) }),
-  );
+  r.get('/payment-attempts/:id', async (c) => {
+    const ctx = c.var.ctx;
+    const attempt = await payments.getPortalAttempt(ctx, c.req.param('id'));
+    if (attempt.phase !== 'waiting') return c.json({ data: attempt });
+    // While waiting, ask the gateway (at most once per 5 s per attempt).
+    await orchestration.checkAttempt(ctx, attempt.id);
+    return c.json({ data: await payments.getPortalAttempt(ctx, attempt.id) });
+  });
+  r.post('/payment-attempts/:id/otp', async (c) => {
+    const ctx = c.var.ctx;
+    await enforce(ctx, { key: `pay-otp:user:${ctx.actor.userId}`, limit: 20, windowSeconds: 3600 });
+    const attempt = await payments.getPortalAttempt(ctx, c.req.param('id'));
+    const { otp } = await jsonBody(c, attemptOtpSchema);
+    return c.json({ data: await orchestration.submitAttemptOtp(ctx, attempt.id, otp) });
+  });
+  r.get('/invoices/:id/payment-options', async (c) => {
+    const ctx = c.var.ctx;
+    return c.json({
+      data: await orchestration.invoicePaymentOptions(ctx, await invoices.portalInvoiceId(ctx, c.req.param('id'))),
+    });
+  });
+  r.post('/invoices/:id/pay', async (c) => {
+    const ctx = c.var.ctx;
+    await enforce(ctx, { key: `pay-start:user:${ctx.actor.userId}`, limit: 30, windowSeconds: 3600 });
+    const invoiceId = await invoices.portalInvoiceId(ctx, c.req.param('id'));
+    const body = await jsonBody(c, payInvoiceSchema);
+    const start = await orchestration.initiateInvoicePayment(ctx, invoiceId, {
+      methodCode: body.methodCode,
+      phone: body.phone,
+      idempotencyKey: idempotencyKey(c),
+    });
+    return c.json({ data: { ...start, statusPage: `/portal/payments/attempts/${start.attemptId}` } }, 201);
+  });
 
   r.get('/projects', async (c) => c.json({ data: await projects.listPortalProjects(c.var.ctx) }));
   r.get('/projects/:id', async (c) => c.json({ data: await projects.getPortalProject(c.var.ctx, c.req.param('id')) }));

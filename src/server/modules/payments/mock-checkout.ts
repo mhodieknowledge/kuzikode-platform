@@ -2,11 +2,12 @@
  * The mock gateway's hosted page (`/dev/mock-checkout/:reference`, docs/06 §6): stands in for a gateway's card page in
  * development and staging. Not found unless the mock gateway is enabled (never in production).
  */
-import { MOCK_OUTCOMES, type MockOutcome, ProviderError } from '@kuzikode/payments';
+import { MOCK_OUTCOMES, type MockOutcome, ProviderError, signMockCallback } from '@kuzikode/payments';
 import type { RequestContext } from '../../context';
 import { notFound, validationError } from '../../lib/errors';
 import { formatMoney } from '../../../shared/money';
 import { accountConfig, getAccount } from './router';
+import { handleCallback } from './orchestration';
 import { d1MockStore, mockProvider } from './providers';
 
 export interface MockCheckoutView {
@@ -65,5 +66,26 @@ export async function settleMockCheckout(
     throw err;
   }
   ctx.logger.info('mock payment settled', { reference, outcome });
+  // Like a real gateway, notify our result URL with a signed status update. Delivered in-process (a Worker can't
+  // reliably call its own hostname); it goes through exactly the same callback handling, including the status check.
+  const settled = await d1MockStore(ctx).get(reference);
+  if (settled) {
+    const body = await signMockCallback(built.config, {
+      reference,
+      merchantReference: settled.merchantReference,
+      status: settled.status,
+      amountMinor: settled.paidMinor,
+      currency: settled.currency,
+    });
+    try {
+      await handleCallback(ctx, 'mock', settled.accountId, {
+        headers: new Headers({ 'content-type': 'application/json' }),
+        body,
+        contentType: 'application/json',
+      });
+    } catch (err) {
+      ctx.logger.error('mock callback delivery failed', { reference, err });
+    }
+  }
   return getMockCheckout(ctx, reference);
 }

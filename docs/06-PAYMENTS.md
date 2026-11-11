@@ -228,6 +228,11 @@ So the design minimises Paynow's card screen to a **one-time, in-context step pe
    token on the due date. Failed charge → invoice stays open, client is emailed a pay link. Consent and every charge are audited.
 6. **Before Paynow approves tokenization** (`capabilities.tokenization = false`): step 3 still works through the popup (without saving the card), so
    cards are accepted from day one. Saved cards and auto-charge switch on automatically once the account option `tokenizationEnabled` is set.
+**As built (P6.3e):** saved cards are offered and saved only for signed-in portal payers (a public invoice link is a bearer link), and
+saving is an unticked opt-in on the checkout. The card window reports back through `postMessage` and a `BroadcastChannel`; COOP is
+`same-origin-allow-popups` on the checkout pages and `unsafe-none` on `/pay/card-return`, so the popup keeps its opener (see DECISIONS).
+The Super Admin turns saved cards on per gateway account (`tokenizationEnabled`). A failed automatic charge sends `card_charge_failed`.
+
 7. **Future:** if Paynow later offers embeddable card fields or a direct card API, add it as a new adapter capability (`hostedCardFields`).
    The checkout page structure doesn't change.
 

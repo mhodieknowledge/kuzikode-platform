@@ -72,3 +72,12 @@ Things only the owner can do. The agent keeps building around them and records e
   each brand's artwork guidelines. If you want them: download the logo packs (Paynow merchant dashboard → marketing/artwork, or each
   brand's media page), put the SVG/PNG files in `design/images/inbox/payment-logos/` and the next build session will add them. Nothing
   is blocked without them.
+- [ ] **Paynow card tokenization approval, for saved cards and automatic card charges (2026-11-11).** Saved cards are built and
+  tested (P6.3e), but Paynow must approve tokenization for the merchant account first. Live check from this build in test mode with
+  Paynow's official test tokens: Paynow answered "You are not permitted to tokenize payment instruments" (card entry with
+  `tokenize=true`), "The specified ID does not have any ACTIVE 'vmc' payment method" and "The use of tokenized transactions is not
+  permitted for your merchant" (saved-card payments). Cards still work today through the secure card window, just without saving.
+  Owner action: email Paynow support and ask them to (1) enable tokenization ("tokenize payment instruments") and (2) activate the
+  `vmc` and `zimswitch` express methods for the USD integration (and the ZWG one if you add it). When Paynow confirms: sign in as
+  Super Admin → Admin → Payments → Gateways → edit the Paynow account → switch on **Saved cards (card tokenization)** → Save. Then
+  ask the next build session to re-run the live token check (scratch script in PROGRESS.md P6.3e).

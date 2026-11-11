@@ -2,6 +2,15 @@
 
 All notable changes to this package. Versions follow semver; the interface is still settling before 1.0.
 
+## 0.4.0 — 2026-11-11
+
+- Card tokenization (docs/06 §3b): `InitiateInput.tokenize` (redirect card entry returns a reusable token) and
+  `InitiateInput.cardToken` (saved-card express payment); `StatusResult.cardToken` (token, expiry, scheme, brand, last 4),
+  server-only and never in `raw`. Paynow: `tokenize=true`, `method=vmc|zimswitch` + `token` + `merchanttrace`,
+  `tokenexpiry` (D-MMM-YYYY) parsed, re-tokenized token read from every paid status; only when the account option
+  `tokenizationEnabled` is set. Mock: same, with Paynow-style test tokens (…44444444 refused, …33333333 cancelled after
+  30 s, …22222222 paid after 30 s).
+
 ## 0.3.0 — 2026-11-11
 
 - PesePay adapter (`createPesepayProvider`): AES-256-CBC envelope (matches the docs' Node reference byte for byte),

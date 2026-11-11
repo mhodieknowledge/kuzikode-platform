@@ -79,6 +79,16 @@ export const payInvoiceSchema = z
   .strict();
 export type PayInvoiceInput = z.infer<typeof payInvoiceSchema>;
 
+const savedCardId = z.string().regex(/^spm_[A-Za-z0-9]{8,40}$/, 'Choose a saved card.');
+
+/** Signed-in portal payers may also pay with a saved card or save a new one (docs/06 §3b). Public links may not. */
+export const portalPayInvoiceSchema = payInvoiceSchema
+  .extend({ savedCardId: savedCardId.optional(), saveCard: z.boolean().optional() })
+  .strict();
+
+/** Portal: "Charge my saved card automatically for this plan" (cardId) or stop it (null). */
+export const autoChargeSchema = z.object({ cardId: savedCardId.nullable() }).strict();
+
 /** The public invoice link also needs the Turnstile check (docs/06 §3b). */
 export const publicPayInvoiceSchema = payInvoiceSchema.extend({ turnstileToken: z.string().min(1).max(2048) }).strict();
 
@@ -114,6 +124,8 @@ export const paymentAccountUpdateSchema = z
     enabledMethods: z.array(methodCode).max(20),
     enabled: z.boolean(),
     statusNote: z.string().trim().max(300).nullable(),
+    /** Saved cards: switch on only once the gateway has approved card tokenization (docs/06 §3b rule 6). */
+    tokenizationEnabled: z.boolean().optional(),
   })
   .strict();
 export type PaymentAccountUpdate = z.infer<typeof paymentAccountUpdateSchema>;

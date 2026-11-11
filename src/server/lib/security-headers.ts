@@ -3,6 +3,24 @@ export type AppEnvName = 'development' | 'staging' | 'production';
 export interface CspOptions {
   /** Extra origins allowed as form targets (e.g. a routed gateway's card hand-off). */
   formActionOrigins?: string[];
+  /** Cross-Origin-Opener-Policy for this response (default `same-origin`; see `openerPolicyFor`). */
+  openerPolicy?: OpenerPolicy;
+}
+
+export type OpenerPolicy = 'same-origin' | 'same-origin-allow-popups' | 'unsafe-none';
+
+/**
+ * COOP per page (docs/06 §3b card window). Everything is `same-origin`, except: the checkout pages open the gateway's card
+ * window as a popup and need to hear back from it (`same-origin-allow-popups`); the page the card window lands on
+ * (`/pay/card-return`) and the mock gateway's card page stand in for a third-party page inside that popup
+ * (`unsafe-none`), so the popup keeps its link to the checkout and can close itself. Those pages show no private data
+ * beyond the attempt status the signed link already opens.
+ */
+export function openerPolicyFor(pathname: string): OpenerPolicy {
+  if (pathname === '/pay/card-return' || pathname.startsWith('/dev/mock-checkout/')) return 'unsafe-none';
+  if (/^\/pay\/[A-Za-z0-9_-]{20,100}$/.test(pathname) || /^\/portal\/invoices\/[^/]+\/pay$/.test(pathname))
+    return 'same-origin-allow-popups';
+  return 'same-origin';
 }
 
 /**
@@ -33,7 +51,7 @@ export function securityHeaders(appEnv: AppEnvName, opts: CspOptions = {}): Reco
     'X-Content-Type-Options': 'nosniff',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
     'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-    'Cross-Origin-Opener-Policy': 'same-origin',
+    'Cross-Origin-Opener-Policy': opts.openerPolicy ?? 'same-origin',
     'X-Frame-Options': 'DENY',
   };
   if (appEnv === 'production') headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains';

@@ -3,6 +3,7 @@ import { ProviderError } from '../src/errors';
 import {
   createPaynowProvider,
   mapPaynowStatus,
+  parsePaynowDate,
   parsePaynowDateTime,
   parsePaynowMessage,
   paynowHash,
@@ -104,7 +105,8 @@ interface Sent {
 
 function fakePaynow(opts: { key?: string } = {}) {
   const key = opts.key ?? KEY;
-  const state = new Map<string, { status: string; amount: string; reference: string; paynowref: string }>();
+  type T = { status: string; amount: string; reference: string; paynowref: string; tokenize?: boolean };
+  const state = new Map<string, T>();
   const sent: Sent[] = [];
   let seq = 9000;
   const reply = async (fields: [string, string][]) => {
@@ -114,13 +116,21 @@ function fakePaynow(opts: { key?: string } = {}) {
     );
     return [...fields, ['hash', hash] as [string, string]].map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
   };
-  const statusMsg = (t: { status: string; amount: string; reference: string; paynowref: string }) =>
+  const statusMsg = (t: T) =>
     reply([
       ['reference', t.reference],
       ['paynowreference', t.paynowref],
       ['amount', t.amount],
       ['status', t.status],
       ['pollurl', `https://www.paynow.co.zw/Interface/CheckPayment/?guid=${t.paynowref}`],
+      ...((t.tokenize && t.status === 'Paid'
+        ? [
+            ['token', `{11111111-2222-3333-4444-${t.paynowref.padStart(12, '0')}}`],
+            ['tokenexpiry', '31-May-2027'],
+            ['paymentchannel', 'Visa'],
+            ['paymentinstrument', '411111******1111'],
+          ]
+        : []) as [string, string][]),
     ]);
   const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input);
@@ -130,9 +140,16 @@ function fakePaynow(opts: { key?: string } = {}) {
     if (url.endsWith('/interface/initiatetransaction') || url.endsWith('/interface/remotetransaction')) {
       if (!(await verifyPaynowMessage(msg, KEY))) return new Response('status=Error&error=Invalid+hash');
       if (msg.get('amount') === '0.00') return new Response('status=Error&error=Invalid+amount+field');
-      if (msg.get('phone') === '0774444444') return new Response('status=Error&error=Insufficient+balance');
+      if (msg.get('phone') === '0774444444' || msg.get('token')?.includes('44444444'))
+        return new Response('status=Error&error=Insufficient+balance');
       const paynowref = String(++seq);
-      const t = { status: 'Created', amount: msg.get('amount')!, reference: msg.get('reference')!, paynowref };
+      const t: T = {
+        status: 'Created',
+        amount: msg.get('amount')!,
+        reference: msg.get('reference')!,
+        paynowref,
+        tokenize: msg.get('tokenize') === 'true' || !!msg.get('token'),
+      };
       state.set(paynowref, t);
       const poll = `https://www.paynow.co.zw/Interface/CheckPayment/?guid=${paynowref}`;
       if (url.endsWith('initiatetransaction'))
@@ -325,6 +342,93 @@ describe('Paynow adapter', () => {
     expect((await p.checkPaymentStatus(config, { pollUrl: res.pollUrl! })).status).toBe('pending');
     const cb = await p.parseCallback(config, { headers: new Headers(), body: 'hash=ABC', contentType: '' });
     expect(cb.authentic).toBe(false);
+  });
+
+  it('tokenized card entry: tokenize=true only when enabled; the paid status carries the token (never in raw)', async () => {
+    const fake = fakePaynow();
+    const p = createPaynowProvider({ fetch: fake.fetch });
+    const card = input({ flow: 'redirect', methodCode: 'card', phone: undefined, tokenize: true });
+    await p.initiatePayment(config, card);
+    expect(parsePaynowMessage(fake.sent[0]!.body).get('tokenize')).toBeUndefined();
+    const tok = { ...config, options: { ...config.options, tokenizationEnabled: true } };
+    const res = await p.initiatePayment(tok, { ...card, merchantReference: 'att_TOK' });
+    const sent = parsePaynowMessage(fake.sent[1]!.body);
+    expect(sent.pairs.map(([k]) => k)).toEqual([
+      'id',
+      'reference',
+      'amount',
+      'additionalinfo',
+      'returnurl',
+      'resulturl',
+      'authemail',
+      'tokenize',
+      'status',
+      'hash',
+    ]);
+    expect(sent.get('tokenize')).toBe('true');
+    const pending = await p.checkPaymentStatus(tok, { pollUrl: res.pollUrl! });
+    expect(pending.cardToken).toBeUndefined();
+    fake.state.get(res.providerReference!)!.status = 'Paid';
+    const paid = await p.checkPaymentStatus(tok, { pollUrl: res.pollUrl! });
+    expect(paid.cardToken).toEqual({
+      token: `{11111111-2222-3333-4444-${res.providerReference!.padStart(12, '0')}}`,
+      expiresAt: '2027-05-31T23:59:59.000Z',
+      scheme: 'vmc',
+      brand: 'Visa',
+      last4: '1111',
+    });
+    expect(JSON.stringify(paid.raw)).not.toContain('11111111-2222');
+    expect(JSON.stringify(paid.raw)).not.toContain('411111');
+  });
+
+  it('saved card: express vmc + token + merchanttrace; refused without tokenization; insufficient → declined', async () => {
+    const fake = fakePaynow();
+    const p = createPaynowProvider({ fetch: fake.fetch });
+    const saved = input({
+      methodCode: 'card',
+      phone: undefined,
+      cardToken: { token: '{11111111-1111-1111-1111-111111111111}', scheme: 'vmc' },
+    });
+    await expect(p.initiatePayment(config, saved)).rejects.toMatchObject({ code: 'not_supported' });
+    const tok = { ...config, options: { ...config.options, tokenizationEnabled: true } };
+    const res = await p.initiatePayment(tok, saved);
+    expect(res).toMatchObject({ kind: 'express_pending', customerInstructions: expect.stringContaining('saved card') });
+    const sent = parsePaynowMessage(fake.sent[0]!.body);
+    expect(fake.sent[0]!.url).toBe('https://www.paynow.co.zw/interface/remotetransaction');
+    expect(sent.pairs.map(([k]) => k)).toEqual([
+      'id',
+      'reference',
+      'amount',
+      'additionalinfo',
+      'returnurl',
+      'resulturl',
+      'authemail',
+      'method',
+      'token',
+      'merchanttrace',
+      'status',
+      'hash',
+    ]);
+    expect(sent.get('method')).toBe('vmc');
+    expect(sent.get('merchanttrace')).toBe('att_01TEST');
+    expect(JSON.stringify(res)).not.toContain('11111111-1111');
+    await expect(
+      p.initiatePayment(tok, {
+        ...saved,
+        cardToken: { token: '{44444444-4444-4444-4444-444444444444}', scheme: 'zimswitch' },
+      }),
+    ).rejects.toMatchObject({ code: 'declined' });
+    expect(parsePaynowMessage(fake.sent[1]!.body).get('method')).toBe('zimswitch');
+    await expect(p.initiatePayment(tok, { ...saved, flow: 'redirect' })).rejects.toMatchObject({
+      code: 'invalid_request',
+    });
+  });
+
+  it('token expiry format D-MMM-YYYY', () => {
+    expect(parsePaynowDate('31-Dec-2027')).toBe('2027-12-31T23:59:59.000Z');
+    expect(parsePaynowDate('1-Feb-2027')).toBe('2027-02-01T23:59:59.000Z');
+    expect(parsePaynowDate('31-Feb-2027')).toBeNull();
+    expect(parsePaynowDate('2027-12-31')).toBeNull();
   });
 
   it('declares its secrets and honest capabilities', () => {

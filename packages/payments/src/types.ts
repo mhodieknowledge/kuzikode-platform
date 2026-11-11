@@ -60,6 +60,31 @@ export interface InitiateInput {
   methodCode?: string;
   phone?: string;
   customer?: { email?: string; phone?: string; name?: string };
+  /**
+   * Redirect card entry only: ask the gateway to return a reusable card token in the status (needs
+   * `capabilities.tokenization`). Ignored by adapters without tokenization.
+   */
+  tokenize?: boolean;
+  /** Express payment with a saved card (needs `capabilities.tokenization`): the token from an earlier status. */
+  cardToken?: { token: string; scheme: CardScheme };
+}
+
+/** The card network family a gateway charges a token through (Paynow: `vmc` = Visa/Mastercard, `zimswitch`). */
+export type CardScheme = 'vmc' | 'zimswitch';
+
+/**
+ * A reusable card token from a verified status (tokenized payments only). SERVER-ONLY: the app encrypts the token at
+ * rest and never logs it or sends it to a browser. Never part of `raw`.
+ */
+export interface CardTokenResult {
+  token: string;
+  /** ISO date the token stops working (null when the gateway did not say). */
+  expiresAt: string | null;
+  scheme: CardScheme;
+  /** e.g. "Visa", "Mastercard", "Zimswitch". */
+  brand: string | null;
+  /** Last four digits only. */
+  last4: string | null;
 }
 
 export type InitiateResult =
@@ -108,6 +133,8 @@ export interface StatusResult {
   amountMinor?: number;
   currency?: string;
   failureReason?: string;
+  /** Present when the payment returned a reusable card token (see `CardTokenResult`). */
+  cardToken?: CardTokenResult;
   raw: Redacted;
 }
 

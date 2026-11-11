@@ -130,4 +130,49 @@ describe('mock gateway simulation', () => {
       code: 'misconfigured',
     });
   });
+
+  it('tokenization: a tokenized card payment returns a token once paid; saved tokens pay, cancel or are refused', async () => {
+    const { provider, tick } = setup();
+    const tok = { ...config, options: { ...config.options, tokenizationEnabled: true } };
+    expect(provider.capabilities(config).tokenization).toBe(false);
+    expect(provider.capabilities(tok).tokenization).toBe(true);
+    const card = { ...express(), flow: 'redirect' as const, methodCode: 'card', tokenize: true };
+    // Without tokenization the payment works but returns no token.
+    const plain = await provider.initiatePayment(config, card);
+    await provider.settle(config, plain.providerReference!, 'succeeded');
+    expect((await provider.checkPaymentStatus(config, { pollUrl: plain.pollUrl! })).cardToken).toBeUndefined();
+    const r = await provider.initiatePayment(tok, { ...card, merchantReference: 'att_tok1' });
+    expect((await provider.checkPaymentStatus(tok, { pollUrl: r.pollUrl! })).cardToken).toBeUndefined();
+    await provider.settle(tok, r.providerReference!, 'succeeded');
+    const paid = await provider.checkPaymentStatus(tok, { pollUrl: r.pollUrl! });
+    expect(paid.cardToken).toMatchObject({ token: `mocktok_${r.providerReference}`, scheme: 'vmc', last4: '4242' });
+    expect(JSON.stringify(paid.raw)).not.toContain('mocktok_');
+
+    const saved = (token: string, ref: string) => ({
+      ...express({ merchantReference: ref }),
+      methodCode: 'card',
+      phone: undefined,
+      cardToken: { token, scheme: 'vmc' as const },
+    });
+    await expect(provider.initiatePayment(config, saved(paid.cardToken!.token, 'att_s0'))).rejects.toMatchObject({
+      code: 'not_supported',
+    });
+    const s1 = await provider.initiatePayment(tok, saved(paid.cardToken!.token, 'att_s1'));
+    const s2 = await provider.initiatePayment(tok, saved('mocktok_33333333', 'att_s2'));
+    expect(JSON.stringify(s1)).not.toContain('mocktok_');
+    tick(3);
+    expect((await provider.checkPaymentStatus(tok, { pollUrl: s2.pollUrl! })).status).toBe('pending');
+    tick(27);
+    const s1Paid = await provider.checkPaymentStatus(tok, { pollUrl: s1.pollUrl! });
+    expect(s1Paid.status).toBe('succeeded');
+    // Re-tokenized: a new token replaces the old one.
+    expect(s1Paid.cardToken?.token).toBe(`mocktok_${s1.providerReference}`);
+    expect((await provider.checkPaymentStatus(tok, { pollUrl: s2.pollUrl! })).status).toBe('cancelled');
+    await expect(provider.initiatePayment(tok, saved('mocktok_44444444', 'att_s3'))).rejects.toMatchObject({
+      code: 'declined',
+    });
+    await expect(provider.initiatePayment(tok, saved('not a token', 'att_s4'))).rejects.toMatchObject({
+      code: 'invalid_request',
+    });
+  });
 });

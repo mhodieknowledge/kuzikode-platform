@@ -383,6 +383,34 @@ const defs = {
         ],
       }),
   },
+  card_charge_failed: {
+    schema: z.object({ name: z.string(), number: z.string(), amount: z.string(), link: url }),
+    render: (b: Brand, d: { name: string; number: string; amount: string; link: string }) =>
+      renderEmail(b, {
+        subject: `We could not charge your saved card for invoice ${d.number}`,
+        preheader: `${d.amount} is still due on invoice ${d.number}.`,
+        heading: 'Your automatic card payment did not go through',
+        blocks: [
+          { kind: 'p', text: `Hi ${d.name},` },
+          {
+            kind: 'p',
+            text: `We tried to charge your saved card for invoice ${d.number}, but the payment was not completed. Nothing was taken from your card, and the invoice is still open.`,
+          },
+          {
+            kind: 'kv',
+            rows: [
+              ['Invoice', d.number],
+              ['Amount due', d.amount],
+            ],
+          },
+          { kind: 'button', text: 'Pay invoice', href: d.link },
+          {
+            kind: 'small',
+            text: 'You can pay with another card, a mobile wallet or a bank transfer. If your card has expired, remove it in the client portal and save a new one.',
+          },
+        ],
+      }),
+  },
   payment_receipt: {
     schema: z.object({
       name: z.string(),

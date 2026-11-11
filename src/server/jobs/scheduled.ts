@@ -7,6 +7,7 @@ import { applyApplicationRetention, autoClosePostings } from '../modules/careers
 import { sendFollowUpReminders } from '../modules/leads/admin';
 import { dispatchNotificationEmails } from '../modules/notifications';
 import { billSubscriptions, flagAtRisk, sendRenewalReminders } from '../modules/subscriptions';
+import { autoChargeDueInvoices } from '../modules/payments/autocharge';
 import type { QueueMessageBody } from './outbox';
 
 export const CRON_FREQUENT = '*/5 * * * *';
@@ -94,6 +95,8 @@ export const SCHEDULE: Record<string, [name: string, task: ScheduledTask][]> = {
   [CRON_MORNING]: [
     // Business hours: auto-issued subscription invoices and client renewal emails go out in the morning.
     ['subscription-billing', (ctx) => billSubscriptions(ctx)],
+    // After billing: subscription invoices due today are charged to the client's saved card where they consented.
+    ['subscription-auto-charge', (ctx) => autoChargeDueInvoices(ctx)],
     ['invoice-reminders', (ctx) => sendReminders(ctx)],
     ['renewal-reminders', (ctx) => sendRenewalReminders(ctx)],
   ],

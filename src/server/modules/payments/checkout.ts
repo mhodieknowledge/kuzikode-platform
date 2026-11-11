@@ -13,6 +13,7 @@ import type { BankTransferNoticeInput } from '../../../shared/schemas/payments';
 import { getSettings, settingText } from '../cms';
 import { notifyStaffWithPermission } from '../notifications/service';
 import { invoicePaymentOptions, type PaymentOptions } from './orchestration';
+import { checkoutCards, type SavedCardView } from './saved-cards';
 
 const SUMMARY_LINES = 5;
 
@@ -40,10 +41,13 @@ export interface CheckoutView {
   bankTransfer: { details: string; reference: string } | null;
   /** Mobile number to suggest for wallet payments (the caller's own or the invoice's client), local format. */
   phone: string | null;
+  /** Signed-in portal payers only (docs/06 §3b): usable saved cards, and whether a new card may be saved. */
+  cards: { saved: SavedCardView[]; canSave: boolean };
 }
 
 interface InvoiceRow {
   id: string;
+  client_id: string;
   number: string | null;
   status: string;
   currency: string;
@@ -63,7 +67,7 @@ export async function checkoutView(
 ): Promise<CheckoutView> {
   const inv = await ctx.db
     .prepare(
-      `SELECT id, number, status, currency, total_minor, amount_paid_minor, amount_credited_minor, balance_minor,
+      `SELECT id, client_id, number, status, currency, total_minor, amount_paid_minor, amount_credited_minor, balance_minor,
          client_snapshot FROM invoices WHERE id = ? AND status <> 'draft'`,
     )
     .bind(invoiceId)
@@ -78,6 +82,10 @@ export async function checkoutView(
   ]);
   const open = OPEN.includes(inv.status) && inv.balance_minor > 0;
   const [options, settings] = await Promise.all([invoicePaymentOptions(ctx, inv.id), open ? getSettings(ctx) : null]);
+  const cards =
+    open && options.methods.some((m) => m.code === 'card')
+      ? await checkoutCards(ctx, { clientId: inv.client_id, currency: inv.currency }, { portalUser: !!opts.userId })
+      : { savedCards: [], canSaveCard: false };
   const user = opts.userId
     ? await ctx.db.prepare('SELECT phone FROM users WHERE id = ?').bind(opts.userId).first<{ phone: string | null }>()
     : null;
@@ -104,6 +112,7 @@ export async function checkoutView(
     testMode: options.testMode,
     bankTransfer: open && bank ? { details: bank, reference: inv.number ?? inv.id } : null,
     phone: normalizeZimPhone(user?.phone ?? '') ?? normalizeZimPhone(client.phone ?? ''),
+    cards: { saved: cards.savedCards, canSave: cards.canSaveCard },
   };
 }
 

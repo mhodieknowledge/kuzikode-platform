@@ -37,3 +37,13 @@ export async function verifyPaymentReturn(ctx: RequestContext, attemptId: string
   if (!/^[A-Za-z0-9_-]{1,64}$/.test(attemptId) || !looksLikeToken(signature)) return false;
   return timingSafeEqualString(await returnSignature(ctx, attemptId), signature);
 }
+
+/**
+ * Where the gateway's card window returns (`/pay/card-return?attempt=<id>&t=<sig>`, docs/06 §3b): the page tells the
+ * checkout that opened the window and closes itself, or shows the status when it was opened in the same tab. Same
+ * signature as the return link.
+ */
+export async function cardReturnUrl(ctx: RequestContext, attemptId: string): Promise<string> {
+  const q = new URLSearchParams({ attempt: attemptId, t: await returnSignature(ctx, attemptId) });
+  return `${ctx.config.siteOrigin}/pay/card-return?${q}`;
+}

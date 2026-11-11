@@ -19,7 +19,13 @@ import * as invoices from '../invoices/portal';
 import * as payments from '../payments/portal';
 import * as orchestration from '../payments/orchestration';
 import { idempotencyKey } from '../payments/routes';
-import { attemptOtpSchema, bankTransferNoticeSchema, payInvoiceSchema } from '../../../shared/schemas/payments';
+import {
+  attemptOtpSchema,
+  autoChargeSchema,
+  bankTransferNoticeSchema,
+  portalPayInvoiceSchema,
+} from '../../../shared/schemas/payments';
+import * as cards from '../payments/saved-cards';
 import { reportBankTransfer } from '../payments/checkout';
 import * as projects from '../projects/portal';
 import * as quotations from '../quotations/service';
@@ -184,10 +190,12 @@ export function portalRoutes() {
     const ctx = c.var.ctx;
     await enforce(ctx, { key: `pay-start:user:${ctx.actor.userId}`, limit: 30, windowSeconds: 3600 });
     const invoiceId = await invoices.portalInvoiceId(ctx, c.req.param('id'));
-    const body = await jsonBody(c, payInvoiceSchema);
+    const body = await jsonBody(c, portalPayInvoiceSchema);
     const start = await orchestration.initiateInvoicePayment(ctx, invoiceId, {
       methodCode: body.methodCode,
       phone: body.phone,
+      savedCardId: body.savedCardId,
+      saveCard: body.saveCard,
       idempotencyKey: idempotencyKey(c),
     });
     const base = `/api/v1/portal/payment-attempts/${encodeURIComponent(start.attemptId)}`;
@@ -208,6 +216,22 @@ export function portalRoutes() {
     await enforce(ctx, { key: `pay-notice:user:${ctx.actor.userId}`, limit: 10, windowSeconds: 3600 });
     const invoiceId = await invoices.portalInvoiceId(ctx, c.req.param('id'));
     return c.json({ data: await reportBankTransfer(ctx, invoiceId, await jsonBody(c, bankTransferNoticeSchema)) });
+  });
+
+  // Saved cards (docs/06 §3b rule 4): masked number + expiry only; the token never leaves the server.
+  r.get('/saved-cards', async (c) => c.json({ data: await cards.listPortalSavedCards(c.var.ctx) }));
+  r.post('/saved-cards/:id/default', async (c) => {
+    await cards.setDefaultCard(c.var.ctx, c.req.param('id'));
+    return c.json({ data: { ok: true } });
+  });
+  r.delete('/saved-cards/:id', async (c) => {
+    await cards.removeCard(c.var.ctx, c.req.param('id'));
+    return c.json({ data: { ok: true } });
+  });
+  r.put('/services/subscriptions/:id/auto-charge', async (c) => {
+    const { cardId } = await jsonBody(c, autoChargeSchema);
+    await cards.setSubscriptionAutoCharge(c.var.ctx, c.req.param('id'), cardId);
+    return c.json({ data: { ok: true } });
   });
 
   r.get('/projects', async (c) => c.json({ data: await projects.listPortalProjects(c.var.ctx) }));

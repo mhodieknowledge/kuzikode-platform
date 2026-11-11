@@ -42,6 +42,7 @@ const id = encodeURIComponent(invoiceId);
       methods={view.methods}
       bankTransfer={view.bankTransfer}
       phone={view.phone}
+      cards={view.cards}
       testMode={view.testMode}
       endpoints={{
         pay: `/api/v1/portal/invoices/${id}/pay`,

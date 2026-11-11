@@ -1,6 +1,6 @@
 {
   "name": "@kuzikode/payments",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Gateway-independent payment provider adapters (Paynow, PesePay, mock) for Workers and Node 18+.",
   "type": "module",
   "private": true,

@@ -159,4 +159,4 @@ export const E2E_CHECKOUT_USER = {
 } as const;
 
 /** Invoice ids of this run's checkout fixtures (global-setup creates them; a paid invoice can't be paid again). */
-export const checkoutInvoiceId = (run: string, slot: 'a' | 'b' | 'c' | 'd') => `inv_e2e_co_${run}_${slot}`;
+export const checkoutInvoiceId = (run: string, slot: 'a' | 'b' | 'c' | 'd' | 'e' | 'f') => `inv_e2e_co_${run}_${slot}`;

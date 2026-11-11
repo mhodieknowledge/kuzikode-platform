@@ -1,7 +1,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { env } from 'cloudflare:workers';
 import { createContext } from './server/context';
-import { isPrivatePath, PRIVATE_HEADERS, securityHeaders } from './server/lib/security-headers';
+import { isPrivatePath, openerPolicyFor, PRIVATE_HEADERS, securityHeaders } from './server/lib/security-headers';
 import { resolveSession } from './server/modules/auth/service';
 
 /** Builds the request context for pages and applies security / cache headers to every page response. */
@@ -30,7 +30,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
     res.headers.set('Cache-Control', 'private, no-store');
     res.headers.set('X-Robots-Tag', 'noindex, nofollow');
   }
-  const headers: Record<string, string> = { ...securityHeaders(ctx.config.appEnv), 'X-Request-Id': ctx.requestId };
+  const headers: Record<string, string> = {
+    ...securityHeaders(ctx.config.appEnv, { openerPolicy: openerPolicyFor(context.url.pathname) }),
+    'X-Request-Id': ctx.requestId,
+  };
   if (isPrivatePath(context.url.pathname)) Object.assign(headers, PRIVATE_HEADERS);
   for (const [k, v] of Object.entries(headers)) res.headers.set(k, v);
   return res;

@@ -3,6 +3,8 @@ import PortalLayout from '../../layouts/PortalLayout.astro';
 import { CancellationRequest } from '../../components/portal/SupportForms';
 import { loadPortalPage } from '../../server/lib/portal-page';
 import { listPortalServices } from '../../server/modules/subscriptions/portal';
+import { portalAutoChargeOptions } from '../../server/modules/payments';
+import { AutoCharge } from '../../components/portal/SavedCards';
 import { formatMoney } from '../../shared/money';
 import { formatLongDate } from '../../shared/service-display';
 
@@ -11,6 +13,10 @@ const page = await loadPortalPage(ctx, Astro.request, { area: 'finance' });
 if (page instanceof Response) return page;
 const groups = await listPortalServices(ctx);
 const multiClient = groups.length > 1;
+const autoCharge = await portalAutoChargeOptions(
+  ctx,
+  groups.flatMap((g) => g.subscriptions.map((s) => s.id)),
+);
 const empty = groups.every((g) => g.subscriptions.length === 0 && g.assets.length === 0);
 const section = 'rounded-lg border border-line bg-surface p-5 md:p-6';
 ---
@@ -46,7 +52,16 @@ const section = 'rounded-lg border border-line bg-surface p-5 md:p-6';
                       {s.paused ? 'Paused' : s.nextBillingDate ? `Next bill ${formatLongDate(s.nextBillingDate)}` : ''}
                     </p>
                   </div>
-                  <div class="md:max-w-sm md:text-right">
+                  <div class="flex flex-col gap-3 md:max-w-sm md:items-end md:text-right">
+                    {autoCharge[s.id]?.cards.length ? (
+                      <AutoCharge
+                        client:visible
+                        subscriptionId={s.id}
+                        description={s.description}
+                        cards={autoCharge[s.id]!.cards}
+                        current={autoCharge[s.id]!.current}
+                      />
+                    ) : null}
                     {s.cancellationRequested ? (
                       <p class="text-sm font-medium text-ink-800">
                         Cancellation requested.{' '}

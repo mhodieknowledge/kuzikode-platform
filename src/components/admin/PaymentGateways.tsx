@@ -22,6 +22,7 @@ interface Account {
   enabledMethods: string[];
   enabled: boolean;
   statusNote: string | null;
+  tokenizationEnabled: boolean;
   usable: boolean;
   credentials: { fields: { name: string; present: boolean }[]; complete: boolean };
   available: { currencies: string[]; methods: Method[] };
@@ -91,6 +92,8 @@ export function PaymentGateways({ initial, currencies }: { initial: GatewayConfi
               <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1 text-sm [&_dd]:break-words">
                 <dt className="text-ink-600">Currencies</dt>
                 <dd>{(a.currencies.length ? a.currencies : a.available.currencies).join(', ')}</dd>
+                <dt className="text-ink-600">Saved cards</dt>
+                <dd>{a.tokenizationEnabled ? 'On' : 'Off'}</dd>
                 <dt className="text-ink-600">Methods</dt>
                 <dd>
                   {(a.enabledMethods.length
@@ -211,6 +214,7 @@ function AccountDialog({
   const [methods, setMethods] = useState<string[]>(account?.enabledMethods ?? []);
   const [enabled, setEnabled] = useState(account?.enabled ?? true);
   const [note, setNote] = useState(account?.statusNote ?? '');
+  const [tokenization, setTokenization] = useState(account?.tokenizationEnabled ?? false);
   // What the chosen gateway offers (taken from any account of that gateway, or the account itself).
   const offer = account?.available ??
     config.accounts.find((x) => x.providerKey === providerKey)?.available ?? { currencies, methods: [] };
@@ -224,6 +228,7 @@ function AccountDialog({
         enabledMethods: methods,
         enabled,
         statusNote: note.trim() ? note.trim() : null,
+        tokenizationEnabled: tokenization,
       };
       if (mode === 'create')
         await apiFetch('/api/v1/admin/payments/config/accounts', { body: { ...body, providerKey, secretPrefix } });
@@ -309,6 +314,11 @@ function AccountDialog({
             </fieldset>
           ) : null}
           <Switch label="Enabled" checked={enabled} onCheckedChange={setEnabled} />
+          <Switch label="Saved cards (card tokenization)" checked={tokenization} onCheckedChange={setTokenization} />
+          <p className="-mt-2 text-[13px] text-ink-600">
+            Switch on only after the gateway has approved card tokenization for this account. Clients can then save a
+            card in the portal and pay with it on our checkout, and opt in to automatic charges for their plans.
+          </p>
           <Field label="Note for the team" error={a.errors['statusNote']}>
             <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} maxLength={300} />
           </Field>

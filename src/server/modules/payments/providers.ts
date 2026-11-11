@@ -31,6 +31,7 @@ export function d1MockStore(ctx: RequestContext): MockStore {
         scripted: NormalizedStatus | null;
         settle_at: string | null;
         otp: string | null;
+        tokenize: number;
         created_at: string;
       }>();
       if (!r) return null;
@@ -48,6 +49,7 @@ export function d1MockStore(ctx: RequestContext): MockStore {
         scripted: r.scripted,
         settleAt: r.settle_at,
         otpReference: r.otp,
+        tokenize: r.tokenize === 1,
         createdAt: r.created_at,
       } satisfies MockPaymentState;
     },
@@ -55,8 +57,8 @@ export function d1MockStore(ctx: RequestContext): MockStore {
       await ctx.db
         .prepare(
           `INSERT INTO mock_provider_state (reference, account_id, merchant_reference, amount_minor, paid_minor, currency, status,
-             method_code, result_url, return_url, scripted, settle_at, otp, created_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             method_code, result_url, return_url, scripted, settle_at, otp, tokenize, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
            ON CONFLICT(reference) DO UPDATE SET status = excluded.status, paid_minor = excluded.paid_minor,
              scripted = excluded.scripted, settle_at = excluded.settle_at, otp = excluded.otp,
              updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')`,
@@ -75,6 +77,7 @@ export function d1MockStore(ctx: RequestContext): MockStore {
           s.scripted,
           s.settleAt,
           s.otpReference,
+          s.tokenize ? 1 : 0,
           s.createdAt,
         )
         .run();

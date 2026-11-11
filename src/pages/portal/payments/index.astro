@@ -2,7 +2,8 @@
 import PortalLayout from '../../../layouts/PortalLayout.astro';
 import StatusPill from '../../../components/portal/StatusPill.astro';
 import { loadPortalPage } from '../../../server/lib/portal-page';
-import { listPortalPayments } from '../../../server/modules/payments';
+import { listPortalPayments, listPortalSavedCards } from '../../../server/modules/payments';
+import { SavedCards } from '../../../components/portal/SavedCards';
 import { formatMoney } from '../../../shared/money';
 import { paymentMethodLabel } from '../../../shared/payment-methods';
 import { formatLongDate } from '../../../shared/service-display';
@@ -10,7 +11,8 @@ import { formatLongDate } from '../../../shared/service-display';
 const { ctx } = Astro.locals;
 const page = await loadPortalPage(ctx, Astro.request, { area: 'finance' });
 if (page instanceof Response) return page;
-const payments = await listPortalPayments(ctx);
+const [payments, cards] = await Promise.all([listPortalPayments(ctx), listPortalSavedCards(ctx)]);
+const multiClient = new Set(cards.map((c) => c.clientId)).size > 1;
 const STATUS = {
   completed: { label: 'Received', tone: 'success' },
   partially_refunded: { label: 'Part refunded', tone: 'warning' },
@@ -60,4 +62,18 @@ const STATUS = {
       ))}
     </ul>
   )}
+  {cards.length ? (
+    <section
+      class="mt-8 max-w-3xl rounded-lg border border-line bg-surface px-5 pt-5 pb-1 md:px-6"
+      aria-labelledby="cards-h"
+    >
+      <h2 id="cards-h" class="text-lg font-semibold">
+        Saved cards
+      </h2>
+      <p class="mt-1 text-sm text-ink-600">
+        Cards you saved when paying. We keep only a secure token from our payment partner, never your card number.
+      </p>
+      <SavedCards client:load cards={cards} showClient={multiClient} />
+    </section>
+  ) : null}
 </PortalLayout>

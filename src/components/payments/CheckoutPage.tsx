@@ -3,6 +3,11 @@
  * from the page's `CheckoutView` (methods of the routed account) and the attempt views our API returns: no gateway
  * names or gateway-specific branches. Every gateway detail (prompt text, wallet code, OTP step, card page) arrives as
  * normalized fields.
+ *
+ * Cards (docs/06 §3b): a saved card is charged right here (express). A new card is entered once in the gateway's
+ * secure window, opened as a centred popup straight from the click; the checkout stays behind it, polls, and hears back
+ * from `/pay/card-return` (postMessage, plus a BroadcastChannel in case the opener link was lost). If the popup is
+ * blocked or the screen is narrow, the card page opens in this tab and returns to `/pay/card-return`.
  */
 import { CheckCircle2, Clock, CreditCard, Landmark, Smartphone, Wallet, XCircle, type LucideIcon } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type ClipboardEvent, type KeyboardEvent } from 'react';
@@ -18,6 +23,43 @@ export interface CheckoutMethod {
   needs: string[];
 }
 
+/** A saved card as the server shows it: never the token. */
+export interface CheckoutSavedCard {
+  id: string;
+  brand: string;
+  last4: string | null;
+  expiresAt: string | null;
+  isDefault: boolean;
+}
+
+/** The message `/pay/card-return` sends to the checkout that opened the card window. */
+export const CARD_RETURN_MESSAGE = 'kuzikode:card-return';
+export const CARD_RETURN_CHANNEL = 'kuzikode-card-return';
+const CARD_WINDOW = { name: 'kuzikode_card', width: 480, height: 720, minScreen: 640 };
+
+/** Opens (or reuses) the centred card window. Must run inside the click handler, or browsers block it. */
+function openCardWindow(url: string): Window | null {
+  const left = Math.max(0, Math.round(window.screenX + (window.outerWidth - CARD_WINDOW.width) / 2));
+  const top = Math.max(0, Math.round(window.screenY + (window.outerHeight - CARD_WINDOW.height) / 2));
+  try {
+    return window.open(
+      url,
+      CARD_WINDOW.name,
+      `popup=yes,width=${CARD_WINDOW.width},height=${CARD_WINDOW.height},left=${left},top=${top}`,
+    );
+  } catch {
+    return null;
+  }
+}
+
+const cardLabel = (c: CheckoutSavedCard) => (c.last4 ? `${c.brand} •••• ${c.last4}` : c.brand);
+const cardExpiry = (iso: string | null) =>
+  iso
+    ? new Intl.DateTimeFormat('en-GB', { month: '2-digit', year: '2-digit', timeZone: 'Africa/Harare' }).format(
+        new Date(iso),
+      )
+    : null;
+
 export interface CheckoutProps {
   mode: 'public' | 'portal';
   currency: string;
@@ -27,6 +69,8 @@ export interface CheckoutProps {
   methods: CheckoutMethod[];
   bankTransfer: { details: string; reference: string } | null;
   phone: string | null;
+  /** Portal only: saved cards and whether a new card may be saved. */
+  cards?: { saved: CheckoutSavedCard[]; canSave: boolean };
   testMode: boolean;
   endpoints: { pay: string; bankNotice: string };
   /** The invoice page to go back to. */
@@ -70,6 +114,12 @@ const POLL_MS = 3000;
 const WAIT_LIMIT_MS = 10 * 60_000;
 const BANK = 'bank_transfer';
 
+/** Our status endpoint's view of the attempt (null when the request failed; the next poll tries again). */
+const fetchStatus = (url: string) =>
+  apiFetch<{ data: StatusView }>(url)
+    .then((res) => res.data)
+    .catch(() => null);
+
 /** Wall-clock time for the countdown (only ever read in effects and event handlers). */
 const nowMs = () => Date.now();
 
@@ -80,8 +130,11 @@ function methodIcon(m: CheckoutMethod): LucideIcon {
   return needsPhone(m) ? Smartphone : Wallet;
 }
 
-function methodHint(m: CheckoutMethod): string {
-  if (m.flow === 'redirect') return "Enter your card on our payment partner's secure page.";
+function methodHint(m: CheckoutMethod, savedCards: number): string {
+  if (m.flow === 'redirect')
+    return savedCards
+      ? 'Pay with your saved card or add a new one.'
+      : "Enter your card once in our payment partner's secure window.";
   if (m.needs.includes('otp')) return 'We send a one-time code to your phone to confirm.';
   if (needsPhone(m)) return 'Approve the prompt on your phone with your PIN.';
   return 'Get a code to approve in your wallet app.';
@@ -117,6 +170,12 @@ export function CheckoutPage(p: CheckoutProps) {
   const [confirming, setConfirming] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [reset, setReset] = useState(0);
+  const savedCards = p.cards?.saved ?? [];
+  const canSaveCard = !!p.cards?.canSave;
+  const [cardChoice, setCardChoice] = useState<string>(savedCards[0]?.id ?? 'new');
+  const [saveCard, setSaveCard] = useState(false);
+  const [windowClosed, setWindowClosed] = useState(false);
+  const cardWindow = useRef<Window | null>(null);
   const lock = useRef(false);
   const onToken = useCallback((t: string | null) => setToken(t), []);
   const method = options.find((m) => m.code === selected);
@@ -124,22 +183,68 @@ export function CheckoutPage(p: CheckoutProps) {
 
   const waiting = stage === 'waiting';
   const gaveUp = waiting && now - startedAt >= WAIT_LIMIT_MS;
+  const inCardWindow = waiting && attempt?.flow === 'redirect';
 
   // Live status: poll our endpoint every 3 s for up to 10 minutes (the server asks the gateway at most every 5 s).
   useEffect(() => {
     if (!waiting || gaveUp || !attempt?.statusUrl) return;
     const url = attempt.statusUrl;
     const t = window.setTimeout(() => {
-      apiFetch<{ data: StatusView }>(url)
-        .then((res) => {
-          setStatus(res.data);
-          if (res.data.phase !== 'waiting') setStage('done');
+      void fetchStatus(url)
+        .then((d) => {
+          if (!d) return;
+          setStatus(d);
+          if (d.phase !== 'waiting') setStage('done');
         })
-        .catch(() => undefined)
         .finally(() => setPollTick((n) => n + 1));
     }, POLL_MS);
     return () => window.clearTimeout(t);
   }, [waiting, gaveUp, attempt?.statusUrl, pollTick]);
+
+  // The card window reports back when the gateway returns (same origin only), so the result shows at once.
+  useEffect(() => {
+    if (!inCardWindow || !attempt?.statusUrl) return;
+    const url = attempt.statusUrl;
+    const id = attempt.attemptId;
+    const onReturn = (data: unknown) => {
+      const d = data as { type?: unknown; attemptId?: unknown } | null;
+      if (!d || d.type !== CARD_RETURN_MESSAGE || d.attemptId !== id) return;
+      setConfirming(true);
+      void fetchStatus(url).then((s) => {
+        if (!s) return;
+        setStatus(s);
+        if (s.phase !== 'waiting') setStage('done');
+      });
+    };
+    const onMessage = (e: MessageEvent) => {
+      if (e.origin === window.location.origin) onReturn(e.data);
+    };
+    window.addEventListener('message', onMessage);
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel(CARD_RETURN_CHANNEL);
+      channel.onmessage = (e: MessageEvent) => onReturn(e.data);
+    } catch {
+      channel = null;
+    }
+    // Notice when the customer closes the card window without finishing.
+    const watch = window.setInterval(() => {
+      if (cardWindow.current?.closed) setWindowClosed(true);
+    }, 1000);
+    return () => {
+      window.removeEventListener('message', onMessage);
+      channel?.close();
+      window.clearInterval(watch);
+    };
+  }, [inCardWindow, attempt?.statusUrl, attempt?.attemptId]);
+
+  // The result is on our page now: the card window is no longer needed.
+  useEffect(() => {
+    if (stage !== 'waiting' && cardWindow.current && !cardWindow.current.closed) {
+      cardWindow.current.close();
+      cardWindow.current = null;
+    }
+  }, [stage]);
 
   // Countdown tick.
   useEffect(() => {
@@ -160,24 +265,48 @@ export function CheckoutPage(p: CheckoutProps) {
       setErrors({ turnstile: ['Complete the security check and try again.'] });
       return;
     }
+    const isCard = method.flow === 'redirect';
+    const savedCard = isCard ? savedCards.find((c) => c.id === cardChoice) : undefined;
+    // A new card: open the secure window now, from the click (browsers block popups opened later), and point it at
+    // the gateway's card page once we have it. Narrow screens use this tab instead.
+    let win: Window | null = null;
+    if (isCard && !savedCard && window.innerWidth >= CARD_WINDOW.minScreen) {
+      win = openCardWindow('');
+      try {
+        if (win) win.document.title = 'Secure card payment';
+      } catch {
+        // Not ours to touch any more; fine.
+      }
+    }
     lock.current = true;
     setBusy(true);
     let leaving = false;
+    let handedOff = false;
     try {
       const res = await apiFetch<{ data: StartView }>(p.endpoints.pay, {
         body: {
           methodCode: method.code,
           ...(needsPhone(method) ? { phone } : {}),
+          ...(savedCard ? { savedCardId: savedCard.id } : {}),
+          ...(isCard && !savedCard && canSaveCard && saveCard ? { saveCard: true } : {}),
           ...(publicPage ? { turnstileToken: token } : {}),
         },
         idempotencyKey: newIdempotencyKey(),
       });
       const d = res.data;
       if (d.phase === 'waiting' && d.redirectUrl) {
-        // Card entry happens on the gateway's secure page, which sends the customer back to our status page.
-        leaving = true;
-        window.location.assign(d.redirectUrl);
-        return;
+        if (win && !win.closed) {
+          // Card entry in the secure window on top of our checkout, which waits and polls behind it.
+          win.location.href = d.redirectUrl;
+          cardWindow.current = win;
+          handedOff = true;
+          setWindowClosed(false);
+        } else {
+          // Popup blocked or a small screen: the card page opens here and returns to /pay/card-return.
+          leaving = true;
+          window.location.assign(d.redirectUrl);
+          return;
+        }
       }
       setAttempt(d);
       setStatus({ id: d.attemptId, phase: d.phase, message: d.message, payment: null });
@@ -189,12 +318,26 @@ export function CheckoutPage(p: CheckoutProps) {
       if (err instanceof ApiError && Object.keys(err.fields).length) setErrors(err.fields);
       else setFormError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
     } finally {
+      if (win && !handedOff && !leaving && !win.closed) win.close();
       if (!leaving) {
         lock.current = false;
         setBusy(false);
         if (publicPage) setReset((n) => n + 1);
       }
     }
+  }
+
+  function reopenCardWindow() {
+    const url = attempt?.redirectUrl;
+    if (!url) return;
+    const win = window.innerWidth >= CARD_WINDOW.minScreen ? openCardWindow(url) : null;
+    if (!win) {
+      window.location.assign(url);
+      return;
+    }
+    cardWindow.current = win;
+    setWindowClosed(false);
+    win.focus();
   }
 
   function backToChoose(keepMethod: boolean) {
@@ -285,7 +428,7 @@ export function CheckoutPage(p: CheckoutProps) {
                     <span className="flex flex-col">
                       <span className="font-semibold text-ink-950">{m.name}</span>
                       <span className="text-[13px] text-ink-600">
-                        {m.code === BANK ? 'Pay from your bank, then let us know.' : methodHint(m)}
+                        {m.code === BANK ? 'Pay from your bank, then let us know.' : methodHint(m, savedCards.length)}
                       </span>
                     </span>
                   </label>
@@ -328,6 +471,58 @@ export function CheckoutPage(p: CheckoutProps) {
                   />
                 </Field>
               ) : null}
+              {method.flow === 'redirect' && savedCards.length ? (
+                <fieldset className="flex flex-col gap-2">
+                  <legend className="mb-1 text-sm font-medium text-ink-950">Card</legend>
+                  {[...savedCards, null].map((c) => {
+                    const value = c ? c.id : 'new';
+                    const checked = cardChoice === value;
+                    return (
+                      <label
+                        key={value}
+                        className={cn(
+                          'flex min-h-[48px] cursor-pointer items-center gap-3 rounded-sm border px-3 py-2',
+                          'has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-500',
+                          checked ? 'border-brand-600 bg-brand-50' : 'border-line hover:border-ink-400',
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="card"
+                          value={value}
+                          checked={checked}
+                          onChange={() => setCardChoice(value)}
+                          className="size-4 accent-brand-600"
+                        />
+                        <CreditCard size={18} aria-hidden="true" className="shrink-0 text-brand-600" />
+                        <span className="flex flex-col text-sm">
+                          <span className="font-semibold text-ink-950">{c ? cardLabel(c) : 'Use a new card'}</span>
+                          {c?.expiresAt ? (
+                            <span className="text-[13px] text-ink-600">Saved · expires {cardExpiry(c.expiresAt)}</span>
+                          ) : null}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </fieldset>
+              ) : null}
+              {errors['savedCardId'] ? (
+                <p className="text-[13px] font-medium text-danger-600">{errors['savedCardId'].join(' ')}</p>
+              ) : null}
+              {method.flow === 'redirect' && canSaveCard && cardChoice === 'new' ? (
+                <label className="flex min-h-[44px] cursor-pointer items-start gap-3 text-sm text-ink-800">
+                  <input
+                    type="checkbox"
+                    checked={saveCard}
+                    onChange={(e) => setSaveCard(e.target.checked)}
+                    className="mt-0.5 size-4 accent-brand-600"
+                  />
+                  <span>
+                    Save this card for faster payments next time. Only a secure token from our payment partner is kept,
+                    never your card number.
+                  </span>
+                </label>
+              ) : null}
               {errors['methodCode'] ? (
                 <p className="text-[13px] font-medium text-danger-600">{errors['methodCode'].join(' ')}</p>
               ) : null}
@@ -347,8 +542,9 @@ export function CheckoutPage(p: CheckoutProps) {
               </Button>
               {method.flow === 'redirect' ? (
                 <p className="text-[13px] text-ink-600">
-                  For your security, card details are entered on our payment partner's secure page. Kuzikode never sees
-                  your card number.
+                  {savedCards.some((c) => c.id === cardChoice)
+                    ? 'Your saved card is charged right here. No card details are needed.'
+                    : "For your security, card details are entered once in our payment partner's secure window. Kuzikode never sees your card number."}
                 </p>
               ) : null}
             </form>
@@ -368,13 +564,26 @@ export function CheckoutPage(p: CheckoutProps) {
             )}
             <div className="min-w-0">
               <h2 id="pay-h" className="text-xl font-bold tracking-display">
-                {gaveUp ? 'Still waiting?' : confirming ? 'Confirming your payment' : 'Waiting for approval'}
+                {gaveUp
+                  ? 'Still waiting?'
+                  : confirming
+                    ? 'Confirming your payment'
+                    : inCardWindow
+                      ? 'Complete card entry in the secure window…'
+                      : 'Waiting for approval'}
               </h2>
               <p className="mt-1 text-[15px] text-ink-800">
                 {gaveUp
                   ? 'We have not had a confirmation yet. If you approved the payment, it will show on your invoice as soon as it is confirmed.'
-                  : (attempt.instructions?.text ?? attempt.message)}
+                  : inCardWindow
+                    ? "For your security, card details are entered once in our payment partner's secure window. Kuzikode never sees your card number."
+                    : (attempt.instructions?.text ?? attempt.message)}
               </p>
+              {inCardWindow && windowClosed && !confirming ? (
+                <p className="mt-2 text-[13px] text-ink-600" data-testid="card-window-closed">
+                  Closed the secure window before finishing? Open it again, or choose another method.
+                </p>
+              ) : null}
               {!gaveUp ? (
                 <p className="mt-1 text-[13px] text-ink-600 tabular-nums">
                   {money(p.amountDueMinor)} · checking for {mmss(WAIT_LIMIT_MS - (now - startedAt))} more
@@ -416,6 +625,7 @@ export function CheckoutPage(p: CheckoutProps) {
                 Check again
               </Button>
             ) : null}
+            {inCardWindow && !confirming ? <Button onClick={reopenCardWindow}>Open secure window</Button> : null}
             <Button variant="secondary" onClick={() => backToChoose(false)}>
               Choose another method
             </Button>

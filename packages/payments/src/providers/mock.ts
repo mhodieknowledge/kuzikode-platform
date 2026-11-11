@@ -42,6 +42,8 @@ export interface MockPaymentState {
   scripted: NormalizedStatus | null;
   settleAt: string | null;
   otpReference: string | null;
+  /** Card payment that returns a reusable token once paid (redirect with `tokenize`, or a saved-card payment). */
+  tokenize?: boolean;
   createdAt: string;
 }
 
@@ -82,6 +84,14 @@ const SCRIPT: Record<string, { status: NormalizedStatus; afterSeconds: number } 
   '4444444': 'refuse',
 };
 
+/**
+ * Saved-card simulation, like Paynow's test tokens: a token containing 44444444 is refused at once (insufficient
+ * balance), 33333333 → cancelled after 30 s, 22222222 → paid after 30 s (slow authorization); any other token is paid
+ * after 3 s.
+ */
+export const MOCK_CARD_LAST4 = '4242';
+const isMockToken = (t: string) => /^mocktok_[A-Za-z0-9_-]{4,80}$/.test(t) || /^\{?[0-9a-f-]{8,40}\}?$/i.test(t);
+
 const enc = new TextEncoder();
 async function hmacHex(key: string, message: string): Promise<string> {
   const k = await crypto.subtle.importKey('raw', enc.encode(key), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
@@ -118,6 +128,18 @@ function signingKey(config: ProviderConfig): string {
 }
 
 const statusOf = (s: MockPaymentState, raw?: Record<string, unknown>): StatusResult => ({
+  ...(s.tokenize && s.status === 'succeeded'
+    ? {
+        cardToken: {
+          // A fresh token per payment (Paynow re-tokenizes every card payment).
+          token: `mocktok_${s.reference}`,
+          expiresAt: new Date(Date.parse(s.createdAt) + 180 * 86_400_000).toISOString(),
+          scheme: 'vmc' as const,
+          brand: 'Visa',
+          last4: MOCK_CARD_LAST4,
+        },
+      }
+    : {}),
   status: s.status,
   providerStatus: s.status.toUpperCase(),
   providerReference: s.reference,
@@ -164,14 +186,14 @@ export function createMockProvider(opts: MockProviderOptions): PaymentProvider &
     displayName: 'Mock gateway (test only)',
     credentialFields,
 
-    capabilities: () => ({
+    capabilities: (config) => ({
       flows: ['redirect', 'express'],
       methods: METHODS,
       currencies: ['USD', 'ZWG'],
       refunds: true,
       statusPolling: true,
       signedCallbacks: true,
-      tokenization: false,
+      tokenization: config.options?.['tokenizationEnabled'] === true,
       hostedCardFields: false,
     }),
 
@@ -182,7 +204,13 @@ export function createMockProvider(opts: MockProviderOptions): PaymentProvider &
       const method = input.methodCode ? METHODS.find((m) => m.code === input.methodCode) : undefined;
       if (input.methodCode && !method)
         throw new ProviderError('mock', 'not_supported', 'This payment method is not available');
-      if (method && method.flow !== input.flow)
+      const tokenization = config.options?.['tokenizationEnabled'] === true;
+      const saved = input.cardToken;
+      if (saved) {
+        if (!tokenization) throw new ProviderError('mock', 'not_supported', 'Saved cards are not enabled');
+        if (input.flow !== 'express' || input.methodCode !== 'card' || !isMockToken(saved.token))
+          throw new ProviderError('mock', 'invalid_request', 'Invalid saved card');
+      } else if (method && method.flow !== input.flow)
         throw new ProviderError('mock', 'invalid_request', 'This payment method does not support that flow');
       const reference = `mock_${input.merchantReference}`;
       const base: MockPaymentState = {
@@ -199,6 +227,7 @@ export function createMockProvider(opts: MockProviderOptions): PaymentProvider &
         scripted: null,
         settleAt: null,
         otpReference: null,
+        tokenize: !!saved || (input.flow === 'redirect' && !!input.tokenize && tokenization),
         createdAt: now().toISOString(),
       };
       const pollUrl = `mock://poll/${reference}`;
@@ -208,6 +237,24 @@ export function createMockProvider(opts: MockProviderOptions): PaymentProvider &
         await store.save(base);
         const redirectUrl = `${baseUrl.replace(/\/$/, '')}/${encodeURIComponent(reference)}`;
         return { kind: 'redirect', providerReference: reference, redirectUrl, pollUrl, raw: redact({ reference }) };
+      }
+
+      if (saved) {
+        if (saved.token.includes('44444444'))
+          throw new ProviderError('mock', 'declined', 'Insufficient balance', { retryable: false });
+        const slow = saved.token.includes('33333333') || saved.token.includes('22222222');
+        await store.save({
+          ...base,
+          scripted: saved.token.includes('33333333') ? 'cancelled' : 'succeeded',
+          settleAt: new Date(now().getTime() + (slow ? 30_000 : 3000)).toISOString(),
+        });
+        return {
+          kind: 'express_pending',
+          providerReference: reference,
+          pollUrl,
+          customerInstructions: 'Charging your saved card. This usually takes a few seconds.',
+          raw: redact({ reference, method: saved.scheme }),
+        };
       }
 
       const needsPhone = method ? (method.needs?.includes('phone') ?? false) : true;

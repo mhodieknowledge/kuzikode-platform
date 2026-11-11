@@ -14,6 +14,8 @@ import { ProviderError } from '../errors';
 import { decimalToMinor, minorToDecimal } from '../money';
 import { redact } from '../redact';
 import type {
+  CardScheme,
+  CardTokenResult,
   CredentialField,
   InboundCallback,
   InitiateInput,
@@ -134,6 +136,32 @@ export function parsePaynowDateTime(s: string): string | null {
   return Number.isNaN(utc) ? null : new Date(utc).toISOString();
 }
 
+/** `tokenexpiry` ("D-MMM-YYYY", e.g. 31-Dec-2027) → ISO end of that day (UTC); null when unreadable. */
+export function parsePaynowDate(s: string): string | null {
+  const m = /^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/.exec(s.trim());
+  if (!m) return null;
+  const month = MONTHS.indexOf(m[2]!.toLowerCase());
+  if (month < 0) return null;
+  const d = new Date(Date.UTC(Number(m[3]), month, Number(m[1]), 23, 59, 59));
+  return d.getUTCMonth() === month ? d.toISOString() : null;
+}
+
+/** The reusable card token in a verified status update / poll answer (tokenized payments only). */
+export function paynowCardToken(msg: PaynowMessage): CardTokenResult | undefined {
+  const token = msg.get('token')?.trim();
+  if (!token) return undefined;
+  const channel = msg.get('paymentchannel')?.trim() || null;
+  const digits = (msg.get('paymentinstrument') ?? '').replace(/\D/g, '');
+  const scheme: CardScheme = /zimswitch/i.test(channel ?? '') ? 'zimswitch' : 'vmc';
+  return {
+    token,
+    expiresAt: parsePaynowDate(msg.get('tokenexpiry') ?? ''),
+    scheme,
+    brand: channel ? channel.slice(0, 40) : null,
+    last4: digits.length >= 4 ? digits.slice(-4) : null,
+  };
+}
+
 function credentials(config: ProviderConfig) {
   const integrationId = config.credentials['integrationId'];
   const integrationKey = config.credentials['integrationKey'];
@@ -208,6 +236,7 @@ export function createPaynowProvider(deps: ProviderDeps = {}): PaymentProvider {
     const amountMinor = amount === undefined ? null : decimalToMinor(amount);
     const providerReference = msg.get('paynowreference');
     const merchantReference = msg.get('reference');
+    const cardToken = mapped === 'succeeded' ? paynowCardToken(msg) : undefined;
     return {
       status: mapped ?? 'pending',
       providerStatus,
@@ -215,6 +244,7 @@ export function createPaynowProvider(deps: ProviderDeps = {}): PaymentProvider {
       ...(merchantReference ? { merchantReference } : {}),
       ...(amountMinor !== null ? { amountMinor } : {}),
       ...(mapped === 'failed' || mapped === 'cancelled' ? { failureReason: `Paynow status: ${providerStatus}` } : {}),
+      ...(cardToken ? { cardToken } : {}),
       raw: rawOf(msg, config),
     };
   }
@@ -242,7 +272,15 @@ export function createPaynowProvider(deps: ProviderDeps = {}): PaymentProvider {
       const method = input.methodCode ? METHODS.find((m) => m.code === input.methodCode) : undefined;
       if (input.methodCode && !method)
         throw new ProviderError('paynow', 'not_supported', 'This payment method is not available');
-      if (method && method.flow !== input.flow)
+      const tokenization = config.options?.['tokenizationEnabled'] === true;
+      const saved = input.cardToken;
+      if (saved) {
+        // Saved card: express checkout with the token (express_checkout_transactions, method vmc / zimswitch).
+        if (!tokenization)
+          throw new ProviderError('paynow', 'not_supported', 'Saved cards are not enabled for this account');
+        if (input.flow !== 'express' || input.methodCode !== 'card' || !saved.token)
+          throw new ProviderError('paynow', 'invalid_request', 'A saved card is paid by express checkout');
+      } else if (method && method.flow !== input.flow)
         throw new ProviderError('paynow', 'invalid_request', 'This payment method does not support that flow');
       const express = input.flow === 'express';
       const testEmail = config.mode === 'test' ? (config.options?.['testAuthEmail'] as string | undefined) : undefined;
@@ -261,9 +299,12 @@ export function createPaynowProvider(deps: ProviderDeps = {}): PaymentProvider {
         ['resulturl', input.resultUrl],
       ];
       if (authemail) fields.push(['authemail', authemail]);
+      if (!express && input.tokenize && tokenization) fields.push(['tokenize', 'true']);
       if (express) {
-        fields.push(['method', input.methodCode ?? '']);
-        if (input.phone) fields.push(['phone', input.phone]);
+        fields.push(['method', saved ? saved.scheme : (input.methodCode ?? '')]);
+        if (saved) fields.push(['token', saved.token]);
+        else if (input.phone) fields.push(['phone', input.phone]);
+        // Required for card tokens: a unique trace prevents a double debit when a request times out.
         fields.push(['merchanttrace', input.merchantReference.slice(0, 32)]);
       }
       const body = await signPaynowRequest(fields, integrationKey);
@@ -283,6 +324,14 @@ export function createPaynowProvider(deps: ProviderDeps = {}): PaymentProvider {
         const browserUrl = msg.get('browserurl');
         if (!browserUrl) throw new ProviderError('paynow', 'invalid_response', 'Paynow sent no payment page');
         return { kind: 'redirect', redirectUrl: paynowUrl(browserUrl), ...refs, raw };
+      }
+      if (saved) {
+        return {
+          kind: 'express_pending',
+          ...refs,
+          customerInstructions: 'Charging your saved card. This usually takes a few seconds.',
+          raw,
+        };
       }
       if (input.methodCode === 'innbucks') {
         const code = msg.get('authorizationcode');

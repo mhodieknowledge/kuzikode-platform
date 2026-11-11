@@ -26,6 +26,8 @@ function assertSuperAdmin(ctx: RequestContext) {
 
 export interface AccountView extends PaymentAccount {
   providerName: string;
+  /** Saved cards are on (the account option `tokenizationEnabled`). */
+  tokenizationEnabled: boolean;
   /** False for an unknown provider, or the test gateway where it is switched off (always in production). */
   usable: boolean;
   credentials: CredentialStatus;
@@ -57,6 +59,7 @@ export async function paymentConfig(ctx: RequestContext): Promise<{
     return {
       ...a,
       providerName: p?.displayName ?? a.providerKey,
+      tokenizationEnabled: a.options['tokenizationEnabled'] === true,
       usable: !!p && providerAllowed(ctx, a.providerKey),
       credentials: credentialStatus(ctx, a),
       available: {
@@ -121,8 +124,11 @@ async function checkAccountFields(ctx: RequestContext, providerKey: string, inpu
 }
 
 const accountSnapshot = (
-  a: Pick<PaymentAccount, 'label' | 'mode' | 'currencies' | 'enabledMethods' | 'enabled' | 'statusNote'>,
+  a: Pick<PaymentAccount, 'label' | 'mode' | 'currencies' | 'enabledMethods' | 'enabled' | 'statusNote'> & {
+    tokenizationEnabled?: boolean;
+  },
 ) => ({
+  tokenizationEnabled: a.tokenizationEnabled ?? false,
   label: a.label,
   mode: a.mode,
   currencies: a.currencies,
@@ -148,7 +154,7 @@ export async function createPaymentAccount(ctx: RequestContext, input: PaymentAc
       stmt(
         ctx.db,
         `INSERT INTO payment_provider_accounts (id, provider_key, label, mode, secret_prefix, currencies, enabled_methods, options,
-           enabled, status_note, updated_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, '{}', ?, ?, ?, ?, ?)`,
+           enabled, status_note, updated_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         id,
         input.providerKey,
         input.label,
@@ -156,6 +162,7 @@ export async function createPaymentAccount(ctx: RequestContext, input: PaymentAc
         input.secretPrefix,
         JSON.stringify(input.currencies),
         JSON.stringify(input.enabledMethods),
+        JSON.stringify(input.tokenizationEnabled ? { tokenizationEnabled: true } : {}),
         input.enabled ? 1 : 0,
         input.statusNote,
         ctx.actor.userId,
@@ -189,13 +196,17 @@ export async function updatePaymentAccount(
       stmt(
         ctx.db,
         `UPDATE payment_provider_accounts SET label = ?, mode = ?, currencies = ?, enabled_methods = ?, enabled = ?, status_note = ?,
-           updated_by = ?, updated_at = ? WHERE id = ?`,
+           options = ?, updated_by = ?, updated_at = ? WHERE id = ?`,
         input.label,
         input.mode,
         JSON.stringify(input.currencies),
         JSON.stringify(input.enabledMethods),
         input.enabled ? 1 : 0,
         input.statusNote,
+        JSON.stringify({
+          ...before.options,
+          tokenizationEnabled: input.tokenizationEnabled ?? before.options['tokenizationEnabled'] === true,
+        }),
         ctx.actor.userId,
         ctx.now().toISOString(),
         id,
@@ -206,8 +217,11 @@ export async function updatePaymentAccount(
         action: 'payment_account.updated',
         entityType: 'payment_account',
         entityId: id,
-        before: accountSnapshot(before),
-        after: accountSnapshot(input),
+        before: accountSnapshot({ ...before, tokenizationEnabled: before.options['tokenizationEnabled'] === true }),
+        after: accountSnapshot({
+          ...input,
+          tokenizationEnabled: input.tokenizationEnabled ?? before.options['tokenizationEnabled'] === true,
+        }),
       }),
     )
     .run();

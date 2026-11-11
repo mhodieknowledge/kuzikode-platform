@@ -397,7 +397,7 @@ describe('online payments (P6.2)', () => {
     const start = await pay(portal, invoiceId, { methodCode: 'card' });
     const reference = (start.body.data.redirectUrl as string).split('/dev/mock-checkout/')[1]!;
     const view = await settleMockCheckout(createContext({ env }), decodeURIComponent(reference), 'succeeded');
-    expect(view.returnUrl).toMatch(/^\/pay\/return\?attempt=/);
+    expect(view.returnUrl).toMatch(/^\/pay\/card-return\?attempt=/);
     expect(await paymentsFor(start.body.data.attemptId)).toHaveLength(1);
     expect(await invoiceRow(invoiceId)).toMatchObject({ status: 'paid' });
   });

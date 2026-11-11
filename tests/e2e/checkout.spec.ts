@@ -1,7 +1,8 @@
 /**
  * P6.3d: Kuzikode's own checkout (docs/06 §3b) on the mock gateway. Fresh invoices per run (global-setup):
  *  a → public EcoCash success with receipt · b → public insufficient balance, cancel, InnBucks code + QR, bank notice
- *  c → portal O'mari OTP (double-click starts one attempt) · d → public card hand-off and back to our status page.
+ *  c → portal O'mari OTP (double-click starts one attempt) · d → public card, popup blocked → same-tab card page →
+ *  /pay/card-return · e → portal new card in the secure popup window, saved · f → portal saved card paid on our page.
  * Mock test numbers: …1111111 paid after 5 s, …3333333 cancelled after 30 s, …4444444 refused at once.
  */
 import { createHmac } from 'node:crypto';
@@ -187,14 +188,99 @@ test('portal checkout: O’mari OTP, a double click starts one attempt, paid →
   await expect(page.getByRole('link', { name: 'Pay now' })).toHaveCount(0);
 });
 
-test('public checkout: card hands off to the secure page, which returns to our status page', async ({ page }) => {
+test('public checkout: card with the popup blocked falls back to this tab and returns to /pay/card-return', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1440, height: 900 });
+  // A browser that blocks popups.
+  await page.addInitScript(() => {
+    window.open = () => null;
+  });
   await publicCheckout(page, 'd');
   await page.getByText('Bank card', { exact: true }).click();
-  await expect(page.getByText("card details are entered on our payment partner's secure page")).toBeVisible();
+  await expect(page.getByText("card details are entered once in our payment partner's secure window")).toBeVisible();
+  // Public links never offer saving a card.
+  await expect(page.getByText('Save this card')).toHaveCount(0);
   await page.getByRole('button', { name: 'Pay $25.00' }).click();
   await expect(page).toHaveURL(/\/dev\/mock-checkout\//);
   await page.getByRole('button', { name: /^Succeed/ }).click();
-  await expect(page).toHaveURL(/\/pay\/return\?attempt=/);
+  await expect(page).toHaveURL(/\/pay\/card-return\?attempt=/);
   await expect(page.getByRole('heading', { name: 'Payment received' })).toBeVisible({ timeout: 30_000 });
+});
+
+async function portalSignIn(page: Page) {
+  await page.goto('/portal/login');
+  await expect(page.locator('astro-island').filter({ hasText: 'Sign in' }).first()).not.toHaveAttribute('ssr');
+  await page.getByLabel('Email').fill(E2E_CHECKOUT_USER.email);
+  await page.getByLabel('Password').fill(E2E_PASSWORD);
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page).toHaveURL(/\/portal$/);
+}
+
+test('portal cards: new card in the secure window (saved), then paid on our page with no card screen, then removed', async ({
+  page,
+  context,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await portalSignIn(page);
+  // Nothing a browser receives may carry a card token.
+  const bodies: string[] = [];
+  page.on('response', async (r) => {
+    if (r.url().includes('/api/')) bodies.push(await r.text().catch(() => ''));
+  });
+
+  const e = checkoutInvoiceId(run, 'e');
+  const res = await page.goto(`/portal/invoices/${e}/pay`);
+  expect(res?.headers()['cross-origin-opener-policy']).toBe('same-origin-allow-popups');
+  await hydrated(page);
+  await page.getByText('Bank card', { exact: true }).click();
+  await page.getByText('Save this card for faster payments next time').click();
+  const popupPromise = page.waitForEvent('popup');
+  await page.getByRole('button', { name: 'Pay $25.00' }).click();
+  const popup = await popupPromise;
+  // Our checkout stays behind the secure window and waits.
+  await expect(page.getByRole('heading', { name: 'Complete card entry in the secure window…' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Open secure window' })).toBeVisible();
+  await page.setViewportSize({ width: 375, height: 800 });
+  await page.screenshot({ path: 'test-results/screens/checkout-card-window-375.png', fullPage: true });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await expectAccessible(page);
+  await popup.waitForURL(/\/dev\/mock-checkout\//);
+  const closed = popup.waitForEvent('close');
+  await popup.getByRole('button', { name: /^Succeed/ }).click();
+  // The card-return page reports to the checkout and closes itself.
+  await closed;
+  await expect(page.getByRole('heading', { name: 'Payment received' })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole('link', { name: 'Download receipt (PDF)' })).toBeVisible();
+
+  // The next invoice: the saved card is offered first and charged right here.
+  const f = checkoutInvoiceId(run, 'f');
+  await page.goto(`/portal/invoices/${f}/pay`);
+  await hydrated(page);
+  await page.getByText('Bank card', { exact: true }).click();
+  await expect(page.getByRole('radio', { name: /Visa •••• 4242/ })).toBeChecked();
+  await expect(page.getByText('Your saved card is charged right here.')).toBeVisible();
+  await page.setViewportSize({ width: 375, height: 800 });
+  await page.screenshot({ path: 'test-results/screens/checkout-saved-card-375.png', fullPage: true });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const pages = context.pages().length;
+  await page.getByRole('button', { name: 'Pay $25.00' }).click();
+  await expect(page.getByRole('heading', { name: 'Payment received' })).toBeVisible({ timeout: 30_000 });
+  expect(context.pages()).toHaveLength(pages); // no card window at all
+  expect(bodies.join('\n')).not.toMatch(/mocktok_|token_enc/);
+
+  // Portal management: the card is listed (masked), and removing it deletes it.
+  await page.goto('/portal/payments');
+  const cards = page.getByTestId('saved-cards');
+  await expect(cards.locator('p', { hasText: 'Visa •••• 4242' })).toBeVisible();
+  await expect(cards.getByText('Default')).toBeVisible();
+  await expectAccessible(page);
+  for (const width of [375, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.screenshot({ path: `test-results/screens/portal-saved-cards-${width}.png`, fullPage: true });
+  }
+  await expect(page.locator('astro-island').filter({ hasText: 'Visa' })).not.toHaveAttribute('ssr');
+  await cards.getByRole('button', { name: 'Remove Visa •••• 4242' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Remove card' }).click();
+  await expect(page.getByTestId('saved-cards')).toHaveCount(0);
 });

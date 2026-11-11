@@ -21,7 +21,7 @@ import { Batch, stmt } from '../../db/client';
 import { sha256Hex } from '../../lib/crypto';
 import { conflict, notFound, validationError } from '../../lib/errors';
 import { newId } from '../../lib/ids';
-import { paymentReturnUrl } from '../../lib/public-links';
+import { cardReturnUrl, documentToken, paymentReturnUrl } from '../../lib/public-links';
 import { formatMoney } from '../../../shared/money';
 import { OPEN_INVOICE_STATUSES, type InvoiceStatus } from '../../../shared/invoices';
 import { normalizeZimPhone } from '../../../shared/payment-methods';
@@ -29,6 +29,8 @@ import { applyIncomingPayment, reverseIncomingPayment } from '../invoices/servic
 import { notifyStaffWithPermission } from '../notifications';
 import { attemptOutcome, type AttemptPhase } from './portal';
 import { accountConfig, getAccount, paymentMethodOptions, resolveRoute } from './router';
+import { captureCardToken, cardForPayment } from './saved-cards';
+import { enqueue, dispatch } from '../../jobs/outbox';
 
 /** Attempts still waiting for an outcome (reconciliation keeps checking these). */
 export const OPEN_ATTEMPT = ['created', 'initiated', 'pending', 'partially_paid'] as const;
@@ -49,6 +51,9 @@ export interface AttemptRow {
   flow: 'redirect' | 'express';
   method_code: string | null;
   payer_phone_masked: string | null;
+  initiated_by_user_id: string | null;
+  saved_method_id: string | null;
+  tokenize: number;
   amount_minor: number;
   currency: string;
   status: string;
@@ -207,6 +212,10 @@ export async function invoicePaymentOptions(ctx: RequestContext, invoiceId: stri
 export interface InitiateRequest {
   methodCode: string;
   phone?: string | undefined;
+  /** Pay with a saved card (signed-in portal payers and the auto-charge cron only; the caller checks that). */
+  savedCardId?: string | undefined;
+  /** New card entry: ask the gateway for a token to save the card (signed-in portal payers only). */
+  saveCard?: boolean | undefined;
   /** From the browser, one per click (a double-tap reuses it). */
   idempotencyKey: string;
 }
@@ -230,8 +239,18 @@ export async function initiateInvoicePayment(
   const inv = await loadInvoice(ctx, invoiceId);
   if (!payable(inv)) throw conflict('This invoice has nothing left to pay.');
   const route = await resolveRoute(ctx, { currency: inv.currency, methodCode: req.methodCode });
-  const method = route?.methods.find((m) => m.code === req.methodCode);
-  if (!route || !method) throw validationError({ methodCode: ['This payment method is not available right now.'] });
+  const routed = route?.methods.find((m) => m.code === req.methodCode);
+  if (!route || !routed) throw validationError({ methodCode: ['This payment method is not available right now.'] });
+  const tokenization = route.provider.capabilities(route.config).tokenization;
+  // A saved card is charged by express checkout on our page; a new card goes to the gateway's secure card window.
+  let saved: Awaited<ReturnType<typeof cardForPayment>> | null = null;
+  if (req.savedCardId) {
+    if (routed.flow !== 'redirect' || !tokenization)
+      throw validationError({ savedCardId: ['Saved cards cannot be used for this payment.'] });
+    saved = await cardForPayment(ctx, req.savedCardId, inv.client_id, route.account.id);
+  }
+  const method = saved ? { ...routed, flow: 'express' as const, needs: [] } : routed;
+  const tokenize = !saved && method.flow === 'redirect' && !!req.saveCard && tokenization;
   const needsPhone = method.needs?.includes('phone') ?? false;
   const phone = needsPhone ? normalizeZimPhone(req.phone ?? '') : null;
   if (needsPhone && !phone) throw validationError({ phone: ['Enter a Zimbabwean mobile number, like 0771 234 567.'] });
@@ -242,9 +261,19 @@ export async function initiateInvoicePayment(
     const reuse = await ctx.db
       .prepare(
         `SELECT * FROM payment_attempts WHERE invoice_id = ? AND amount_minor = ? AND account_id = ? AND method_code = ?
+           AND flow = ? AND COALESCE(saved_method_id, '') = ? AND tokenize = ?
            AND status IN ('initiated','pending') AND created_at > ? ORDER BY created_at DESC LIMIT 1`,
       )
-      .bind(invoiceId, inv.balance_minor, route.account.id, method.code, since)
+      .bind(
+        invoiceId,
+        inv.balance_minor,
+        route.account.id,
+        method.code,
+        method.flow,
+        saved?.card.id ?? '',
+        tokenize ? 1 : 0,
+        since,
+      )
       .first<AttemptRow>();
     if (reuse) return startView(ctx, reuse);
   }
@@ -258,8 +287,9 @@ export async function initiateInvoicePayment(
         stmt(
           ctx.db,
           `INSERT INTO payment_attempts (id, invoice_id, client_id, initiated_by_user_id, provider_key, account_id, flow, method_code,
-             payer_phone_masked, amount_minor, currency, status, merchant_reference, idempotency_key, expires_at, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'created', ?, ?, ?, ?, ?)`,
+             payer_phone_masked, saved_method_id, tokenize, amount_minor, currency, status, merchant_reference, idempotency_key,
+             expires_at, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'created', ?, ?, ?, ?, ?)`,
           id,
           invoiceId,
           inv.client_id,
@@ -269,6 +299,8 @@ export async function initiateInvoicePayment(
           method.flow,
           method.code,
           masked,
+          saved?.card.id ?? null,
+          tokenize ? 1 : 0,
           inv.balance_minor,
           inv.currency,
           id,
@@ -285,7 +317,14 @@ export async function initiateInvoicePayment(
           providerKey: route.provider.key,
           type: 'initiate_request',
           dedupe: `init:${id}`,
-          payload: { method: method.code, amountMinor: inv.balance_minor, currency: inv.currency },
+          payload: {
+            method: method.code,
+            flow: method.flow,
+            amountMinor: inv.balance_minor,
+            currency: inv.currency,
+            ...(saved ? { savedCardId: saved.card.id } : {}),
+            ...(tokenize ? { tokenize: true } : {}),
+          },
         }),
       )
       .run();
@@ -307,11 +346,14 @@ export async function initiateInvoicePayment(
       amountMinor: inv.balance_minor,
       currency: inv.currency,
       description: `Invoice ${inv.number ?? invoiceId}`,
-      returnUrl: await paymentReturnUrl(ctx, id),
+      // Card entry returns to the small card-return page (it reports to the checkout that opened the card window).
+      returnUrl: method.flow === 'redirect' ? await cardReturnUrl(ctx, id) : await paymentReturnUrl(ctx, id),
       resultUrl: `${ctx.config.siteOrigin}/api/payments/callbacks/${encodeURIComponent(route.provider.key)}/${encodeURIComponent(route.account.id)}`,
       flow: method.flow,
       methodCode: method.code,
       ...(phone ? { phone } : {}),
+      ...(saved ? { cardToken: { token: saved.token, scheme: saved.card.method } } : {}),
+      ...(tokenize ? { tokenize: true } : {}),
       customer: {
         ...(client.email ? { email: client.email } : {}),
         ...(client.name ? { name: client.name } : {}),
@@ -604,7 +646,9 @@ async function markFinished(
     .prepare('SELECT number FROM invoices WHERE id = ?')
     .bind(a.invoice_id)
     .first<{ number: string | null }>();
+  const email = await autoChargeFailureEmail(ctx, a, inv?.number ?? null);
   const res = await new Batch(ctx.db)
+    .addAll(email ? [email.stmt] : [])
     .add(
       stmt(
         ctx.db,
@@ -645,7 +689,43 @@ async function markFinished(
       }),
     )
     .run();
-  return res.changes('attempt') === 1;
+  const changed = res.changes('attempt') === 1;
+  if (changed && email) dispatch(ctx, [email.id]);
+  return changed;
+}
+
+/** Suffix of the idempotency key of the billing cron's automatic card charge (one per invoice). */
+export const AUTOCHARGE_KEY = 'autocharge';
+
+/**
+ * A failed automatic card charge (subscription auto-charge, docs/06 §3b rule 5): the invoice stays open and the client
+ * gets an email with the link to pay it. Enqueued in the same batch as the attempt's failure, so it is sent once.
+ */
+async function autoChargeFailureEmail(ctx: RequestContext, a: AttemptRow, invoiceNumber: string | null) {
+  if (a.idempotency_key !== `${a.invoice_id}:${AUTOCHARGE_KEY}`) return null;
+  const row = await ctx.db
+    .prepare(
+      `SELECT c.email, c.display_name, i.balance_minor, i.currency FROM invoices i JOIN clients c ON c.id = i.client_id
+       WHERE i.id = ?`,
+    )
+    .bind(a.invoice_id)
+    .first<{ email: string | null; display_name: string; balance_minor: number; currency: string }>();
+  if (!row?.email) return null;
+  const { token } = await documentToken(ctx, 'invoice', a.invoice_id);
+  return enqueue(ctx, {
+    type: 'email.send',
+    payload: {
+      template: 'card_charge_failed',
+      to: row.email,
+      data: {
+        name: row.display_name,
+        number: invoiceNumber ?? a.invoice_id,
+        amount: formatMoney(row.balance_minor, row.currency),
+        link: `${ctx.config.siteOrigin}/pay/${token}`,
+      },
+    },
+    idempotencyKey: `email:card_charge_failed:${a.id}`,
+  });
 }
 
 async function alertFinance(ctx: RequestContext, a: AttemptRow, title: string, key: string) {
@@ -734,6 +814,17 @@ export async function applyStatus(ctx: RequestContext, a: AttemptRow, r: StatusR
         // payments.attempt_id is UNIQUE: a concurrent apply recorded it first, and this batch rolled back entirely.
         if (err instanceof Error && /UNIQUE/i.test(err.message)) return;
         throw err;
+      }
+      if (r.cardToken && (a.tokenize === 1 || a.saved_method_id)) {
+        // Saving the card never undoes the payment; the token itself is never logged.
+        try {
+          await captureCardToken(ctx, a, r.cardToken);
+        } catch (err) {
+          ctx.logger.warn('card token not saved', {
+            attemptId: a.id,
+            error: err instanceof Error ? err.name : 'unknown',
+          });
+        }
       }
       return;
     }

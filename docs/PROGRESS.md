@@ -5,16 +5,10 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
-- Last completed task: **P6.3d Custom checkout page** (2026-11-11).
-- **Next step:** **P6.3e Paynow cards on our checkout** (docs/06 §3b card rules 1–7): card tile opens the gateway card page in a
-  centred popup (`window.open` 480×720 from the click) with `tokenize=true` when the account option `tokenizationEnabled` is set;
-  initiate must accept a per-attempt `returnUrl` → new `/pay/card-return` page that `postMessage`s `{attemptId}` to `window.opener`
-  (same origin) and closes, else shows the status (same-tab fallback when the popup is blocked or width < 640). `CheckoutPage`
-  (src/components/payments) gets a "Complete card entry in the secure window…" waiting state and polls as for express. Saved
-  cards: new table (migration 0012) with AES-GCM-encrypted token (`DATA_ENCRYPTION_KEY`), masked number, expiry; captured from
-  the verified status (`token`, `tokenexpiry`, `paymentinstrument`) in `applyStatus`; never returned to the browser or logged.
-  Saved-card express payment (`vmc`/`zimswitch` + token + `merchanttrace`) from the checkout; portal management (list, default,
-  remove); opt-in auto-charge consent for subscriptions. Mock adapter needs tokenization support for the tests.
+- Last completed task: **P6.3e Cards on our checkout** (2026-11-11). Saved cards wait on Paynow approving tokenization (BLOCKERS).
+- **Next step:** **P6.4 Reconciliation** (docs/06 §3, roadmap): cron over `payment_attempts` with `next_check_at <= now` (backoff
+  already written by `checkedStmt`/`nextCheckAt` in `modules/payments/orchestration.ts`), expiry of attempts past `expires_at`
+  (→ `markFinished(..., 'expired')`), an admin "Check now" button on the attempt/invoice, and the missed-callback test.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 - New entries are appended at the **bottom** of this file.
 
@@ -673,3 +667,24 @@ The **Next step** line must be specific enough that a fresh session can continue
   `/pay/return` paid); axe clean; 375/768/1440 screenshots reviewed. global-setup creates 4 fresh checkout invoices per run for a
   separate e2e client/user and sets test bank details. Portal, public-documents, gateways and invoices specs re-run green.
 - Next step: P6.3e (see Current status).
+
+## 2026-11-11 17:10 UTC · P6.3e Cards on our checkout ✅ (saved cards blocked on Paynow approval)
+- Package 0.4.0: `InitiateInput.tokenize` / `cardToken`, `StatusResult.cardToken` (server-only, never in `raw`). Paynow: `tokenize=true`
+  on card entry, saved card = express `method=vmc|zimswitch` + `token` + `merchanttrace`, `tokenexpiry` (D-MMM-YYYY) parsed, fresh
+  token read from every paid status (re-tokenization). Mock: same, Paynow's test-token outcomes. Only with account option `tokenizationEnabled`.
+- App: migration 0012 (`payment_attempts.tokenize`, mock state, index). `modules/payments/saved-cards.ts` (AES-GCM token at rest,
+  capture from a verified paid status, dedupe by brand/last 4, portal list/default/remove, per-plan auto-charge consent),
+  `autocharge.ts` (morning cron after billing: one attempt per due subscription invoice; failure → `card_charge_failed` email with the
+  pay link, same batch). Card entry returns to new `/pay/card-return` (postMessage + BroadcastChannel, closes itself, else shows status).
+  COOP per page (`openerPolicyFor`). Saved cards for signed-in portal payers only. Super Admin switch "Saved cards (card tokenization)".
+- UI: `CheckoutPage` card window (about:blank from the click → gateway URL; popup blocked / < 640 px → same tab), "Complete card entry
+  in the secure window…" state, "Open secure window", saved-card radio list + "Use a new card" + opt-in "Save this card"; portal
+  `/portal/payments` "Saved cards" (make default, remove with confirm); `/portal/services` "Charge my saved card automatically for this plan".
+- Tests: package +5 · unit (COOP, email template) · integration `saved-cards.test.ts` (5: no tokenization, save + saved-card pay with
+  re-tokenization + no token in API/events/audit, declined/scoping/expired, management, auto-charge consent/once/failure email/withdraw) ·
+  e2e checkout (popup blocked fallback → /pay/card-return; portal popup → saved → paid on our page with no window, no token in any API
+  response → removed). Screens 375/1440 reviewed; axe clean.
+- Live check (Paynow test mode, owner's USD integration, official test tokens): refused by Paynow, "You are not permitted to tokenize
+  payment instruments" / "does not have any ACTIVE 'vmc' payment method" / "tokenized transactions not permitted for your merchant".
+  Owner action in BLOCKERS. Re-check script: bundle a small script that calls `createPaynowProvider().initiatePayment` with
+  `cardToken {11111111-1111-1111-1111-111111111111}` (esbuild → node, `NODE_USE_ENV_PROXY=1`).

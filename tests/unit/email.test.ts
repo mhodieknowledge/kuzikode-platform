@@ -153,6 +153,12 @@ describe('templates', () => {
       overdue: true,
       link: 'https://example.com/i/abc',
     },
+    card_charge_failed: {
+      name: 'Ann Moyo Bakery',
+      number: 'INV-2026-00007',
+      amount: '$25.00',
+      link: 'https://example.com/pay/abc',
+    },
     payment_receipt: {
       name: 'Ann',
       receiptNumber: 'RCT-2026-00001',

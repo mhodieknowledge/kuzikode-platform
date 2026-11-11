@@ -43,7 +43,7 @@ export default async function globalSetup() {
   const clientSnap = JSON.stringify({ name: E2E_PORTAL_USER.clientName, email: 'hello@borrowdale-florists.example' });
   const businessSnap = JSON.stringify({ name: 'Kuzikode Technologies' });
   const now = new Date().toISOString();
-  // checkout.spec (P6.3d): four fresh $25.00 invoices per run (paying one closes it for good).
+  // checkout.spec (P6.3d/e): six fresh $25.00 invoices per run (paying one closes it for good).
   const run = Date.now().toString(36);
   process.env.E2E_CHECKOUT_RUN = run;
   const coSnap = JSON.stringify({
@@ -51,7 +51,7 @@ export default async function globalSetup() {
     email: 'orders@avondale-bakery.example',
     phone: '+263 77 111 1111',
   });
-  const checkoutInvoices = (['a', 'b', 'c', 'd'] as const).map((slot) => ({
+  const checkoutInvoices = (['a', 'b', 'c', 'd', 'e', 'f'] as const).map((slot) => ({
     id: checkoutInvoiceId(run, slot),
     number: `INV-E2E-C${run.toUpperCase()}-${slot.toUpperCase()}`,
   }));
@@ -149,6 +149,11 @@ export default async function globalSetup() {
        VALUES (${q(`iti_e2e_co_${run}_${i}`)}, ${q(inv.id)}, 1, 'Menu board design', 1000, 2500, 2500, 0, 0, 2500);`,
       `UPDATE invoices SET status = 'issued', public_token_hash = ${q(publicTokenHash('invoice', inv.id))} WHERE id = ${q(inv.id)};`,
     ]),
+    // P6.3e: saved cards on the mock gateway; the checkout client starts each run with none.
+    `UPDATE payment_provider_accounts SET options = json_set(options, '$.tokenizationEnabled', json('true')) WHERE id = 'ppa_mock';`,
+    `UPDATE subscriptions SET autocharge_method_id = NULL WHERE client_id = ${q(E2E_CHECKOUT_USER.clientId)};`,
+    `UPDATE saved_payment_methods SET status = 'removed', token_enc = NULL, is_default = 0, removed_at = ${q(now)}
+     WHERE client_id = ${q(E2E_CHECKOUT_USER.clientId)} AND status <> 'removed';`,
     `UPDATE application_settings SET value = ${q(JSON.stringify('Kuzikode Technologies (e2e test details)\nExample Bank, Harare\nAccount 0000000000'))}
      WHERE key = 'documents.bank_details';`,
     "UPDATE application_settings SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT) WHERE key = 'content_version';",

@@ -1,0 +1,75 @@
+---
+/**
+ * Development-only email preview (P6.6): every template, and its notable variants, rendered with sample data through the
+ * real renderer. 404 outside APP_ENV=development. Sent emails are in the dev mailbox (/admin/dev/mailbox).
+ */
+import { brandFor } from '../../../server/email';
+import { renderTemplate, TEMPLATE_NAMES } from '../../../server/email/templates';
+import { EMAIL_SAMPLES, EMAIL_VARIANTS } from '../../../server/email/templates/samples';
+
+const { ctx } = Astro.locals;
+if (ctx.config.appEnv !== 'development') return new Response('Not found', { status: 404 });
+const brand = await brandFor(ctx);
+const rows = [
+  ...TEMPLATE_NAMES.map((name) => ({ name, variant: null as string | null, data: EMAIL_SAMPLES[name] })),
+  ...EMAIL_VARIANTS.map((v) => ({ name: v.name, variant: v.variant, data: v.data })),
+]
+  .sort((a, b) => a.name.localeCompare(b.name))
+  .map((r) => ({ ...r, subject: renderTemplate(r.name, brand, r.data).subject }));
+const href = (name: string, variant: string | null, format?: 'text') => {
+  const q = new URLSearchParams();
+  if (variant) q.set('variant', variant);
+  if (format) q.set('format', format);
+  const s = q.toString();
+  return `/dev/emails/${name}${s ? `?${s}` : ''}`;
+};
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Email templates (dev)</title>
+  </head>
+  <body style="font-family: system-ui, sans-serif; margin: 1rem; max-width: 72rem">
+    <main>
+      <h1>Email templates</h1>
+      <p>
+        Development only. {TEMPLATE_NAMES.length} templates and {EMAIL_VARIANTS.length} variants, rendered with sample
+        data. Sent emails are in the <a href="/admin/dev/mailbox">dev mailbox</a>.
+      </p>
+      <div style="overflow-x: auto">
+        <table style="border-collapse: collapse; width: 100%">
+          <thead>
+            <tr>
+              <th scope="col" style="text-align: left; padding: 0.4rem">
+                Template
+              </th>
+              <th scope="col" style="text-align: left; padding: 0.4rem">
+                Subject
+              </th>
+              <th scope="col" style="text-align: left; padding: 0.4rem">
+                Preview
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr style="border-top: 1px solid #ddd">
+                <td style="padding: 0.4rem">
+                  <code>{r.name}</code>
+                  {r.variant ? ` (${r.variant})` : ''}
+                </td>
+                <td style="padding: 0.4rem">{r.subject}</td>
+                <td style="padding: 0.4rem; white-space: nowrap">
+                  <a href={href(r.name, r.variant)}>HTML</a> · <a href={href(r.name, r.variant, 'text')}>Plain text</a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </body>
+</html>

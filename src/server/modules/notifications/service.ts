@@ -218,7 +218,7 @@ const EMAIL_BATCH = 50;
 export async function dispatchNotificationEmails(ctx: RequestContext): Promise<{ queued: number; skipped: number }> {
   const { results } = await ctx.db
     .prepare(
-      `SELECT n.id, n.type, n.title, n.body, n.link, u.email, u.name, u.status
+      `SELECT n.id, n.type, n.title, n.body, n.link, n.entity_type, n.entity_id, u.email, u.name, u.status
        FROM notifications n JOIN users u ON u.id = n.user_id
        WHERE n.email_state = 'pending' ORDER BY n.created_at, n.id LIMIT ?`,
     )
@@ -229,6 +229,8 @@ export async function dispatchNotificationEmails(ctx: RequestContext): Promise<{
       title: string;
       body: string | null;
       link: string | null;
+      entity_type: string | null;
+      entity_id: string | null;
       email: string | null;
       name: string;
       status: string;
@@ -246,19 +248,28 @@ export async function dispatchNotificationEmails(ctx: RequestContext): Promise<{
       continue;
     }
     const link = safeLink(n.link);
+    // Some notification types have their own, richer email (PRD §7); the rest use the generic notification email.
+    const payload =
+      n.type === 'quotation.accepted' && n.entity_type === 'quotation' && n.entity_id
+        ? {
+            template: 'quotation_accepted',
+            to: n.email,
+            data: { name: n.name, label: notificationLabel(n.type), quotationId: n.entity_id },
+          }
+        : {
+            template: 'notification',
+            to: n.email,
+            data: {
+              name: n.name,
+              label: notificationLabel(n.type),
+              title: n.title,
+              ...(n.body ? { body: n.body } : {}),
+              ...(link ? { link: new URL(link, ctx.config.siteOrigin).toString() } : {}),
+            },
+          };
     const job = enqueue(ctx, {
       type: 'email.send',
-      payload: {
-        template: 'notification',
-        to: n.email,
-        data: {
-          name: n.name,
-          label: notificationLabel(n.type),
-          title: n.title,
-          ...(n.body ? { body: n.body } : {}),
-          ...(link ? { link: new URL(link, ctx.config.siteOrigin).toString() } : {}),
-        },
-      },
+      payload,
       idempotencyKey: `email:notification:${n.id}`,
     });
     jobIds.push(job.id);

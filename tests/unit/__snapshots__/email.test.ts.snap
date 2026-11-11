@@ -19,6 +19,26 @@ exports[`templates > application_acknowledgement renders HTML and text with the 
 </table></td></tr></table></body></html>"
 `;
 
+exports[`templates > application_acknowledgement renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "We received your application (APP-2026-0001)",
+  "text": "Thank you for applying
+
+Hi Ann,
+
+We have received your application for Junior Web Developer. We read every application and will contact you if we would like to take it further.
+
+Your reference: APP-2026-0001
+Position: Junior Web Developer
+
+We keep applications for 12 months after the position closes and then delete your CV. To withdraw your application or ask us to delete your data sooner, reply to this email.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
 exports[`templates > candidate_message renders HTML and text with the branded layout 1`] = `
 "<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>Interview invitation: Junior Developer</title></head>
@@ -37,6 +57,26 @@ Kuzikode Technologies</p>
 </td></tr>
 <tr><td style="padding:20px 32px;border-top:1px solid #E4E7EE;font-size:12px;line-height:1.5;color:#475066">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#475066">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
+`;
+
+exports[`templates > candidate_message renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "Interview invitation: Junior Developer",
+  "text": "Interview invitation: Junior Developer
+
+Hi Tino,
+
+We would like to invite you to an interview.
+
+Kind regards,
+Kuzikode Technologies
+
+Application reference APP-2026-0001. Reply to this email to reach us.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
 `;
 
 exports[`templates > card_charge_failed renders HTML and text with the branded layout 1`] = `
@@ -59,6 +99,28 @@ exports[`templates > card_charge_failed renders HTML and text with the branded l
 </table></td></tr></table></body></html>"
 `;
 
+exports[`templates > card_charge_failed renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "We could not charge your saved card for invoice INV-2026-00007",
+  "text": "Your automatic card payment did not go through
+
+Hi Ann Moyo Bakery,
+
+We tried to charge your saved card for invoice INV-2026-00007, but the payment was not completed. Nothing was taken from your card, and the invoice is still open.
+
+Invoice: INV-2026-00007
+Amount due: $25.00
+
+Pay invoice: https://example.com/pay/abc
+
+You can pay with another card, a mobile wallet or a bank transfer. If your card has expired, remove it in the client portal and save a new one.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
 exports[`templates > client_invitation renders HTML and text with the branded layout 1`] = `
 "<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>Your Kuzikode client portal account</title></head>
@@ -76,6 +138,25 @@ exports[`templates > client_invitation renders HTML and text with the branded la
 </td></tr>
 <tr><td style="padding:20px 32px;border-top:1px solid #E4E7EE;font-size:12px;line-height:1.5;color:#475066">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#475066">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
+`;
+
+exports[`templates > client_invitation renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "Your Kuzikode client portal account",
+  "text": "Welcome to your client portal
+
+Hi Ann,
+
+Kuzikode has created a client portal account for you. In the portal you can view and accept quotations, pay invoices, follow project progress and contact us.
+
+Set up your account: https://kuzikode.example/portal/accept-invite?token=abc
+
+This invitation works once and expires in 7 days.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
 `;
 
 exports[`templates > email_verification renders HTML and text with the branded layout 1`] = `
@@ -97,6 +178,44 @@ exports[`templates > email_verification renders HTML and text with the branded l
 </table></td></tr></table></body></html>"
 `;
 
+exports[`templates > email_verification renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "Confirm your email address",
+  "text": "Confirm your email address
+
+Hi Ann,
+
+Please confirm that this is your email address.
+
+Confirm email address: https://kuzikode.example/portal/verify-email?token=abc
+
+The link expires in 24 hours.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
+exports[`templates > enquiry_acknowledgement (project wizard) 1`] = `
+{
+  "subject": "We received your message (ENQ-2026-0001)",
+  "text": "Thank you for getting in touch
+
+Hi Ann,
+
+Thank you for your message. A member of our team will reply, usually within one business day.
+
+Your reference: ENQ-2026-0001
+
+Reply to this email if you want to add anything. Please keep the reference in the subject.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
 exports[`templates > enquiry_acknowledgement renders HTML and text with the branded layout 1`] = `
 "<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>We received your message (ENQ-2026-0001)</title></head>
@@ -116,6 +235,25 @@ exports[`templates > enquiry_acknowledgement renders HTML and text with the bran
 </table></td></tr></table></body></html>"
 `;
 
+exports[`templates > enquiry_acknowledgement renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "We received your message (ENQ-2026-0001)",
+  "text": "Thank you for getting in touch
+
+Hi Ann,
+
+Thank you for your message. A member of our team will reply, usually within one business day.
+
+Your reference: ENQ-2026-0001
+
+Reply to this email if you want to add anything. Please keep the reference in the subject.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
 exports[`templates > enquiry_admin renders HTML and text with the branded layout 1`] = `
 "<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>New enquiry ENQ-2026-0001 from Ann</title></head>
@@ -132,6 +270,25 @@ exports[`templates > enquiry_admin renders HTML and text with the branded layout
 </td></tr>
 <tr><td style="padding:20px 32px;border-top:1px solid #E4E7EE;font-size:12px;line-height:1.5;color:#475066">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#475066">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
+`;
+
+exports[`templates > enquiry_admin renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "New enquiry ENQ-2026-0001 from Ann",
+  "text": "New enquiry
+
+Reference: ENQ-2026-0001
+From: Ann (ann@example.com)
+Category: web-development
+
+We need a website.
+
+Open in admin: https://kuzikode.example/admin/enquiries/enq_1
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
 `;
 
 exports[`templates > invoice_issued renders HTML and text with the branded layout 1`] = `
@@ -154,6 +311,75 @@ exports[`templates > invoice_issued renders HTML and text with the branded layou
 </table></td></tr></table></body></html>"
 `;
 
+exports[`templates > invoice_issued renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "Invoice INV-2026-00001 from Kuzikode Technologies",
+  "text": "Your invoice
+
+Hi Ann,
+
+Please find your invoice below. You can view it online and download a PDF copy from the link.
+
+Invoice: INV-2026-00001
+Amount due: $500.00
+Due date: 13 November 2026
+
+View invoice: https://example.com/i/abc
+
+Please quote the invoice number with your payment. Reply to this email with any questions.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
+exports[`templates > invoice_reminder (before due) 1`] = `
+{
+  "subject": "Reminder: invoice INV-2026-00001 is due 13 November 2026",
+  "text": "A friendly payment reminder
+
+Hi Ann,
+
+This is a reminder that invoice INV-2026-00001 is due on 13 November 2026.
+
+Invoice: INV-2026-00001
+Balance due: $250.00
+Due date: 13 November 2026
+
+View invoice: https://example.com/i/abc
+
+If you have already paid, thank you, and please ignore this reminder. Reply to this email if anything is unclear.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
+exports[`templates > invoice_reminder (due today) 1`] = `
+{
+  "subject": "Reminder: invoice INV-2026-00001 is due today",
+  "text": "Your invoice is due today
+
+Hi Ann,
+
+This is a reminder that invoice INV-2026-00001 is due today, 13 November 2026.
+
+Invoice: INV-2026-00001
+Balance due: $250.00
+Due date: 13 November 2026
+
+View invoice: https://example.com/i/abc
+
+If you have already paid, thank you, and please ignore this reminder. Reply to this email if anything is unclear.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
 exports[`templates > invoice_reminder renders HTML and text with the branded layout 1`] = `
 "<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>Reminder: invoice INV-2026-00001 is overdue</title></head>
@@ -174,6 +400,29 @@ exports[`templates > invoice_reminder renders HTML and text with the branded lay
 </table></td></tr></table></body></html>"
 `;
 
+exports[`templates > invoice_reminder renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "Reminder: invoice INV-2026-00001 is overdue",
+  "text": "Your invoice is overdue
+
+Hi Ann,
+
+Our records show that invoice INV-2026-00001 was due on 13 November 2026 and still has a balance outstanding.
+
+Invoice: INV-2026-00001
+Balance due: $250.00
+Due date: 13 November 2026
+
+View invoice: https://example.com/i/abc
+
+If you have already paid, thank you, and please ignore this reminder. Reply to this email if anything is unclear.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
 exports[`templates > newsletter_confirmation renders HTML and text with the branded layout 1`] = `
 "<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>Confirm your newsletter subscription</title></head>
@@ -190,6 +439,23 @@ exports[`templates > newsletter_confirmation renders HTML and text with the bran
 </td></tr>
 <tr><td style="padding:20px 32px;border-top:1px solid #E4E7EE;font-size:12px;line-height:1.5;color:#475066">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#475066">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
+`;
+
+exports[`templates > newsletter_confirmation renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "Confirm your newsletter subscription",
+  "text": "Confirm your subscription
+
+Please confirm that you would like to receive occasional updates and articles from Kuzikode Technologies.
+
+Confirm subscription: https://kuzikode.example/newsletter/confirm?token=abc
+
+The link expires in 7 days. If you did not sign up, ignore this email and you will not be subscribed. Every newsletter includes an unsubscribe link.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
 `;
 
 exports[`templates > notification renders HTML and text with the branded layout 1`] = `
@@ -211,6 +477,25 @@ exports[`templates > notification renders HTML and text with the branded layout 
 </table></td></tr></table></body></html>"
 `;
 
+exports[`templates > notification renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "New enquiry from Ann Moyo · Kuzikode Technologies",
+  "text": "New enquiry from Ann Moyo
+
+Hi Tendai,
+
+Website for a bakery, budget USD 1,000–2,500.
+
+Open in admin: https://kuzikode.example/admin/enquiries/enq_1
+
+You get this email because "New enquiry" emails are on. Change it under Account → Notification preferences.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
 exports[`templates > password_reset renders HTML and text with the branded layout 1`] = `
 "<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>Reset your Kuzikode password</title></head>
@@ -228,6 +513,25 @@ exports[`templates > password_reset renders HTML and text with the branded layou
 </td></tr>
 <tr><td style="padding:20px 32px;border-top:1px solid #E4E7EE;font-size:12px;line-height:1.5;color:#475066">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#475066">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
+`;
+
+exports[`templates > password_reset renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "Reset your Kuzikode password",
+  "text": "Reset your password
+
+Hi Ann,
+
+We received a request to reset your password. Use the button below to choose a new one.
+
+Choose a new password: https://kuzikode.example/admin/reset-password?token=abc
+
+The link works once and expires in 60 minutes. If you didn't ask for this, you can ignore this email.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
 `;
 
 exports[`templates > payment_receipt renders HTML and text with the branded layout 1`] = `
@@ -250,6 +554,31 @@ exports[`templates > payment_receipt renders HTML and text with the branded layo
 </table></td></tr></table></body></html>"
 `;
 
+exports[`templates > payment_receipt renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "Payment received: receipt RCT-2026-00001",
+  "text": "Thank you for your payment
+
+Hi Ann,
+
+We have received your payment of $600.00. Your receipt details are below.
+
+Receipt: RCT-2026-00001
+Date received: 6 November 2026
+Invoice: INV-2026-00001
+Balance remaining: $0.00
+Held as account credit: $100.00
+
+View invoice: https://example.com/i/abc
+
+Keep this email for your records.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
 exports[`templates > project_update renders HTML and text with the branded layout 1`] = `
 "<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>Update on Online ordering website (PRJ-2026-0001)</title></head>
@@ -266,6 +595,98 @@ exports[`templates > project_update renders HTML and text with the branded layou
 </td></tr>
 <tr><td style="padding:20px 32px;border-top:1px solid #E4E7EE;font-size:12px;line-height:1.5;color:#475066">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#475066">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
+`;
+
+exports[`templates > project_update renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "Update on Online ordering website (PRJ-2026-0001)",
+  "text": "An update on Online ordering website
+
+Hi Ann,
+
+The design is approved. Build starts on Monday.
+
+Project PRJ-2026-0001. Reply to this email with any questions.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
+exports[`templates > quotation_accepted (recorded by staff) 1`] = `
+{
+  "subject": "Quotation QUO-2026-0001 accepted by Baobab Foods",
+  "text": "A quotation was accepted
+
+Hi Tendai,
+
+A team member recorded that Baobab Foods accepted quotation QUO-2026-0001.
+
+Quotation: QUO-2026-0001: Website redesign
+Client: Baobab Foods
+Total: US$1,200.00
+Accepted: 11 November 2026
+Accepted by: Ann Moyo
+
+Next steps, such as the invoice or the project, start from the quotation page.
+
+Open the quotation: https://kuzikode.example/admin/quotations/quo_1
+
+You get this email because "Quotation accepted" emails are on. Change it under Account → Notification preferences.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
+exports[`templates > quotation_accepted renders HTML and text with the branded layout 1`] = `
+"<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>Quotation QUO-2026-0001 accepted by Baobab Foods</title></head>
+<body style="margin:0;padding:0;background:#F7F8FA;font-family:Inter,'Segoe UI',Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">Baobab Foods accepted Website redesign (US$1,200.00).</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F7F8FA"><tr><td align="center" style="padding:24px 12px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #E4E7EE;border-radius:10px">
+<tr><td style="padding:24px 32px;border-bottom:1px solid #E4E7EE"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#0A0F1C"><span style="color:#2747E8">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:28px 32px 12px">
+<h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#0A0F1C;font-weight:700">A quotation was accepted</h1>
+<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#1C2333">Hi Tendai,</p>
+<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#1C2333">Baobab Foods accepted quotation QUO-2026-0001 through its client link.</p>
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 20px;border-collapse:collapse"><tr><td style="padding:8px 0;border-bottom:1px solid #E4E7EE;font-size:14px;color:#475066">Quotation</td><td align="right" style="padding:8px 0;border-bottom:1px solid #E4E7EE;font-size:14px;color:#0A0F1C;font-weight:600">QUO-2026-0001: Website redesign</td></tr><tr><td style="padding:8px 0;border-bottom:1px solid #E4E7EE;font-size:14px;color:#475066">Client</td><td align="right" style="padding:8px 0;border-bottom:1px solid #E4E7EE;font-size:14px;color:#0A0F1C;font-weight:600">Baobab Foods</td></tr><tr><td style="padding:8px 0;border-bottom:1px solid #E4E7EE;font-size:14px;color:#475066">Total</td><td align="right" style="padding:8px 0;border-bottom:1px solid #E4E7EE;font-size:14px;color:#0A0F1C;font-weight:600">US$1,200.00</td></tr><tr><td style="padding:8px 0;border-bottom:1px solid #E4E7EE;font-size:14px;color:#475066">Accepted</td><td align="right" style="padding:8px 0;border-bottom:1px solid #E4E7EE;font-size:14px;color:#0A0F1C;font-weight:600">11 November 2026</td></tr><tr><td style="padding:8px 0;border-bottom:1px solid #E4E7EE;font-size:14px;color:#475066">Accepted by</td><td align="right" style="padding:8px 0;border-bottom:1px solid #E4E7EE;font-size:14px;color:#0A0F1C;font-weight:600">Ann Moyo</td></tr></table>
+<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#1C2333">Next steps, such as the invoice or the project, start from the quotation page.</p>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:#2747E8;border-radius:6px"><a href="https://kuzikode.example/admin/quotations/quo_1" style="display:inline-block;padding:12px 22px;font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none">Open the quotation</a></td></tr></table>
+<p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#475066">You get this email because &quot;Quotation accepted&quot; emails are on. Change it under Account → Notification preferences.</p>
+</td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #E4E7EE;font-size:12px;line-height:1.5;color:#475066">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#475066">kuzikode.example</a></td></tr>
+</table></td></tr></table></body></html>"
+`;
+
+exports[`templates > quotation_accepted renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "Quotation QUO-2026-0001 accepted by Baobab Foods",
+  "text": "A quotation was accepted
+
+Hi Tendai,
+
+Baobab Foods accepted quotation QUO-2026-0001 through its client link.
+
+Quotation: QUO-2026-0001: Website redesign
+Client: Baobab Foods
+Total: US$1,200.00
+Accepted: 11 November 2026
+Accepted by: Ann Moyo
+
+Next steps, such as the invoice or the project, start from the quotation page.
+
+Open the quotation: https://kuzikode.example/admin/quotations/quo_1
+
+You get this email because "Quotation accepted" emails are on. Change it under Account → Notification preferences.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
 `;
 
 exports[`templates > quotation_sent renders HTML and text with the branded layout 1`] = `
@@ -288,6 +709,49 @@ exports[`templates > quotation_sent renders HTML and text with the branded layou
 </table></td></tr></table></body></html>"
 `;
 
+exports[`templates > quotation_sent renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "Quotation QUO-2026-0001: Website redesign",
+  "text": "Your quotation
+
+Hi Ann,
+
+Please find our quotation for Website redesign. You can read it online, download it and accept or decline it from the link below.
+
+Quotation: QUO-2026-0001
+Total: US$1,200.00
+Valid until: 6 December 2026
+
+View quotation: https://example.com/q/abc
+
+If you have questions, reply to this email and we will get back to you.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
+exports[`templates > renewal_reminder (auto-renew) 1`] = `
+{
+  "subject": "Renewal coming up: Domain: baobab.co.zw",
+  "text": "A renewal is coming up
+
+Hi Ann,
+
+Domain: baobab.co.zw renews automatically on 6 December 2026 (in 7 days). You don't need to do anything.
+
+Service: Domain: baobab.co.zw
+Renewal date: 6 December 2026
+
+We send this reminder 30, 14 and 7 days before each renewal.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
 exports[`templates > renewal_reminder renders HTML and text with the branded layout 1`] = `
 "<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>Renewal coming up: Domain: baobab.co.zw</title></head>
@@ -305,6 +769,46 @@ exports[`templates > renewal_reminder renders HTML and text with the branded lay
 </td></tr>
 <tr><td style="padding:20px 32px;border-top:1px solid #E4E7EE;font-size:12px;line-height:1.5;color:#475066">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#475066">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
+`;
+
+exports[`templates > renewal_reminder renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "Renewal coming up: Domain: baobab.co.zw",
+  "text": "A renewal is coming up
+
+Hi Ann,
+
+Domain: baobab.co.zw is due for renewal on 6 December 2026 (in 30 days). Reply to this email to confirm you'd like to keep it, or if anything should change.
+
+Service: Domain: baobab.co.zw
+Renewal date: 6 December 2026
+
+We send this reminder 30, 14 and 7 days before each renewal.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
+exports[`templates > security_alert (new sign-in) 1`] = `
+{
+  "subject": "New sign-in to your account · Kuzikode",
+  "text": "New sign-in to your account
+
+Hi Ann,
+
+New sign-in to your account. Your other sessions have been signed out where relevant.
+
+When: Thu, 05 Nov 2026 10:00:00 GMT
+IP address: 1.2.3.4
+
+If this was not you, reset your password straight away and contact us.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
 `;
 
 exports[`templates > security_alert renders HTML and text with the branded layout 1`] = `
@@ -326,6 +830,26 @@ exports[`templates > security_alert renders HTML and text with the branded layou
 </table></td></tr></table></body></html>"
 `;
 
+exports[`templates > security_alert renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "Your password was changed · Kuzikode",
+  "text": "Your password was changed
+
+Hi Ann,
+
+Your password was changed. Your other sessions have been signed out where relevant.
+
+When: Thu, 05 Nov 2026 10:00:00 GMT
+IP address: 1.2.3.4
+
+If this was not you, reset your password straight away and contact us.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
 exports[`templates > staff_invitation renders HTML and text with the branded layout 1`] = `
 "<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>You have been invited to the Kuzikode admin</title></head>
@@ -343,6 +867,25 @@ exports[`templates > staff_invitation renders HTML and text with the branded lay
 </td></tr>
 <tr><td style="padding:20px 32px;border-top:1px solid #E4E7EE;font-size:12px;line-height:1.5;color:#475066">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#475066">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
+`;
+
+exports[`templates > staff_invitation renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "You have been invited to the Kuzikode admin",
+  "text": "Welcome to the team workspace
+
+Hi Ann,
+
+You have been invited to the Kuzikode admin portal. Set a password to activate your account.
+
+Set your password: https://kuzikode.example/admin/accept-invite?token=abc
+
+This invitation works once and expires in 7 days.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
 `;
 
 exports[`templates > support_ack renders HTML and text with the branded layout 1`] = `
@@ -364,6 +907,25 @@ exports[`templates > support_ack renders HTML and text with the branded layout 1
 </table></td></tr></table></body></html>"
 `;
 
+exports[`templates > support_ack renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "We received your request: Website is down [SUP-2026-0002]",
+  "text": "We received your support request
+
+Hi Ann,
+
+Thank you for getting in touch. Our team will look at your request and reply in the client portal.
+
+Request: SUP-2026-0002: Website is down
+
+View your request: https://kuzikode.example/portal/support/sup_1
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
 exports[`templates > support_reply renders HTML and text with the branded layout 1`] = `
 "<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>Re: Email not syncing [SUP-2026-0001]</title></head>
@@ -383,6 +945,25 @@ exports[`templates > support_reply renders HTML and text with the branded layout
 </table></td></tr></table></body></html>"
 `;
 
+exports[`templates > support_reply renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "Re: Email not syncing [SUP-2026-0001]",
+  "text": "A reply to your support request
+
+Hi Ann,
+
+We reset the mailbox password; please try again.
+
+Request: SUP-2026-0001: Email not syncing
+
+Reply to this email and we will add your message to the request.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
+`;
+
 exports[`templates > system_test renders HTML and text with the branded layout 1`] = `
 "<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>Test email from Kuzikode Technologies</title></head>
@@ -399,4 +980,21 @@ exports[`templates > system_test renders HTML and text with the branded layout 1
 </td></tr>
 <tr><td style="padding:20px 32px;border-top:1px solid #E4E7EE;font-size:12px;line-height:1.5;color:#475066">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#475066">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
+`;
+
+exports[`templates > system_test renders HTML and text with the branded layout 2`] = `
+{
+  "subject": "Test email from Kuzikode Technologies",
+  "text": "Email is working
+
+Hi Ann,
+
+This is a test sent from the admin settings. If you can read it, outgoing email is set up correctly.
+
+Sent 2026-11-06T10:00:00.000Z.
+
+—
+Kuzikode Technologies
+https://kuzikode.example/",
+}
 `;

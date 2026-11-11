@@ -5,9 +5,11 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
-- Last completed task: **P6.5 Paynow test-mode verification** `[!]` (2026-11-11; Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
-- **Next step:** **P6.6 All email templates** (PRD §7): every template HTML + text, dev preview page, snapshot tests (AC: every
-  template has a test). Look at the existing email module/templates first (`card_charge_failed`, notification emails…). Then P6.7.
+- Last completed task: **P6.6 All email templates** (2026-11-11). P6.5 is `[!]` (Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
+- **Next step:** **P6.7 Resend webhooks** (roadmap; PRD §7, docs/07 for webhook rules): `POST /api/webhooks/resend`,
+  verify the Svix-style signature (`svix-id`, `svix-timestamp`, `svix-signature`, secret `RESEND_WEBHOOK_SECRET`; re-check Resend's
+  docs with WebFetch first), map delivered/bounced/complained/delayed → `email_logs.status` by provider message id, idempotent,
+  tests with signed fixtures. Then P6.8 (live email on staging; a RESEND_API_KEY exists in the build env).
 - **For P8.2 (staging):** re-run `LIVE_RESULT_URL=https://<staging>/api/payments/callbacks/paynow/<accountId> npm run test:payments:live`
   so Paynow's result URL is reachable, and record it.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
@@ -713,3 +715,14 @@ The **Next step** line must be specific enough that a fresh session can continue
   "Insufficient balance"**, not retryable · redirect (card) → verified paynow.co.zw page, status **Created** (waiting). 4/4 passed.
   PesePay: skipped (no test keys).
 - Not done (owner/staging): result URL reachable on staging (P8.2), manual "Faked Success" on Paynow's page (BLOCKERS).
+
+## 2026-11-11 17:45 UTC · P6.6 All email templates ✅
+- 23 templates (PRD §7 list complete). New `quotation_accepted` staff email (number, title, client, total, accepted on/by, link-or-staff
+  wording; resolver loads details at send time; the notification dispatcher uses it for `quotation.accepted`, same email preference).
+  `invoice_reminder` gains the "due today" wording for the on-the-day reminder (`dueToday` set by the resolver at send time).
+- `src/server/email/templates/samples.ts`: sample data typed `Record<TemplateName, …>` (a template without a sample fails the
+  typecheck) + 6 variants. Dev preview `/dev/emails` (list with subjects) and `/dev/emails/<name>[?variant=&format=text]`
+  (real renderer, 404 outside development); linked from the dev nav.
+- Tests: unit email (39: HTML + subject/text snapshots for every template and variant, PRD list complete, before/on/after wording) ·
+  integration notifications (acceptance → dedicated email to staff, rendered from the queue) and invoices (on-due reminder "due today")
+  · e2e `email-preview.spec.ts`. ui-kit e2e green.

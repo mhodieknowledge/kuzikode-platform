@@ -73,6 +73,33 @@ describe('notifications (P4.16)', () => {
     expect((await notes(colleague.id, 'quotation.rejected')).map((n) => n.entity_id)).toEqual([id]);
   });
 
+  it('quotation.accepted emails staff the dedicated "quotation accepted" email with the details (P6.6)', async () => {
+    const author = await staff(['admin']);
+    const colleague = await createStaff(['finance_manager']);
+    const { id, token } = await sentQuotation(author, await newClient(author));
+    const res = await api(`/api/v1/public/quotations/${token}/respond`, {
+      body: { decision: 'accept', name: 'Tariro Banda', agree: true },
+    });
+    expect(res.status, JSON.stringify(res.body)).toBe(200);
+    const [note] = await notes(colleague.id, 'quotation.accepted');
+    expect(note).toMatchObject({ entity_id: id, email_state: 'pending' });
+    await dispatchNotificationEmails(sysCtx());
+    const [job] = await all(
+      'SELECT id, payload FROM outbox WHERE idempotency_key = ?',
+      `email:notification:${note.id}`,
+    );
+    expect(JSON.parse(job.payload)).toMatchObject({ template: 'quotation_accepted', data: { quotationId: id } });
+    expect(await processOutbox(sysCtx(), job.id)).toEqual({ outcome: 'done' });
+    const [log] = await all('SELECT to_email, subject, text FROM email_logs WHERE outbox_id = ?', job.id);
+    const number = (await all('SELECT number FROM quotations WHERE id = ?', id))[0].number as string;
+    expect(log.to_email).toBe(colleague.email);
+    expect(log.subject).toBe(`Quotation ${number} accepted by Baobab Foods`);
+    expect(log.text).toContain('Baobab Foods accepted quotation');
+    expect(log.text).toContain('Accepted by: Tariro Banda');
+    expect(log.text).toContain('$800.00');
+    expect(log.text).toContain(`/admin/quotations/${id}`);
+  });
+
   it('invoice.issued and payment.received reach finance staff, not the person who did it', async () => {
     const finance = await staff(['admin']);
     const colleague = await createStaff(['finance_manager']);

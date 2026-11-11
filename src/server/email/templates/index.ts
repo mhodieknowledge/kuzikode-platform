@@ -273,6 +273,68 @@ const defs = {
         ],
       }),
   },
+  quotation_accepted: {
+    schema: z.object({
+      name: z.string(),
+      label: z.string(),
+      number: z.string(),
+      title: z.string(),
+      client: z.string(),
+      total: z.string(),
+      acceptedBy: z.string().nullable(),
+      acceptedOn: z.string(),
+      byStaff: z.boolean(),
+      link: url,
+    }),
+    render: (
+      b: Brand,
+      d: {
+        name: string;
+        label: string;
+        number: string;
+        title: string;
+        client: string;
+        total: string;
+        acceptedBy: string | null;
+        acceptedOn: string;
+        byStaff: boolean;
+        link: string;
+      },
+    ) =>
+      renderEmail(b, {
+        subject: `Quotation ${d.number} accepted by ${d.client}`,
+        preheader: `${d.client} accepted ${d.title} (${d.total}).`,
+        heading: 'A quotation was accepted',
+        blocks: [
+          { kind: 'p', text: `Hi ${d.name},` },
+          {
+            kind: 'p',
+            text: d.byStaff
+              ? `A team member recorded that ${d.client} accepted quotation ${d.number}.`
+              : `${d.client} accepted quotation ${d.number} through its client link.`,
+          },
+          {
+            kind: 'kv',
+            rows: [
+              ['Quotation', `${d.number}: ${d.title}`],
+              ['Client', d.client],
+              ['Total', d.total],
+              ['Accepted', d.acceptedOn],
+              ...(d.acceptedBy ? ([['Accepted by', d.acceptedBy]] as [string, string][]) : []),
+            ],
+          },
+          {
+            kind: 'p',
+            text: 'Next steps, such as the invoice or the project, start from the quotation page.',
+          },
+          { kind: 'button', text: 'Open the quotation', href: d.link },
+          {
+            kind: 'small',
+            text: `You get this email because "${d.label}" emails are on. Change it under Account → Notification preferences.`,
+          },
+        ],
+      }),
+  },
   newsletter_confirmation: {
     schema: z.object({ link: url }),
     render: (b: Brand, d: { link: string }) =>
@@ -347,25 +409,43 @@ const defs = {
       balance: z.string(),
       dueDate: z.string(),
       overdue: z.boolean(),
+      /** The reminder sent on the due date itself (before / on / after due, PRD §7). */
+      dueToday: z.boolean().optional(),
       link: url,
     }),
     render: (
       b: Brand,
-      d: { name: string; number: string; balance: string; dueDate: string; overdue: boolean; link: string },
+      d: {
+        name: string;
+        number: string;
+        balance: string;
+        dueDate: string;
+        overdue: boolean;
+        dueToday?: boolean | undefined;
+        link: string;
+      },
     ) =>
       renderEmail(b, {
         subject: d.overdue
           ? `Reminder: invoice ${d.number} is overdue`
-          : `Reminder: invoice ${d.number} is due ${d.dueDate}`,
+          : d.dueToday
+            ? `Reminder: invoice ${d.number} is due today`
+            : `Reminder: invoice ${d.number} is due ${d.dueDate}`,
         preheader: `${d.balance} outstanding on invoice ${d.number}.`,
-        heading: d.overdue ? 'Your invoice is overdue' : 'A friendly payment reminder',
+        heading: d.overdue
+          ? 'Your invoice is overdue'
+          : d.dueToday
+            ? 'Your invoice is due today'
+            : 'A friendly payment reminder',
         blocks: [
           { kind: 'p', text: `Hi ${d.name},` },
           {
             kind: 'p',
             text: d.overdue
               ? `Our records show that invoice ${d.number} was due on ${d.dueDate} and still has a balance outstanding.`
-              : `This is a reminder that invoice ${d.number} is due on ${d.dueDate}.`,
+              : d.dueToday
+                ? `This is a reminder that invoice ${d.number} is due today, ${d.dueDate}.`
+                : `This is a reminder that invoice ${d.number} is due on ${d.dueDate}.`,
           },
           {
             kind: 'kv',

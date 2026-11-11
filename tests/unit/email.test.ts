@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { EmailProviderError } from '../../src/server/email/provider';
 import { resendProvider } from '../../src/server/email/providers/resend';
 import { renderTemplate, TEMPLATE_NAMES } from '../../src/server/email/templates';
+import { EMAIL_SAMPLES, EMAIL_VARIANTS } from '../../src/server/email/templates/samples';
 import { escapeHtml } from '../../src/server/email/templates/layout';
 
 const brand = { companyName: 'Kuzikode Technologies', siteUrl: 'https://kuzikode.example/' };
@@ -64,121 +65,51 @@ describe('Resend adapter', () => {
 });
 
 describe('templates', () => {
-  const samples: Record<string, unknown> = {
-    security_alert: { name: 'Ann', event: 'password_changed', at: '2026-11-05T10:00:00Z', ip: '1.2.3.4' },
-    password_reset: {
-      name: 'Ann',
-      link: 'https://kuzikode.example/admin/reset-password?token=abc',
-      expiresInMinutes: 60,
-    },
-    email_verification: { name: 'Ann', link: 'https://kuzikode.example/portal/verify-email?token=abc' },
-    staff_invitation: { name: 'Ann', link: 'https://kuzikode.example/admin/accept-invite?token=abc', expiresInDays: 7 },
-    client_invitation: {
-      name: 'Ann',
-      link: 'https://kuzikode.example/portal/accept-invite?token=abc',
-      expiresInDays: 7,
-    },
-    enquiry_acknowledgement: { name: 'Ann', reference: 'ENQ-2026-0001', kind: 'contact' },
-    enquiry_admin: {
-      reference: 'ENQ-2026-0001',
-      name: 'Ann',
-      email: 'ann@example.com',
-      category: 'web-development',
-      message: 'We need a website.',
-      kind: 'contact',
-      link: 'https://kuzikode.example/admin/enquiries/enq_1',
-    },
-    application_acknowledgement: { name: 'Ann', reference: 'APP-2026-0001', position: 'Junior Web Developer' },
-    system_test: { name: 'Ann', at: '2026-11-06T10:00:00.000Z' },
-    quotation_sent: {
-      name: 'Ann',
-      number: 'QUO-2026-0001',
-      title: 'Website redesign',
-      total: 'US$1,200.00',
-      validUntil: '6 December 2026',
-      link: 'https://example.com/q/abc',
-      message: null,
-    },
-    newsletter_confirmation: { link: 'https://kuzikode.example/newsletter/confirm?token=abc' },
-    support_reply: {
-      name: 'Ann',
-      reference: 'SUP-2026-0001',
-      subject: 'Email not syncing',
-      body: 'We reset the mailbox password; please try again.',
-    },
-    support_ack: {
-      name: 'Ann',
-      reference: 'SUP-2026-0002',
-      subject: 'Website is down',
-      link: 'https://kuzikode.example/portal/support/sup_1',
-    },
-    candidate_message: {
-      subject: 'Interview invitation: Junior Developer',
-      body: 'Hi Tino,\n\nWe would like to invite you to an interview.\n\nKind regards,\nKuzikode Technologies',
-      reference: 'APP-2026-0001',
-    },
-    renewal_reminder: {
-      name: 'Ann',
-      item: 'Domain: baobab.co.zw',
-      renewalDate: '6 December 2026',
-      days: 30,
-      autoRenew: false,
-    },
-    notification: {
-      name: 'Tendai',
-      label: 'New enquiry',
-      title: 'New enquiry from Ann Moyo',
-      body: 'Website for a bakery, budget USD 1,000–2,500.',
-      link: 'https://kuzikode.example/admin/enquiries/enq_1',
-    },
-    project_update: {
-      name: 'Ann',
-      project: 'Online ordering website',
-      reference: 'PRJ-2026-0001',
-      body: 'The design is approved. Build starts on Monday.',
-    },
-    invoice_issued: {
-      name: 'Ann',
-      number: 'INV-2026-00001',
-      total: '$500.00',
-      dueDate: '13 November 2026',
-      link: 'https://example.com/i/abc',
-      message: null,
-    },
-    invoice_reminder: {
-      name: 'Ann',
-      number: 'INV-2026-00001',
-      balance: '$250.00',
-      dueDate: '13 November 2026',
-      overdue: true,
-      link: 'https://example.com/i/abc',
-    },
-    card_charge_failed: {
-      name: 'Ann Moyo Bakery',
-      number: 'INV-2026-00007',
-      amount: '$25.00',
-      link: 'https://example.com/pay/abc',
-    },
-    payment_receipt: {
-      name: 'Ann',
-      receiptNumber: 'RCT-2026-00001',
-      amount: '$600.00',
-      receivedOn: '6 November 2026',
-      invoiceNumber: 'INV-2026-00001',
-      balance: '$0.00',
-      credit: '$100.00',
-      link: 'https://example.com/i/abc',
-    },
-  };
-
   it.each(TEMPLATE_NAMES)('%s renders HTML and text with the branded layout', (name) => {
-    const r = renderTemplate(name, brand, samples[name]);
+    const r = renderTemplate(name, brand, EMAIL_SAMPLES[name]);
     expect(r.subject.length).toBeGreaterThan(5);
     expect(r.html).toContain('<!doctype html>');
     expect(r.html).toContain('Kuzikode Technologies');
     expect(r.html).toContain('color-scheme');
     expect(r.text).not.toContain('<');
+    expect(r.text).toContain('Kuzikode Technologies');
     expect(r.html).toMatchSnapshot();
+    expect({ subject: r.subject, text: r.text }).toMatchSnapshot();
+  });
+
+  it.each(EMAIL_VARIANTS.map((v) => [`${v.name} (${v.variant})`, v] as const))('%s', (_label, v) => {
+    const r = renderTemplate(v.name, brand, v.data);
+    expect({ subject: r.subject, text: r.text }).toMatchSnapshot();
+  });
+
+  it('PRD §7 template list is complete', () => {
+    for (const name of [
+      'staff_invitation',
+      'client_invitation',
+      'email_verification',
+      'password_reset',
+      'security_alert',
+      'enquiry_admin',
+      'enquiry_acknowledgement',
+      'quotation_sent',
+      'quotation_accepted',
+      'invoice_issued',
+      'payment_receipt',
+      'card_charge_failed',
+      'invoice_reminder',
+      'project_update',
+      'support_ack',
+      'support_reply',
+    ])
+      expect(TEMPLATE_NAMES).toContain(name);
+  });
+
+  it('reminder wording: before, on and after the due date', () => {
+    const subject = (d: Record<string, unknown>) =>
+      renderTemplate('invoice_reminder', brand, { ...EMAIL_SAMPLES.invoice_reminder, ...d }).subject;
+    expect(subject({ overdue: false })).toBe('Reminder: invoice INV-2026-00001 is due 13 November 2026');
+    expect(subject({ overdue: false, dueToday: true })).toBe('Reminder: invoice INV-2026-00001 is due today');
+    expect(subject({ overdue: true })).toBe('Reminder: invoice INV-2026-00001 is overdue');
   });
 
   it('escapes user-controlled data', () => {

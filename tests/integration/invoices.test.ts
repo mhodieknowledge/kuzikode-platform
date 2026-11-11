@@ -298,6 +298,19 @@ describe('invoices (P4.9)', () => {
       ).n,
     ).toBe(1);
 
+    const subjectOf = async (key: string, at: Date) => {
+      const j = await row('SELECT id FROM outbox WHERE idempotency_key = ?', key);
+      expect(await processOutbox(sysCtx(at), j.id)).toEqual({ outcome: 'done' });
+      return (await row('SELECT subject FROM email_logs WHERE outbox_id = ?', j.id)).subject as string;
+    };
+    expect(await subjectOf(`email:invoice_reminder:${a}:before_3`, before)).toMatch(/^Reminder: invoice .+ is due \d/);
+
+    // On the due date: the "on the day" reminder says "due today" (before / on / after due, PRD §7).
+    const onDay = new Date(`${due}T08:00:00Z`);
+    await sendReminders(sysCtx(onDay));
+    expect(await kindsOf(a)).toEqual(['before_3', 'due']);
+    expect(await subjectOf(`email:invoice_reminder:${a}:due`, onDay)).toMatch(/is due today$/);
+
     // Ten days late: overdue (once), and only the latest reached reminder (after_7), once.
     const late = new Date(`${addDays(due, 10)}T01:00:00Z`);
     await markOverdue(sysCtx(late));
@@ -310,9 +323,9 @@ describe('invoices (P4.9)', () => {
     ).toBe(1);
     await sendReminders(sysCtx(late));
     await sendReminders(sysCtx(late));
-    expect(await kindsOf(a)).toEqual(['before_3', 'after_7']);
+    expect(await kindsOf(a)).toEqual(['before_3', 'due', 'after_7']);
     expect(await kindsOf(paid)).toEqual([]);
-    expect((await inv(a)).reminder_count).toBe(2);
+    expect((await inv(a)).reminder_count).toBe(3);
     expect(
       (await row("SELECT COUNT(*) AS n FROM notifications WHERE type = 'invoice.overdue' AND entity_id = ?", a)).n,
     ).toBeGreaterThan(0);

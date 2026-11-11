@@ -6,7 +6,13 @@ import KitchenSink from '../../components/dev/KitchenSink';
 if (Astro.locals.ctx.config.appEnv !== 'development') return new Response('Not found', { status: 404 });
 const nav = [
   { label: 'Overview', items: [{ label: 'UI kit', href: '/dev/ui', active: true }] },
-  { label: 'Development', items: [{ label: 'Mailbox', href: '/admin/dev/mailbox' }] },
+  {
+    label: 'Development',
+    items: [
+      { label: 'Mailbox', href: '/admin/dev/mailbox' },
+      { label: 'Email templates', href: '/dev/emails' },
+    ],
+  },
 ];
 ---
 

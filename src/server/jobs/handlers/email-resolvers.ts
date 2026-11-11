@@ -1,6 +1,7 @@
 import type { RequestContext } from '../../context';
 import { formatMoney } from '../../../shared/money';
 import { formatLongDate } from '../../../shared/service-display';
+import { businessDate } from '../../lib/dates';
 
 /**
  * Some email data is only known after the business batch commits (e.g. gap-free references assigned in SQL).
@@ -61,6 +62,42 @@ const quotationDetails: EmailResolver = async (ctx, data) => {
   };
 };
 
+/** Staff email when a client accepts a quotation (PRD §7 "quotation accepted (admin)"). */
+const quotationAccepted: EmailResolver = async (ctx, data) => {
+  const row = await ctx.db
+    .prepare(
+      `SELECT q.number, q.title, q.total_minor, q.currency, q.status, q.accepted_at, q.accepted_by_name, q.accepted_ip,
+         COALESCE(json_extract(q.client_snapshot, '$.name'), c.display_name) AS client
+       FROM quotations q JOIN clients c ON c.id = q.client_id WHERE q.id = ?`,
+    )
+    .bind(String(data['quotationId'] ?? ''))
+    .first<{
+      number: string | null;
+      title: string;
+      total_minor: number;
+      currency: string;
+      status: string;
+      accepted_at: string | null;
+      accepted_by_name: string | null;
+      accepted_ip: string | null;
+      client: string;
+    }>();
+  if (!row?.number) throw new Error('quotation not found or not numbered for email');
+  const { quotationId: id, ...rest } = data;
+  return {
+    ...rest,
+    number: row.number,
+    title: row.title,
+    client: row.client,
+    total: formatMoney(row.total_minor, row.currency),
+    acceptedBy: row.accepted_by_name,
+    acceptedOn: formatLongDate(row.accepted_at ?? ctx.now().toISOString()),
+    // A client accepting through the link leaves its IP; staff recording it on the client's behalf does not.
+    byStaff: row.accepted_ip === null,
+    link: new URL(`/admin/quotations/${String(id)}`, ctx.config.siteUrl).toString(),
+  };
+};
+
 const invoiceDetails: EmailResolver = async (ctx, data) => {
   const row = await ctx.db
     .prepare('SELECT number, total_minor, balance_minor, currency, due_date, status FROM invoices WHERE id = ?')
@@ -88,13 +125,14 @@ const invoiceDetails: EmailResolver = async (ctx, data) => {
 const reminderDetails: EmailResolver = async (ctx, data) => {
   const d = await invoiceDetails(ctx, data);
   const row = await ctx.db
-    .prepare('SELECT status, balance_minor FROM invoices WHERE id = ?')
+    .prepare('SELECT status, balance_minor, due_date FROM invoices WHERE id = ?')
     .bind(String(data['invoiceId'] ?? ''))
-    .first<{ status: string; balance_minor: number }>();
+    .first<{ status: string; balance_minor: number; due_date: string | null }>();
   if (!row || !['issued', 'partially_paid', 'overdue'].includes(row.status) || row.balance_minor <= 0)
     throw new SkipEmail('invoice no longer has a balance');
   const { total: _t, ...rest } = d;
-  return { ...rest, overdue: row.status === 'overdue' };
+  const overdue = row.status === 'overdue';
+  return { ...rest, overdue, dueToday: !overdue && row.due_date === businessDate(ctx.now()) };
 };
 
 const receiptDetails: EmailResolver = async (ctx, data) => {
@@ -130,6 +168,7 @@ const receiptDetails: EmailResolver = async (ctx, data) => {
 
 export const EMAIL_RESOLVERS: Record<string, EmailResolver> = {
   quotation_sent: quotationDetails,
+  quotation_accepted: quotationAccepted,
   invoice_issued: invoiceDetails,
   invoice_reminder: reminderDetails,
   payment_receipt: receiptDetails,

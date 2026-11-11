@@ -91,7 +91,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P5.8 Public document pages** `/q/:token`, `/i/:token`, `/pay/return`. AC: token tests, noindex/no-store.
 
 ## Phase 6 — Payments & email integrations
-- [ ] **P6.1 `packages/payments` workspace package** (interface, types, money helpers, adapter conformance kit, mock provider, README + extraction guide + "writing a new adapter" guide, own tests in CI) + app router (accounts + routes) + mock checkout page. AC: mock unreachable in production config (test).
+- [x] **P6.1 `packages/payments` workspace package** (interface, types, money helpers, adapter conformance kit, mock provider, README + extraction guide + "writing a new adapter" guide, own tests in CI) + app router (accounts + routes) + mock checkout page. AC: mock unreachable in production config (test).
 - [ ] **P6.2 Payments service** (initiate, attempts reuse, callback endpoint, verify, apply, state machine, reversal, overpayment, idempotency). AC: all docs/06 §5 tests. Also: a failed/cancelled attempt raises a `payment.failed` notification (`notifyStaffWithPermission(ctx, 'payments.view', …)` in the same batch) with a test (carried over from P4.16).
 - [ ] **P6.3 Paynow adapter (launch)**: redirect + express (EcoCash, OneMoney, InnBucks, O'mari OTP), SHA-512 hash in/out, polling, mapper, redaction. AC: docs' hash vectors pass, conformance kit passes, mocked-HTTP integration tests.
 - [ ] **P6.3b PesePay adapter (alternative)**: AES-256-CBC, initiate, check, mapper. AC: conformance kit passes. Test that switching the route from Paynow to PesePay changes only new attempts.

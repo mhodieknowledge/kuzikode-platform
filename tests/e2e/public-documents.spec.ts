@@ -51,3 +51,22 @@ test('bad tokens and signatures are 404 and still private (P5.8)', async ({ requ
     expect(res.headers()['x-robots-tag'], path).toBe('noindex, nofollow');
   }
 });
+
+test('mock gateway page: test banner, pick an outcome, back to our site (P6.1)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const res = await page.goto('/dev/mock-checkout/mock_pat_e2e_checkout');
+  expect(res?.status()).toBe(200);
+  expect(res?.headers()['x-robots-tag']).toBe('noindex, nofollow');
+  await expect(page.getByText('TEST PAYMENT, no real money.')).toBeVisible();
+  await expect(page.getByText('$45.00')).toBeVisible();
+  await expectAccessible(page);
+  await screenshots(page, 'mock-checkout');
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.getByRole('button', { name: /^Succeed/ }).click();
+  await expect(page).toHaveURL(/\/contact$/);
+  // Settled: the page now only offers the way back.
+  await page.goto('/dev/mock-checkout/mock_pat_e2e_checkout');
+  await expect(page.getByText('succeeded', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Succeed/ })).toHaveCount(0);
+  expect((await page.request.get('/dev/mock-checkout/mock_unknown')).status()).toBe(404);
+});

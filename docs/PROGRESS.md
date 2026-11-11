@@ -4,12 +4,15 @@ The agent appends a new entry at the top after every task, and always before a s
 The **Next step** line must be specific enough that a fresh session can continue without guessing.
 
 ## Current status
-- Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 5 (client portal) done.
-- Last completed task: **P5.8 Public document pages** (2026-11-11).
-- **Next step:** Phase 6, **P6.1 `packages/payments` workspace package** (interface, types, money helpers, adapter conformance kit,
-  mock provider, README + extraction + "writing a new adapter" guides, own tests in CI) + app router (accounts + routes) + mock
-  checkout page; AC: mock unreachable in production config (test). Read docs/06 in full first. The gateway return URL for every
-  attempt is `paymentReturnUrl(ctx, attemptId)` (`src/server/lib/public-links.ts`) → `/pay/return`.
+- Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
+- Last completed task: **P6.1 payments package + router + mock checkout** (2026-11-11).
+- **Next step:** **P6.2 Payments service** (docs/06 §3 + §5 tests): `src/server/modules/payments/orchestration.ts` (or service.ts):
+  `paymentOptions(invoice)` via `paymentMethodOptions`, `initiate` (Idempotency-Key, attempt reuse < 30 min, `resolveRoute`,
+  `paymentReturnUrl` as returnUrl, resultUrl `/api/payments/callbacks/:provider/:accountId`), callback endpoint (parseCallback →
+  `payment_events` dedupe → confirm with checkPaymentStatus → apply), apply in one batch guarded by the attempt status UPDATE,
+  overpayment → client credit, reversal/dispute handling, `payment.failed` notification (carried over from P4.16). The mock's hosted
+  page (`settleMockCheckout`) only changes gateway state; P6.2 should also deliver a signed mock callback in-process
+  (`signMockCallback`) after settling, so the callback path is exercised in dev.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 - New entries are appended at the **bottom** of this file.
 
@@ -566,3 +569,19 @@ The **Next step** line must be specific enough that a fresh session can continue
   verify: unit 234 / integration 260 green.
 - Note: run Playwright locally **without** `CI=1` (CI mode skips the preinstalled Chromium).
 - Next step: P6.1 (see Current status).
+
+## 2026-11-11 12:45 UTC · P6.1 Payments package, router, mock checkout ✅
+- `packages/payments` (`@kuzikode/payments` 0.1.0, no dependencies): types (+ `credentialFields`), integer money helpers,
+  `ProviderError` (safe message, `retryable`), `redact` (secrets dropped, phone/e-mail/instrument masked, secret values scrubbed),
+  mock adapter (injectable `MockStore`; test numbers 1111111/2222222/3333333/4444444, InnBucks code, O'mari OTP 123456, hosted
+  outcomes, HMAC-signed callbacks, refunds), conformance kit `test/conformance.ts`, boundaries test (no app imports), README
+  (usage, new adapter guide, extraction), CHANGELOG, standalone `npm test -w @kuzikode/payments` (CI step added).
+- App: `modules/payments/providers.ts` (registry, D1 mock store, mock allowed only when `config.mockPaymentsEnabled`),
+  `router.ts` (`resolveRoute`: exact currency > `*`, exact method > `*`, then priority; skips disabled/not-allowed accounts,
+  missing secrets, currency/method mismatch; `paymentMethodOptions`; `credentialStatus` names only; `accountConfig` resolves
+  `<prefix>_<env>` secrets and `*Secret` options), `mock-checkout.ts` + page `/dev/mock-checkout/:reference` (TEST banner,
+  same-origin form POST, redirects only to our own site). Migration 0011 adds mock state columns.
+- Tests: package unit 22 (conformance on mock, money, redaction, boundaries, simulation) · integration `payment-router.test.ts`
+  (4: specificity/priority/skips/no route, secrets outside development, mock unreachable with production config even with the
+  flag and a secret, hosted page settle-once) · e2e mock page (axe, 375/768/1440 reviewed). verify: unit 256 / integration 264.
+- Next step: P6.2 (see Current status).

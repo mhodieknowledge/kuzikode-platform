@@ -1,0 +1,97 @@
+---
+/**
+ * Mock gateway hosted page (docs/06 §6). A person plays the gateway: picks an outcome, then returns to our site.
+ * 404 unless the mock gateway is enabled (never in production). Plain form POST, same-origin only, no JavaScript.
+ */
+import DocumentLayout from '../../../layouts/DocumentLayout.astro';
+import { AppError } from '../../../server/lib/errors';
+import { isSameOriginPost } from '../../../server/lib/same-origin';
+import {
+  getMockCheckout,
+  settleMockCheckout,
+  type MockCheckoutView,
+} from '../../../server/modules/payments/mock-checkout';
+import { paymentMethodLabel } from '../../../shared/payment-methods';
+
+const { ctx } = Astro.locals;
+const reference = Astro.params.reference ?? '';
+let view: MockCheckoutView;
+let error: string | null = null;
+try {
+  if (Astro.request.method === 'POST') {
+    if (!isSameOriginPost(Astro.request, ctx.config.siteUrl)) return new Response('Forbidden', { status: 403 });
+    const form = await Astro.request.formData();
+    try {
+      view = await settleMockCheckout(ctx, reference, String(form.get('outcome') ?? ''));
+      if (view.returnUrl) return Astro.redirect(view.returnUrl, 303);
+    } catch (err) {
+      if (!(err instanceof AppError) || err.code !== 'VALIDATION_FAILED') throw err;
+      error = Object.values(err.fields ?? {})[0]?.[0] ?? 'Choose an outcome.';
+      view = await getMockCheckout(ctx, reference);
+    }
+  } else {
+    view = await getMockCheckout(ctx, reference);
+  }
+} catch (err) {
+  if (err instanceof AppError && err.code === 'NOT_FOUND') return new Response('Not found', { status: 404 });
+  throw err;
+}
+const outcomes = [
+  ['succeeded', 'Succeed', 'The payment goes through.'],
+  ['failed', 'Fail', 'Declined, for example insufficient balance.'],
+  ['cancelled', 'Cancel', 'The customer cancels.'],
+  ['partially_paid', 'Partial', 'Half of the amount is paid.'],
+  ['expired', 'Time out', 'Nobody approves it in time.'],
+  ['disputed', 'Dispute', 'Paid, then disputed.'],
+] as const;
+---
+
+<DocumentLayout title="Mock gateway">
+  <div class="mx-auto flex max-w-xl flex-col gap-6">
+    <p
+      role="note"
+      class="rounded-sm border border-warning-600/40 bg-warning-50 px-4 py-3 text-sm font-semibold text-warning-700"
+    >
+      TEST PAYMENT, no real money. This page stands in for a payment gateway in development and staging.
+    </p>
+    <section class="rounded-lg border border-line bg-surface p-6 md:p-8" aria-labelledby="mock-h">
+      <h1 id="mock-h" class="text-2xl font-bold tracking-display">
+        Mock gateway
+      </h1>
+      <dl class="mt-4 grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 rounded-md bg-canvas px-4 py-3 text-sm">
+        <dt class="text-ink-600">Amount</dt>
+        <dd class="font-mono font-semibold tabular-nums text-ink-950">{view.amount}</dd>
+        <dt class="text-ink-600">Method</dt>
+        <dd class="text-ink-950">{paymentMethodLabel(view.method)}</dd>
+        <dt class="text-ink-600">Reference</dt>
+        <dd class="break-all font-mono text-ink-950">{view.reference}</dd>
+        <dt class="text-ink-600">Status</dt>
+        <dd class="text-ink-950">{view.status}</dd>
+      </dl>
+      {error ? (
+        <p role="alert" class="mt-4 text-sm font-semibold text-danger-700">
+          {error}
+        </p>
+      ) : null}
+      {view.status === 'pending' ? (
+        <form method="post" class="mt-6 grid gap-3 sm:grid-cols-2">
+          {outcomes.map(([value, label, hint]) => (
+            <button
+              type="submit"
+              name="outcome"
+              value={value}
+              class="flex min-h-11 flex-col items-start rounded-sm border border-line bg-surface px-4 py-2 text-left hover:border-ink-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+            >
+              <span class="text-sm font-semibold text-ink-950">{label}</span>
+              <span class="text-[13px] text-ink-600">{hint}</span>
+            </button>
+          ))}
+        </form>
+      ) : view.returnUrl ? (
+        <a href={view.returnUrl} class="mt-6 inline-flex font-semibold text-brand-600 underline underline-offset-2">
+          Return to Kuzikode
+        </a>
+      ) : null}
+    </section>
+  </div>
+</DocumentLayout>

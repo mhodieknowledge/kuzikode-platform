@@ -37,6 +37,9 @@ jobs:
       - name: Verify
         run: npm run verify
 
+      - name: Payments package tests (standalone)
+        run: npm test -w @kuzikode/payments
+
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 

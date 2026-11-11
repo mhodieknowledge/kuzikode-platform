@@ -97,6 +97,10 @@ export default async function globalSetup() {
      VALUES ('pal_e2e_portal_1', 'pay_e2e_portal_1', 'inv_e2e_portal_2', 20000, 'USD') ON CONFLICT(id) DO NOTHING;`,
     `INSERT INTO payment_provider_accounts (id, provider_key, label, mode, secret_prefix)
      VALUES ('ppa_e2e_mock', 'mock', 'Mock (e2e)', 'test', 'MOCK') ON CONFLICT(id) DO NOTHING;`,
+    // mock gateway hosted page (P6.1): one pending redirect payment, reset to pending on every run.
+    `INSERT INTO mock_provider_state (reference, account_id, merchant_reference, amount_minor, paid_minor, currency, status, method_code, result_url, return_url)
+     VALUES ('mock_pat_e2e_checkout', 'ppa_e2e_mock', 'pat_e2e_checkout', 4500, 4500, 'USD', 'pending', 'card', NULL, '/contact')
+     ON CONFLICT(reference) DO UPDATE SET status = 'pending', paid_minor = 4500, scripted = NULL, settle_at = NULL;`,
     `INSERT INTO payment_attempts (id, invoice_id, client_id, provider_key, account_id, flow, method_code, payer_phone_masked, amount_minor, currency, status, merchant_reference, idempotency_key)
      VALUES ('pat_e2e_portal_failed', 'inv_e2e_portal_2', ${q(E2E_PORTAL_USER.clientId)}, 'mock', 'ppa_e2e_mock', 'express', 'ecocash', '077****111', 25000, 'USD', 'failed', 'pat_e2e_portal_failed', 'e2e-portal-failed')
      ON CONFLICT(id) DO NOTHING;`,

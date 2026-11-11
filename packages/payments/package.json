@@ -10,7 +10,14 @@
   },
   "files": [
     "src",
+    "test/conformance.ts",
     "README.md",
     "CHANGELOG.md"
-  ]
+  ],
+  "scripts": {
+    "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=18"
+  }
 }

@@ -28,7 +28,9 @@ import { fileResponse } from '../files/service';
 import { getPublicAttempt } from './portal';
 import { reportBankTransfer } from './checkout';
 import * as svc from './service';
+import { checkAttemptNow, listInvoiceAttempts } from './reconciliation';
 
+const attemptListQuery = z.object({ invoiceId: z.string().min(1).max(64) }).strict();
 const pageQuery = z.object({ page: z.coerce.number().int().min(1).max(10_000).default(1) }).strict();
 
 /** `/api/v1/admin/payments`. */
@@ -65,6 +67,12 @@ export function paymentRoutes() {
     await config.deletePaymentRoute(c.var.ctx, c.req.param('id'));
     return c.json({ data: { ok: true } });
   });
+  r.get('/attempts', requirePermission('payments.view'), async (c) =>
+    c.json({ data: await listInvoiceAttempts(c.var.ctx, query(c, attemptListQuery).invoiceId) }),
+  );
+  r.post('/attempts/:id/check', requirePermission('payments.view'), async (c) =>
+    c.json({ data: await checkAttemptNow(c.var.ctx, c.req.param('id')) }),
+  );
   r.get('/', requirePermission('payments.view'), async (c) =>
     c.json({ data: await svc.listPayments(c.var.ctx, query(c, paymentListQuery)) }),
   );

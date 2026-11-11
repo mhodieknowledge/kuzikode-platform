@@ -8,6 +8,7 @@ import { sendFollowUpReminders } from '../modules/leads/admin';
 import { dispatchNotificationEmails } from '../modules/notifications';
 import { billSubscriptions, flagAtRisk, sendRenewalReminders } from '../modules/subscriptions';
 import { autoChargeDueInvoices } from '../modules/payments/autocharge';
+import { reconcilePayments } from '../modules/payments/reconciliation';
 import type { QueueMessageBody } from './outbox';
 
 export const CRON_FREQUENT = '*/5 * * * *';
@@ -78,6 +79,8 @@ export async function pruneOperationalData(ctx: RequestContext): Promise<Record<
 export const SCHEDULE: Record<string, [name: string, task: ScheduledTask][]> = {
   [CRON_FREQUENT]: [
     ['outbox-sweep', (ctx) => sweepOutbox(ctx)],
+    // Missed callbacks: open attempts by backoff, expiry, late reversals (docs/06 §3).
+    ['payment-reconciliation', (ctx) => reconcilePayments(ctx)],
     ['notification-emails', (ctx) => dispatchNotificationEmails(ctx)],
     ['publish-due-posts', (ctx) => publishDuePosts(ctx)],
     ['auto-close-postings', (ctx) => autoClosePostings(ctx)],

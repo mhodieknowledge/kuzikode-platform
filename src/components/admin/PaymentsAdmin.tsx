@@ -1,7 +1,19 @@
-/** Payments islands (P4.11): recording a refund. The server validates the amounts and the covering credit. */
+/** Payments islands (P4.11, P6.4): recording a refund; online payment attempts with "Check now". The server validates the amounts and the covering credit. */
 import { useState } from 'react';
 import { formatMoney } from '../../shared/money';
-import { apiFetch, Button, Dialog, Field, Input, MoneyInput, Select, Textarea } from '../ui';
+import {
+  ApiError,
+  apiFetch,
+  Badge,
+  Button,
+  Dialog,
+  Field,
+  Input,
+  MoneyInput,
+  Select,
+  Textarea,
+  type Tone,
+} from '../ui';
 import { Alert, useAction } from './actions';
 
 export function RefundAction({
@@ -120,5 +132,140 @@ export function RefundAction({
         )}
       </Dialog>
     </>
+  );
+}
+
+/** An online payment attempt as `/api/v1/admin/payments/attempts` returns it (P6.4). */
+export interface AttemptItem {
+  id: string;
+  methodCode: string | null;
+  methodLabel: string;
+  accountLabel: string | null;
+  testMode: boolean;
+  payerPhoneMasked: string | null;
+  amount: string;
+  status: string;
+  failureReason: string | null;
+  merchantReference: string;
+  checkCount: number;
+  lastCheckedAt: string | null;
+  nextCheckAt: string | null;
+  createdAt: string;
+  paymentId: string | null;
+}
+
+const ATTEMPT_STATUS: Record<string, [label: string, tone: Tone]> = {
+  created: ['Starting', 'neutral'],
+  initiated: ['Waiting', 'info'],
+  pending: ['Waiting', 'info'],
+  partially_paid: ['Part paid', 'warning'],
+  succeeded: ['Paid', 'success'],
+  disputed: ['Disputed', 'warning'],
+  refunded: ['Refunded', 'neutral'],
+  reversed: ['Reversed', 'danger'],
+  failed: ['Failed', 'danger'],
+  cancelled: ['Cancelled', 'neutral'],
+  expired: ['Expired', 'neutral'],
+  error: ['Error', 'danger'],
+};
+
+const when = (iso: string | null) =>
+  iso
+    ? new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
+        new Date(iso),
+      )
+    : '';
+
+/**
+ * The invoice's online payment attempts with a "Check now" per attempt: asks the gateway at once and applies the
+ * verified result (reconciliation runs on its own every few minutes; this is for finance when a client calls).
+ */
+export function PaymentAttempts({ initial }: { initial: AttemptItem[] }) {
+  const [items, setItems] = useState(initial);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const check = async (a: AttemptItem) => {
+    setBusyId(a.id);
+    setMessage(null);
+    setError(null);
+    try {
+      const { data: next } = await apiFetch<{ data: Omit<AttemptItem, 'methodLabel'> }>(
+        `/api/v1/admin/payments/attempts/${a.id}/check`,
+        { body: {} },
+      );
+      if (next.status !== a.status) {
+        // The invoice's balance and payments may have changed: show the page as it is now.
+        setMessage(`Updated: ${ATTEMPT_STATUS[next.status]?.[0] ?? next.status}. Refreshing…`);
+        window.location.reload();
+        return;
+      }
+      setItems((list) => list.map((x) => (x.id === a.id ? { ...x, ...next, methodLabel: x.methodLabel } : x)));
+      setMessage(`Checked with the gateway: no change (${ATTEMPT_STATUS[next.status]?.[0] ?? next.status}).`);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'The check did not complete. Please try again.');
+    } finally {
+      setBusyId(null);
+    }
+  };
+  return (
+    <div className="mt-3 flex flex-col gap-3">
+      <p aria-live="polite" className="text-[13px] text-ink-800 empty:hidden">
+        {message}
+      </p>
+      <Alert message={error} />
+      <ul className="flex flex-col gap-4 text-sm">
+        {items.map((a) => {
+          const [label, tone] = ATTEMPT_STATUS[a.status] ?? [a.status, 'neutral' as Tone];
+          return (
+            <li key={a.id} className="flex flex-col gap-1">
+              <div className="tnum flex flex-wrap items-center justify-between gap-2 font-medium text-ink-950">
+                <span>
+                  {a.methodLabel}
+                  {a.payerPhoneMasked ? (
+                    <span className="font-normal text-ink-600"> · {a.payerPhoneMasked}</span>
+                  ) : null}
+                </span>
+                <span>{a.amount}</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge tone={tone}>{label}</Badge>
+                {a.testMode ? <Badge tone="warning">Test</Badge> : null}
+                {a.paymentId ? (
+                  <a href={`/admin/payments/${a.paymentId}`} className="text-[12px] text-brand-600 underline">
+                    View payment
+                  </a>
+                ) : null}
+              </div>
+              <p className="text-[12px] text-ink-600">
+                Started {when(a.createdAt)}
+                {a.accountLabel ? ` · ${a.accountLabel}` : ''} ·{' '}
+                <span className="font-mono">{a.merchantReference}</span>
+              </p>
+              <p className="text-[12px] text-ink-600">
+                {a.checkCount === 0
+                  ? 'Not checked with the gateway yet'
+                  : `Checked ${a.checkCount} ${a.checkCount === 1 ? 'time' : 'times'}, last ${when(a.lastCheckedAt)}`}
+                {a.nextCheckAt ? ` · next automatic check ${when(a.nextCheckAt)}` : ''}
+              </p>
+              {a.failureReason ? <p className="text-[12px] text-ink-800">{a.failureReason}</p> : null}
+              {a.status !== 'created' ? (
+                <div>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={busyId !== null}
+                    aria-label={`Check now with the gateway: ${a.methodLabel} ${a.amount}, ${a.merchantReference}`}
+                    onClick={() => void check(a)}
+                  >
+                    {busyId === a.id ? 'Checking…' : 'Check now'}
+                  </Button>
+                </div>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }

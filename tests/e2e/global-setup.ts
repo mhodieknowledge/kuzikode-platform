@@ -149,6 +149,24 @@ export default async function globalSetup() {
        VALUES (${q(`iti_e2e_co_${run}_${i}`)}, ${q(inv.id)}, 1, 'Menu board design', 1000, 2500, 2500, 0, 0, 2500);`,
       `UPDATE invoices SET status = 'issued', public_token_hash = ${q(publicTokenHash('invoice', inv.id))} WHERE id = ${q(inv.id)};`,
     ]),
+    // reconciliation.spec (P6.4): an unpaid invoice with one online attempt still waiting at the gateway (reset every run).
+    `INSERT INTO invoices (id, number, client_id, currency, status, issue_date, due_date, subtotal_minor, total_minor, amount_paid_minor, balance_minor, issued_at,
+       client_snapshot, business_snapshot)
+     VALUES ('inv_e2e_recon', 'INV-E2E-R001', ${q(E2E_CHECKOUT_USER.clientId)}, 'USD', 'draft', '2026-11-01', '2099-12-31', 4000, 4000, 0, 4000, '2026-11-01T08:00:00.000Z', ${q(coSnap)}, ${q(businessSnap)})
+     ON CONFLICT(id) DO NOTHING;`,
+    `INSERT INTO invoice_items (id, invoice_id, position, description, quantity_milli, unit_price_minor, line_subtotal_minor, line_discount_minor, line_tax_minor, line_total_minor)
+     SELECT 'iti_e2e_recon', 'inv_e2e_recon', 1, 'Social media templates', 1000, 4000, 4000, 0, 0, 4000
+     WHERE (SELECT status FROM invoices WHERE id = 'inv_e2e_recon') = 'draft'
+     ON CONFLICT(id) DO NOTHING;`,
+    "UPDATE invoices SET status = 'issued' WHERE id = 'inv_e2e_recon' AND status = 'draft';",
+    `INSERT INTO mock_provider_state (reference, account_id, merchant_reference, amount_minor, paid_minor, currency, status, method_code, result_url, return_url)
+     VALUES ('mock_pat_e2e_recon', 'ppa_e2e_mock', 'pat_e2e_recon', 4000, 4000, 'USD', 'pending', 'ecocash', NULL, NULL)
+     ON CONFLICT(reference) DO UPDATE SET status = 'pending', paid_minor = 4000, scripted = NULL, settle_at = NULL;`,
+    `INSERT INTO payment_attempts (id, invoice_id, client_id, provider_key, account_id, flow, method_code, payer_phone_masked, amount_minor, currency, status,
+       merchant_reference, provider_reference, idempotency_key, expires_at, next_check_at, created_at)
+     VALUES ('pat_e2e_recon', 'inv_e2e_recon', ${q(E2E_CHECKOUT_USER.clientId)}, 'mock', 'ppa_e2e_mock', 'express', 'ecocash', '077****111', 4000, 'USD', 'pending',
+       'pat_e2e_recon', 'mock_pat_e2e_recon', 'e2e-recon', '2099-01-01T00:00:00.000Z', '2099-01-01T00:00:00.000Z', ${q(now)})
+     ON CONFLICT(id) DO UPDATE SET status = 'pending', check_count = 0, last_checked_at = NULL, failure_reason = NULL, completed_at = NULL;`,
     // P6.3e: saved cards on the mock gateway; the checkout client starts each run with none.
     `UPDATE payment_provider_accounts SET options = json_set(options, '$.tokenizationEnabled', json('true')) WHERE id = 'ppa_mock';`,
     `UPDATE subscriptions SET autocharge_method_id = NULL WHERE client_id = ${q(E2E_CHECKOUT_USER.clientId)};`,

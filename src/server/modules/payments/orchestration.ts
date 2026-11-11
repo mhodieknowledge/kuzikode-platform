@@ -38,7 +38,7 @@ const OPEN_ATTEMPT_SQL = `('created','initiated','pending','partially_paid')`;
 /** A verified success also lands on an attempt we had given up on: the money was taken, so it is recorded. */
 const SUCCEEDABLE_SQL = `('created','initiated','pending','partially_paid','failed','cancelled','expired','error')`;
 const REUSE_MINUTES = 30;
-const ATTEMPT_LIFETIME_HOURS = 72;
+export const ATTEMPT_LIFETIME_HOURS = 72;
 /** Reconciliation backoff by check count (minutes): 2, 5, 10, 30, 60, then hourly. */
 const BACKOFF_MINUTES = [2, 5, 10, 30, 60];
 
@@ -423,7 +423,7 @@ export async function attemptStart(ctx: RequestContext, attemptId: string): Prom
 
 // ---------------------------------------------------------------- events
 
-type EventType =
+export type EventType =
   | 'initiate_request'
   | 'initiate_response'
   | 'callback_received'
@@ -434,7 +434,7 @@ type EventType =
   | 'error'
   | 'unmatched';
 
-function eventStmt(
+export function eventStmt(
   ctx: RequestContext,
   e: {
     attemptId: string | null;
@@ -620,7 +620,7 @@ function nextCheckAt(ctx: RequestContext, checkCount: number): string {
 }
 
 /** Records that we checked (count, time, next check) without changing the status. */
-function checkedStmt(ctx: RequestContext, a: AttemptRow, providerStatus?: string) {
+export function checkedStmt(ctx: RequestContext, a: AttemptRow, providerStatus?: string) {
   return stmt(
     ctx.db,
     `UPDATE payment_attempts SET check_count = check_count + 1, last_checked_at = ?, next_check_at = ?,
@@ -633,7 +633,7 @@ function checkedStmt(ctx: RequestContext, a: AttemptRow, providerStatus?: string
   );
 }
 
-async function markFinished(
+export async function markFinished(
   ctx: RequestContext,
   a: AttemptRow,
   status: 'failed' | 'cancelled' | 'expired' | 'error',

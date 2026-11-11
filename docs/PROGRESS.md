@@ -5,10 +5,10 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
-- Last completed task: **P6.3e Cards on our checkout** (2026-11-11). Saved cards wait on Paynow approving tokenization (BLOCKERS).
-- **Next step:** **P6.4 Reconciliation** (docs/06 §3, roadmap): cron over `payment_attempts` with `next_check_at <= now` (backoff
-  already written by `checkedStmt`/`nextCheckAt` in `modules/payments/orchestration.ts`), expiry of attempts past `expires_at`
-  (→ `markFinished(..., 'expired')`), an admin "Check now" button on the attempt/invoice, and the missed-callback test.
+- Last completed task: **P6.4 Reconciliation** (2026-11-11). Saved cards wait on Paynow approving tokenization (BLOCKERS).
+- **Next step:** **P6.5 Paynow test-mode verification** (roadmap): `npm run test:payments:live` against staging with the Paynow
+  test numbers (0771111111 / 0773333333 / 0774444444) + one manual redirect payment with "Faked Success"; record results.
+  `[!]` with a BLOCKERS entry if credentials or staging are missing. Then P6.6 email templates.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 - New entries are appended at the **bottom** of this file.
 
@@ -688,3 +688,18 @@ The **Next step** line must be specific enough that a fresh session can continue
   payment instruments" / "does not have any ACTIVE 'vmc' payment method" / "tokenized transactions not permitted for your merchant".
   Owner action in BLOCKERS. Re-check script: bundle a small script that calls `createPaynowProvider().initiatePayment` with
   `cardToken {11111111-1111-1111-1111-111111111111}` (esbuild → node, `NODE_USE_ENV_PROXY=1`).
+
+## 2026-11-11 17:20 UTC · P6.4 Reconciliation ✅
+- `modules/payments/reconciliation.ts`: `reconcilePayments` on the 5-minute cron (`payment-reconciliation`): open attempts older
+  than 2 min whose `next_check_at` is due (or past `expires_at`) are checked with the gateway (forced) and applied; backoff 2/5/10/30/60
+  min then hourly; past the 72 h lifetime → one final check → `expired` (+ `reconcile` event, payment.failed alert; a success at the
+  final check wins); `created` for 30 min with no gateway reference → `error`; succeeded payments re-checked daily for 7 days, disputed
+  hourly for 90 days (late dispute/refund/reversal). Attempts the gateway can't be asked about still move to their next slot. 25 per
+  group per run. `checkAttemptNow` (payments.view, audited `payment.attempt_checked`, 30/user/10 min) and `listInvoiceAttempts`.
+- API: `GET /api/v1/admin/payments/attempts?invoiceId=`, `POST /api/v1/admin/payments/attempts/:id/check`.
+- UI: "Online payment attempts" panel on `/admin/invoices/[id]` (status badge, test badge, masked phone, checks, next automatic
+  check, "Check now" → reloads when the status changes, aria-live result).
+- Tests: integration `reconciliation.test.ts` (7: schedule, missed callback applied once incl. concurrent runs, backoff, expiry,
+  never started, late reversal + daily/7-day bounds, Check now permissions/audit/no internals/list) · e2e `reconciliation.spec.ts`
+  (seeded waiting attempt, Check now → no change; axe; 375/768/1440 reviewed). verify: unit 331 / integration 297. Checkout,
+  public-documents, gateways, portal-auth, invoices e2e re-run green.

@@ -2,6 +2,9 @@
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
 import InvoiceDocument from '../../../../components/documents/InvoiceDocument.astro';
 import { InvoiceActions } from '../../../../components/admin/InvoicesAdmin';
+import { PaymentAttempts } from '../../../../components/admin/PaymentsAdmin';
+import { listInvoiceAttempts } from '../../../../server/modules/payments';
+import { paymentMethodLabel } from '../../../../shared/payment-methods';
 import { loadAdminPage } from '../../../../server/lib/admin-page';
 import { businessDate } from '../../../../server/lib/dates';
 import { AppError } from '../../../../server/lib/errors';
@@ -25,6 +28,13 @@ try {
 }
 const { invoice: inv, items, client, contact, history, payments, creditsApplied, reminders, quotation } = data;
 const perms = page.auth.permissions;
+const attempts =
+  inv.status !== 'draft' && perms.has('payments.view')
+    ? (await listInvoiceAttempts(ctx, inv.id)).map((a) => ({
+        ...a,
+        methodLabel: paymentMethodLabel(a.methodCode ?? a.providerKey),
+      }))
+    : [];
 const settings = await getSettings(ctx);
 const link = inv.status === 'draft' ? null : await publicLink(ctx, inv.id);
 const open = OPEN_INVOICE_STATUSES.includes(inv.status) && inv.balance_minor > 0;
@@ -208,6 +218,17 @@ const REMINDER = (k: string) =>
           {data.creditAvailable > 0 && open ? (
             <p class="mt-3 text-[13px] text-info-700">The client has {money(data.creditAvailable)} credit available.</p>
           ) : null}
+        </section>
+      ) : null}
+      {attempts.length ? (
+        <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="att-title">
+          <h2 id="att-title" class="font-sans text-base font-semibold">
+            Online payment attempts
+          </h2>
+          <p class="mt-1 text-[12px] text-ink-600">
+            Checked with the gateway automatically. Use Check now when a client says they paid.
+          </p>
+          <PaymentAttempts client:visible initial={attempts} />
         </section>
       ) : null}
       {data.creditNotes.length ? (

@@ -74,6 +74,17 @@ describe('post-deploy smoke test', () => {
     expect(failures[0]!.errors[0]).toBe('status 503, expected 200');
   });
 
+  it('explains Cloudflare error 1027 (account daily request limit)', async () => {
+    const limited = (async () => new Response('<h1>Error 1027</h1>', { status: 429 })) as unknown as typeof fetch;
+    const [first] = await smoke('https://example.test', {
+      env: 'staging',
+      fetchImpl: limited,
+      attempts: 1,
+      delayMs: 0,
+    });
+    expect(first!.errors[0]).toMatch(/error 1027.*daily request limit/);
+  });
+
   it('reports missing and wrong headers by name', () => {
     const check = checksFor('staging').find((c) => c.path === '/admin/login')!;
     const errors = evaluate(

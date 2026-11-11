@@ -75,9 +75,16 @@ export async function smoke(base, opts) {
     let errors = [];
     for (let i = 1; i <= attempts; i++) {
       try {
-        const res = await fetchImpl(url, { redirect: 'manual', headers: { 'user-agent': 'kuzikode-smoke/1' } });
+        const res = await fetchImpl(url, {
+          redirect: 'manual',
+          headers: { 'user-agent': 'kuzikode-smoke/1' },
+          signal: AbortSignal.timeout(15_000),
+        });
         const text = await res.text();
         errors = evaluate(check, res, text);
+        // Cloudflare's own page when the account's Workers Free plan daily request limit is used up (all Workers).
+        if (res.status === 429 && /Error 1027/.test(text))
+          errors = ['Cloudflare error 1027: the account has used its Workers daily request limit (resets 00:00 UTC)'];
         if (errors.length === 0 || (res.status !== 429 && res.status < 500)) break;
       } catch (err) {
         errors = [`request failed: ${err instanceof Error ? err.message : String(err)}`];

@@ -838,3 +838,25 @@ The **Next step** line must be specific enough that a fresh session can continue
   11 read-only checks incl. security/private headers, robots, sitemap, 404, Turnstile key) and `bootstrap-admin.yml` (manual; owner
   enters their email; `bootstrap-admin --send-email` queues the invite through the outbox, link never logged). Smoke script passes
   11/11 against a local worker; unit tests for both.
+
+## 2026-11-11 22:45 UTC · P8.3 production + backup workflows ✅ · P8.4 restore drill ✅ · P8.2 waiting on the Cloudflare daily limit
+- **Blocker found:** all `*.mhodieknowledge.workers.dev` hosts answer Cloudflare **Error 1027** (account's Workers Free daily
+  limit used up: `zimindex` ≈160k requests today, Kuzikode 1). So both this container's and GitHub's smoke requests never reach the
+  Worker. Deploy staging run #1 (Actions 43110654890): build, migrations, deploy ✅; smoke ✗ (1027). Owner action in BLOCKERS.
+  `scripts/smoke.mjs` now names error 1027 and has a 15 s per-request timeout.
+- `deploy-production.yml` (manual, type "deploy production", main only, `production` environment): required-secret check →
+  `npm run verify` → `scripts/backup-d1.sh production pre-deploy` → `scripts/prod-secrets.mjs` (generates HMAC/DATA keys only if
+  the Worker lacks them, passes third-party keys from GitHub secrets, fails on a missing required one; names only in logs) →
+  migrations → base seed → build → `wrangler deploy --secrets-file` → smoke `--env production` (HSTS, real Turnstile key,
+  indexable robots). Not run (owner's button).
+- `backup.yml` (nightly 01:43 UTC + manual, production default) → `scripts/backup-d1.sh`: D1 export (wrangler output, which holds
+  a presigned link, never printed) + manifest (`scripts/d1-manifest.mjs`: per-table counts in one scalar-subquery SELECT because
+  D1 allows max 5 compound terms, invoice/payment per-currency checksums) → gzip → AES-256-CBC PBKDF2 200k → round-trip check →
+  R2 `d1/daily/…` (+ `d1/monthly/…` on the 1st, `d1/pre-deploy/…`). Retention via R2 lifecycle rules set on both backup buckets:
+  daily 30 d, monthly 365 d, pre-deploy 90 d.
+- **P8.4 drill (staging, 22:22 UTC):** `backup-d1.sh staging pre-deploy` → 45 824-byte encrypted object
+  `kuzikode-staging-backups/d1/pre-deploy/20261111T222212Z` → `scripts/restore-drill.sh staging d1/pre-deploy/20261111T222212Z`:
+  downloaded + decrypted (288 452 bytes SQL), restored into scratch D1 `kuzikode-restore-test`, **92 tables, 677 rows, checksums
+  match**, 26 s, scratch DB deleted (`d1 list` confirms). Staging has seed data only (no invoices yet), so the money checksums
+  compared empty sets; production repeats the drill once real data exists (RUNBOOK).
+- Unit tests: smoke (5), deploy scripts (5: secrets plan, manifest compare, count SQL).

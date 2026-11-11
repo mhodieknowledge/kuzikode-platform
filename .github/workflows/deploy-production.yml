@@ -1,0 +1,92 @@
+name: Deploy production
+
+# Manual only (docs/09 §6, CLAUDE.md §3): the owner presses "Run workflow". The GitHub Environment `production`
+# should have the owner as required reviewer (Settings → Environments), so the job waits for that approval too.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: Type "deploy production" to confirm
+        type: string
+        required: true
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Verify, back up, migrate, deploy, smoke test
+    if: inputs.confirm == 'deploy production' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: production
+      url: https://kuzikode.mhodieknowledge.workers.dev
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+      PRODUCTION_URL: https://kuzikode.mhodieknowledge.workers.dev
+      CI: 'true'
+      ASTRO_TELEMETRY_DISABLED: '1'
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - name: Check required repository secrets
+        run: |
+          missing=""
+          for n in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID BACKUP_ENCRYPTION_PASSPHRASE; do
+            [ -n "${!n}" ] || missing="$missing $n"
+          done
+          if [ -n "$missing" ]; then echo "::error::Missing GitHub secrets:$missing (docs/PRODUCTION-CHECKLIST.md)"; exit 1; fi
+
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify (typecheck, lint, placeholders, unit, integration, build)
+        run: npm run verify
+
+      - name: Back up the production database first
+        run: bash scripts/backup-d1.sh production pre-deploy
+
+      - name: Prepare Worker secrets (names only in the log)
+        env:
+          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_WEBHOOK_SECRET: ${{ secrets.RESEND_WEBHOOK_SECRET }}
+          PAYNOW_USD_INTEGRATION_ID: ${{ secrets.PAYNOW_USD_INTEGRATION_ID }}
+          PAYNOW_USD_INTEGRATION_KEY: ${{ secrets.PAYNOW_USD_INTEGRATION_KEY }}
+          PAYNOW_ZWG_INTEGRATION_ID: ${{ secrets.PAYNOW_ZWG_INTEGRATION_ID }}
+          PAYNOW_ZWG_INTEGRATION_KEY: ${{ secrets.PAYNOW_ZWG_INTEGRATION_KEY }}
+          PESEPAY_MAIN_INTEGRATION_KEY: ${{ secrets.PESEPAY_MAIN_INTEGRATION_KEY }}
+          PESEPAY_MAIN_ENCRYPTION_KEY: ${{ secrets.PESEPAY_MAIN_ENCRYPTION_KEY }}
+        run: node scripts/prod-secrets.mjs --env production --out "$RUNNER_TEMP/secrets.json"
+
+      - name: Apply D1 migrations (production)
+        run: npm run db:migrate:production
+
+      - name: Base seed (idempotent, production-safe)
+        run: node scripts/seed.ts --env production
+
+      - name: Build (production)
+        run: npm run build:production
+
+      - name: Deploy Worker (production)
+        run: npx wrangler deploy --secrets-file "$RUNNER_TEMP/secrets.json"
+
+      - name: Remove the secrets file
+        if: always()
+        run: rm -f "$RUNNER_TEMP/secrets.json"
+
+      - name: Smoke test
+        run: node scripts/smoke.mjs "$PRODUCTION_URL" --env production

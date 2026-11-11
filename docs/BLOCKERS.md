@@ -100,3 +100,19 @@ Things only the owner can do. The agent keeps building around them and records e
   the endpoint's **signing secret** (starts with `whsec_`) and set it as the Worker secret `RESEND_WEBHOOK_SECRET` for that
   environment (`npx wrangler secret put RESEND_WEBHOOK_SECRET --env staging`, or add it to the build environment and the agent sets it).
   Without it the endpoint answers 404 and emails simply stay "sent" in the log.
+- [ ] **Cloudflare Workers daily request limit is used up by another Worker on your account (2026-11-11 22:25 UTC).** Every
+  `*.mhodieknowledge.workers.dev` address, Kuzikode staging included, answers with Cloudflare's "Error 1027 · This website has been
+  temporarily rate limited". Cause (Cloudflare analytics, today since 00:00 UTC): your existing Worker **`zimindex`** served about
+  160 000 requests, 132 000 of them errors; the Workers Free plan allows 100 000 requests per day **for the whole account**. The
+  limit resets at 00:00 UTC, but it will keep happening, and production Kuzikode would go offline the same way. The build agent
+  doesn't touch other projects, so choose one: (a) fix or pause `zimindex` (its error rate suggests a retry loop or a bot hitting
+  it: Dashboard → Workers & Pages → zimindex → Metrics/Logs), or (b) upgrade to **Workers Paid ($5/month**, 10 million requests
+  included; it's also the BLOCKERS advice before taking real payments), or (c) move Kuzikode to a separate Cloudflare account.
+- [ ] **Production deploy secrets (2026-11-11, P8.3).** The manual **Deploy production** workflow (Actions → Deploy production → Run
+  workflow → type `deploy production`) needs these GitHub secrets (Settings → Secrets and variables → Actions, or as secrets of
+  the `production` environment): `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `BACKUP_ENCRYPTION_PASSPHRASE` (any long random
+  phrase, 20+ characters; **store a copy in your password manager**: without it no backup can ever be decrypted),
+  `TURNSTILE_SECRET_KEY`, and for email/payments `RESEND_API_KEY`, `RESEND_WEBHOOK_SECRET`, `PAYNOW_USD_INTEGRATION_ID`,
+  `PAYNOW_USD_INTEGRATION_KEY` (the **live** Paynow keys once Paynow sets the integration live). The workflow generates the
+  internal keys (`HMAC_SECRET`, `DATA_ENCRYPTION_KEY`) on the first deploy and keeps them, backs up the database first, migrates,
+  applies the base seed, deploys and smoke-tests. The nightly **Backup** workflow uses the same three Cloudflare/backup secrets.

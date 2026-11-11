@@ -1,0 +1,53 @@
+name: Backup
+
+# Nightly encrypted D1 export to R2 (docs/09 §6–7). Retention is enforced by R2 lifecycle rules on the backups bucket
+# (d1/daily/ 30 days, d1/monthly/ 365 days, d1/pre-deploy/ 90 days), so this job never deletes anything itself.
+on:
+  schedule:
+    - cron: '43 1 * * *'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which database
+        type: choice
+        options: [production, staging]
+        default: production
+
+concurrency:
+  group: backup-${{ inputs.environment || 'production' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
+      TARGET_ENV: ${{ inputs.environment || 'production' }}
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - name: Check secrets
+        id: creds
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || [ -z "$BACKUP_ENCRYPTION_PASSPHRASE" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID and BACKUP_ENCRYPTION_PASSPHRASE GitHub secrets are required (docs/BLOCKERS.md)."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Export, compress, encrypt, upload
+        run: bash scripts/backup-d1.sh "$TARGET_ENV" nightly

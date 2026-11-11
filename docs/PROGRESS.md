@@ -5,10 +5,10 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
-- Last completed task: **P7.4 Performance pass** (2026-11-11). Phase 6 done except P6.5 `[!]` (owner's Faked Success). P6.5 is `[!]` (Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
-- **Next step:** **P7.5 Placeholder sweep**: `scripts/check-placeholders.mjs` + `npm run check:placeholders` in CI (grep src/ for
-  TODO/FIXME, lorem, `href="#"`, `console.log` outside the logger, "coming soon", fake numbers like "100+ clients"; allow-list with
-  reasons for legitimate hits), fix every real hit. Then P7.6 link check + migration check.
+- Last completed task: **P7.6 Link check + migration check** (2026-11-11). Phase 7 done. Phase 6 done except P6.5 `[!]` (owner's Faked Success). P6.5 is `[!]` (Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
+- **Next step:** first confirm CI is green on `main` with the new two-job workflow (verify + e2e). Then **Phase 8, P8.1 Remote
+  resources** (docs/09; `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` exist in the build env): create only `kuzikode-*` resources
+  (staging D1, R2, KV, Queue), put real IDs into wrangler.jsonc, record in PROGRESS. Then P8.2 staging deploy + smoke tests.
 - **For P8.2 (staging):** send a test email from staging (Admin → Settings → email test) and confirm `delivered` arrives through the
   Resend webhook once the owner has configured it (BLOCKERS); re-run `LIVE_RESULT_URL=https://<staging>/api/payments/callbacks/paynow/<accountId> npm run test:payments:live`
   so Paynow's result URL is reachable, and record it.
@@ -801,3 +801,15 @@ The **Next step** line must be specific enough that a fresh session can continue
   admin sign-in 41.8 ms (PBKDF2 100k ≈ 21 ms CPU, DECISIONS 2026-11-05), invoice PDF first render 43.2 ms, stored PDF 27.7 ms.
   CPU-heavy paths stay those already recorded (login hash, PDF render once per document); Workers Paid remains the BLOCKERS advice
   before real payments.
+
+## 2026-11-11 21:30 UTC · P7.5 Placeholder sweep ✅ · P7.6 Link + migration check ✅ · CI split
+- `scripts/check-placeholders.mjs` (`npm run check:placeholders`, inside `verify`): 7 rules (TODO/FIXME/HACK, lorem, `href="#"`,
+  console.log/debug, clickable "Coming soon", permanently disabled buttons, invented social proof); dev-only pages/fixtures and
+  generated types skipped; per-line opt-out with a reason. Proven with a probe file (all 7 caught). Real tree: one legitimate CLI log
+  in the seed builder (marked). Audit of the rest: "Coming soon" only as non-clickable status labels; seeds ship no testimonials,
+  portfolio, team or client logos.
+- `scripts/check-migrations.mjs` (`npm run check:migrations`, CI step): all 12 migrations apply to an empty D1 in a throwaway
+  directory, then `migrations list` reports nothing pending.
+- `tests/e2e/links.spec.ts`: crawls from `/` + sitemap (51 pages, 77 URLs): every internal page/asset < 400, no `#`/`javascript:`
+  links. Green.
+- CI: runs 75–76 hit the 15-minute job timeout (suite grew to 92 e2e tests); now two parallel jobs, verify (20 min) and e2e (30 min).

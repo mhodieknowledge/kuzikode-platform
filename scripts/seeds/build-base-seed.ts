@@ -324,5 +324,5 @@ export function buildBaseSeed(): string {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const target = fileURLToPath(new URL('../../seeds/base.sql', import.meta.url));
   writeFileSync(target, buildBaseSeed());
-  console.log(`wrote ${target}`);
+  console.log(`wrote ${target}`); // placeholder-ok: CLI output of the seed builder
 }

@@ -111,8 +111,8 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P7.2 Security suite** green. Run the `/security-review` skill (if available) or a manual OWASP pass over auth, portal scoping, uploads, payments. Fix all findings.
 - [x] **P7.3 Responsive + accessibility pass** on every page (3 widths, axe, keyboard).
 - [x] **P7.4 Performance pass** (Lighthouse targets, bundle sizes, CPU timings documented).
-- [ ] **P7.5 Placeholder sweep** (grep for TODO, lorem, `href="#"`, `console.log`, disabled-forever buttons, fake numbers). AC: script `npm run check:placeholders` in CI.
-- [ ] **P7.6 Link check + migration check.**
+- [x] **P7.5 Placeholder sweep** (grep for TODO, lorem, `href="#"`, `console.log`, disabled-forever buttons, fake numbers). AC: script `npm run check:placeholders` in CI.
+- [x] **P7.6 Link check + migration check.**
 
 ## Phase 8 — Production preparation
 - [ ] **P8.1 Remote resources** (staging, plus production resources creation if a token exists). Real IDs into wrangler.jsonc. `[!]` without a token.

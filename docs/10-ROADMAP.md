@@ -102,7 +102,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [!] **P6.5 Paynow test-mode verification** (`npm run test:payments:live` with test numbers 0771111111 / 0773333333 / 0774444444 against staging + one manual redirect payment with "Faked Success"). AC: results recorded. `[!]` if no Paynow test credentials, with BLOCKERS entry.
   _2026-11-11: automated suite passed live from the build container (results in PROGRESS); the staging re-run (reachable result URL) happens in P8.2; the manual "Faked Success" needs the owner's Paynow login (BLOCKERS)._
 - [x] **P6.6 All email templates** (PRD §7) HTML + text, rendered preview page (dev), snapshot tests. AC: every template has a test.
-- [ ] **P6.7 Resend webhooks** (signature verification, status updates). AC: tests with signed fixtures.
+- [x] **P6.7 Resend webhooks** (signature verification, status updates). AC: tests with signed fixtures.
 - [ ] **P6.8 Live email verification** with a real Resend key on staging. AC: delivered email recorded. `[!]` if no key.
 
 ## Phase 7 — Quality assurance

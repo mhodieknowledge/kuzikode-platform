@@ -89,3 +89,9 @@ Things only the owner can do. The agent keeps building around them and records e
   client and open its client link, (2) Pay now → Bank card → Pay, (3) on the Paynow page sign in with your Paynow merchant login and
   choose **Faked Success**, (4) you come back to Kuzikode's page, which shows "Paid" and a receipt. Then tick this line (or tell the
   next build session) and it is recorded in FINAL-REPORT.
+- [ ] **Resend delivery webhook (2026-11-11, P6.7).** Built and tested with signed fixtures; it needs one setting in Resend once staging
+  (and later production) is deployed: Resend dashboard → Webhooks → Add endpoint → URL `https://<staging address>/api/webhooks/resend`
+  → events `email.sent`, `email.delivered`, `email.bounced`, `email.complained`, `email.failed`, `email.suppressed` → save, then copy
+  the endpoint's **signing secret** (starts with `whsec_`) and set it as the Worker secret `RESEND_WEBHOOK_SECRET` for that
+  environment (`npx wrangler secret put RESEND_WEBHOOK_SECRET --env staging`, or add it to the build environment and the agent sets it).
+  Without it the endpoint answers 404 and emails simply stay "sent" in the log.

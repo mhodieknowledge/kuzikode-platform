@@ -21,6 +21,7 @@ import { publicQuotationRoutes, quotationRoutes } from './modules/quotations';
 import { documentRoutes, publicDocumentRoutes } from './modules/documents';
 import { invoiceRoutes } from './modules/invoices';
 import { paymentCallbackRoutes, paymentRoutes, publicPaymentRoutes } from './modules/payments';
+import { webhookRoutes } from './modules/email-webhooks';
 import { projectRoutes } from './modules/projects';
 import { expenseRoutes } from './modules/expenses';
 import { supportRoutes } from './modules/support';
@@ -69,6 +70,7 @@ export function createApp() {
   app.route('/api/v1/public', publicDocumentRoutes());
   app.route('/api/v1/public', publicPaymentRoutes());
   app.route('/api/payments/callbacks', paymentCallbackRoutes());
+  app.route('/api/webhooks', webhookRoutes());
 
   app.notFound((c) => {
     const requestId = c.var.requestId ?? 'unknown';

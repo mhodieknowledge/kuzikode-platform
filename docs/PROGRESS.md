@@ -5,11 +5,10 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
-- Last completed task: **P6.6 All email templates** (2026-11-11). P6.5 is `[!]` (Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
-- **Next step:** **P6.7 Resend webhooks** (roadmap; PRD §7, docs/07 for webhook rules): `POST /api/webhooks/resend`,
-  verify the Svix-style signature (`svix-id`, `svix-timestamp`, `svix-signature`, secret `RESEND_WEBHOOK_SECRET`; re-check Resend's
-  docs with WebFetch first), map delivered/bounced/complained/delayed → `email_logs.status` by provider message id, idempotent,
-  tests with signed fixtures. Then P6.8 (live email on staging; a RESEND_API_KEY exists in the build env).
+- Last completed task: **P6.7 Resend webhooks** (2026-11-11). P6.5 is `[!]` (Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
+- **Next step:** **P6.8 Live email verification** (roadmap): needs staging (P8.2) for the "on staging" part; a `RESEND_API_KEY` is in the
+  build env, so at minimum send one real email through `resendProvider` from the container to a Resend test address
+  (`delivered@resend.dev`), record the message id + status; mark `[!]` for the staging/webhook part with BLOCKERS. Then Phase 7 (P7.1).
 - **For P8.2 (staging):** re-run `LIVE_RESULT_URL=https://<staging>/api/payments/callbacks/paynow/<accountId> npm run test:payments:live`
   so Paynow's result URL is reachable, and record it.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
@@ -726,3 +725,12 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Tests: unit email (39: HTML + subject/text snapshots for every template and variant, PRD list complete, before/on/after wording) ·
   integration notifications (acceptance → dedicated email to staff, rendered from the queue) and invoices (on-due reminder "due today")
   · e2e `email-preview.spec.ts`. ui-kit e2e green.
+
+## 2026-11-11 17:55 UTC · P6.7 Resend webhooks ✅
+- `modules/email-webhooks`: `POST /api/webhooks/resend` (re-verified Resend + Svix docs): Svix signature with WebCrypto (`whsec_` base64
+  key, `id.timestamp.body`, space-separated `v1,` signatures, 5-min tolerance, constant-time compare), 256 KB cap, 1200/h/IP; events →
+  `email_logs.status` by `provider_message_id` (provider `resend` only), monotonic so retries/out-of-order events never go backwards;
+  bounce details / complaint / suppression into `email_logs.error`. Owner setup (endpoint + secret) in BLOCKERS.
+- Tests: unit `resend-webhook.test.ts` (3: equals Node HMAC reference, tolerance, malformed headers/secret) · integration
+  `resend-webhooks.test.ts` (5, signed fixtures: forward-only + replay + complaint after delivery, bounce/failed/suppressed, secret
+  rotation, forged/stale/future/unsigned/v2/tampered refused, unknown/other provider/ignored types/bad JSON acknowledged).

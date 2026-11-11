@@ -38,6 +38,8 @@ export default defineConfig(async () => {
                   HMAC_SECRET: 'test-hmac-secret-0123456789abcdef0123456789abcdef',
                   DATA_ENCRYPTION_KEY: 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=',
                   TURNSTILE_SECRET_KEY: '1x0000000000000000000000000000000AA',
+                  // Test-only Svix-style secret (whsec_ + base64 key) for signed Resend webhook fixtures.
+                  RESEND_WEBHOOK_SECRET: 'whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw',
                 },
               },
             }),

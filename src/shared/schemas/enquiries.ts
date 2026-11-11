@@ -47,9 +47,10 @@ export const enquirySchema = z
     category: z
       .string()
       .trim()
-      .min(1, 'Choose a category.')
+      // Empty stops here (abort) so the pattern check doesn't add a second, technical message.
+      .min(1, { message: 'Choose a category.', abort: true })
       .max(80)
-      .regex(/^[a-z0-9_-]+$/),
+      .regex(/^[a-z0-9_-]+$/, 'Choose a category from the list.'),
     service: slug.optional().or(z.literal('').transform(() => undefined)),
     product: slug.optional().or(z.literal('').transform(() => undefined)),
     budgetRange: z

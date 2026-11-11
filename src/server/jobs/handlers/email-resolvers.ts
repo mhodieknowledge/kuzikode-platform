@@ -111,10 +111,11 @@ const invoiceDetails: EmailResolver = async (ctx, data) => {
       status: string;
     }>();
   if (!row?.number) throw new Error('invoice not found or not numbered for email');
-  const { invoiceId: _id, ...rest } = data;
+  const { invoiceId: id, ...rest } = data;
   return {
     ...rest,
     number: row.number,
+    portalLink: new URL(`/portal/invoices/${String(id)}`, ctx.config.siteUrl).toString(),
     total: formatMoney(row.total_minor, row.currency),
     balance: formatMoney(row.balance_minor, row.currency),
     dueDate: row.due_date ? formatLongDate(row.due_date) : '',
@@ -130,7 +131,7 @@ const reminderDetails: EmailResolver = async (ctx, data) => {
     .first<{ status: string; balance_minor: number; due_date: string | null }>();
   if (!row || !['issued', 'partially_paid', 'overdue'].includes(row.status) || row.balance_minor <= 0)
     throw new SkipEmail('invoice no longer has a balance');
-  const { total: _t, ...rest } = d;
+  const { total: _t, portalLink: _p, ...rest } = d;
   const overdue = row.status === 'overdue';
   return { ...rest, overdue, dueToday: !overdue && row.due_date === businessDate(ctx.now()) };
 };

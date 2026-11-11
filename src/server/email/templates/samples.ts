@@ -83,6 +83,7 @@ export const EMAIL_SAMPLES: Record<TemplateName, Record<string, unknown>> = {
     total: '$500.00',
     dueDate: '13 November 2026',
     link: 'https://example.com/i/abc',
+    portalLink: 'https://kuzikode.example/portal/invoices/inv_1',
     message: null,
   },
   invoice_reminder: {

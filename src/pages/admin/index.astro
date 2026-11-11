@@ -159,7 +159,7 @@ const fmt = (iso: string) =>
     </section>
   ) : null}
   {d.financial ? (
-    <div class="mt-6 grid gap-6 lg:grid-cols-2">
+    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
       <section class={card} aria-label="Monthly revenue received">
         {d.financial.charts.revenue.length === 0 ? (
           <BarChart
@@ -199,7 +199,7 @@ const fmt = (iso: string) =>
       </section>
     </div>
   ) : null}
-  <div class="mt-6 grid gap-6 lg:grid-cols-2">
+  <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
     {d.recentPayments ? (
       <section class={card} aria-labelledby="payments-title">
         <div class="flex items-center justify-between">
@@ -220,7 +220,7 @@ const fmt = (iso: string) =>
                   <a href={`/admin/payments/${p.id}`} class="text-sm font-semibold text-ink-950 hover:underline">
                     {p.client}
                   </a>
-                  <p class="text-[12px] text-ink-600">
+                  <p class="text-[12px] text-ink-600 [overflow-wrap:anywhere]">
                     {p.receiptNumber} · {methods.get(p.method) ?? p.method} · {fmt(p.receivedAt)}
                     {p.providerReference ? ` · Ref ${p.providerReference}` : ''}
                   </p>
@@ -358,7 +358,7 @@ const fmt = (iso: string) =>
       </section>
     ) : null}
   </div>
-  <div class="mt-8 grid gap-6 lg:grid-cols-2">
+  <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
     <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="recent-title">
       <div class="flex items-center justify-between">
         <h2 id="recent-title" class="font-sans text-base font-semibold">

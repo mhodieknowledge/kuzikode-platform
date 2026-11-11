@@ -362,6 +362,8 @@ const defs = {
       total: z.string(),
       dueDate: z.string(),
       link: url,
+      /** The same invoice in the client portal (for clients with a portal account). */
+      portalLink: url.optional(),
       message: z.string().nullable().optional(),
     }),
     render: (
@@ -372,6 +374,7 @@ const defs = {
         total: string;
         dueDate: string;
         link: string;
+        portalLink?: string | undefined;
         message?: string | null | undefined;
       },
     ) =>
@@ -395,6 +398,14 @@ const defs = {
             ],
           },
           { kind: 'button', text: 'View invoice', href: d.link },
+          ...(d.portalLink
+            ? [
+                {
+                  kind: 'small' as const,
+                  text: `Have a client portal account? The invoice is also in your portal, where you can pay online: ${d.portalLink}`,
+                },
+              ]
+            : []),
           {
             kind: 'small',
             text: 'Please quote the invoice number with your payment. Reply to this email with any questions.',

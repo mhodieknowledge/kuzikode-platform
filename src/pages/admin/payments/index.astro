@@ -237,6 +237,11 @@ const tab = (active: boolean) =>
                   <td class="px-4 py-3 text-ink-800">
                     {METHOD[p.method] ?? p.method}
                     <span class="block text-[12px] text-ink-600">{PROVIDER[p.provider_key] ?? p.provider_key}</span>
+                    {p.provider_reference || p.reference ? (
+                      <span class="block font-mono text-[12px] text-ink-600" title="Gateway or bank reference">
+                        {p.provider_reference ?? p.reference}
+                      </span>
+                    ) : null}
                   </td>
                   <td class="px-4 py-3">
                     <span class={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${STATUS[p.status]?.[1] ?? ''}`}>

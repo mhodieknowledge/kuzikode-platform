@@ -5,9 +5,11 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
-- Last completed task: **P6.8 Live email verification** (2026-11-11). Phase 6 done except P6.5 `[!]` (owner's Faked Success). P6.5 is `[!]` (Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
-- **Next step:** **P7.1 Full E2E journey** (docs/08 §4, the 16-step flow): read docs/08 §4, check which steps the existing specs already
-  cover, and write one journey spec that walks them in order (green). Then P7.2 security suite.
+- Last completed task: **P7.1 Full E2E journey** (2026-11-11). Phase 6 done except P6.5 `[!]` (owner's Faked Success). P6.5 is `[!]` (Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
+- **Next step:** **P7.2 Security suite** (roadmap + docs/08 §4 "security.spec.ts": client B can't open client A's invoice/project/file
+  URLs (404), Content Manager can't reach invoices, logged-out access redirects to login, `/admin` never indexed), then run the
+  `/security-review` skill (or a manual OWASP pass over auth, portal scoping, uploads, payments) and fix findings. Also check
+  user-facing Zod messages: a few schemas still have `.regex()` without a message (mostly hidden ID/select fields; see P7.1 entry).
 - **For P8.2 (staging):** send a test email from staging (Admin → Settings → email test) and confirm `delivered` arrives through the
   Resend webhook once the owner has configured it (BLOCKERS); re-run `LIVE_RESULT_URL=https://<staging>/api/payments/callbacks/paynow/<accountId> npm run test:payments:live`
   so Paynow's result URL is reachable, and record it.
@@ -739,3 +741,15 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Real send with the owner's `RESEND_API_KEY` through `resendProvider` (our adapter, `system_test` template rendered by our renderer),
   from `Kuzikode <onboarding@resend.dev>` to Resend's test inbox `delivered@resend.dev`: id `01a1cbb7-62c4-7799-9cd4-9f94c0156a33`,
   `GET /emails/:id` → `last_event: delivered` within 5 s. (Real client addresses need a verified sending domain: BLOCKERS "Domain kuzikode.com".)
+
+## 2026-11-11 18:40 UTC · P7.1 Full E2E journey ✅
+- `tests/e2e/full-journey.spec.ts`: the 16 steps of docs/08 §4 in one serial test with fresh data: contact enquiry (reference) →
+  admin notification → lead + log note → client → quotation (3 lines, 5% discount, VAT; $1,081.67) sent → mailbox link → public
+  `/q/` PDF + accept → convert (second convert refused/idempotent) → issue → invoice email with `/i/` and portal links → portal
+  invitation (Owner) → set password → portal sign-in → invoice PDF → $500 bank transfer recorded (Part paid) → portal Pay now →
+  EcoCash mock → "Waiting for approval" → "Payment received" after the server-side check → Paid, 2 receipts → both receipt PDFs in
+  the portal → dashboard + payments list with the gateway reference → project from the quotation (milestone, update, deliverable) →
+  client sees progress, milestone, update and downloads the file. Passes in ~58 s; run twice green.
+- Fixes found by the journey: invoice email now includes the portal link (resolver `portalLink`); payments list shows the
+  gateway/bank reference; the contact form's empty category showed a raw Zod pattern message (now "Choose a category." only);
+  dashboard overflowed at 375 px with long references (single-column grids now `grid-cols-1`, references wrap).

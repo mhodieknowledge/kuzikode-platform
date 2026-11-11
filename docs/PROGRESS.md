@@ -5,11 +5,11 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
-- Last completed task: **P6.7 Resend webhooks** (2026-11-11). P6.5 is `[!]` (Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
-- **Next step:** **P6.8 Live email verification** (roadmap): needs staging (P8.2) for the "on staging" part; a `RESEND_API_KEY` is in the
-  build env, so at minimum send one real email through `resendProvider` from the container to a Resend test address
-  (`delivered@resend.dev`), record the message id + status; mark `[!]` for the staging/webhook part with BLOCKERS. Then Phase 7 (P7.1).
-- **For P8.2 (staging):** re-run `LIVE_RESULT_URL=https://<staging>/api/payments/callbacks/paynow/<accountId> npm run test:payments:live`
+- Last completed task: **P6.8 Live email verification** (2026-11-11). Phase 6 done except P6.5 `[!]` (owner's Faked Success). P6.5 is `[!]` (Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
+- **Next step:** **P7.1 Full E2E journey** (docs/08 §4, the 16-step flow): read docs/08 §4, check which steps the existing specs already
+  cover, and write one journey spec that walks them in order (green). Then P7.2 security suite.
+- **For P8.2 (staging):** send a test email from staging (Admin → Settings → email test) and confirm `delivered` arrives through the
+  Resend webhook once the owner has configured it (BLOCKERS); re-run `LIVE_RESULT_URL=https://<staging>/api/payments/callbacks/paynow/<accountId> npm run test:payments:live`
   so Paynow's result URL is reachable, and record it.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 - New entries are appended at the **bottom** of this file.
@@ -734,3 +734,8 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Tests: unit `resend-webhook.test.ts` (3: equals Node HMAC reference, tolerance, malformed headers/secret) · integration
   `resend-webhooks.test.ts` (5, signed fixtures: forward-only + replay + complaint after delivery, bounce/failed/suppressed, secret
   rotation, forged/stale/future/unsigned/v2/tampered refused, unknown/other provider/ignored types/bad JSON acknowledged).
+
+## 2026-11-11 18:00 UTC · P6.8 Live email verification ✅ (container; staging repeat in P8.2)
+- Real send with the owner's `RESEND_API_KEY` through `resendProvider` (our adapter, `system_test` template rendered by our renderer),
+  from `Kuzikode <onboarding@resend.dev>` to Resend's test inbox `delivered@resend.dev`: id `01a1cbb7-62c4-7799-9cd4-9f94c0156a33`,
+  `GET /emails/:id` → `last_event: delivered` within 5 s. (Real client addresses need a verified sending domain: BLOCKERS "Domain kuzikode.com".)

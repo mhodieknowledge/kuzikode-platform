@@ -103,7 +103,8 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
   _2026-11-11: automated suite passed live from the build container (results in PROGRESS); the staging re-run (reachable result URL) happens in P8.2; the manual "Faked Success" needs the owner's Paynow login (BLOCKERS)._
 - [x] **P6.6 All email templates** (PRD §7) HTML + text, rendered preview page (dev), snapshot tests. AC: every template has a test.
 - [x] **P6.7 Resend webhooks** (signature verification, status updates). AC: tests with signed fixtures.
-- [ ] **P6.8 Live email verification** with a real Resend key on staging. AC: delivered email recorded. `[!]` if no key.
+- [x] **P6.8 Live email verification** with a real Resend key on staging. AC: delivered email recorded. `[!]` if no key.
+  _2026-11-11: real send through our Resend adapter from the build container, Resend reports `delivered` (PROGRESS). Repeated from staging, with the delivery webhook, in the P8.2 smoke tests._
 
 ## Phase 7 — Quality assurance
 - [ ] **P7.1 Full E2E journey** (docs/08 §4) green.

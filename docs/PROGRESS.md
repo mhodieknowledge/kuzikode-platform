@@ -819,3 +819,12 @@ The **Next step** line must be specific enough that a fresh session can continue
 ## 2026-11-11 21:50 UTC · CI green · session hand-off
 - CI run 78 on `main` (d7efa6f): verify job ✅ (4 min 40 s), e2e job ✅ (92 + link check, ~11 min). First green run since run 66.
 - Session ending at a phase boundary (Phases 1–7 done; P6.5 `[!]` on the owner's Faked Success). Next: P8.1 (see Current status).
+
+## 2026-11-11 22:00 UTC · P8.1 Remote resources ✅
+- Created with wrangler 4.158 (API token from the build env; only `kuzikode-*` names, nothing else touched):
+  staging D1 `kuzikode-staging-db` (bfe8dc86-a8b1-4c22-944e-92f735a9fa4f, ENAM), R2 `kuzikode-staging-files` + `kuzikode-staging-backups`,
+  KV `kuzikode-staging-cache` (0995450f0a70435f8cd064bb22873572), Queues `kuzikode-staging-jobs` + `kuzikode-staging-jobs-dlq`;
+  production D1 `kuzikode-prod-db` (fe59d0e4-4a0d-48f3-95b0-4111ffbff5d0), R2 `kuzikode-prod-files` + `kuzikode-prod-backups`,
+  KV `kuzikode-prod-cache` (9ca45b78464f4f16b62badae19599920), Queues `kuzikode-prod-jobs` + `kuzikode-prod-jobs-dlq` (all empty).
+- `wrangler.jsonc`: the four `<..._ID>` placeholders replaced with the real IDs. `npm run deploy:staging:dry` lists every staging
+  binding against the real resources.

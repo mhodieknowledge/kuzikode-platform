@@ -115,7 +115,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 - [x] **P7.6 Link check + migration check.**
 
 ## Phase 8 — Production preparation
-- [ ] **P8.1 Remote resources** (staging, plus production resources creation if a token exists). Real IDs into wrangler.jsonc. `[!]` without a token.
+- [x] **P8.1 Remote resources** (staging, plus production resources creation if a token exists). Real IDs into wrangler.jsonc. `[!]` without a token.
 - [ ] **P8.2 Deploy staging** via CI + migrations + base seed + bootstrap admin (credentials go to the owner via BLOCKERS.md instructions, never committed) + smoke tests.
 - [ ] **P8.3 deploy-production + backup workflows** (manual production, nightly encrypted backup).
 - [ ] **P8.4 Backup/restore drill** executed and recorded.

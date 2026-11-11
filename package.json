@@ -19,7 +19,7 @@
     "test:unit": "vitest run --project unit",
     "test:integration": "vitest run --project integration",
     "test:e2e": "playwright test",
-    "test:payments:live": "vitest run --project payments-live",
+    "test:payments:live": "NODE_USE_ENV_PROXY=1 vitest run --project payments-live",
     "verify": "npm run typecheck && npm run lint && npm run test:unit && npm run test:integration && npm run build",
     "verify:full": "npm run verify && npm run test:e2e",
     "cf:types": "wrangler types --strict-vars=false src/worker-configuration.d.ts",

@@ -17,6 +17,16 @@ export default defineConfig(async () => {
           },
         },
         {
+          // Opt-in real gateway calls in test mode (P6.5): `npm run test:payments:live`. Never in verify or default CI.
+          extends: true,
+          test: {
+            name: 'payments-live',
+            environment: 'node',
+            include: ['tests/live/**/*.live.test.ts'],
+            testTimeout: 120_000,
+          },
+        },
+        {
           extends: true,
           plugins: [
             cloudflareTest({

@@ -5,10 +5,11 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
-- Last completed task: **P6.4 Reconciliation** (2026-11-11). Saved cards wait on Paynow approving tokenization (BLOCKERS).
-- **Next step:** **P6.5 Paynow test-mode verification** (roadmap): `npm run test:payments:live` against staging with the Paynow
-  test numbers (0771111111 / 0773333333 / 0774444444) + one manual redirect payment with "Faked Success"; record results.
-  `[!]` with a BLOCKERS entry if credentials or staging are missing. Then P6.6 email templates.
+- Last completed task: **P6.5 Paynow test-mode verification** `[!]` (2026-11-11; Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
+- **Next step:** **P6.6 All email templates** (PRD §7): every template HTML + text, dev preview page, snapshot tests (AC: every
+  template has a test). Look at the existing email module/templates first (`card_charge_failed`, notification emails…). Then P6.7.
+- **For P8.2 (staging):** re-run `LIVE_RESULT_URL=https://<staging>/api/payments/callbacks/paynow/<accountId> npm run test:payments:live`
+  so Paynow's result URL is reachable, and record it.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 - New entries are appended at the **bottom** of this file.
 
@@ -703,3 +704,12 @@ The **Next step** line must be specific enough that a fresh session can continue
   never started, late reversal + daily/7-day bounds, Check now permissions/audit/no internals/list) · e2e `reconciliation.spec.ts`
   (seeded waiting attempt, Check now → no change; axe; 375/768/1440 reviewed). verify: unit 331 / integration 297. Checkout,
   public-documents, gateways, portal-auth, invoices e2e re-run green.
+
+## 2026-11-11 17:30 UTC · P6.5 Paynow test-mode verification `[!]` (automated part done)
+- New opt-in vitest project `payments-live` (`tests/live/paynow.live.test.ts`, `npm run test:payments:live`, sets
+  `NODE_USE_ENV_PROXY=1`); not in verify/CI. Skips per gateway without credentials; `LIVE_RESULT_URL`/`LIVE_RETURN_URL` optional.
+- Live run 2026-11-11 17:20 UTC from the build container, owner's Paynow USD integration in test mode: 0771111111 → **Paid** $1.00,
+  our reference, also found by trace (23 s) · 0773333333 → **Cancelled** (46 s) · 0774444444 → refused at once, **declined
+  "Insufficient balance"**, not retryable · redirect (card) → verified paynow.co.zw page, status **Created** (waiting). 4/4 passed.
+  PesePay: skipped (no test keys).
+- Not done (owner/staging): result URL reachable on staging (P8.2), manual "Faked Success" on Paynow's page (BLOCKERS).

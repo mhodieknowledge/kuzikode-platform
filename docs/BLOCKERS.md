@@ -81,3 +81,11 @@ Things only the owner can do. The agent keeps building around them and records e
   `vmc` and `zimswitch` express methods for the USD integration (and the ZWG one if you add it). When Paynow confirms: sign in as
   Super Admin → Admin → Payments → Gateways → edit the Paynow account → switch on **Saved cards (card tokenization)** → Save. Then
   ask the next build session to re-run the live token check (scratch script in PROGRESS.md P6.3e).
+- [ ] **Paynow "Faked Success" test payment through the Paynow page (2026-11-11, P6.5).** The automated live suite already passed
+  against your Paynow test integration (EcoCash success, cancel and insufficient balance, and a card/redirect payment created on
+  Paynow's page). Paynow only lets the **merchant account that owns the integration** fake-pay a redirect payment, which needs your
+  Paynow login, so this one step is yours (Paynow requires at least one successful test before "Request to be Set Live").
+  Once staging is deployed (P8.2, its address goes in docs/PROGRESS.md): (1) in staging Admin, issue a small USD invoice to a test
+  client and open its client link, (2) Pay now → Bank card → Pay, (3) on the Paynow page sign in with your Paynow merchant login and
+  choose **Faked Success**, (4) you come back to Kuzikode's page, which shows "Paid" and a receipt. Then tick this line (or tell the
+  next build session) and it is recorded in FINAL-REPORT.

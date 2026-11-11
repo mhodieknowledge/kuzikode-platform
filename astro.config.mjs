@@ -24,5 +24,7 @@ export default defineConfig({
     plugins: [tailwindcss()],
     // Unique per build: part of the edge page-cache key so a deploy never serves HTML from the previous build.
     define: { __BUILD_ID__: JSON.stringify(process.env.GITHUB_SHA ?? `local-${Date.now()}`) },
+    // Fonts are always files: our CSP (`font-src 'self'`) blocks data: URLs, so small subsets Vite would inline never loaded.
+    build: { assetsInlineLimit: (file) => (/\.(woff2?|ttf|otf)$/i.test(file) ? false : undefined) },
   },
 });

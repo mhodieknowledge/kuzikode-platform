@@ -5,10 +5,10 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
-- Last completed task: **P7.3 Responsive + accessibility pass** (2026-11-11). Phase 6 done except P6.5 `[!]` (owner's Faked Success). P6.5 is `[!]` (Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
-- **Next step:** **P7.4 Performance pass** (Lighthouse targets PRD §10 on Home, Services, a service page, Contact; bundle sizes; CPU
-  timings for login, invoice PDF, home SSR via `wrangler dev` timing logs; document in PROGRESS + DECISIONS). Lighthouse: Chromium is
-  at /opt/pw-browsers/chromium (`CHROME_PATH`, `--headless --no-sandbox`); `npx lighthouse` needs the npm registry (allowed).
+- Last completed task: **P7.4 Performance pass** (2026-11-11). Phase 6 done except P6.5 `[!]` (owner's Faked Success). P6.5 is `[!]` (Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
+- **Next step:** **P7.5 Placeholder sweep**: `scripts/check-placeholders.mjs` + `npm run check:placeholders` in CI (grep src/ for
+  TODO/FIXME, lorem, `href="#"`, `console.log` outside the logger, "coming soon", fake numbers like "100+ clients"; allow-list with
+  reasons for legitimate hits), fix every real hit. Then P7.6 link check + migration check.
 - **For P8.2 (staging):** send a test email from staging (Admin → Settings → email test) and confirm `delivered` arrives through the
   Resend webhook once the owner has configured it (BLOCKERS); re-run `LIVE_RESULT_URL=https://<staging>/api/payments/callbacks/paynow/<accountId> npm run test:payments:live`
   so Paynow's result URL is reachable, and record it.
@@ -787,3 +787,17 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Bug found on the way: with more than 99 unread notifications the bell's label ("103 unread") didn't contain its visible text
   ("99+") → WCAG 2.5.3; the label now says "99+ unread".
 - Full e2e suite locally: 92 tests, green (7.1 min).
+
+## 2026-11-11 21:00 UTC · P7.4 Performance pass ✅
+- Lighthouse 12.6.1, mobile profile, local production build on `wrangler dev` (`npm run perf:lighthouse`):
+  `/` P99 A100 BP100 · `/services/` P100 A100 BP100 · `/services/web-development` P98 A100 BP100 · `/contact` P99 A100 BP96
+  (Turnstile iframe); LCP 1.5–2.1 s, TBT 0–10 ms, CLS 0. SEO 69 in development (deliberate `noindex` + robots `Disallow: /`);
+  with `APP_ENV=production` SEO = 100 on `/` and `/contact`. All PRD §10 targets met.
+- Fixed: font subsets under 4 KB were inlined as `data:` URLs that our CSP blocks (Best Practices 93 → 100).
+- Sizes: Worker 4.39 MB raw / 1.24 MB gzip (free limit 3 MB gzip); client JS 242 KB gzip in total across all islands (React
+  runtime 65 KB, UI kit 56 KB, Zod schemas 24 KB, the rest per-page islands ≤ 7 KB); CSS 12.6 KB gzip. Home transfers 313 KB
+  (script 125 KB, fonts 93 KB, images 69 KB).
+- Timings (local `wrangler dev`, warm, wall clock incl. local D1/R2 I/O, median of 7): home SSR 11.8 ms, service page 10.8 ms,
+  admin sign-in 41.8 ms (PBKDF2 100k ≈ 21 ms CPU, DECISIONS 2026-11-05), invoice PDF first render 43.2 ms, stored PDF 27.7 ms.
+  CPU-heavy paths stay those already recorded (login hash, PDF render once per document); Workers Paid remains the BLOCKERS advice
+  before real payments.

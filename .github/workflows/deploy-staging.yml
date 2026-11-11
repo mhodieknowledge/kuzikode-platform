@@ -1,0 +1,73 @@
+name: Deploy staging
+
+# Runs after CI succeeds on main (docs/09 §6), or by hand. Worker secrets live on the Worker (wrangler secret), not here.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Build, migrate, deploy, smoke test
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: staging
+      url: https://kuzikode-staging.mhodieknowledge.workers.dev
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      STAGING_URL: https://kuzikode-staging.mhodieknowledge.workers.dev
+      ASTRO_TELEMETRY_DISABLED: '1'
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - name: Check Cloudflare credentials
+        id: creds
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID repository secrets are not set; staging deploy skipped (docs/BLOCKERS.md)."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.creds.outputs.ok == 'true'
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: actions/setup-node@v7
+        if: steps.creds.outputs.ok == 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.creds.outputs.ok == 'true'
+        run: npm ci
+
+      - name: Build (staging)
+        if: steps.creds.outputs.ok == 'true'
+        run: npm run build:staging
+
+      - name: Apply D1 migrations (staging)
+        if: steps.creds.outputs.ok == 'true'
+        run: npm run db:migrate:staging
+
+      - name: Deploy Worker (staging)
+        if: steps.creds.outputs.ok == 'true'
+        run: npx wrangler deploy
+
+      - name: Smoke test
+        if: steps.creds.outputs.ok == 'true'
+        run: node scripts/smoke.mjs "$STAGING_URL" --env staging

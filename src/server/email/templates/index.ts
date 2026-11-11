@@ -5,6 +5,11 @@
 import { z } from 'zod';
 import { renderEmail, type Brand, type Rendered } from './layout';
 
+/** "24 hours" for a one-day link (the bootstrap invite), otherwise "N days". */
+export function expiryText(days: number): string {
+  return days === 1 ? '24 hours' : `${days} days`;
+}
+
 const url = z.url();
 
 const defs = {
@@ -91,7 +96,7 @@ const defs = {
             text: 'You have been invited to the Kuzikode admin portal. Set a password to activate your account.',
           },
           { kind: 'button', text: 'Set your password', href: d.link },
-          { kind: 'small', text: `This invitation works once and expires in ${d.expiresInDays} days.` },
+          { kind: 'small', text: `This invitation works once and expires in ${expiryText(d.expiresInDays)}.` },
         ],
       }),
   },
@@ -109,7 +114,7 @@ const defs = {
             text: 'Kuzikode has created a client portal account for you. In the portal you can view and accept quotations, pay invoices, follow project progress and contact us.',
           },
           { kind: 'button', text: 'Set up your account', href: d.link },
-          { kind: 'small', text: `This invitation works once and expires in ${d.expiresInDays} days.` },
+          { kind: 'small', text: `This invitation works once and expires in ${expiryText(d.expiresInDays)}.` },
         ],
       }),
   },

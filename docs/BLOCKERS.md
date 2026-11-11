@@ -22,8 +22,13 @@ Things only the owner can do. The agent keeps building around them and records e
 - [ ] **Tax:** confirm VAT registration and the current rate before enabling the tax rate in Settings.
 - [ ] **Workers Paid plan ($5/month)** recommended before taking real payments in production (removes the 10 ms CPU cap).
 - [ ] **GitHub `production` environment** with you as required reviewer (Settings → Environments), so production deploys need your click.
-- [ ] **First admin account:** after the staging/production bootstrap, open the one-time set-password link
-  (valid 24 h). The agent gives it to you in the session chat, or you run `npm run bootstrap:admin` yourself (see docs/09 §5).
+- [ ] **First admin account (staging is deployed, 2026-11-11):** GitHub → this repo → **Actions** → **Bootstrap first admin** → **Run
+  workflow** → environment `staging`, your email and name → Run. Within about 10 minutes the staging site emails you a one-time
+  "Set your password" link (valid 24 hours); open it, choose a password, then sign in at
+  https://kuzikode-staging.mhodieknowledge.workers.dev/admin/login and set up two-step sign-in. Use the email address of your Resend
+  account: until a domain is verified in Resend, Resend only delivers to that address. The link is never printed in the workflow log.
+  (Alternative with a terminal: `npm run bootstrap:admin -- --env staging --email you@example.com --name "Your Name"` prints the link.)
+  Do the same with `production` once production is deployed (P8.3).
 
 - [x] **pen.dev (optional, for mockups):** *(present in the build environment, checked 2026-11-05)* pen.dev → organization settings → Developer Keys → create key. Add `PEN_CLI_KEY`
   and `PEN_CLAUDE_OAUTH_TOKEN` (run `claude setup-token` on your PC; it uses your Claude Pro plan, no API credit) to the Claude Code cloud

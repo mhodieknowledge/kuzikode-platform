@@ -116,7 +116,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 
 ## Phase 8 — Production preparation
 - [x] **P8.1 Remote resources** (staging, plus production resources creation if a token exists). Real IDs into wrangler.jsonc. `[!]` without a token.
-- [ ] **P8.2 Deploy staging** via CI + migrations + base seed + bootstrap admin (credentials go to the owner via BLOCKERS.md instructions, never committed) + smoke tests.
+- [~] **P8.2 Deploy staging** via CI + migrations + base seed + bootstrap admin (credentials go to the owner via BLOCKERS.md instructions, never committed) + smoke tests.
 - [ ] **P8.3 deploy-production + backup workflows** (manual production, nightly encrypted backup).
 - [ ] **P8.4 Backup/restore drill** executed and recorded.
 - [ ] **P8.5 Docs:** `README.md` (overview, local setup), `docs/RUNBOOK.md` (deploy, migrate, rollback, restore, rotate secrets, incident basics), `docs/ADMIN-GUIDE.md` (owner onboarding: first login, settings, inviting staff/clients, invoicing, payments), `docs/PAYMENTS-ONBOARDING.md` (Paynow merchant account, integration keys, test mode → "Request to be Set Live", per-currency integrations, how to switch to or add PesePay by adding an account + route), `docs/EMAIL-SETUP.md` (Resend domain + DNS), `docs/PRODUCTION-CHECKLIST.md`.

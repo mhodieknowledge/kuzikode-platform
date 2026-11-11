@@ -1,5 +1,6 @@
 // Kuzikode Worker configuration. Bindings are NOT inherited into env.* blocks, so each env repeats them.
-// Staging and production resource IDs are real (created 2026-11-11, roadmap P8.1).
+// Staging and production resource IDs are real (created 2026-11-11, roadmap P8.1). Staging and production use the
+// owner's Turnstile widget site key (public); its hostnames are managed in the Turnstile dashboard.
 // Production custom domain (enable when kuzikode.com is on Cloudflare, docs/09 §8):
 //   "routes": [{ "pattern": "kuzikode.com", "custom_domain": true }, { "pattern": "www.kuzikode.com", "custom_domain": true }]
 {
@@ -82,7 +83,7 @@
         "PAYMENTS_MOCK_ENABLED": "true",
         "EMAIL_FROM": "Kuzikode <onboarding@resend.dev>",
         "EMAIL_REPLY_TO": "",
-        "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+        "TURNSTILE_SITE_KEY": "0x4AAAAAAF1CYJgOAgTyNXMr",
         "ADMIN_ALERT_EMAIL": "",
       },
       "triggers": {
@@ -142,7 +143,7 @@
         "PAYMENTS_MOCK_ENABLED": "false",
         "EMAIL_FROM": "Kuzikode <onboarding@resend.dev>",
         "EMAIL_REPLY_TO": "",
-        "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+        "TURNSTILE_SITE_KEY": "0x4AAAAAAF1CYJgOAgTyNXMr",
         "ADMIN_ALERT_EMAIL": "",
       },
       "triggers": {

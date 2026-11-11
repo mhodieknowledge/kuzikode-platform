@@ -828,3 +828,13 @@ The **Next step** line must be specific enough that a fresh session can continue
   KV `kuzikode-prod-cache` (9ca45b78464f4f16b62badae19599920), Queues `kuzikode-prod-jobs` + `kuzikode-prod-jobs-dlq` (all empty).
 - `wrangler.jsonc`: the four `<..._ID>` placeholders replaced with the real IDs. `npm run deploy:staging:dry` lists every staging
   binding against the real resources.
+
+## 2026-11-11 22:20 UTC · P8.2 staging deploy (in progress)
+- Staging deployed by hand from this container: 12 migrations applied remotely, base + nonprod seeds, Worker `kuzikode-staging`
+  (version 83fe6747) with 7 Worker secrets (`wrangler secret list`: all `secret_text`), 3 crons, queue producer/consumer.
+  URL https://kuzikode-staging.mhodieknowledge.workers.dev
+- This container can't reach `*.workers.dev` (Cloudflare edge 429 for the shared egress IP, Worker never invoked), so the smoke
+  test runs from GitHub Actions: new `deploy-staging.yml` (after CI on main or by hand: build → migrate → deploy → `scripts/smoke.mjs`,
+  11 read-only checks incl. security/private headers, robots, sitemap, 404, Turnstile key) and `bootstrap-admin.yml` (manual; owner
+  enters their email; `bootstrap-admin --send-email` queues the invite through the outbox, link never logged). Smoke script passes
+  11/11 against a local worker; unit tests for both.

@@ -1,10 +1,13 @@
 /**
  * One-time creation of the first Super Administrator (docs/07 §9).
- *   npm run bootstrap:admin -- --env local|staging|production --email owner@example.com --name "Owner" [--reissue]
+ *   npm run bootstrap:admin -- --env local|staging|production --email owner@example.com --name "Owner" [--reissue] [--send-email]
  * - Refuses if an active super admin already exists.
  * - Creates the user with no usable password (status 'invited'), the super_admin role, a system audit row and a
  *   single-use invite token valid for 24 h, then prints the set-password link to this terminal only.
  * - --reissue creates a fresh link for the invited super admin while no active super admin exists.
+ * - --send-email does not print the link: it queues the standard staff invitation email (outbox row in the same
+ *   statement list), which the deployed Worker's 5-minute outbox sweep sends. Used by the bootstrap-admin workflow so
+ *   the link never appears in CI logs.
  * Never run in CI. Never commit or log the printed link.
  */
 import { execFileSync } from 'node:child_process';
@@ -20,6 +23,7 @@ export interface BootstrapArgs {
   email: string;
   name: string;
   reissue: boolean;
+  sendEmail: boolean;
   persistTo?: string;
   siteUrl?: string;
 }
@@ -44,6 +48,7 @@ export function parseArgs(argv: string[]): BootstrapArgs {
     email,
     name,
     reissue: argv.includes('--reissue'),
+    sendEmail: argv.includes('--send-email'),
     ...(persistTo ? { persistTo } : {}),
     ...(siteUrl ? { siteUrl } : {}),
   };
@@ -105,6 +110,23 @@ export function buildReissueSql(p: {
   ].join('\n');
 }
 
+/** Outbox row for the staff invitation email (same shape as `enqueue()` in src/server/jobs/outbox.ts). */
+export function buildInviteEmailSql(p: {
+  email: string;
+  name: string;
+  link: string;
+  tokenId: string;
+  now: Date;
+}): string {
+  const now = p.now.toISOString();
+  const payload = JSON.stringify({
+    template: 'staff_invitation',
+    to: p.email,
+    data: { name: p.name, link: p.link, expiresInDays: 1 },
+  });
+  return `INSERT OR IGNORE INTO outbox (id, type, payload, idempotency_key, status, attempts, available_at, created_at, updated_at) VALUES (${sq(newId('obx'))}, 'email.send', ${sq(payload)}, ${sq(`email:invite:${p.tokenId}`)}, 'pending', 0, ${sq(now)}, ${sq(now)}, ${sq(now)});`;
+}
+
 /** PUBLIC_SITE_URL for the env from wrangler.jsonc (comments stripped). */
 export function siteUrlFor(env: BootstrapEnv): string {
   const raw = readFileSync(new URL('../wrangler.jsonc', import.meta.url), 'utf8')
@@ -134,36 +156,43 @@ function query<T>(args: BootstrapArgs, sql: string): T[] {
   return res[0]?.results ?? [];
 }
 
-export function run(args: BootstrapArgs): { link: string } {
+export function run(args: BootstrapArgs): { link: string; emailed: boolean } {
   const active = query<{ n: number }>(args, ACTIVE_SUPER_ADMINS_SQL)[0]?.n ?? 0;
   if (active > 0) throw new Error('A Super Administrator already exists. Bootstrap is only for the first account.');
-  const existing = query<{ id: string; status: string; user_type: string }>(
+  const existing = query<{ id: string; name: string; status: string; user_type: string }>(
     args,
-    `SELECT id, status, user_type FROM users WHERE email = ${sq(args.email)}`,
+    `SELECT id, name, status, user_type FROM users WHERE email = ${sq(args.email)}`,
   )[0];
   const { token, hash } = newToken();
   const tokenId = newId('tok');
   const now = new Date();
   let sql: string;
+  let name = args.name;
   if (args.reissue) {
     if (!existing || existing.status !== 'invited')
       throw new Error('--reissue needs an invited (not yet active) account with that email.');
+    name = existing.name;
     sql = buildReissueSql({ userId: existing.id, email: args.email, tokenId, tokenHash: hash, now });
   } else {
     if (existing)
       throw new Error('A user with that email already exists. Use --reissue for an unaccepted bootstrap invite.');
     sql = buildCreateSql({ userId: newId('usr'), email: args.email, name: args.name, tokenId, tokenHash: hash, now });
   }
-  d1(args, ['--command', sql]);
   const base = args.siteUrl ?? siteUrlFor(args.env);
-  return { link: new URL(`/admin/accept-invite?token=${encodeURIComponent(token)}`, base).toString() };
+  const link = new URL(`/admin/accept-invite?token=${encodeURIComponent(token)}`, base).toString();
+  if (args.sendEmail) sql += '\n' + buildInviteEmailSql({ email: args.email, name, link, tokenId, now });
+  d1(args, ['--command', sql]);
+  return { link, emailed: args.sendEmail };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
-    const { link } = run(parseArgs(process.argv.slice(2)));
+    const args = parseArgs(process.argv.slice(2));
+    const { link, emailed } = run(args);
     process.stdout.write(
-      `\nFirst Super Administrator created.\nOpen this one-time link within 24 hours to set the password (do not share or commit it):\n\n  ${link}\n\n`,
+      emailed
+        ? `\nSuper Administrator invitation queued. The ${args.env} Worker emails the one-time link (valid 24 hours) to the address given within about 10 minutes.\n\n`
+        : `\nFirst Super Administrator created.\nOpen this one-time link within 24 hours to set the password (do not share or commit it):\n\n  ${link}\n\n`,
     );
   } catch (err) {
     console.error(err instanceof Error ? err.message : err);

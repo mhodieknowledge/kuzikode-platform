@@ -1,0 +1,52 @@
+name: Bootstrap first admin
+
+# One-time creation of the first Super Administrator (docs/07 §9, scripts/bootstrap-admin.ts --send-email).
+# The set-password link is never printed: the deployed Worker emails it (valid 24 hours) to the address entered here.
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which deployment
+        type: choice
+        options: [staging, production]
+        default: staging
+      email:
+        description: Your email address (the account's sign-in email; the link is sent here)
+        type: string
+        required: true
+      name:
+        description: Your name as it should appear in the admin
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ inputs.environment }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      TARGET_ENV: ${{ inputs.environment }}
+      ADMIN_EMAIL: ${{ inputs.email }}
+      ADMIN_NAME: ${{ inputs.name }}
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - name: Mask the email address in logs
+        run: echo "::add-mask::$ADMIN_EMAIL"
+
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create the Super Administrator and queue the invitation email
+        run: npm run bootstrap:admin -- --env "$TARGET_ENV" --email "$ADMIN_EMAIL" --name "$ADMIN_NAME" --send-email

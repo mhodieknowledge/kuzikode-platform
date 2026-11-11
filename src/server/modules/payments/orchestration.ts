@@ -31,6 +31,7 @@ import { attemptOutcome, type AttemptPhase } from './portal';
 import { accountConfig, getAccount, paymentMethodOptions, resolveRoute } from './router';
 import { captureCardToken, cardForPayment } from './saved-cards';
 import { enqueue, dispatch } from '../../jobs/outbox';
+import { enforce } from '../../lib/rate-limit';
 
 /** Attempts still waiting for an outcome (reconciliation keeps checking these). */
 export const OPEN_ATTEMPT = ['created', 'initiated', 'pending', 'partially_paid'] as const;
@@ -277,6 +278,8 @@ export async function initiateInvoicePayment(
       .first<AttemptRow>();
     if (reuse) return startView(ctx, reuse);
   }
+  // docs/07 §4: at most 10 new gateway transactions per invoice per hour (prompt spam on a client's phone, gateway abuse).
+  await enforce(ctx, { key: `pay-initiate:invoice:${invoiceId}`, limit: 10, windowSeconds: 3600 });
 
   const id = newId('att', ctx.now().getTime());
   const now = ctx.now();

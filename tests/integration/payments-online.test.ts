@@ -198,6 +198,25 @@ describe('online payments (P6.2)', () => {
     expect(await invoiceRow(invoiceId)).toMatchObject({ status: 'issued', balance_minor: 50_000 });
   });
 
+  it('at most 10 new gateway transactions per invoice per hour (docs/07 §4); reuse and replays do not count', async () => {
+    const s = await staff();
+    const { invoiceId, portal } = await invoiceFor(s);
+    for (let i = 0; i < 10; i++) {
+      const r = await pay(portal, invoiceId, { methodCode: 'ecocash', phone: '0774444444' });
+      expect(r.status, JSON.stringify(r.body)).toBe(201);
+    }
+    await env.DB.prepare("DELETE FROM rate_limits WHERE key LIKE 'pay-start:%'").run(); // only the per-invoice limit left
+    const eleventh = await pay(portal, invoiceId, { methodCode: 'ecocash', phone: '0774444444' });
+    expect(eleventh.status).toBe(429);
+    expect(eleventh.body.error.code).toBe('RATE_LIMITED');
+    // A replay of an earlier request (same idempotency key) still answers with its attempt.
+    const key = `k_${u()}`;
+    const other = await invoiceFor(s);
+    const first = await pay(other.portal, other.invoiceId, { methodCode: 'card' }, key);
+    const again = await pay(other.portal, other.invoiceId, { methodCode: 'card' }, key);
+    expect(again.body.data.attemptId).toBe(first.body.data.attemptId);
+  });
+
   it('forged callback → nothing applied; genuine claim not confirmed by the status check → nothing applied', async () => {
     const s = await staff();
     const { invoiceId, portal } = await invoiceFor(s);

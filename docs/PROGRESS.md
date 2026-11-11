@@ -5,11 +5,10 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## Current status
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
-- Last completed task: **P7.1 Full E2E journey** (2026-11-11). Phase 6 done except P6.5 `[!]` (owner's Faked Success). P6.5 is `[!]` (Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
-- **Next step:** **P7.2 Security suite** (roadmap + docs/08 §4 "security.spec.ts": client B can't open client A's invoice/project/file
-  URLs (404), Content Manager can't reach invoices, logged-out access redirects to login, `/admin` never indexed), then run the
-  `/security-review` skill (or a manual OWASP pass over auth, portal scoping, uploads, payments) and fix findings. Also check
-  user-facing Zod messages: a few schemas still have `.regex()` without a message (mostly hidden ID/select fields; see P7.1 entry).
+- Last completed task: **P7.2 Security suite** (2026-11-11). Phase 6 done except P6.5 `[!]` (owner's Faked Success). P6.5 is `[!]` (Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
+- **Next step:** **P7.3 Responsive + accessibility pass** on every page (3 widths, axe, keyboard): list every route under `src/pages`,
+  check which specs already screenshot/axe them (`screenshots()` + `expectAccessible()`), and add one sweep spec for the rest
+  (public, admin, portal) with fixture IDs from global-setup. Then P7.4 performance.
 - **For P8.2 (staging):** send a test email from staging (Admin → Settings → email test) and confirm `delivered` arrives through the
   Resend webhook once the owner has configured it (BLOCKERS); re-run `LIVE_RESULT_URL=https://<staging>/api/payments/callbacks/paynow/<accountId> npm run test:payments:live`
   so Paynow's result URL is reachable, and record it.
@@ -753,3 +752,18 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Fixes found by the journey: invoice email now includes the portal link (resolver `portalLink`); payments list shows the
   gateway/bank reference; the contact form's empty category showed a raw Zod pattern message (now "Choose a category." only);
   dashboard overflowed at 375 px with long references (single-column grids now `grid-cols-1`, references wrap).
+
+## 2026-11-11 19:05 UTC · P7.2 Security suite ✅
+- e2e `security.spec.ts` (3): client B (new fixture user `e2e-security@example.com`, owner of the checkout client only) gets 404 on
+  client A's invoice/pay/quotation/project/payment-attempt pages and 10 portal APIs (invoice + PDF + payment options, quotation + PDF,
+  project, receipt, attempt, file), no client A names leak, lists only own data, admin API/file → 401, `/admin` → login; Content
+  Manager: no finance nav, 403 page + API for invoices/payments/clients; signed-out → login with `next`, 401 on APIs, `noindex`
+  header + meta, robots closed outside production.
+- Manual OWASP pass (no `security-review` diff to review on `main`): SQL interpolation (only constants and a whitelisted export
+  table), router auth (public routers: honeypot + per-IP limit + Turnstile; newsletter double opt-in), `set:html` sources sanitized
+  on write (CMS, catalogue, quotations, careers, insights, industries) and JSON-LD escapes `<`, cookies (HttpOnly/SameSite Lax),
+  no secrets in client bundles or logs, docs/07 §12 test list all present (IDOR, CSRF/Origin, lockout, single-use tokens, spoofed
+  uploads, SVG, XSS, mock blocked in production, headers, no-store). Finding fixed: per-invoice initiation limit (10/hour) was
+  missing → added + integration test. Earlier in P7.1: raw Zod message on the contact form.
+- Fixture hygiene: global-setup hides files on the portal project (portal-auth expects none); the security spec uploads to another
+  client's project. verify green; security + portal-auth + checkout e2e green.

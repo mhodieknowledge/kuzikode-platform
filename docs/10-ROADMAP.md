@@ -108,7 +108,7 @@ Work top to bottom. A task is done only when its **AC** (acceptance criteria) ar
 
 ## Phase 7 — Quality assurance
 - [x] **P7.1 Full E2E journey** (docs/08 §4) green.
-- [ ] **P7.2 Security suite** green. Run the `/security-review` skill (if available) or a manual OWASP pass over auth, portal scoping, uploads, payments. Fix all findings.
+- [x] **P7.2 Security suite** green. Run the `/security-review` skill (if available) or a manual OWASP pass over auth, portal scoping, uploads, payments. Fix all findings.
 - [ ] **P7.3 Responsive + accessibility pass** on every page (3 widths, axe, keyboard).
 - [ ] **P7.4 Performance pass** (Lighthouse targets, bundle sizes, CPU timings documented).
 - [ ] **P7.5 Placeholder sweep** (grep for TODO, lorem, `href="#"`, `console.log`, disabled-forever buttons, fake numbers). AC: script `npm run check:placeholders` in CI.

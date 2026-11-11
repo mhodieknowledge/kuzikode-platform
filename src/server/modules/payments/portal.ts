@@ -6,6 +6,7 @@
 import type { RequestContext } from '../../context';
 import { notFound } from '../../lib/errors';
 import { clientScope, portalAreaClientIds } from '../../lib/policies';
+import { documentLink, verifyPaymentReturn } from '../../lib/public-links';
 
 export interface PortalPayment {
   id: string;
@@ -117,42 +118,78 @@ function outcome(status: string): { phase: AttemptPhase; message: string } {
   }
 }
 
-export async function getPortalAttempt(ctx: RequestContext, id: string): Promise<PortalAttempt> {
-  const s = scope(ctx, 'a.client_id');
-  const row = await ctx.db
+interface AttemptRow {
+  id: string;
+  status: string;
+  method_code: string | null;
+  payer_phone_masked: string | null;
+  currency: string;
+  amount_minor: number;
+  created_at: string;
+  completed_at: string | null;
+  invoice_id: string;
+  invoice_number: string;
+  payment_id: string | null;
+  receipt_number: string | null;
+}
+
+async function attemptRow(ctx: RequestContext, id: string, where: { sql: string; params: unknown[] }) {
+  return ctx.db
     .prepare(
       `SELECT a.id, a.status, a.method_code, a.payer_phone_masked, a.currency, a.amount_minor, a.created_at, a.completed_at,
          i.id AS invoice_id, i.number AS invoice_number, p.id AS payment_id, p.receipt_number
        FROM payment_attempts a JOIN invoices i ON i.id = a.invoice_id
        LEFT JOIN payments p ON p.attempt_id = a.id
-       WHERE a.id = ? AND ${s.sql}`,
+       WHERE a.id = ? AND ${where.sql}`,
     )
-    .bind(id, ...s.params)
-    .first<{
-      id: string;
-      status: string;
-      method_code: string | null;
-      payer_phone_masked: string | null;
-      currency: string;
-      amount_minor: number;
-      created_at: string;
-      completed_at: string | null;
-      invoice_id: string;
-      invoice_number: string;
-      payment_id: string | null;
-      receipt_number: string | null;
-    }>();
+    .bind(id, ...where.params)
+    .first<AttemptRow>();
+}
+
+const toAttempt = (row: AttemptRow): PortalAttempt => ({
+  id: row.id,
+  ...outcome(row.status),
+  method: row.method_code,
+  payerPhone: row.payer_phone_masked,
+  currency: row.currency,
+  amountMinor: row.amount_minor,
+  invoice: { id: row.invoice_id, number: row.invoice_number },
+  createdAt: row.created_at,
+  completedAt: row.completed_at,
+  payment: row.payment_id && row.receipt_number ? { id: row.payment_id, receiptNumber: row.receipt_number } : null,
+});
+
+export async function getPortalAttempt(ctx: RequestContext, id: string): Promise<PortalAttempt> {
+  const row = await attemptRow(ctx, id, scope(ctx, 'a.client_id'));
   if (!row) throw notFound();
+  return toAttempt(row);
+}
+
+/** What `/pay/return` and its status endpoint show: the same client-safe view, with links that work without a session. */
+export interface PublicAttempt extends PortalAttempt {
+  links: { status: string; invoice: string; receipt: string | null };
+}
+
+/**
+ * The attempt behind a signed gateway return link (`paymentReturnUrl`). A wrong signature and an unknown attempt look
+ * the same (null). Read-only: the browser return never applies a payment (docs/06 §3).
+ */
+export async function getPublicAttempt(
+  ctx: RequestContext,
+  id: string,
+  signature: string,
+): Promise<PublicAttempt | null> {
+  if (!(await verifyPaymentReturn(ctx, id, signature))) return null;
+  const row = await attemptRow(ctx, id, { sql: "i.status <> 'draft'", params: [] });
+  if (!row) return null;
+  const q = `?t=${encodeURIComponent(signature)}`;
+  const base = `/api/v1/public/payment-attempts/${encodeURIComponent(row.id)}`;
   return {
-    id: row.id,
-    ...outcome(row.status),
-    method: row.method_code,
-    payerPhone: row.payer_phone_masked,
-    currency: row.currency,
-    amountMinor: row.amount_minor,
-    invoice: { id: row.invoice_id, number: row.invoice_number },
-    createdAt: row.created_at,
-    completedAt: row.completed_at,
-    payment: row.payment_id && row.receipt_number ? { id: row.payment_id, receiptNumber: row.receipt_number } : null,
+    ...toAttempt(row),
+    links: {
+      status: `${base}${q}`,
+      invoice: new URL(await documentLink(ctx, 'invoice', row.invoice_id)).pathname,
+      receipt: row.payment_id ? `${base}/receipt${q}` : null,
+    },
   };
 }

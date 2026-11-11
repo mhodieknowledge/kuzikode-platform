@@ -3,11 +3,14 @@ import DocumentLayout from '../../layouts/DocumentLayout.astro';
 import QuotationDocument from '../../components/documents/QuotationDocument.astro';
 import { QuotationResponse } from '../../components/forms/QuotationResponse';
 import { getPublicQuotation } from '../../server/modules/quotations';
+import { publicDocumentPageLimit } from '../../server/lib/rate-limit';
 import { formatMoney } from '../../shared/money';
 import { formatLongDate } from '../../shared/service-display';
 
 const { ctx } = Astro.locals;
 const token = Astro.params.token ?? '';
+const limited = await publicDocumentPageLimit(ctx);
+if (limited) return limited;
 const data = await getPublicQuotation(ctx, token);
 if (!data) return new Response(null, { status: 404, statusText: 'Not found' });
 const q = data.quotation;

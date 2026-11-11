@@ -26,6 +26,7 @@ describe('security headers', () => {
     ['/q/abc', true],
     ['/i/abc', true],
     ['/pay/abc', true],
+    ['/pay/return', true],
     ['/', false],
     ['/services', false],
     ['/insights/payments', false],

@@ -54,3 +54,16 @@ export async function peek(ctx: RequestContext, rule: Pick<RateLimitRule, 'key' 
 export async function reset(ctx: RequestContext, key: string): Promise<void> {
   await ctx.db.prepare('DELETE FROM rate_limits WHERE key = ?').bind(key).run();
 }
+
+/**
+ * Rate limit for the public token pages (`/q/:token`, `/i/:token`, `/pay/return`, docs/07 §6), counted per IP across
+ * all of them. Returns a plain 429 response for the page to return, or null to carry on.
+ */
+export async function publicDocumentPageLimit(ctx: RequestContext): Promise<Response | null> {
+  const rule = { key: `document-page:ip:${ctx.ip}`, limit: 300, windowSeconds: 3600 };
+  if ((await hit(ctx, rule)) <= rule.limit) return null;
+  return new Response('Too many requests. Please try again later.', {
+    status: 429,
+    headers: { 'content-type': 'text/plain; charset=utf-8', 'retry-after': '600' },
+  });
+}

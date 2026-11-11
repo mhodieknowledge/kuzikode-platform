@@ -1,9 +1,20 @@
 import { execFileSync } from 'node:child_process';
+import { createHash, createHmac } from 'node:crypto';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { hashPassword } from '../../src/server/lib/crypto';
 import { E2E_PASSWORD, E2E_PORTAL_SUPPORT_USER, E2E_PORTAL_USER, E2E_USERS } from './users';
+
+/** `documentToken(ctx, kind, id).hash` with the local development HMAC secret (tests run without `.dev.vars`). */
+const publicTokenHash = (kind: string, id: string) =>
+  createHash('sha256')
+    .update(
+      createHmac('sha256', 'dev-only-hmac-secret-not-for-production-use-0001')
+        .update(`${kind}:${id}`)
+        .digest('base64url'),
+    )
+    .digest('hex');
 
 const wrangler = (...args: string[]) => execFileSync('npx', ['wrangler', ...args], { stdio: 'pipe' });
 const q = (s: string) => `'${s.replace(/'/g, "''")}'`;
@@ -77,6 +88,8 @@ export default async function globalSetup() {
      ON CONFLICT(id) DO NOTHING;`,
     `UPDATE invoices SET status = CASE id WHEN 'inv_e2e_portal_1' THEN 'issued' ELSE 'partially_paid' END
      WHERE id IN ('inv_e2e_portal_1', 'inv_e2e_portal_2') AND status = 'draft';`,
+    // Public link hash (same derivation as documentToken with the dev HMAC secret), for /pay/return → /i/:token (P5.8).
+    `UPDATE invoices SET public_token_hash = ${q(publicTokenHash('invoice', 'inv_e2e_portal_2'))} WHERE id = 'inv_e2e_portal_2';`,
     `INSERT INTO payments (id, receipt_number, client_id, provider_key, method, amount_minor, currency, received_at, reference)
      VALUES ('pay_e2e_portal_1', 'RCT-E2E-P001', ${q(E2E_PORTAL_USER.clientId)}, 'manual', 'bank_transfer', 20000, 'USD', '2026-08-20T10:00:00.000Z', 'FT-E2E-1')
      ON CONFLICT(id) DO NOTHING;`,

@@ -1,3 +1,3 @@
 export * from './service';
-export { paymentRoutes } from './routes';
+export { paymentRoutes, publicPaymentRoutes } from './routes';
 export * from './portal';

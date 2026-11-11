@@ -1,6 +1,7 @@
 /**
  * Live status of an online payment attempt (P5.5). While the attempt is waiting it re-reads the portal API every few
- * seconds (up to ~3 minutes), then shows the outcome with links to the receipt or back to the invoice.
+ * seconds (up to ~3 minutes), then shows the outcome with links to the receipt or back to the invoice. Used by the portal
+ * and by the public gateway return page (`/pay/return`), which passes `links` that work without a session.
  */
 import { CheckCircle2, Clock, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -18,7 +19,15 @@ export interface AttemptView {
   amountMinor: number;
   invoice: { id: string; number: string };
   payment: { id: string; receiptNumber: string } | null;
+  /** Public return page only: signed status/receipt endpoints and the public invoice page. */
+  links?: { status: string; invoice: string; receipt: string | null };
 }
+
+const portalLinks = (a: AttemptView) => ({
+  status: `/api/v1/portal/payment-attempts/${encodeURIComponent(a.id)}`,
+  invoice: `/portal/invoices/${a.invoice.id}`,
+  receipt: a.payment ? `/api/v1/portal/payments/${a.payment.id}/receipt` : null,
+});
 
 const POLL_MS = 4000;
 const MAX_POLLS = 45;
@@ -28,17 +37,18 @@ export function AttemptStatus({ initial }: { initial: AttemptView }) {
   const [polls, setPolls] = useState(0);
   const waiting = a.phase === 'waiting';
   const gaveUp = waiting && polls >= MAX_POLLS;
+  const links = a.links ?? portalLinks(a);
 
   useEffect(() => {
     if (!waiting || polls >= MAX_POLLS) return;
     const t = window.setTimeout(() => {
-      apiFetch<{ data: AttemptView }>(`/api/v1/portal/payment-attempts/${encodeURIComponent(a.id)}`)
+      apiFetch<{ data: AttemptView }>(links.status)
         .then((res) => setA(res.data))
         .catch(() => undefined)
         .finally(() => setPolls((n) => n + 1));
     }, POLL_MS);
     return () => window.clearTimeout(t);
-  }, [waiting, polls, a.id]);
+  }, [waiting, polls, links.status]);
 
   const Icon = a.phase === 'succeeded' ? CheckCircle2 : a.phase === 'failed' ? XCircle : Clock;
   const tone =
@@ -80,19 +90,12 @@ export function AttemptStatus({ initial }: { initial: AttemptView }) {
         ) : null}
       </dl>
       <p className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-        {a.payment ? (
-          <a
-            href={`/api/v1/portal/payments/${a.payment.id}/receipt`}
-            download
-            className="font-semibold text-brand-600 underline underline-offset-2"
-          >
+        {links.receipt ? (
+          <a href={links.receipt} download className="font-semibold text-brand-600 underline underline-offset-2">
             Download receipt
           </a>
         ) : null}
-        <a
-          href={`/portal/invoices/${a.invoice.id}`}
-          className="font-semibold text-brand-600 underline underline-offset-2"
-        >
+        <a href={links.invoice} className="font-semibold text-brand-600 underline underline-offset-2">
           Back to invoice {a.invoice.number}
         </a>
       </p>

@@ -2,11 +2,14 @@
 import DocumentLayout from '../../layouts/DocumentLayout.astro';
 import InvoiceDocument from '../../components/documents/InvoiceDocument.astro';
 import { getPublicInvoice } from '../../server/modules/invoices';
+import { publicDocumentPageLimit } from '../../server/lib/rate-limit';
 import { formatMoney } from '../../shared/money';
 import { formatLongDate } from '../../shared/service-display';
 
 const { ctx } = Astro.locals;
 const token = Astro.params.token ?? '';
+const limited = await publicDocumentPageLimit(ctx);
+if (limited) return limited;
 const data = await getPublicInvoice(ctx, token);
 if (!data) return new Response(null, { status: 404, statusText: 'Not found' });
 const inv = data.invoice;

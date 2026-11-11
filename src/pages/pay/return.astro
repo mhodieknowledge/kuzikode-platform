@@ -1,0 +1,31 @@
+---
+/**
+ * Where a payment gateway sends the browser back (docs/06 §3, `paymentReturnUrl`). Shows the attempt's live status from
+ * our own records and polls our status endpoint; it never applies a payment, so a forged or replayed return changes
+ * nothing. Private: noindex + no-store (middleware, `/pay` prefix).
+ */
+import DocumentLayout from '../../layouts/DocumentLayout.astro';
+import { AttemptStatus } from '../../components/portal/AttemptStatus';
+import { publicDocumentPageLimit } from '../../server/lib/rate-limit';
+import { getPublicAttempt } from '../../server/modules/payments';
+
+const { ctx } = Astro.locals;
+const id = Astro.url.searchParams.get('attempt') ?? '';
+const signature = Astro.url.searchParams.get('t') ?? '';
+const limited = await publicDocumentPageLimit(ctx);
+if (limited) return limited;
+const attempt = await getPublicAttempt(ctx, id, signature);
+if (!attempt) return new Response(null, { status: 404, statusText: 'Not found' });
+---
+
+<DocumentLayout title="Payment status">
+  <div class="mx-auto flex max-w-xl flex-col gap-6">
+    <h1 class="sr-only">Payment status</h1>
+    <div class="rounded-lg border border-line bg-surface p-6 md:p-8">
+      <AttemptStatus client:load initial={attempt} />
+    </div>
+    <p class="text-center text-[12px] text-ink-600">
+      Payments are processed securely by our payment partner. Kuzikode never sees or stores your PIN or card number.
+    </p>
+  </div>
+</DocumentLayout>

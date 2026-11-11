@@ -20,7 +20,7 @@ import { assetRoutes, subscriptionRoutes } from './modules/subscriptions';
 import { publicQuotationRoutes, quotationRoutes } from './modules/quotations';
 import { documentRoutes, publicDocumentRoutes } from './modules/documents';
 import { invoiceRoutes } from './modules/invoices';
-import { paymentRoutes } from './modules/payments';
+import { paymentRoutes, publicPaymentRoutes } from './modules/payments';
 import { projectRoutes } from './modules/projects';
 import { expenseRoutes } from './modules/expenses';
 import { supportRoutes } from './modules/support';
@@ -67,6 +67,7 @@ export function createApp() {
   app.route('/api/v1/public', publicCareersRoutes());
   app.route('/api/v1/public', publicQuotationRoutes());
   app.route('/api/v1/public', publicDocumentRoutes());
+  app.route('/api/v1/public', publicPaymentRoutes());
 
   app.notFound((c) => {
     const requestId = c.var.requestId ?? 'unknown';

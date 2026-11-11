@@ -4,15 +4,14 @@ The agent appends a new entry at the top after every task, and always before a s
 The **Next step** line must be specific enough that a fresh session can continue without guessing.
 
 ## Current status
-- Phase 1, 2 and 3 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 4 (administration) in progress.
-- Last completed task: **P4.15 CMS editors** (P4.1–P4.15 done).
-- **Next step:** P4.16 Notifications — in-app list page (`/admin/notifications`: read/unread, mark all read; the bell from P4.1 links
-  there), per-user preferences already exist (P4.3 `/admin/account/notifications`?) — check `modules/notifications` and settings
-  first; email dispatch per preference for every type in `shared/notifications.ts` (a dispatcher that turns new `notifications` rows
-  into `email.send` jobs when the user's preference says email, idempotent per notification id), and one integration test per type
-  trigger (enquiry.new, quotation.viewed/accepted/rejected, invoice.issued, payment.received, payment.failed (Phase 6: test the
-  notifier function directly), invoice.overdue, milestone.updated, support.created/replied, client.registered, application.new).
+- Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 5 (client portal) done.
+- Last completed task: **P5.8 Public document pages** (2026-11-11).
+- **Next step:** Phase 6, **P6.1 `packages/payments` workspace package** (interface, types, money helpers, adapter conformance kit,
+  mock provider, README + extraction + "writing a new adapter" guides, own tests in CI) + app router (accounts + routes) + mock
+  checkout page; AC: mock unreachable in production config (test). Read docs/06 in full first. The gateway return URL for every
+  attempt is `paymentReturnUrl(ctx, attemptId)` (`src/server/lib/public-links.ts`) → `/pay/return`.
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
+- New entries are appended at the **bottom** of this file.
 
 ---
 
@@ -551,3 +550,19 @@ The **Next step** line must be specific enough that a fresh session can continue
   `hydrated()` scrolls `client:visible` islands into view (was flaky). verify: integration 257 green.
 - Next step: P5.8 Public document pages `/q/:token`, `/i/:token`, `/pay/return` (AC: token tests, noindex/no-store). Check
   `src/server/lib/public-links.ts` (documentToken) and whether any of these pages already exist under src/pages/q, src/pages/i.
+
+## 2026-11-11 11:50 UTC · P5.8 Public document pages ✅
+- `/q/:token` and `/i/:token` existed (P4.7/P4.9); added the docs/07 §6 rate limit (`publicDocumentPageLimit`, 300/h per IP
+  shared by all token pages, plain 429). noindex/no-store come from the middleware (`/q/`, `/i/`, `/pay` private prefixes) plus
+  the `robots` meta in DocumentLayout.
+- `/pay/return?attempt=<id>&t=<sig>`: gateway browser return. `paymentReturnUrl` / `verifyPaymentReturn` (HMAC of the attempt
+  id, constant-time compare, no storage). `getPublicAttempt` reuses the portal's client-safe attempt view (shared loader in
+  payments/portal.ts) with session-free links: `/api/v1/public/payment-attempts/:id?t=` (status, polled) and `/receipt?t=`
+  (receipt PDF once paid), invoice link = public `/i/` page. Read-only: never applies a payment. `AttemptStatus` takes `links`.
+- Tests: integration `public-documents.test.ts` (3: tokens per kind/draft/flipped/malformed/oversized, PDF headers on 200 and
+  404; return signature per attempt, status/receipt, no provider detail leak, status read never mutates; rate limit 300→429) ·
+  unit isPrivatePath `/pay/return` · e2e `public-documents.spec.ts` (return page without session, no portal links, axe,
+  375/768/1440 reviewed; bad tokens/signatures 404 with private headers). portal-auth, invoices, quotations e2e still green.
+  verify: unit 234 / integration 260 green.
+- Note: run Playwright locally **without** `CI=1` (CI mode skips the preinstalled Chromium).
+- Next step: P6.1 (see Current status).

@@ -8,6 +8,7 @@ import {
   E2E_CHECKOUT_USER,
   E2E_PASSWORD,
   E2E_PORTAL_SUPPORT_USER,
+  E2E_SECURITY_USER,
   E2E_PORTAL_USER,
   E2E_SUPER_TOTP_SECRET,
   E2E_USERS,
@@ -167,6 +168,17 @@ export default async function globalSetup() {
      VALUES ('pat_e2e_recon', 'inv_e2e_recon', ${q(E2E_CHECKOUT_USER.clientId)}, 'mock', 'ppa_e2e_mock', 'express', 'ecocash', '077****111', 4000, 'USD', 'pending',
        'pat_e2e_recon', 'mock_pat_e2e_recon', 'e2e-recon', '2099-01-01T00:00:00.000Z', '2099-01-01T00:00:00.000Z', ${q(now)})
      ON CONFLICT(id) DO UPDATE SET status = 'pending', check_count = 0, last_checked_at = NULL, failure_reason = NULL, completed_at = NULL;`,
+    // portal-auth expects the portal project to share no files yet (local DB only; nothing else adds files to it).
+    "UPDATE project_files SET client_visible = 0 WHERE project_id = 'prj_e2e_portal';",
+    // security.spec (P7.2): client B, a portal owner of the checkout client only.
+    `INSERT INTO users (id, email, name, user_type, password_hash, status, must_change_password, email_verified_at)
+     VALUES (${q(E2E_SECURITY_USER.id)}, ${q(E2E_SECURITY_USER.email)}, ${q(E2E_SECURITY_USER.name)}, 'client', ${q(hash)}, 'active', 0, ${q(now)})
+     ON CONFLICT(id) DO UPDATE SET password_hash = excluded.password_hash, status = 'active', failed_login_count = 0, locked_until = NULL;`,
+    `DELETE FROM sessions WHERE user_id = ${q(E2E_SECURITY_USER.id)};`,
+    `DELETE FROM user_mfa WHERE user_id = ${q(E2E_SECURITY_USER.id)};`,
+    `INSERT INTO client_user_access (id, client_id, user_id, role, status)
+     VALUES ('cua_e2e_security', ${q(E2E_SECURITY_USER.clientId)}, ${q(E2E_SECURITY_USER.id)}, 'owner', 'active')
+     ON CONFLICT(client_id, user_id) DO UPDATE SET status = 'active';`,
     // P6.3e: saved cards on the mock gateway; the checkout client starts each run with none.
     `UPDATE payment_provider_accounts SET options = json_set(options, '$.tokenizationEnabled', json('true')) WHERE id = 'ppa_mock';`,
     `UPDATE subscriptions SET autocharge_method_id = NULL WHERE client_id = ${q(E2E_CHECKOUT_USER.clientId)};`,

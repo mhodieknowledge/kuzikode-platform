@@ -158,5 +158,13 @@ export const E2E_CHECKOUT_USER = {
   clientName: 'Avondale Bakery (e2e)',
 } as const;
 
+/** "Client B" for security.spec: an owner of the checkout client, never of the portal client (own email → own login limit). */
+export const E2E_SECURITY_USER = {
+  id: 'usr_e2e_security',
+  email: 'e2e-security@example.com',
+  name: 'Bongani Other',
+  clientId: 'cli_e2e_checkout',
+} as const;
+
 /** Invoice ids of this run's checkout fixtures (global-setup creates them; a paid invoice can't be paid again). */
 export const checkoutInvoiceId = (run: string, slot: 'a' | 'b' | 'c' | 'd' | 'e' | 'f') => `inv_e2e_co_${run}_${slot}`;

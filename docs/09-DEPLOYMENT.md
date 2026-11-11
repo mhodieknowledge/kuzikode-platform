@@ -72,7 +72,8 @@ Bindings are **not inherited** into `env.*` blocks. Repeat all of them per env. 
 | `TURNSTILE_SECRET_KEY` | yes (staging/prod) | Turnstile siteverify |
 | `HMAC_SECRET` | yes | CSRF token HMAC, signed download URLs, IP hashing pepper (32+ random bytes) |
 | `ADMIN_ALERT_EMAIL` (var or secret) | yes | Where admin alerts go if no staff prefs are set |
-| `DATA_ENCRYPTION_KEY` | yes | AES-GCM key (32 random bytes, base64) for TOTP secrets. Rotation procedure in RUNBOOK |
+| `DATA_ENCRYPTION_KEY` | yes | AES-GCM key (32 random bytes, base64) for TOTP secrets and saved-card tokens. Rotation procedure in RUNBOOK |
+| `DATA_ENCRYPTION_KEY_PREVIOUS` | only during a rotation | The old key: still read, re-encrypted nightly, then removed (RUNBOOK §5) |
 | `OPENAI_API_KEY` / `GEMINI_API_KEY` | optional | Paid image generation for the dev-time imagery (agent environment only, never a Worker secret) |
 The Cloudflare API token additionally needs **Workers AI: Read + Edit** so the agent can generate the site imagery during development (no Worker binding needed).
 GitHub repo secrets: `CLOUDFLARE_API_TOKEN` (scopes: Workers Scripts Edit, D1 Edit, Workers R2 Storage Edit,

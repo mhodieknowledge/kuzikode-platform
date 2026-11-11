@@ -1,6 +1,7 @@
 # Secret NAMES only. Copy to .dev.vars (git-ignored) and fill in values for local development.
 HMAC_SECRET=
 DATA_ENCRYPTION_KEY=
+DATA_ENCRYPTION_KEY_PREVIOUS=
 TURNSTILE_SECRET_KEY=
 RESEND_API_KEY=
 RESEND_WEBHOOK_SECRET=

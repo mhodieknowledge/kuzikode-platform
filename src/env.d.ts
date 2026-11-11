@@ -5,6 +5,7 @@
 interface KuzikodeSecrets {
   HMAC_SECRET?: string;
   DATA_ENCRYPTION_KEY?: string;
+  DATA_ENCRYPTION_KEY_PREVIOUS?: string;
   TURNSTILE_SECRET_KEY?: string;
   RESEND_API_KEY?: string;
   RESEND_WEBHOOK_SECRET?: string;

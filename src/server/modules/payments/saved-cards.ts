@@ -11,7 +11,8 @@ import type { CardScheme, CardTokenResult } from '@kuzikode/payments';
 import type { RequestContext } from '../../context';
 import { Batch, stmt } from '../../db/client';
 import { auditStmt } from '../../lib/audit';
-import { decryptString, encryptString } from '../../lib/crypto';
+import { encryptString } from '../../lib/crypto';
+import { openData, reencryptColumn } from '../../lib/data-keys';
 import { notFound, validationError } from '../../lib/errors';
 import { newId } from '../../lib/ids';
 import { clientScope, portalAreaClientIds } from '../../lib/policies';
@@ -110,7 +111,7 @@ export async function cardForPayment(
   const card = (await usableCards(ctx, clientId, accountId)).find((c) => c.id === cardId);
   if (!card?.token_enc)
     throw validationError({ savedCardId: ['This saved card can no longer be used. Choose another card.'] });
-  return { card, token: await decryptString(ctx.config.dataEncryptionKey, card.token_enc, PURPOSE) };
+  return { card, token: await openData(ctx, card.token_enc, PURPOSE) };
 }
 
 function tokenExpiry(ctx: RequestContext, t: CardTokenResult): string {
@@ -434,4 +435,9 @@ export async function portalAutoChargeOptions(
     };
   }
   return out;
+}
+
+/** Nightly during a DATA_ENCRYPTION_KEY rotation: moves saved-card tokens to the current key (RUNBOOK). */
+export function reencryptCardTokens(ctx: RequestContext) {
+  return reencryptColumn(ctx, 'cardTokens');
 }

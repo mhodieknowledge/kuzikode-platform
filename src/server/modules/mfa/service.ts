@@ -2,7 +2,8 @@
 import type { RequestContext } from '../../context';
 import { Batch } from '../../db/client';
 import { auditStmt } from '../../lib/audit';
-import { decryptString, encryptString, hmacSha256Base64Url, verifyPassword } from '../../lib/crypto';
+import { encryptString, hmacSha256Base64Url, verifyPassword } from '../../lib/crypto';
+import { openData, reencryptColumn } from '../../lib/data-keys';
 import { AppError, forbidden, unauthenticated, validationError } from '../../lib/errors';
 import { newId } from '../../lib/ids';
 import { assertCan, isSuperAdmin } from '../../lib/policies';
@@ -96,7 +97,7 @@ export async function confirmEnrolment(ctx: RequestContext, code: string): Promi
   await enforce(ctx, { key: `mfa:${auth.session.id}`, limit: 10, windowSeconds: 900 });
   const row = await getRow(ctx, auth.user.id);
   if (!row || row.enabled_at) throw new AppError('CONFLICT', 'Start set-up again.');
-  const secret = await decryptString(ctx.config.dataEncryptionKey, row.totp_secret_enc, PURPOSE);
+  const secret = await openData(ctx, row.totp_secret_enc, PURPOSE);
   const step = await verifyTotp(secret, code.trim(), ctx.now().getTime(), null);
   if (step === null)
     throw validationError({ code: ['That code is not right. Check the time on your phone and try again.'] });
@@ -139,7 +140,7 @@ export async function verifySession(ctx: RequestContext, code: string): Promise<
   const now = ctx.now().toISOString();
   const trimmed = code.trim();
   if (/^\d{6}$/.test(trimmed)) {
-    const secret = await decryptString(ctx.config.dataEncryptionKey, row.totp_secret_enc, PURPOSE);
+    const secret = await openData(ctx, row.totp_secret_enc, PURPOSE);
     const step = await verifyTotp(secret, trimmed, ctx.now().getTime(), row.last_used_step);
     if (step !== null) {
       const res = await new Batch(ctx.db)
@@ -183,7 +184,7 @@ async function assertPasswordAndCode(ctx: RequestContext, auth: AuthState, passw
     throw validationError({ password: ['Your password is incorrect.'] });
   const row = await getRow(ctx, auth.user.id);
   if (!row?.enabled_at) throw new AppError('CONFLICT', 'Two-factor authentication is not on.');
-  const secret = await decryptString(ctx.config.dataEncryptionKey, row.totp_secret_enc, PURPOSE);
+  const secret = await openData(ctx, row.totp_secret_enc, PURPOSE);
   const step = await verifyTotp(secret, code.trim(), ctx.now().getTime(), row.last_used_step);
   if (step === null) throw validationError({ code: ['That code is not right.'] });
   return step;
@@ -244,4 +245,9 @@ export async function adminReset(ctx: RequestContext, userId: string): Promise<v
     .sql('UPDATE sessions SET revoked_at = ? WHERE user_id = ? AND revoked_at IS NULL', now, userId)
     .add(auditStmt(ctx, { action: 'auth.mfa_reset_by_admin', entityType: 'user', entityId: userId }))
     .run();
+}
+
+/** Nightly during a DATA_ENCRYPTION_KEY rotation: moves TOTP secrets to the current key (RUNBOOK). */
+export function reencryptTotpSecrets(ctx: RequestContext) {
+  return reencryptColumn(ctx, 'totp');
 }

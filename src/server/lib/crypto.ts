@@ -141,3 +141,20 @@ export async function decryptString(base64Key: string, payload: string, purpose:
   );
   return new TextDecoder().decode(pt);
 }
+
+/**
+ * Decrypts with the current key, falling back to the previous one during a key rotation (RUNBOOK "Rotate secrets").
+ * `rotated` is true when the previous key was needed, so the caller (or the nightly job) can re-encrypt.
+ */
+export async function decryptWithRotation(
+  keys: { current: string; previous?: string | undefined },
+  payload: string,
+  purpose: string,
+): Promise<{ plaintext: string; rotated: boolean }> {
+  try {
+    return { plaintext: await decryptString(keys.current, payload, purpose), rotated: false };
+  } catch (err) {
+    if (!keys.previous) throw err;
+    return { plaintext: await decryptString(keys.previous, payload, purpose), rotated: true };
+  }
+}

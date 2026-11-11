@@ -860,3 +860,16 @@ The **Next step** line must be specific enough that a fresh session can continue
   match**, 26 s, scratch DB deleted (`d1 list` confirms). Staging has seed data only (no invoices yet), so the money checksums
   compared empty sets; production repeats the drill once real data exists (RUNBOOK).
 - Unit tests: smoke (5), deploy scripts (5: secrets plan, manifest compare, count SQL).
+
+## 2026-11-11 23:20 UTC · P8.5 Docs ✅ · DATA_ENCRYPTION_KEY rotation
+- New: `README.md` (overview, links, local setup, checks, layout), `docs/RUNBOOK.md` (deploy, migrations, rollback, Time
+  Travel + encrypted-export restore incl. drill record, secret rotation table, incident basics incl. Error 1027,
+  post-deploy checklist), `docs/ADMIN-GUIDE.md` (bootstrap → password → 2FA, settings tabs, roles, clients/portal,
+  quotation → invoice → payment → credit note, gateways), `docs/PAYMENTS-ONBOARDING.md` (Faked Success, going live, ZWG
+  integration, adding/switching to PesePay by account + route), `docs/EMAIL-SETUP.md` (Resend domain DNS, sender change,
+  webhook, Email Routing, limits), `docs/PRODUCTION-CHECKLIST.md`. UI labels in the guides checked against the components.
+- Rotation support so the RUNBOOK procedure is real: `DATA_ENCRYPTION_KEY_PREVIOUS` fallback (`lib/data-keys.ts`) + nightly
+  `reencrypt-totp-secrets` / `reencrypt-card-tokens`; integration tests (4) in `tests/integration/key-rotation.test.ts`.
+- Staging: `PAYNOW_TEST_AUTHEMAIL` Worker secret added (the seeded Paynow USD account reads it in test mode).
+- Backup workflow run #1 on GitHub (staging) ✅ → `BACKUP_ENCRYPTION_PASSPHRASE` GitHub secret exists.
+- verify: unit 355 / integration 308, green.

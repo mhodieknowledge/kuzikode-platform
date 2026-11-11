@@ -10,6 +10,8 @@ import { billSubscriptions, flagAtRisk, sendRenewalReminders } from '../modules/
 import { autoChargeDueInvoices } from '../modules/payments/autocharge';
 import { reconcilePayments } from '../modules/payments/reconciliation';
 import type { QueueMessageBody } from './outbox';
+import { reencryptTotpSecrets } from '../modules/mfa/service';
+import { reencryptCardTokens } from '../modules/payments/saved-cards';
 
 export const CRON_FREQUENT = '*/5 * * * *';
 export const CRON_NIGHTLY = '17 2 * * *';
@@ -87,6 +89,9 @@ export const SCHEDULE: Record<string, [name: string, task: ScheduledTask][]> = {
   ],
   [CRON_NIGHTLY]: [
     ['prune-operational-data', (ctx) => pruneOperationalData(ctx)],
+    // No-ops unless DATA_ENCRYPTION_KEY_PREVIOUS is set (key rotation, RUNBOOK).
+    ['reencrypt-totp-secrets', (ctx) => reencryptTotpSecrets(ctx)],
+    ['reencrypt-card-tokens', (ctx) => reencryptCardTokens(ctx)],
     ['prune-unconfirmed-newsletter', (ctx) => pruneUnconfirmed(ctx)],
     ['application-retention', (ctx) => applyApplicationRetention(ctx)],
     ['lead-follow-up-reminders', (ctx) => sendFollowUpReminders(ctx)],

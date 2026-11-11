@@ -17,6 +17,8 @@ const envSchema = z.object({
   EMAIL_PROVIDER: z.enum(['log', 'resend']).default('log'),
   HMAC_SECRET: optionalSecret,
   DATA_ENCRYPTION_KEY: optionalSecret,
+  /** Set only during a key rotation (RUNBOOK): data still encrypted with the old key stays readable. */
+  DATA_ENCRYPTION_KEY_PREVIOUS: optionalSecret,
   TURNSTILE_SECRET_KEY: optionalSecret,
   RESEND_API_KEY: optionalSecret,
   RESEND_WEBHOOK_SECRET: optionalSecret,
@@ -57,6 +59,8 @@ export interface AppConfig {
   turnstileSiteKey: string;
   hmacSecret: string;
   dataEncryptionKey: string;
+  /** The previous key during a rotation; the nightly re-encryption moves remaining data to the current key. */
+  dataEncryptionKeyPrevious: string | undefined;
   turnstileSecretKey: string;
   resendApiKey: string | undefined;
   resendWebhookSecret: string | undefined;
@@ -107,6 +111,7 @@ export function getConfig(env: Env): AppConfig {
     turnstileSiteKey: e.TURNSTILE_SITE_KEY,
     hmacSecret: e.HMAC_SECRET ?? DEV_FALLBACK.HMAC_SECRET,
     dataEncryptionKey: e.DATA_ENCRYPTION_KEY ?? DEV_FALLBACK.DATA_ENCRYPTION_KEY,
+    dataEncryptionKeyPrevious: e.DATA_ENCRYPTION_KEY_PREVIOUS,
     turnstileSecretKey: e.TURNSTILE_SECRET_KEY ?? DEV_FALLBACK.TURNSTILE_SECRET_KEY,
     resendApiKey: e.RESEND_API_KEY,
     resendWebhookSecret: e.RESEND_WEBHOOK_SECRET,

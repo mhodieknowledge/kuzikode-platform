@@ -1,15 +1,16 @@
 ---
 /**
  * Public header (docs/redesign/RESPONSIVE_DESIGN_SPEC.md §1).
- * ≥ 1280 px: wordmark · main nav with a sliding indicator · Services = the directory mega-panel, About = a compact panel ·
- * search · Client portal · Start a project. Below: wordmark · compact "Start a project" · menu button opening a full-height
- * directory sheet. Behaviour: header.ts.
+ * R3.1 (Route structure, Zimbabwe earth palette). ≥ 1280 px: wordmark · main nav with a sliding indicator · Services = the
+ * division index mega-panel (numerals in division hues, real "from" prices, a lit frame) · About = a compact panel · search ·
+ * Client workspace · Get a quote. Below: wordmark · "Get a quote" (steps back while the hero's own is on screen) · menu button
+ * opening a full-height sheet. No wizard links (BRIEF B.0c). Behaviour: header.ts.
  */
 import Logo from '../../brand/Logo.astro';
 import Icon from '../../icons/Icon.astro';
 import { divisionIcon } from '../../icons/registry';
 import type { SiteNavigation } from '../../../server/modules/cms';
-import type { FromPrice } from '../../../shared/directory';
+import { divisionShortName, type FromPrice } from '../../../shared/directory';
 
 export interface DirectoryDivision {
   slug: string;
@@ -106,11 +107,8 @@ const mobileLinks = [
       <a href="/search" class="kz-btn kz-btn--quiet kz-btn--icon kz-header__icon hidden xl:inline-flex" aria-label="Search">
         <Icon name="search" />
       </a>
-      <a href="/portal/login" class="kz-btn kz-btn--secondary kz-btn--sm hidden xl:inline-flex">Client Portal</a>
-      <a href="/start-a-project" class="kz-btn kz-btn--primary kz-btn--sm kz-btn--knob kz-header__cta">
-        <span>Start a project</span>
-        <span class="kz-btn__knob max-[399px]:hidden"><Icon name="arrow-right" size={16} /></span>
-      </a>
+      <a href="/portal/login" class="kz-btn kz-btn--quiet kz-btn--sm hidden xl:inline-flex">Client workspace</a>
+      <a href="/contact" class="kz-btn kz-btn--primary kz-btn--sm kz-header__cta"><span>Get a quote</span></a>
       <button
         type="button"
         class="kz-btn kz-btn--secondary kz-btn--icon kz-header__menu xl:hidden"
@@ -131,19 +129,17 @@ const mobileLinks = [
         <ul class="kz-dir" role="list">
           {
             divisions.map((d, i) => (
-              <li>
+              <li class={`kz-div-${(i % 6) + 1}`}>
                 <a href={d.href} class="kz-dir__row" data-lit-target={`lit-${d.slug}`}>
                   <span class="kz-dir__floor">{floor(i)}</span>
-                  <span class="kz-dir__name">{d.name}</span>
+                  <span class="kz-dir__name">{divisionShortName(d.slug, d.name)}</span>
                   {d.from ? (
                     <span class="kz-dir__from">
-                      from <span class="font-mono text-on-night">{d.from.amount}</span>
-                      {d.from.suffix !== 'one-off' ? <span class="text-micro"> {d.from.suffix}</span> : null}
+                      from <b class="tnum text-on-night">{d.from.amount}</b>
+                      {d.from.suffix !== 'one-off' ? <span> {d.from.suffix}</span> : null}
                     </span>
                   ) : null}
-                  <span class="kz-knob">
-                    <Icon name="arrow-right" size={16} />
-                  </span>
+                  <Icon name="arrow-right" size={16} class="kz-dir__arrow" />
                 </a>
               </li>
             ))
@@ -165,20 +161,19 @@ const mobileLinks = [
         {
           divisions.map((d, i) => (
             <div id={`lit-${d.slug}`} class="kz-lit__frame" data-lit hidden={i !== 0}>
-              <div class="flex items-center gap-3 text-gold-400">
+              <div class={`kz-lit__head kz-div-${(i % 6) + 1}`}>
                 <Icon name={divisionIcon(d.slug, d.icon)} size={24} />
-                <span class="caps text-micro">Floor {floor(i)}</span>
+                <p class="text-h3 font-bold text-on-night">{d.name}</p>
               </div>
-              <p class="mt-4 text-h3 font-[640] text-on-night">{d.name}</p>
               {d.summary ? <p class="mt-2 text-small text-on-night-2">{d.summary}</p> : null}
-              <ul class="mt-5 flex flex-wrap gap-2">
+              <ul class="kz-lit__list">
                 {d.services.slice(0, 6).map((s) => (
-                  <li class="kz-pill kz-pill--plain border border-night-700">{s.name}</li>
+                  <li>{s.name}</li>
                 ))}
               </ul>
               {d.from ? (
                 <p class="mt-6 text-small text-on-night-3">
-                  Packages from <span class="font-mono text-on-night">{d.from.amount}</span> {d.from.suffix}
+                  Packages from <b class="tnum text-on-night">{d.from.amount}</b> {d.from.suffix}
                 </p>
               ) : null}
             </div>
@@ -229,17 +224,19 @@ const mobileLinks = [
         />
       </form>
 
-      <p class="caps mt-8 text-micro text-on-night-3" id="menu-dir-label">Services</p>
+      <h2 class="kz-menu__h" id="menu-dir-label">What we build</h2>
       <ul class="kz-dir mt-2" role="list" aria-labelledby="menu-dir-label" data-reveal-group>
         {
           divisions.map((d, i) => (
-            <li>
+            <li class={`kz-div-${(i % 6) + 1}`}>
               <a href={d.href} class="kz-dir__row">
                 <span class="kz-dir__floor">{floor(i)}</span>
-                <span class="kz-dir__name">{d.name}</span>
-                <span class="kz-knob">
-                  <Icon name="arrow-right" size={16} />
-                </span>
+                <span class="kz-dir__name">{divisionShortName(d.slug, d.name)}</span>
+                {d.from ? (
+                  <span class="kz-dir__from">
+                    from <b class="tnum text-on-night">{d.from.amount}</b>
+                  </span>
+                ) : null}
               </a>
             </li>
           ))
@@ -260,13 +257,10 @@ const mobileLinks = [
       </ul>
 
       <div class="mt-8 grid gap-3 sm:grid-cols-2">
-        <a href="/start-a-project" class="kz-btn kz-btn--primary kz-btn--lg kz-btn--knob kz-btn--block">
-          <span>Start a project</span>
-          <span class="kz-btn__knob"><Icon name="arrow-right" /></span>
-        </a>
+        <a href="/contact" class="kz-btn kz-btn--primary kz-btn--lg kz-btn--block"><span>Get a quote</span></a>
         <a href="/portal/login" class="kz-btn kz-btn--secondary kz-btn--lg kz-btn--block">
           <Icon name="account" />
-          <span>Client Portal</span>
+          <span>Client workspace</span>
         </a>
       </div>
 

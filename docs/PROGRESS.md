@@ -1010,3 +1010,16 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Next step (R2.5b remainder): port the hero to the real home (`src/ui/public/home/Hero.astro` + `WorkspaceWindow.astro` from b2,
   route index from real division data via `divisionFromPrice`), header CTA "Get a quote" → /contact, then IMAGE-REQUESTS batch 2
   (local workspace photos, warm-neutral grade) + owner notification; then R2.6 (mobile-limits guard spec in CI + boards).
+
+## 2026-11-12 15:40 UTC · R2.5b ✅ · R2.5 ✅ · R2.6 ✅ · R3.1 ✅ · R3.2 ✅
+- Home hero rebuilt (`src/ui/public/home/`: Hero, WorkspaceWindow, RouteIndex; `src/ui/tokens/home.css`): four-layer workspace
+  window (dock, project + milestone strip + quotation + deliverables + activity log, weekly-update note, invoice with local
+  methods), phone order headline → window → copy → CTA, route index (phone swipe track with dots via `[data-kz-track]`, desktop
+  3 × 2 typographic index). Reviewer: FAIL → fixes → **PASS** ("premium, established"). Boards: `docs/screenshots/redesign/boards/
+  home-hero-board.webp`, `home-first-screen-phones.webp` (360/390/430 vs old home vs webdev.co.zw).
+- Header (Get a quote → /contact, Client workspace, division index with hue numerals and short names, no knobs/Floor labels) and
+  footer ("Where next" routes, channels, short division names, newsletter `client:idle`, no wordmark overlay) rebuilt.
+- R2.6 guard `tests/e2e/mobile-limits.spec.ts` (in the e2e suite, so in CI). Phone type scale in tokens (H2 24 px on phones).
+- Fixed inherited red e2e (contact strict label, legal footer overlay, newsletter hydration, products hydration race).
+- Next step: R3.3 (reveal framework already in controllers.ts: add reduced-motion e2e), then R4.1 home body rebuild (remove the
+  `[data-legacy]` wrappers in src/pages/index.astro), R4.6b wizard removal + 301, R4.3 pricing.

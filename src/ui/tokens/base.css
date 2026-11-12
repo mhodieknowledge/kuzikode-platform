@@ -38,6 +38,7 @@
   --color-moss: var(--moss);
   --color-moss-ink: var(--moss-ink);
   --color-msasa: var(--msasa);
+  --color-umber: var(--umber);
   --color-granite: var(--granite);
   --color-granite-ink: var(--granite-ink);
   --color-on-action: var(--on-action);
@@ -89,13 +90,13 @@
   --font-mono: 'Overpass Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Fluid type scale: phone → 1440. */
-  --text-display-xl: clamp(2.5rem, 1.6rem + 4.1vw, 5.4rem);
+  --text-display-xl: clamp(2rem, 1rem + 3.3vw, 3.875rem);
   --text-display-xl--line-height: 0.98;
-  --text-display: clamp(2rem, 1.55rem + 2.1vw, 3.4rem);
+  --text-display: clamp(2rem, 1.2rem + 2.6vw, 3.4rem);
   --text-display--line-height: 1.02;
-  --text-h2: clamp(1.75rem, 1.45rem + 1.25vw, 2.6rem);
+  --text-h2: clamp(1.5rem, 1.1rem + 1.6vw, 2.75rem);
   --text-h2--line-height: 1.06;
-  --text-h3: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);
+  --text-h3: clamp(1.125rem, 1rem + 0.5vw, 1.5rem);
   --text-h3--line-height: 1.2;
   --text-body: clamp(1.0625rem, 1.03rem + 0.15vw, 1.125rem);
   --text-body--line-height: 1.5;

@@ -1,8 +1,8 @@
 ---
 /**
  * Home hero (BRIEF B.0e premium hero, B.1a phone limits; prototype design/concepts/b2). Copy from the CMS hero section
- * (title, body, calls to action); wizard links are presented as "Get a quote" (B.0c). Phones: headline, one value line, one
- * primary action + a quiet link, the starting price, then the workspace window in the first screen and the route track peeking.
+ * (title, body, calls to action); wizard links are presented as "Get a quote" (B.0c). Phones: headline, then the workspace window
+ * (visual-led), then the value line, the primary action + a quiet link and the starting price; the route track peeks below.
  */
 import type { SectionContent } from '../../../shared/schemas/cms';
 import type { FromPrice } from '../../../shared/directory';
@@ -23,8 +23,9 @@ const websites = divisions.find((d) => d.slug === 'web-development')?.from ?? nu
 
 <section class="kz-hero" aria-labelledby="hero-title">
   <div class="container-wide kz-hero__grid">
+    <h1 id="hero-title" class="kz-hero__title" data-enter>{c.title}</h1>
+    <WorkspaceWindow />
     <div class="kz-hero__copy">
-      <h1 id="hero-title" class="kz-hero__title" data-enter>{c.title}</h1>
       <p class="kz-hero__value" data-enter="2">{c.body}</p>
       <div class="kz-hero__acts" data-enter="2">
         <a class="kz-btn kz-btn--primary kz-btn--lg" href={primary.href} data-hero-cta><span>{primary.label}</span></a>
@@ -41,7 +42,6 @@ const websites = divisions.find((d) => d.slug === 'web-development')?.from ?? nu
         <span>Pay with EcoCash, OneMoney, InnBucks or card</span>
       </p>
     </div>
-    <WorkspaceWindow />
   </div>
   <div class="container-wide">
     <RouteIndex divisions={divisions} />

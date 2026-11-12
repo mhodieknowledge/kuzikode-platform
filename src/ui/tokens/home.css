@@ -4,12 +4,13 @@
  */
 @layer components {
   .kz-hero {
-    padding: 20px 0 8px;
+    padding: 16px 0 8px;
     overflow: clip;
   }
   .kz-hero__grid {
     display: grid;
-    gap: 20px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
   }
   .kz-hero__title {
     font-size: 2rem;
@@ -20,7 +21,6 @@
     max-width: 16ch;
   }
   .kz-hero__value {
-    margin-top: 10px;
     font-size: 0.9375rem;
     line-height: 1.55;
     color: var(--ink-700);
@@ -31,30 +31,31 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 8px 20px;
-    margin-top: 16px;
+    margin-top: 14px;
   }
   .kz-hero__proof {
     display: flex;
     flex-wrap: wrap;
     gap: 2px 14px;
-    margin-top: 12px;
+    margin-top: 10px;
     font-size: 0.8125rem;
     color: var(--ink-500);
   }
   .kz-hero__proof b {
-    font-family: var(--font-mono);
-    font-weight: 600;
+    font-weight: 700;
     color: var(--ink-900);
+    font-variant-numeric: tabular-nums;
   }
 
-  /* The workspace window: real product UI as the hero object, with depth from layering. */
+  /* The workspace window: four elevations (window · project · note · invoice). */
   .kz-scene {
     position: relative;
     isolation: isolate;
-    padding-bottom: 18px;
+    padding-bottom: 70px;
   }
   .kz-win {
     position: relative;
+    z-index: 1;
     display: grid;
     border-radius: 14px;
     overflow: hidden;
@@ -70,7 +71,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    padding: 12px 16px;
+    padding: 11px 14px;
     border-bottom: 1px solid var(--night-700);
     font-size: 0.75rem;
   }
@@ -95,8 +96,8 @@
   }
   .kz-win__main {
     display: grid;
-    gap: 14px;
-    padding: 16px;
+    gap: 12px;
+    padding: 14px 14px 66px;
   }
   .kz-win__head {
     display: flex;
@@ -135,65 +136,88 @@
   }
   .kz-strip .is-now {
     color: var(--on-night);
+    font-weight: 600;
   }
   .kz-strip .is-now::before {
     background: var(--lit);
   }
-  .kz-win__cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+  .kz-win__row,
+  .kz-win__log {
+    display: none;
   }
   .kz-wcard {
     display: grid;
-    gap: 6px;
+    gap: 5px;
     align-content: start;
-    padding: 12px;
+    padding: 14px;
     border-radius: 10px;
     background: var(--night-800);
-    box-shadow: inset 0 0 0 1px var(--night-700);
-    font-size: 0.78125rem;
+    box-shadow:
+      inset 0 0 0 1px var(--night-700),
+      0 8px 16px -10px rgb(0 0 0 / 0.5);
+    font-size: 0.8125rem;
   }
   .kz-wcard small {
-    font-size: 0.71875rem;
+    font-size: 0.75rem;
   }
-  .kz-wcard b {
+  .kz-wcard--files span {
     color: var(--on-night);
-    font-weight: 600;
   }
   .kz-wcard__amt {
-    font-family: var(--font-mono);
-    font-weight: 600;
-    font-size: 1.375rem;
+    font-weight: 700;
+    font-size: 1.5rem;
     letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
     color: var(--on-night);
   }
+  .kz-note,
   .kz-paycard {
     position: absolute;
-    right: -6px;
-    bottom: 0;
     display: grid;
-    gap: 8px;
-    width: 58%;
-    max-width: 260px;
-    padding: 14px;
+    gap: 6px;
     border-radius: 12px;
     background: var(--paper);
     color: var(--ink-900);
+  }
+  .kz-note {
+    z-index: 2;
+    left: 10px;
+    bottom: 6px;
+    width: 52%;
+    padding: 12px;
+    font-size: 0.78125rem;
+    line-height: 1.35;
+    box-shadow:
+      0 0 0 1px rgb(20 20 18 / 0.08),
+      0 16px 30px -16px rgb(0 0 0 / 0.45);
+  }
+  .kz-note small,
+  .kz-paycard small {
+    font-size: 0.71875rem;
+    color: var(--ink-500);
+  }
+  .kz-note b {
+    font-weight: 700;
+  }
+  .kz-note span {
+    display: none;
+  }
+  .kz-paycard {
+    z-index: 3;
+    right: 0;
+    bottom: 0;
+    width: 46%;
+    padding: 12px;
     box-shadow:
       0 0 0 1px rgb(20 20 18 / 0.1),
       0 24px 44px -18px rgb(0 0 0 / 0.5),
       0 6px 12px -6px rgb(0 0 0 / 0.2);
   }
-  .kz-paycard small {
-    font-size: 0.71875rem;
-    color: var(--ink-500);
-  }
   .kz-paycard__amt {
-    font-family: var(--font-mono);
-    font-weight: 600;
-    font-size: 1.5rem;
+    font-weight: 700;
+    font-size: 1.375rem;
     letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
   }
   .kz-paycard__methods {
     display: grid;
@@ -201,12 +225,15 @@
     gap: 5px;
   }
   .kz-paycard__methods span {
-    padding: 8px;
+    padding: 7px 4px;
     border-radius: 6px;
     box-shadow: inset 0 0 0 1px var(--bone-200);
-    font-size: 0.75rem;
+    font-size: 0.71875rem;
     font-weight: 600;
     text-align: center;
+  }
+  .kz-paycard__methods span:nth-child(n + 3) {
+    display: none;
   }
   .kz-paycard__methods span:first-child {
     background: var(--action);
@@ -217,8 +244,11 @@
     .kz-win {
       animation: kz-rise 0.9s var(--ease-out) both;
     }
+    .kz-note {
+      animation: kz-rise 0.9s 0.18s var(--ease-out) both;
+    }
     .kz-paycard {
-      animation: kz-rise 0.9s 0.25s var(--ease-out) both;
+      animation: kz-rise 0.9s 0.32s var(--ease-out) both;
     }
     [data-enter] {
       animation: kz-rise 0.7s var(--ease-out) both;
@@ -279,9 +309,11 @@
       box-shadow var(--dur-state) var(--ease-out);
   }
   .kz-route__n {
-    font-family: var(--font-mono);
-    font-weight: 600;
-    font-size: 0.9375rem;
+    font-weight: 800;
+    font-size: 1.25rem;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
     color: var(--kz-div-ink);
   }
   .kz-route__name {
@@ -296,8 +328,8 @@
     color: var(--ink-700);
   }
   .kz-route__from b {
-    font-family: var(--font-mono);
-    font-weight: 600;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
     color: var(--ink-900);
   }
   .kz-routes__dots {
@@ -337,19 +369,46 @@
     .kz-routes__track {
       grid-auto-columns: 40%;
     }
+    .kz-scene {
+      padding-bottom: 72px;
+    }
+    .kz-win__row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .kz-note span {
+      display: block;
+      color: var(--ink-700);
+    }
+    .kz-paycard__methods span:nth-child(n + 3) {
+      display: block;
+    }
   }
   @media (min-width: 1024px) {
     .kz-hero {
-      padding: 56px 0 8px;
+      padding: 48px 0 0;
     }
     .kz-hero__grid {
       grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      grid-template-areas:
+        'title scene'
+        'copy scene';
+      column-gap: 56px;
+      row-gap: 0;
       align-items: center;
-      gap: 56px;
+    }
+    .kz-hero__title {
+      grid-area: title;
+      align-self: end;
+    }
+    .kz-hero__copy {
+      grid-area: copy;
+      align-self: start;
+      margin-top: 22px;
     }
     .kz-hero__value {
       font-size: 1.1875rem;
-      margin-top: 20px;
     }
     .kz-hero__acts {
       margin-top: 28px;
@@ -357,12 +416,15 @@
     .kz-hero__proof {
       margin-top: 18px;
     }
+    /* The window bleeds past the right edge; the note and the invoice stay on the visible part. */
     .kz-scene {
-      padding-bottom: 36px;
-      margin-right: 12px;
+      grid-area: scene;
+      margin-right: calc(-1 * var(--gutter));
+      padding: 24px 0 64px 40px;
     }
     .kz-win {
-      grid-template-columns: 168px minmax(0, 1fr);
+      grid-template-columns: 176px minmax(0, 1fr);
+      border-radius: 14px 0 0 14px;
     }
     .kz-win__top {
       grid-column: 1 / -1;
@@ -370,42 +432,87 @@
     }
     .kz-win__dock {
       display: grid;
-      align-content: start;
+      grid-template-rows: repeat(5, auto) 1fr;
       gap: 2px;
       padding: 14px 10px;
       border-right: 1px solid var(--night-700);
       font-size: 0.8125rem;
     }
     .kz-win__dock span {
+      display: flex;
+      justify-content: space-between;
       padding: 8px 10px;
       border-radius: 6px;
+    }
+    .kz-win__dock i {
+      font-style: normal;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      min-width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      background: var(--night-700);
+      color: var(--on-night);
     }
     .kz-win__dock .is-on {
       background: var(--night-800);
       color: var(--on-night);
     }
+    .kz-win__dock .kz-win__dockfoot {
+      align-self: end;
+      font-size: 0.71875rem;
+      color: var(--on-night-3);
+    }
     .kz-win__main {
-      padding: 22px;
+      padding: 24px 24px 28px;
       gap: 18px;
     }
+    .kz-win__log {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 12px 0 0;
+      list-style: none;
+      border-top: 1px solid var(--night-700);
+      font-size: 0.8125rem;
+      max-width: 52%;
+    }
+    .kz-win__log span {
+      display: inline-block;
+      width: 40px;
+      color: var(--on-night-3);
+    }
     .kz-win__title {
-      font-size: 1.3125rem;
+      font-size: 1.375rem;
     }
     .kz-strip li {
-      font-size: 0.78125rem;
+      font-size: 0.8125rem;
     }
     .kz-wcard__amt {
-      font-size: 1.625rem;
+      font-size: 1.75rem;
+    }
+    .kz-note {
+      left: 0;
+      bottom: 26px;
+      width: 300px;
+      padding: 16px;
+      font-size: 0.875rem;
     }
     .kz-paycard {
-      right: -12px;
-      bottom: -4px;
+      right: calc(var(--gutter) + 24px);
+      bottom: 0;
       width: 300px;
-      max-width: none;
       padding: 18px;
+      gap: 8px;
     }
     .kz-paycard__amt {
-      font-size: 1.875rem;
+      font-size: 2rem;
+    }
+    .kz-paycard__methods span {
+      padding: 8px;
+      font-size: 0.75rem;
     }
     .kz-routes {
       padding: 48px 0 64px;
@@ -420,7 +527,7 @@
       border-top: 1px solid var(--bone-200);
     }
     .kz-route {
-      grid-template-columns: 36px minmax(0, 1fr) auto;
+      grid-template-columns: 44px minmax(0, 1fr) auto;
       border-radius: 0;
       background: none;
       box-shadow: none;

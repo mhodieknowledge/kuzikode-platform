@@ -1,23 +1,23 @@
 import { Icon } from '../../icons/icon';
 import { useNewsletter } from './useNewsletter';
 
-/** Footer newsletter field on sign: one pill input with the submit knob inside it. */
+/** Footer newsletter on night: a field and a separate Subscribe button (never one pill with a knob). Logic: useNewsletter. */
 export default function Newsletter({ source }: { source: string }) {
   const { state, error, submit } = useNewsletter(source);
   if (state === 'sent') {
     return (
-      <p role="status" className="mt-3 flex items-center gap-2 text-white">
-        <Icon name="status-ok" className="text-[#5ed6a0]" /> Check your inbox and confirm your subscription.
+      <p role="status" className="mt-3 flex items-center gap-2 text-on-night">
+        <Icon name="status-ok" className="text-gold-400" /> Check your inbox and confirm your subscription.
       </p>
     );
   }
   return (
     // method="post" keeps the address out of the URL if someone submits before hydration (the page ignores the POST).
-    <form onSubmit={submit} method="post" noValidate className="mt-3 grid gap-2">
-      <label htmlFor="newsletter-email" className="text-small text-on-night-2">
+    <form onSubmit={submit} method="post" noValidate className="kz-news mt-3">
+      <label htmlFor="newsletter-email" className="kz-news__label">
         Occasional updates and new articles. Unsubscribe any time.
       </label>
-      <div className="relative">
+      <div className="kz-news__row">
         <input
           id="newsletter-email"
           name="email"
@@ -30,15 +30,11 @@ export default function Newsletter({ source }: { source: string }) {
           placeholder="you@example.com"
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? 'newsletter-error' : undefined}
-          className="min-h-[52px] w-full rounded-full border border-night-700 bg-night-900 py-3 pr-[120px] pl-5 text-[1.0625rem] text-white placeholder:text-on-night-3 focus-visible:border-gold-400 focus-visible:outline-none"
+          className="kz-news__input"
         />
-        <button
-          type="submit"
-          disabled={state === 'busy'}
-          className="kz-btn kz-btn--primary kz-btn--sm absolute top-1.5 right-1.5 bottom-1.5 min-h-0"
-        >
+        <button type="submit" disabled={state === 'busy'} className="kz-btn kz-btn--secondary">
           {state === 'busy' ? <span className="kz-spinner" aria-hidden="true" /> : null}
-          Subscribe
+          <span>Subscribe</span>
         </button>
       </div>
       <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
@@ -48,11 +44,11 @@ export default function Newsletter({ source }: { source: string }) {
         </label>
       </div>
       {error ? (
-        <p id="newsletter-error" role="alert" className="flex items-center gap-2 text-small text-[#ffb4ab]">
+        <p id="newsletter-error" role="alert" className="flex items-center gap-2 text-small text-[#f2a58f]">
           <Icon name="status-danger" size={16} /> {error}
         </p>
       ) : null}
-      <a href="/legal/privacy" className="text-micro text-on-night-3 underline underline-offset-4 hover:text-white">
+      <a href="/legal/privacy" className="kz-footer__link text-micro">
         How we handle your email address
       </a>
     </form>

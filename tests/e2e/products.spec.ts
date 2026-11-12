@@ -17,6 +17,9 @@ test('products page shows Business Suite as In Development with no purchase word
 
 test('register interest creates a product-interest enquiry', async ({ page }) => {
   await page.goto('/products');
+  await page.getByLabel('Your name').scrollIntoViewIfNeeded();
+  // The form is a client:visible island: wait for hydration before typing (Astro removes `ssr`).
+  await expect(page.locator('astro-island:has(form)').first()).not.toHaveAttribute('ssr');
   await page.getByLabel('Your name').fill('Tendai Example');
   await page.getByLabel('Email').fill('tendai.interest@example.com');
   await page.getByRole('checkbox').check();

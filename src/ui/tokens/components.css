@@ -197,8 +197,8 @@
     --kz-div-ink: var(--clay-ink);
   }
   .kz-div-3 {
-    --kz-div: var(--teal);
-    --kz-div-ink: var(--teal-ink);
+    --kz-div: var(--umber);
+    --kz-div-ink: var(--umber-ink);
   }
   .kz-div-4 {
     --kz-div: var(--moss);
@@ -1043,12 +1043,7 @@
   }
   .kz-seg__thumb,
   .kz-tabs__bar,
-  .kz-sheet__panel,
-  .kz-knob {
+  .kz-sheet__panel {
     transition-property: opacity, background-color, color;
-  }
-  .kz-lit .kz-knob,
-  [aria-expanded='true'] > .kz-knob {
-    transform: none;
   }
 }

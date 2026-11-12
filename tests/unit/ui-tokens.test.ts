@@ -109,7 +109,7 @@ describe('Route palette tokens (R2.1 / R2.5)', () => {
     expect(ratio('#E3B04B', '#141412')).toBeGreaterThan(4.5); // lit on night
     expect(ratio('#6B655B', '#F2EEE6')).toBeGreaterThan(4.5); // tertiary ink on bone
     expect(ratio('#17643F', '#FBF9F5')).toBeGreaterThan(4.5); // link on paper
-    for (const ink of ['#8A5C08', '#9A3F28', '#16695F', '#536A1C', '#8E3B52', '#5A554C'])
+    for (const ink of ['#8A5C08', '#9A3F28', '#7C5A3A', '#16695F', '#536A1C', '#8E3B52', '#5A554C'])
       expect(ratio(ink, '#F2EEE6')).toBeGreaterThan(4.5); // accent text
     for (const acc of ['#C98A17', '#B84F35', '#1F8478', '#6F8A2A', '#7A7468'])
       expect(ratio('#0E0D0C', acc)).toBeGreaterThan(3); // large numerals on accent

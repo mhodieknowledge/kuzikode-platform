@@ -7,7 +7,7 @@ test('visitor sends an enquiry and sees a reference; quotation links preselect t
   await page.goto('/contact?category=web-development&service=e-commerce');
   await expect(page.getByRole('heading', { level: 1, name: 'Contact us' })).toBeVisible();
   await expect(page.getByLabel('What is this about?')).toHaveValue('web-development');
-  await expect(page.getByLabel('Service')).toHaveValue('e-commerce');
+  await expect(page.getByLabel('Service', { exact: true })).toHaveValue('e-commerce');
   await expectAccessible(page);
   await screenshots(page, 'contact');
 

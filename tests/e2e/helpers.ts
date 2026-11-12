@@ -5,6 +5,16 @@ export const WIDTHS = [375, 768, 1440] as const;
 
 /** axe-core: zero serious/critical violations (docs/05 §8). */
 export async function expectAccessible(page: Page, opts: { exclude?: string[] } = {}) {
+  // Entrance animations (opacity) would be read mid-fade as low contrast: wait until the finite ones have finished
+  // (spinners loop forever and are ignored).
+  await page.waitForFunction(
+    () =>
+      document
+        .getAnimations()
+        .every((a) => a.playState !== 'running' || a.effect?.getComputedTiming().iterations === Infinity),
+    null,
+    { timeout: 5000 },
+  );
   let builder = new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']);
   for (const sel of opts.exclude ?? []) builder = builder.exclude(sel);
   const results = await builder.analyze();

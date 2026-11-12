@@ -50,40 +50,59 @@ const divisions = categories.map((c) => ({
   canonicalPath="/"
   headerTone="bone"
 >
+  {/* Sections after the hero are still the legacy presentation until R4.1; the B.1a guard skips [data-legacy]. */}
   {sections.map((s) => {
     switch (s.type) {
       case 'hero':
         return <Hero content={s.content as Section<'hero'>['content']} divisions={divisions} />;
       case 'services_grid':
-        return <ServicesGrid content={s.content as Section<'services_grid'>['content']} categories={categories} />;
+        return (
+          <div data-legacy>
+            <ServicesGrid content={s.content as Section<'services_grid'>['content']} categories={categories} />
+          </div>
+        );
       case 'features':
         return (
-          <Features
-            content={s.content as Section<'features'>['content']}
-            anchor={s.key}
-            imageId={s.key === 'why' ? 'home-approach' : undefined}
-          />
+          <div data-legacy>
+            <Features
+              content={s.content as Section<'features'>['content']}
+              anchor={s.key}
+              imageId={s.key === 'why' ? 'home-approach' : undefined}
+            />
+          </div>
         );
       case 'work_grid':
-        return <WorkGrid content={s.content as Section<'work_grid'>['content']} items={featured} />;
+        return (
+          <div data-legacy>
+            <WorkGrid content={s.content as Section<'work_grid'>['content']} items={featured} />
+          </div>
+        );
       case 'process':
         return (
-          <>
+          <div data-legacy>
             <Process content={s.content as Section<'process'>['content']} />
             <WorkGallery />
-          </>
+          </div>
         );
       case 'values':
-        return <Values content={s.content as Section<'values'>['content']} anchor={s.key} />;
+        return (
+          <div data-legacy>
+            <Values content={s.content as Section<'values'>['content']} anchor={s.key} />
+          </div>
+        );
       case 'products_grid':
-        return <ProductsGrid content={s.content as Section<'products_grid'>['content']} products={products} />;
+        return (
+          <div data-legacy>
+            <ProductsGrid content={s.content as Section<'products_grid'>['content']} products={products} />
+          </div>
+        );
       case 'cta':
         return (
-          <>
+          <div data-legacy>
             <Testimonials testimonials={testimonials} />
             <TechnologiesStrip technologies={technologies} />
             <CtaBand content={s.content as Section<'cta'>['content']} />
-          </>
+          </div>
         );
       default:
         return null;

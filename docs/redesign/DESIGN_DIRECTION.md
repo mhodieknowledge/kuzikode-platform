@@ -114,7 +114,8 @@ only as small marks (numerals, a hover rule, a 8 px swatch, chart series, tier r
 | gold-400 (lit) | #E3B04B | Active / current on night, focus ring on night, "now" in the road strip |
 | saffron | #C98A17 (text #8A5C08) | Division 01 Websites; tier and chart series 1 |
 | clay | #B84F35 (text #9A3F28) | Division 02 Apps; series 2; also the base for danger states |
-| teal | #1F8478 (text #16695F) | Division 03 Business software; series 3 |
+| umber | #7C5A3A | Division 03 Business software (the brown of granite in shade); replaced teal here because teal read too close to the emerald action |
+| teal | #1F8478 (text #16695F) | Data series 3 and workspace charts only (not a division colour) |
 | moss | #6F8A2A (text #536A1C) | Division 04 AI & data; series 4 |
 | msasa | #8E3B52 | Division 05 Automation & payments (the spring wine-red of msasa leaves); series 5 |
 | granite | #7A7468 (text #5A554C) | Division 06 Cloud & IT; series 6 |

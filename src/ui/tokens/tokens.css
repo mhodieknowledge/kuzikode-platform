@@ -1,8 +1,8 @@
 /*
  * Design tokens: Route structure in the "Zimbabwe earth" multi-accent palette (docs/redesign/DESIGN_DIRECTION.md §4,
  * BRIEF B.0b+, chosen at R2.5b; prototype design/concepts/b2/?p=1). Neutrals carry 80–90% of every screen: night (near-black)
- * and bone. Emerald is reserved for the primary action. Six earth hues have jobs: one per division (saffron, clay, teal, moss,
- * msasa, granite), pricing tier coding, data and status in the workspace. No blue, indigo or violet (tests/unit/ui-tokens.test.ts).
+ * and bone. Emerald is reserved for the primary action. Six earth hues have jobs: one per division (saffron, clay, umber, moss,
+ * msasa, granite; teal for data series), pricing tier coding, data and status in the workspace. No blue, indigo or violet (tests/unit/ui-tokens.test.ts).
  * Components use these through the Tailwind theme names in base.css; no raw hex in components.
  */
 :root {
@@ -53,6 +53,8 @@
   --moss-ink: #536a1c;
   --msasa: #8e3b52; /* the wine-red of msasa leaves in spring */
   --msasa-ink: #8e3b52;
+  --umber: #7c5a3a; /* the brown of Great Zimbabwe granite in shade */
+  --umber-ink: #7c5a3a;
   --granite: #7a7468;
   --granite-ink: #5a554c;
 
@@ -114,8 +116,8 @@
   --line: var(--bone-200);
   --surface: var(--paper);
   --canvas: var(--bone-50);
-  --brand-600: var(--emerald-500);
-  --brand-500: var(--emerald-600);
+  --brand-600: var(--emerald-600);
+  --brand-500: var(--emerald-700);
   --brand-50: var(--emerald-50);
   --accent-500: var(--saffron);
   --success-600: var(--ok-600);

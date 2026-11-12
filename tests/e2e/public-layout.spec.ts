@@ -14,12 +14,12 @@ test.describe('public layout', () => {
     await expect(services).toHaveAttribute('aria-expanded', 'true');
     const panel = page.locator('#menu-services');
     for (const name of [
-      'Web Development & Digital Solutions',
-      'Mobile & Desktop Application Development',
-      'Business Software & Enterprise Systems',
-      'AI, Data & Intelligence',
-      'Automation & Systems Integration',
-      'Cloud, Infrastructure & IT Solutions',
+      'Web development',
+      'Mobile & desktop apps',
+      'Business software',
+      'AI, data & intelligence',
+      'Automation & integration',
+      'Cloud & IT',
     ]) {
       await expect(
         panel.getByRole('link', { name: new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) }),
@@ -28,11 +28,12 @@ test.describe('public layout', () => {
     await page.keyboard.press('Escape');
     await expect(panel).toBeHidden();
     await expect(services).toBeFocused();
-    await expect(page.getByRole('banner').getByRole('link', { name: 'Start a project' })).toHaveAttribute(
+    // No wizard links (BRIEF B.0c): the header's primary action is a quote request.
+    await expect(page.getByRole('banner').getByRole('link', { name: 'Get a quote' })).toHaveAttribute(
       'href',
-      '/start-a-project',
+      '/contact',
     );
-    await expect(page.getByRole('banner').getByRole('link', { name: 'Client Portal' })).toHaveAttribute(
+    await expect(page.getByRole('banner').getByRole('link', { name: 'Client workspace' })).toHaveAttribute(
       'href',
       '/portal/login',
     );
@@ -47,8 +48,8 @@ test.describe('public layout', () => {
       await page.getByRole('button', { name: 'Open menu' }).click();
       const dialog = page.getByRole('dialog', { name: 'Menu' });
       await expect(dialog).toBeVisible();
-      await expect(dialog.getByRole('link', { name: 'Cloud, Infrastructure & IT Solutions' })).toBeVisible();
-      await expect(dialog.getByRole('link', { name: 'Start a project' })).toBeVisible();
+      await expect(dialog.getByRole('link', { name: /^06 Cloud & IT/ })).toBeVisible();
+      await expect(dialog.getByRole('link', { name: 'Get a quote' })).toBeVisible();
       await expectAccessible(page);
       await page.keyboard.press('Escape');
       await expect(dialog).toBeHidden();

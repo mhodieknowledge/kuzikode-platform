@@ -69,7 +69,7 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
 - [x] **R4.6b Remove the Start-a-project wizard (owner rule BRIEF B.0c).** Delete the page, component, nav and CTA links, search and sitemap
   entries; 301 `/start-a-project` → `/contact`; CTAs become "Get a quote" / "Request this package" → contact with preselection. AC: grep finds
   no "start-a-project"/"Start a project" in `src/` except the redirect; e2e covers the redirect and the package → contact preselect; tests green.
-- [ ] **R4.7 Insights/blog, Careers, FAQ, Products (in-development item kept modest), legal, search, 404/500.**
+- [x] **R4.7 Insights/blog, Careers, FAQ, Products (in-development item kept modest), legal, search, 404/500.**
 - [ ] **R4.8 Public document & checkout pages** (`/q/`, `/i/`, `/pay/…`, the custom checkout) in the new language. Payment flows still pass their e2e tests.
 
 ## R5: Client workspace (Linux-inspired)

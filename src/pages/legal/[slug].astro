@@ -1,21 +1,92 @@
 ---
+/**
+ * Legal pages (R4.7, rebuilt from scratch). Spec (RESPONSIVE_DESIGN_SPEC "legal": readable prose, the table of contents as a
+ * disclosure on phones): a plain head (title, the other legal documents as route tabs), the text at a 68ch measure.
+ * Desktop: a side column with the legal index (current document marked) and "On this page" from the document's own h2s.
+ * Phones: the document switcher scrolls; "On this page" is a closed disclosure above the text.
+ */
 import PublicLayout from '../../layouts/PublicLayout.astro';
+import Icon from '../../ui/icons/Icon.astro';
+import { withHeadingIds } from '../../ui/public/insights/lib';
 import { getPage } from '../../server/modules/cms';
 import type { Section } from '../../shared/schemas/cms';
 
-const SLUGS = ['privacy', 'terms', 'service-terms', 'cookies', 'accessibility'];
+const DOCS = [
+  ['privacy', 'Privacy Policy'],
+  ['terms', 'Terms of Use'],
+  ['service-terms', 'Service Terms'],
+  ['cookies', 'Cookie notice'],
+  ['accessibility', 'Accessibility'],
+] as const;
 const slug = Astro.params.slug ?? '';
-if (!SLUGS.includes(slug)) return new Response(null, { status: 404 });
+if (!DOCS.some(([s]) => s === slug)) return new Response(null, { status: 404 });
 const page = await getPage(Astro.locals.ctx, `legal-${slug}`);
 if (!page) return new Response(null, { status: 404 });
 const body = page.sections.find((s) => s.type === 'rich_text') as Section<'rich_text'> | undefined;
+const { html, toc } = withHeadingIds(body?.content.html ?? '');
 ---
 
-<PublicLayout title={page.seoTitle ?? page.title} description={page.seoDescription ?? undefined}>
-  <article class="bg-surface py-14 md:py-20">
-    <div class="container-content">
-      <h1 class="text-4xl font-bold tracking-display md:text-5xl">{body?.content.title ?? page.title}</h1>
-      {body ? <div class="prose-kz mt-8" set:html={body.content.html} /> : null}
+<PublicLayout
+  title={page.seoTitle ?? page.title}
+  description={page.seoDescription ?? undefined}
+  canonicalPath={`/legal/${slug}`}
+  headerTone="bone"
+  footerCta={false}
+>
+  <article class="kz-legal" aria-labelledby="legal-title">
+    <header class="container-wide kz-legal__head">
+      <h1 id="legal-title" class="kz-xhead__title" data-enter>
+        {body?.content.title ?? page.title}
+      </h1>
+      <nav class="kz-legal__docs" aria-label="Legal documents" data-enter="2">
+        <ul role="list">
+          {DOCS.map(([s, label]) => (
+            <li>
+              <a href={`/legal/${s}`} aria-current={s === slug ? 'page' : undefined}>
+                {label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </header>
+    <div class="container-wide">
+      <div class:list={['kz-legal__grid', toc.length < 2 && 'no-toc']}>
+        {toc.length >= 2 ? (
+          <nav class="kz-art__toc kz-legal__toc" aria-label="On this page">
+            <details data-art-toc>
+              <summary>
+                <Icon name="list-checks" size={16} />
+                On this page
+                <Icon name="chevron-down" size={16} class="kz-art__toc-chev" />
+              </summary>
+              <ol role="list">
+                {toc.map((t, i) => (
+                  <li>
+                    <a href={`#${t.id}`}>
+                      <span aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                      {t.text}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </details>
+          </nav>
+        ) : null}
+        <div class="kz-read kz-legal__body" set:html={html} />
+      </div>
     </div>
   </article>
 </PublicLayout>
+
+<script>
+  const toc = document.querySelector<HTMLDetailsElement>('[data-art-toc]');
+  if (toc) {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const sync = () => {
+      toc.open = mq.matches;
+    };
+    sync();
+    mq.addEventListener('change', sync);
+  }
+</script>

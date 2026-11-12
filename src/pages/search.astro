@@ -1,76 +1,141 @@
 ---
+/**
+ * Site search (R4.7, rebuilt from scratch). Spec (RESPONSIVE_DESIGN_SPEC "search": big field, grouped results with type icons):
+ * a large field with the action beside it (full width under it on phones); results grouped by kind (services, packages,
+ * insights…), each group a ruled list with the kind's icon; a designed "no results" sheet with the main routes. Same GET form
+ * contract (`/search?q=`).
+ */
 import PublicLayout from '../layouts/PublicLayout.astro';
-import { MAX_QUERY_LENGTH, SEARCH_KIND_LABEL, searchSite } from '../server/modules/cms';
+import Icon from '../ui/icons/Icon.astro';
+import type { IconName } from '../ui/icons/registry';
+import { MAX_QUERY_LENGTH, SEARCH_KIND_LABEL, searchSite, type SearchResult } from '../server/modules/cms';
 
 const { ctx } = Astro.locals;
 const q = (Astro.url.searchParams.get('q') ?? '').slice(0, MAX_QUERY_LENGTH).trim();
 const results = q ? await searchSite(ctx, q) : [];
+const ICON: Record<SearchResult['kind'], IconName> = {
+  service: 'services',
+  package: 'packages',
+  industry: 'globe',
+  insight: 'content',
+  faq: 'help',
+  work: 'projects',
+  page: 'pages',
+};
+const PLURAL: Record<SearchResult['kind'], string> = {
+  service: 'Services',
+  package: 'Packages',
+  industry: 'Industries',
+  insight: 'Insights',
+  faq: 'Questions',
+  work: 'Our work',
+  page: 'Pages',
+};
+const groups = [...new Set(results.map((r) => r.kind))].map((kind) => ({
+  kind,
+  items: results.filter((r) => r.kind === kind),
+}));
+const suggestions = ['website', 'EcoCash', 'email', 'automation'];
+const routes = [
+  ['Services', '/services', 'services'],
+  ['Pricing', '/pricing', 'packages'],
+  ['FAQ', '/faq', 'help'],
+  ['Contact', '/contact', 'send'],
+] as const;
 ---
 
-<PublicLayout title={q ? `Search: ${q} · Kuzikode Technologies` : 'Search · Kuzikode Technologies'} noindex>
-  <section class="bg-canvas py-14 md:py-20" aria-labelledby="search-title">
-    <div class="container-content max-w-3xl">
-      <h1 id="search-title" class="text-4xl font-bold tracking-display md:text-5xl">
+<PublicLayout
+  title={q ? `Search: ${q} · Kuzikode Technologies` : 'Search · Kuzikode Technologies'}
+  noindex
+  headerTone="bone"
+>
+  <section class="kz-xhead kz-search" aria-labelledby="search-title">
+    <div class="container-wide">
+      <h1 id="search-title" class="kz-xhead__title" data-enter>
         Search
       </h1>
-      <form action="/search" method="get" role="search" class="mt-6 flex gap-2">
+      <form action="/search" method="get" role="search" class="kz-search__form" data-enter="2">
         <label for="site-search" class="sr-only">
           Search the site
         </label>
-        <input
-          id="site-search"
-          name="q"
-          type="search"
-          value={q}
-          maxlength={MAX_QUERY_LENGTH}
-          placeholder="Services, packages, articles…"
-          class="h-12 min-w-0 flex-1 rounded-sm border border-line bg-surface px-3 text-[15px] text-ink-950 placeholder:text-ink-400 hover:border-ink-400 focus-visible:border-brand-500 focus-visible:outline-2 focus-visible:outline-brand-500"
-        />
-        <button
-          type="submit"
-          class="inline-flex h-12 items-center rounded-sm bg-brand-600 px-5 text-[15px] font-semibold text-white hover:bg-brand-500"
-        >
-          Search
+        <div class="kz-search__box">
+          <Icon name="search" size={24} />
+          <input
+            id="site-search"
+            name="q"
+            type="search"
+            value={q}
+            maxlength={MAX_QUERY_LENGTH}
+            placeholder="Services, packages, articles…"
+            enterkeyhint="search"
+          />
+        </div>
+        <button type="submit" class="kz-btn kz-btn--primary kz-btn--lg">
+          <span>Search</span>
         </button>
       </form>
-    </div>
-  </section>
-  <section class="bg-surface py-12 md:py-16" aria-label="Search results">
-    <div class="container-content max-w-3xl">
       {!q ? (
-        <p class="text-ink-600">Type a word or two, such as “website”, “EcoCash” or “email”.</p>
-      ) : results.length === 0 ? (
-        <p class="text-ink-600" role="status">
-          No results for “{q}”. Try a different word, browse our{' '}
-          <a href="/services" class="font-semibold text-brand-600 underline underline-offset-2">
-            services
-          </a>
-          , or{' '}
-          <a href="/contact" class="font-semibold text-brand-600 underline underline-offset-2">
-            ask us
-          </a>
-          .
+        <p class="kz-search__try">
+          Try
+          {suggestions.map((s) => (
+            <a href={`/search?q=${encodeURIComponent(s)}`}>{s}</a>
+          ))}
         </p>
-      ) : (
-        <>
-          <p class="text-sm text-ink-600" role="status">
-            {results.length} result{results.length === 1 ? '' : 's'} for “{q}”
-          </p>
-          <ol class="mt-6 divide-y divide-line border-y border-line">
-            {results.map((r) => (
-              <li class="py-5">
-                <p class="text-[12px] font-semibold tracking-wide text-ink-600 uppercase">
-                  {SEARCH_KIND_LABEL[r.kind]}
-                </p>
-                <a href={r.href} class="mt-1 block text-lg font-semibold text-ink-950 hover:underline">
-                  {r.title}
-                </a>
-                {r.summary ? <p class="mt-1 line-clamp-2 text-[15px] leading-6 text-ink-600">{r.summary}</p> : null}
-              </li>
-            ))}
-          </ol>
-        </>
-      )}
+      ) : null}
     </div>
   </section>
+
+  {q ? (
+    <section class="kz-sec kz-search__body" aria-label="Search results">
+      <div class="container-wide">
+        {results.length === 0 ? (
+          <div class="kz-search__none">
+            <p class="kz-search__none-h" role="status">
+              No results for “{q}”.
+            </p>
+            <p>Try a different word, or start from one of these:</p>
+            <ul class="kz-search__routes" role="list">
+              {routes.map(([label, href, icon]) => (
+                <li>
+                  <a href={href}>
+                    <Icon name={icon} size={20} />
+                    {label}
+                    <Icon name="arrow-right" size={16} class="kz-search__go" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <Fragment>
+            <p class="kz-search__count" role="status">
+              {results.length} result{results.length === 1 ? '' : 's'} for “{q}”
+            </p>
+            <div class="kz-search__groups">
+              {groups.map((g) => (
+                <section class="kz-sgroup" aria-labelledby={`sg-${g.kind}`}>
+                  <h2 id={`sg-${g.kind}`} class="kz-sgroup__h">
+                    <Icon name={ICON[g.kind]} size={20} />
+                    {PLURAL[g.kind]}
+                    <span aria-hidden="true">{g.items.length}</span>
+                  </h2>
+                  <ol class="kz-sgroup__list" role="list">
+                    {g.items.map((r) => (
+                      <li>
+                        <a href={r.href}>
+                          <span class="kz-sgroup__kind">{SEARCH_KIND_LABEL[r.kind]}</span>
+                          <span class="kz-sgroup__title">{r.title}</span>
+                          {r.summary ? <span class="kz-sgroup__sum">{r.summary}</span> : null}
+                        </a>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              ))}
+            </div>
+          </Fragment>
+        )}
+      </div>
+    </section>
+  ) : null}
 </PublicLayout>

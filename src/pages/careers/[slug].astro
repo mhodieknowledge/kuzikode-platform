@@ -1,8 +1,17 @@
 ---
-import { Briefcase, CalendarClock, MapPin } from 'lucide-react';
+/**
+ * A role (R4.7, rebuilt from scratch). Head: breadcrumb, department, title, summary and a ruled spec sheet (type, workplace,
+ * location, closing date, salary when shown). Body: an editorial reading column with numbered parts (responsibilities,
+ * requirements, nice to have, what we offer, how to apply) and sharing, beside a sticky "ready to apply" plate on desktop. Then the
+ * application sheet (IMG_5018: form + summary). Phones get a sticky apply bar that scrolls to the sheet.
+ * Data, 404/410, staff preview, noindex and JobPosting JSON-LD are unchanged.
+ */
 import PublicLayout from '../../layouts/PublicLayout.astro';
-import ApplicationForm from '../../components/forms/ApplicationForm';
-import { breadcrumbLd } from '../../server/modules/cms';
+import ApplicationForm from '../../ui/public/forms/ApplicationForm';
+import ApplySheet from '../../ui/public/careers/ApplySheet.astro';
+import ApplyBar from '../../ui/public/careers/ApplyBar.astro';
+import Icon from '../../ui/icons/Icon.astro';
+import { breadcrumbLd, getSettings, settingNumber } from '../../server/modules/cms';
 import { employmentTypeLabel, getPostingView, jobPostingLd, workplaceLabel } from '../../server/modules/careers';
 import { formatLongDate, formatPriceTag } from '../../shared/service-display';
 
@@ -20,6 +29,7 @@ const ld = [
   ]),
   ...(open ? [await jobPostingLd(ctx, p)] : []),
 ];
+const retention = settingNumber(await getSettings(ctx), 'careers.retention_months', 12);
 const per = { hour: 'per hour', month: 'per month', year: 'per year' } as const;
 const salary = p.salary
   ? [p.salary.min, p.salary.max]
@@ -27,18 +37,29 @@ const salary = p.salary
       .map((v) => formatPriceTag(v, p.salary!.currency))
       .join(' – ') + ` ${per[p.salary.period]}`
   : null;
+const closes = p.closesAt && open ? formatLongDate(p.closesAt) : null;
 const url = new URL(`/careers/${p.slug}`, ctx.config.siteUrl).toString();
 const share = [
   ['LinkedIn', `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`],
   ['WhatsApp', `https://wa.me/?text=${encodeURIComponent(`${p.title} at Kuzikode Technologies ${url}`)}`],
   ['X', `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(p.title)}`],
 ] as const;
-const sections = [
-  ['Responsibilities', p.responsibilities],
-  ['Requirements', p.requirements],
-  ['Nice to have', p.niceToHaves],
-  ['What we offer', p.offer],
-] as const;
+const parts = (
+  [
+    ['Responsibilities', p.responsibilities],
+    ['Requirements', p.requirements],
+    ['Nice to have', p.niceToHaves],
+    ['What we offer', p.offer],
+  ] as const
+).filter(([, items]) => items.length > 0);
+const spec = [
+  { k: 'Type', v: employmentTypeLabel(p.employmentType) },
+  { k: 'Workplace', v: workplaceLabel(p.workplace) },
+  { k: 'Location', v: p.location },
+  ...(closes ? [{ k: 'Apply by', v: closes }] : []),
+  ...(salary ? [{ k: 'Salary', v: salary }] : []),
+];
+const n = (i: number) => String(i + 1).padStart(2, '0');
 ---
 
 <PublicLayout
@@ -46,124 +67,146 @@ const sections = [
   title={`${p.title} · Careers · Kuzikode Technologies`}
   description={p.summary}
   noindex={!open}
+  headerTone="bone"
+  footerCta={!open}
   whatsappMessage={`Hi Kuzikode, I have a question about the ${p.title} role.`}
 >
-  <section class="bg-canvas py-12 md:py-16" aria-labelledby="job-title">
-    <div class="container-content max-w-3xl">
-      <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-        <ol class="flex gap-1.5">
-          <li>
-            <a href="/careers" class="hover:text-ink-950 hover:underline">
-              Careers
-            </a>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li aria-current="page" class="text-ink-950">
-            {p.title}
-          </li>
-        </ol>
-      </nav>
-      <p class="mt-6 text-[13px] font-medium text-ink-600">{p.department}</p>
-      <h1 id="job-title" class="mt-1 text-4xl font-bold tracking-display md:text-5xl">
-        {p.title}
-      </h1>
-      <ul class="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[15px] text-ink-800">
-        <li class="inline-flex items-center gap-1.5">
-          <MapPin size={16} aria-hidden="true" />
-          {p.location} · {workplaceLabel(p.workplace)}
-        </li>
-        <li class="inline-flex items-center gap-1.5">
-          <Briefcase size={16} aria-hidden="true" />
-          {employmentTypeLabel(p.employmentType)}
-        </li>
-        {p.closesAt && open ? (
-          <li class="inline-flex items-center gap-1.5">
-            <CalendarClock size={16} aria-hidden="true" />
-            Apply by {formatLongDate(p.closesAt)}
-          </li>
-        ) : null}
-        {salary ? <li class="tnum font-semibold text-ink-950">{salary}</li> : null}
-      </ul>
-      {preview ? (
-        <p
-          role="status"
-          class="mt-6 rounded-md border border-warning-600/30 bg-warning-50 px-4 py-3 font-semibold text-warning-700"
-        >
-          Staff preview. The application form appears once the posting is open.
-        </p>
-      ) : open ? null : (
-        <p
-          role="status"
-          class="mt-6 rounded-md border border-line bg-surface px-4 py-3 font-semibold text-ink-950"
-          data-posting-closed
-        >
-          This position is closed and no longer accepts applications.{' '}
-          <a href="/careers" class="text-brand-600 underline underline-offset-2">
-            See open roles
-          </a>
-          .
-        </p>
-      )}
-    </div>
-  </section>
-  <section class="bg-surface py-12 md:py-16" aria-label="Role details">
-    <div class="container-content max-w-3xl">
-      <p class="text-lg leading-8 text-ink-800">{p.summary}</p>
-      {p.description ? <div class="prose-kz mt-6" set:html={p.description} /> : null}
-      {sections.map(([title, items]) =>
-        items.length ? (
-          <div class="mt-10">
-            <h2 class="text-2xl font-bold tracking-display">{title}</h2>
-            <ul class="mt-4 flex list-disc flex-col gap-2 pl-5 text-[16px] leading-7 text-ink-800">
-              {items.map((i) => (
-                <li>{i}</li>
+  <article class="kz-job">
+    <header class="kz-job__head">
+      <div class="container-wide">
+        <nav aria-label="Breadcrumb" class="kz-crumbs">
+          <ol>
+            <li>
+              <a href="/careers">Careers</a>
+            </li>
+            <li aria-current="page">{p.title}</li>
+          </ol>
+        </nav>
+        <div class="kz-job__grid">
+          <div>
+            <p class="kz-job__dept" data-enter>
+              {p.department}
+            </p>
+            <h1 id="job-title" class="kz-job__title" data-enter>
+              {p.title}
+            </h1>
+            <p class="kz-job__sum" data-enter="2">
+              {p.summary}
+            </p>
+          </div>
+          <dl class="kz-job__spec" data-enter="3">
+            {spec.map((s) => (
+              <div class:list={[s.k === 'Salary' && 'is-wide']}>
+                <dt>{s.k}</dt>
+                <dd class:list={[s.k === 'Salary' && 'tnum']}>{s.v}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+        {preview ? (
+          <p role="status" class="kz-job__note kz-job__note--warn">
+            <Icon name="status-warn" size={20} />
+            Staff preview. The application form appears once the posting is open.
+          </p>
+        ) : open ? null : (
+          <p role="status" class="kz-job__note" data-posting-closed>
+            <Icon name="status-info" size={20} />
+            <span>
+              This position is closed and no longer accepts applications. <a href="/careers">See open roles</a>.
+            </span>
+          </p>
+        )}
+      </div>
+    </header>
+
+    <div class="container-wide kz-job__body">
+      <div class="kz-job__story">
+        {p.description ? <div class="prose-kz kz-job__desc" set:html={p.description} /> : null}
+        {parts.map(([title, items], i) => (
+          <section class="kz-job__part" aria-labelledby={`part-${i}`}>
+            <h2 class="kz-job__h" id={`part-${i}`}>
+              <span aria-hidden="true">{n(i)}</span>
+              {title}
+            </h2>
+            <ul class="kz-job__list" role="list">
+              {items.map((t) => (
+                <li>{t}</li>
               ))}
             </ul>
+          </section>
+        ))}
+        {p.howToApply ? (
+          <section class="kz-job__part" aria-labelledby="part-how">
+            <h2 class="kz-job__h" id="part-how">
+              <span aria-hidden="true">{n(parts.length)}</span>
+              How to apply
+            </h2>
+            <p class="kz-job__how">{p.howToApply}</p>
+          </section>
+        ) : null}
+        <div class="kz-job__share">
+          <p class="kz-job__share-k">Share this role</p>
+          <ul role="list">
+            {share.map(([name, href]) => (
+              <li>
+                <a href={href} target="_blank" rel="noopener noreferrer">
+                  {name}
+                  <Icon name="external" size={16} />
+                  <span class="sr-only"> (opens in a new tab)</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      {open ? (
+        <aside class="kz-job__aside" aria-label="Ready to apply">
+          <div class="kz-job__plate">
+            <p class="kz-job__plate-t">Ready to apply?</p>
+            {closes ? (
+              <p class="kz-job__plate-d">
+                <Icon name="calendar" size={16} />
+                Apply by {closes}
+              </p>
+            ) : null}
+            <p class="kz-job__plate-b">
+              You'll need your CV as a PDF or Word file. The form is further down this page.
+            </p>
+            <a class="kz-btn kz-btn--primary kz-btn--lg kz-btn--block" href="#apply">
+              <span>Apply now</span>
+            </a>
           </div>
-        ) : null,
-      )}
-      {p.howToApply ? (
-        <div class="mt-10">
-          <h2 class="text-2xl font-bold tracking-display">How to apply</h2>
-          <p class="mt-4 text-ink-800">{p.howToApply}</p>
-        </div>
+        </aside>
       ) : null}
-      <div class="mt-10 border-t border-line pt-6">
-        <p class="text-sm font-semibold text-ink-950">Share this role</p>
-        <ul class="mt-3 flex flex-wrap gap-2">
-          {share.map(([name, href]) => (
-            <li>
-              <a
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex h-9 items-center rounded-sm border border-line px-3 text-sm font-semibold text-ink-800 hover:border-ink-400"
-              >
-                {name}
-                <span class="sr-only"> (opens in a new tab)</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
     </div>
-  </section>
-  {open ? (
-    <section class="bg-canvas py-12 md:py-16" aria-labelledby="apply-title">
-      <div class="container-content max-w-3xl">
-        <h2 id="apply-title" class="text-3xl font-bold tracking-display">
-          Apply for this role
-        </h2>
-        <div class="mt-8 rounded-lg border border-line bg-surface p-6 md:p-8">
-          <ApplicationForm
-            client:visible
-            slug={p.slug}
+
+    {open ? (
+      <section class="kz-apply" id="apply" aria-labelledby="apply-title">
+        <div class="container-wide">
+          <h2 id="apply-title" class="kz-h2 kz-apply__title">
+            Apply for this role
+          </h2>
+          <ApplySheet
             position={p.title}
-            questions={p.questions}
-            siteKey={ctx.config.turnstileSiteKey}
-          />
+            facts={[
+              { k: 'Department', v: p.department },
+              { k: 'Type', v: employmentTypeLabel(p.employmentType) },
+              { k: 'Where', v: `${p.location}, ${workplaceLabel(p.workplace)}` },
+              ...(closes ? [{ k: 'Closes', v: closes }] : []),
+            ]}
+            retentionMonths={retention}
+          >
+            <ApplicationForm
+              client:visible
+              slug={p.slug}
+              position={p.title}
+              questions={p.questions}
+              siteKey={ctx.config.turnstileSiteKey}
+            />
+          </ApplySheet>
         </div>
-      </div>
-    </section>
-  ) : null}
+      </section>
+    ) : null}
+  </article>
+  {open ? <ApplyBar title={p.title} closes={closes} /> : null}
 </PublicLayout>

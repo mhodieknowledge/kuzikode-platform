@@ -1,0 +1,41 @@
+---
+/**
+ * Phone apply bar (R4.7): a sticky bottom bar on phones and tablets with the role, its closing date and one "Apply" action that
+ * scrolls to the application sheet (#apply). It steps away (slides down) once the sheet reaches the screen, and the floating
+ * WhatsApp button stays hidden while the bar is shown (careers.css). Hidden from 1024 px, where the sticky side plate does the job.
+ */
+interface Props {
+  title: string;
+  closes: string | null;
+}
+const { title, closes } = Astro.props;
+---
+
+<div class="kz-applybar is-on" data-applybar>
+  <div class="kz-applybar__text">
+    <span class="kz-applybar__t">{title}</span>
+    {closes ? <span class="kz-applybar__d">Apply by {closes}</span> : null}
+  </div>
+  <a class="kz-btn kz-btn--primary" href="#apply">
+    <span>Apply</span>
+  </a>
+</div>
+
+<script>
+  function initApplyBar() {
+    const bar = document.querySelector<HTMLElement>('[data-applybar]');
+    const target = document.getElementById('apply');
+    if (!bar || !target || !('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e) return;
+        const reached = e.isIntersecting || e.boundingClientRect.top < 0;
+        bar.classList.toggle('is-on', !reached);
+        bar.toggleAttribute('inert', reached);
+      },
+      { rootMargin: '0px 0px -15% 0px' },
+    );
+    io.observe(target);
+  }
+  initApplyBar();
+</script>

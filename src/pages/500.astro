@@ -1,31 +1,47 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Logo from '../components/Logo.astro';
-/** Kept independent of the database: it must render even when D1 is unavailable. */
+/**
+ * Server error (R4.7, rebuilt from scratch). Kept independent of the database (no CMS, no navigation queries) so it renders even
+ * when D1 is unavailable: the wordmark, a plain sentence, one way home and the "road runs out" drawing.
+ */
+import Head from '../ui/head/Head.astro';
+import Logo from '../ui/brand/Logo.astro';
+import Icon from '../ui/icons/Icon.astro';
+import CoverArt from '../ui/illustrations/CoverArt.astro';
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
-    <BaseHead title="Something went wrong · Kuzikode Technologies" noindex />
+    <Head title="Something went wrong · Kuzikode Technologies" noindex />
   </head>
-  <body class="min-h-screen bg-canvas">
-    <header class="border-b border-line bg-surface">
-      <div class="container-content flex h-16 items-center">
+  <body class="kz-bare">
+    <header class="kz-bare__bar">
+      <div class="container-wide">
         <Logo />
       </div>
     </header>
-    <main id="main" class="container-content max-w-2xl py-24">
-      <p class="font-mono text-sm text-danger-600">500</p>
-      <h1 class="mt-3 text-4xl font-bold tracking-display">Something went wrong on our side.</h1>
-      <p class="mt-4 text-lg text-ink-600">
-        Please try again in a moment. If it keeps happening, email us or use the contact page.
-      </p>
-      <p class="mt-8">
-        <a href="/" class="inline-flex h-11 items-center rounded-sm bg-brand-600 px-5 text-sm font-semibold text-white">
-          Back to the home page
-        </a>
-      </p>
+    <main id="main" class="kz-lost">
+      <div class="container-wide kz-lost__grid">
+        <div class="kz-lost__text">
+          <p class="kz-lost__code is-err">500 · Server error</p>
+          <h1 class="kz-xhead__title">Something went wrong on our side.</h1>
+          <p class="kz-lost__body">
+            Please try again in a moment. If it keeps happening, email us or use the contact page.
+          </p>
+          <p class="kz-lost__acts">
+            <a href="/" class="kz-btn kz-btn--primary">
+              <span>Back to the home page</span>
+            </a>
+            <a href="/contact" class="kz-link">
+              Contact us
+              <Icon name="arrow-right" size={16} />
+            </a>
+          </p>
+        </div>
+        <div class="kz-lost__art" aria-hidden="true">
+          <CoverArt motif="end" />
+        </div>
+      </div>
     </main>
   </body>
 </html>

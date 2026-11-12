@@ -1,0 +1,60 @@
+---
+/**
+ * How applying works (R4.7, IMG_5015 step progress → numbered parts). Four stops on the dashed road, each a real step of the
+ * application system (online form with CV, emailed reference, review, retention from `careers.retention_months`); nothing about
+ * interviews or timelines the system does not guarantee. Desktop: one row of four stops on a horizontal road; phones: a compact
+ * 2 × 2 grid (BRIEF B.1a, no long stacks). Optional careers FAQs from the CMS follow as a question/answer ledger.
+ */
+interface Props {
+  retentionMonths: number;
+  faqs: { id: string; question: string; answer: string }[];
+}
+const { retentionMonths, faqs } = Astro.props;
+const steps = [
+  { t: 'Choose a role', b: 'Read the role and check its closing date.' },
+  { t: 'Apply online', b: 'Your details and your CV as a PDF or Word file. A cover letter is optional.' },
+  { t: 'Get a reference', b: 'We email you a confirmation with your application reference.' },
+  { t: 'We review it', b: 'Every application is read. We contact you if we would like to take it further.' },
+];
+---
+
+<section class="kz-sec kz-sec--inset kz-happly" aria-labelledby="applying-title">
+  <div class="container-wide">
+    <header class="kz-happly__head">
+      <h2 id="applying-title" class="kz-h2">How applying works</h2>
+      <p class="kz-happly__note">
+        We keep application details for {retentionMonths} months after a role closes, then delete them.
+        <a href="/legal/privacy">Privacy policy</a>
+      </p>
+    </header>
+    <ol class="kz-happly__steps" role="list" data-reveal-group>
+      {
+        steps.map((s, i) => (
+          <li class="kz-happly__step">
+            <span class="kz-happly__mark" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <h3 class="kz-happly__t">{s.t}</h3>
+            <p class="kz-happly__b">{s.b}</p>
+          </li>
+        ))
+      }
+    </ol>
+
+    {
+      faqs.length > 0 ? (
+        <div class="kz-cfaq">
+          <h3 class="kz-cfaq__h">Questions about applying</h3>
+          <dl class="kz-cfaq__list">
+            {faqs.map((f) => (
+              <div class="kz-cfaq__row">
+                <dt>{f.question}</dt>
+                <dd>{f.answer}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      ) : null
+    }
+  </div>
+</section>

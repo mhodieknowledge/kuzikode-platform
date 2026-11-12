@@ -1,75 +1,38 @@
 ---
+/**
+ * Products (R4.7, rebuilt from scratch; BRIEF B.7). A short bone header (CMS title and intro), then one modest panel per
+ * published product with its status tag, the Route drawing and the interest form. No photograph (B.4a), no purchase wording.
+ */
 import PublicLayout from '../layouts/PublicLayout.astro';
-import InterestForm from '../components/forms/InterestForm';
-import ResponsiveImage from '../components/ResponsiveImage.astro';
+import ProductPanel from '../ui/public/products/ProductPanel.astro';
 import { getPage, listProducts } from '../server/modules/cms';
 import type { Section } from '../shared/schemas/cms';
 
 const { ctx } = Astro.locals;
 const [page, products] = await Promise.all([getPage(ctx, 'products'), listProducts(ctx)]);
 const intro = page?.sections.find((s) => s.type === 'rich_text') as Section<'rich_text'> | undefined;
-const label: Record<string, string> = { in_development: 'In Development', beta: 'Beta', available: 'Available' };
 ---
 
 <PublicLayout
   title={page?.seoTitle ?? 'Products · Kuzikode Technologies'}
   description={page?.seoDescription ?? undefined}
+  canonicalPath="/products"
+  headerTone="bone"
 >
-  <section class="bg-canvas py-14 md:py-20">
-    <div class="container-content grid items-center gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-14">
-      <div>
-        <h1 class="text-4xl font-bold tracking-display md:text-5xl">{intro?.content.title ?? 'Products'}</h1>
-        {intro ? <div class="prose-kz mt-4 text-lg" set:html={intro.content.html} /> : null}
-      </div>
-      <div class="overflow-hidden rounded-lg">
-        <ResponsiveImage
-          id="product-business-suite"
-          priority
-          sizes="(min-width: 1024px) 600px, 100vw"
-          class="aspect-[16/9] h-auto w-full object-cover"
-        />
-      </div>
+  <section class="kz-phead" aria-labelledby="products-title">
+    <div class="container-wide kz-phead__grid">
+      <h1 id="products-title" class="kz-phead__title" data-enter>
+        {intro?.content.title ?? 'Products'}
+      </h1>
+      {intro ? <div class="kz-phead__intro prose-kz" data-enter="2" set:html={intro.content.html} /> : null}
     </div>
   </section>
-  <section class="bg-surface py-14 md:py-20" aria-label="Products">
-    <div class="container-content flex flex-col gap-8">
+  <section class="kz-sec kz-pbody" aria-label="Products">
+    <div class="container-wide">
       {products.length === 0 ? (
-        <p class="text-ink-600">No products to show yet.</p>
+        <p class="kz-pbody__none">No products to show yet.</p>
       ) : (
-        products.map((p) => (
-          <article
-            class="grid gap-10 rounded-lg border border-line p-6 md:p-10 lg:grid-cols-[1.2fr_1fr]"
-            aria-labelledby={`p-${p.slug}`}
-          >
-            <div>
-              <span class="inline-flex items-center gap-1.5 rounded-full bg-ink-950/5 px-2.5 py-0.5 text-xs font-semibold text-ink-800">
-                <span class="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
-                {label[p.status] ?? p.status}
-              </span>
-              <h2 id={`p-${p.slug}`} class="mt-4 text-3xl font-bold tracking-display">
-                {p.name}
-              </h2>
-              {p.tagline ? <p class="mt-2 text-lg font-medium text-ink-800">{p.tagline}</p> : null}
-              <p class="mt-4 text-[17px] leading-8 text-ink-600">{p.description}</p>
-              {p.status === 'in_development' ? (
-                <p class="mt-4 text-sm text-ink-600">
-                  We have not set a release date. Interested organisations can tell us what they need.
-                </p>
-              ) : null}
-            </div>
-            {p.interestFormEnabled ? (
-              <div class="rounded-md bg-canvas p-6">
-                <h3 class="mb-4 font-sans text-lg font-semibold">Register interest</h3>
-                <InterestForm
-                  client:visible
-                  product={p.slug}
-                  productName={p.name}
-                  siteKey={ctx.config.turnstileSiteKey}
-                />
-              </div>
-            ) : null}
-          </article>
-        ))
+        products.map((p) => <ProductPanel product={p} siteKey={ctx.config.turnstileSiteKey} />)
       )}
     </div>
   </section>

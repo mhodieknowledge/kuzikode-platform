@@ -1,5 +1,5 @@
 ---
-import InsightsListing from '../../../components/public/insights/InsightsListing.astro';
+import InsightsIndex from '../../../ui/public/insights/InsightsIndex.astro';
 import { listPostTags } from '../../../server/modules/cms';
 
 const { ctx } = Astro.locals;
@@ -9,7 +9,7 @@ if (!tag) return new Response(null, { status: 404, statusText: 'Not found' });
 const n = Number(Astro.url.searchParams.get('page') ?? '1');
 ---
 
-<InsightsListing
+<InsightsIndex
   title={`Tagged “${tag.name}”`}
   seoTitle={`${tag.name} · Kuzikode Insights`}
   seoDescription={`Kuzikode Technologies articles tagged ${tag.name}.`}

@@ -106,3 +106,19 @@ Harness: `playwright.visual.config.ts` (`SHOOT=… SHOOT_SET=all|core|quick SHOO
   pages, preview on every visit, no-wrap "30-minute", slots full width with "(optional)" labels, meta line removed, Service "(optional)".
   Not re-reviewed (usage economy); verified by screenshots.
 - e2e: `contact.spec.ts` (+ preview line), `engagement.spec.ts` consultation flow unchanged and green.
+
+## R4.7 Insights, Careers, FAQ, Products, legal, search, 404/500 (2026-11-12)
+- References opened: IMG_5055 (numbered full-width rows → insights ledger, roles index, FAQ index, 404 routes), IMG_5067 (title-left / link-right
+  headers), IMG_5056 (text-first heads), IMG_5057 (FAQ accordion +/−), IMG_5018 (application sheet + summary; interest form beside the product),
+  IMG_5015 (numbered form parts, "How applying works" stops).
+- Viewports: 360, 390, 430, 768, 1440 for insights index, careers, role page, products; 390 + 1440 for article, FAQ, legal, search (results and
+  none), 404. No horizontal overflow (fixed one: FAQ side column min-content widening the grid on phones); phone H1 32 px, H2 22–24 px; tap
+  targets ≥ 44 px (fixed: FAQ side plate button, 404 search button).
+- Interactions: category road (aria-current), article "On this page" (open + section marking on desktop, disclosure on phones), related swipe
+  track, FAQ live filter + deep links + category marking, legal contents, grouped search, careers filters, sticky phone apply bar (hidden once the
+  form is in view), application parts + summary, interest form.
+- Boards `{insights,insights_article,faq,legal,notfound,careers,careers_role,products}-board.webp`. Reviewer (impeccable-finish-reviewer,
+  opus/medium): all eight PASS (FAQ, article and role page "weak"). Fixes applied: 404 route numerals in division hues, products form flattened
+  to paper + hairline (no float shadow), status tag as a gold plate in words (not a mono code tag), room under the phone apply bar. Deferred to
+  R7.2/R8.1: varying the footer "Where next" band per page, a pinned FAQ category road on phones, a "next article" close on articles.
+- Note: the sample role in careers screenshots is test data from `careers.spec.ts` (local D1 only).

@@ -1,4 +1,4 @@
-/** Icon names CMS content may use (rendered by components/public/Icon.astro). */
+/** Icon names CMS content may use (rendered by ui/icons/Icon.astro via the registry). */
 export const CMS_ICONS = [
   'globe',
   'smartphone',

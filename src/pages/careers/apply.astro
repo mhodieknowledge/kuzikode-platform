@@ -1,27 +1,46 @@
 ---
+/**
+ * General application (R4.7, rebuilt from scratch). Only while `careers.general_applications` is on (404 otherwise, unchanged).
+ * Breadcrumb, heading and intro, then the application sheet (IMG_5018: form + summary) with the same numbered form as a role.
+ */
 import PublicLayout from '../../layouts/PublicLayout.astro';
-import ApplicationForm from '../../components/forms/ApplicationForm';
-import { getSettings, settingBool } from '../../server/modules/cms';
+import ApplicationForm from '../../ui/public/forms/ApplicationForm';
+import ApplySheet from '../../ui/public/careers/ApplySheet.astro';
+import { getSettings, settingBool, settingNumber } from '../../server/modules/cms';
 
 const { ctx } = Astro.locals;
-if (!settingBool(await getSettings(ctx), 'careers.general_applications')) {
+const settings = await getSettings(ctx);
+if (!settingBool(settings, 'careers.general_applications')) {
   return new Response(null, { status: 404, statusText: 'Not found' });
 }
+const retention = settingNumber(settings, 'careers.retention_months', 12);
 ---
 
 <PublicLayout
   title="Send us your CV · Careers · Kuzikode Technologies"
   description="Send Kuzikode Technologies a general application."
+  headerTone="bone"
+  footerCta={false}
 >
-  <section class="bg-canvas py-12 md:py-16" aria-labelledby="general-title">
-    <div class="container-content max-w-3xl">
-      <h1 id="general-title" class="text-4xl font-bold tracking-display md:text-5xl">
-        Send us your CV
-      </h1>
-      <p class="mt-4 text-lg text-ink-600">
-        Tell us about yourself. We will keep your details on file and contact you if a suitable role opens.
-      </p>
-      <div class="mt-8 rounded-lg border border-line bg-surface p-6 md:p-8">
+  <section class="kz-apply kz-apply--page" aria-labelledby="general-title">
+    <div class="container-wide">
+      <nav aria-label="Breadcrumb" class="kz-crumbs">
+        <ol>
+          <li>
+            <a href="/careers">Careers</a>
+          </li>
+          <li aria-current="page">Send us your CV</li>
+        </ol>
+      </nav>
+      <div class="kz-apply__intro">
+        <h1 id="general-title" class="kz-job__title" data-enter>
+          Send us your CV
+        </h1>
+        <p class="kz-job__sum" data-enter="2">
+          Tell us about yourself. We will keep your details on file and contact you if a suitable role opens.
+        </p>
+      </div>
+      <ApplySheet position="General application" facts={[]} retentionMonths={retention}>
         <ApplicationForm
           client:load
           slug={null}
@@ -29,7 +48,7 @@ if (!settingBool(await getSettings(ctx), 'careers.general_applications')) {
           questions={[]}
           siteKey={ctx.config.turnstileSiteKey}
         />
-      </div>
+      </ApplySheet>
     </div>
   </section>
 </PublicLayout>

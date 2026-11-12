@@ -1,0 +1,119 @@
+---
+/**
+ * Article covers (R4.7, BRIEF B.4a): code-drawn, in the same Route drawing system as DivisionArt and SceneArt (2 px ink strokes,
+ * round joins, paper surfaces, one accent + tint, gold for the single lit detail, the dashed road). Used only when a post has no
+ * cover photo. The motif follows the subject so the cover says something:
+ * - `pay`: a phone with a mobile-money prompt beside a till receipt (payments).
+ * - `web`: a browser window with a hero block and columns (websites, web apps).
+ * - `mail`: an envelope over a domain address bar (email and domains).
+ * - `guide`: a fork in the road with two sign plates (guides, decisions, everything else).
+ * - `end` (404 / 500): the road runs out at a barrier with a blank sign plate; the lit lamp sits on the barrier.
+ * The accent is the category's hue (`kz-div-*` on the parent). Text bars are blank: no invented words or figures. Decorative.
+ */
+interface Props {
+  motif: 'pay' | 'web' | 'mail' | 'guide' | 'end';
+  class?: string;
+}
+const { motif, class: className } = Astro.props;
+---
+
+<svg
+  class={['kz-ill kz-ill--cover', className].filter(Boolean).join(' ')}
+  viewBox="0 0 360 216"
+  preserveAspectRatio="xMidYMid slice"
+  xmlns="http://www.w3.org/2000/svg"
+  aria-hidden="true"
+  focusable="false"
+  data-ill={`cover-${motif}`}
+>
+  <rect class="i-ground" x="0" y="0" width="360" height="216"></rect>
+  <path class="i-road" d="M0 196H360"></path>
+
+  {motif === 'pay' && (
+    <g>
+      <rect class="i-paper" x="96" y="30" width="84" height="152" rx="12" />
+      <path class="i-line" d="M96 50H180M96 162H180" />
+      <rect class="i-tint-f" x="108" y="62" width="60" height="38" rx="5" />
+      <rect class="i-soft" x="108" y="110" width="44" height="7" rx="3" />
+      <rect class="i-soft" x="108" y="124" width="60" height="7" rx="3" />
+      <rect class="i-acc" x="108" y="140" width="60" height="14" rx="4" />
+      <g transform="rotate(5 238 112)">
+        <path class="i-paper" d="M204 46H272V170L264 176L256 170L248 176L240 170L232 176L224 170L216 176L204 170Z" />
+        <rect class="i-soft" x="216" y="60" width="44" height="7" rx="3" />
+        <path class="i-line-s" d="M216 82H260M216 96H260M216 110H260" stroke-dasharray="3 4" />
+        <path class="i-ink" d="M216 132H260" />
+        <rect class="i-tint-f" x="228" y="142" width="32" height="9" rx="3" />
+      </g>
+      <circle class="i-lit i-move" cx="168" cy="81" r="6" />
+    </g>
+  )}
+
+  {motif === 'web' && (
+    <g>
+      <rect class="i-paper" x="60" y="28" width="240" height="152" rx="9" />
+      <path class="i-line" d="M60 48H300" />
+      <rect class="i-soft" x="72" y="34" width="56" height="8" rx="3" />
+      <rect class="i-tint-f" x="74" y="60" width="128" height="58" rx="5" />
+      <rect class="i-soft" x="86" y="74" width="80" height="9" rx="3" />
+      <rect class="i-soft" x="86" y="90" width="56" height="7" rx="3" />
+      <rect class="i-acc" x="86" y="104" width="34" height="8" rx="3" />
+      <rect class="i-paper" x="214" y="60" width="72" height="58" rx="5" />
+      <path class="i-ink" d="M224 104L242 84L256 96L276 74" fill="none" />
+      <rect class="i-paper" x="74" y="130" width="64" height="38" rx="5" />
+      <rect class="i-paper" x="148" y="130" width="64" height="38" rx="5" />
+      <rect class="i-paper" x="222" y="130" width="64" height="38" rx="5" />
+      <rect class="i-soft" x="84" y="142" width="40" height="6" rx="3" />
+      <rect class="i-soft" x="158" y="142" width="40" height="6" rx="3" />
+      <rect class="i-soft" x="232" y="142" width="40" height="6" rx="3" />
+      <circle class="i-lit i-move" cx="276" cy="74" r="6" />
+    </g>
+  )}
+
+  {motif === 'mail' && (
+    <g>
+      <rect class="i-paper" x="48" y="38" width="264" height="34" rx="8" />
+      <rect class="i-acc" x="60" y="49" width="12" height="12" rx="3" />
+      <rect class="i-soft" x="82" y="51" width="70" height="8" rx="3" />
+      <rect class="i-tint-f" x="156" y="51" width="62" height="8" rx="3" />
+      <g transform="rotate(-4 180 136)">
+        <rect class="i-paper" x="104" y="88" width="152" height="96" rx="7" />
+        <path class="i-ink" d="M104 96L180 146L256 96" fill="none" />
+        <path class="i-line-s" d="M104 184L160 136M256 184L200 136" />
+      </g>
+      <circle class="i-lit i-move" cx="250" cy="96" r="7" />
+    </g>
+  )}
+
+  {motif === 'guide' && (
+    <g>
+      <path
+        class="i-line"
+        d="M180 196V150C180 120 120 112 92 82M180 150C180 120 240 112 268 82"
+        stroke-dasharray="7 7"
+        fill="none"
+      />
+      <rect class="i-solid" x="174" y="58" width="12" height="138" rx="3" />
+      <path class="i-paper" d="M174 64H96L80 80L96 96H174Z" />
+      <path class="i-paper" d="M186 104H266L282 120L266 136H186Z" />
+      <rect class="i-soft" x="102" y="76" width="58" height="8" rx="3" />
+      <rect class="i-tint-f" x="198" y="116" width="50" height="8" rx="3" />
+      <rect class="i-acc" x="254" y="116" width="8" height="8" rx="2" />
+      <circle class="i-lit i-move" cx="180" cy="54" r="7" />
+    </g>
+  )}
+  {motif === 'end' && (
+    <g>
+      <path class="i-line" d="M20 168H210" stroke-dasharray="8 8" />
+      <rect class="i-paper" x="214" y="132" width="112" height="22" rx="4" />
+      <path class="i-line-s" d="M232 132L218 154M258 132L244 154M284 132L270 154M310 132L296 154" />
+      <rect class="i-solid" x="228" y="154" width="8" height="42" rx="2" />
+      <rect class="i-solid" x="304" y="154" width="8" height="42" rx="2" />
+      <rect class="i-solid" x="118" y="70" width="10" height="126" rx="3" />
+      <rect class="i-paper" x="74" y="38" width="98" height="62" rx="7" />
+      <rect class="i-acc" x="88" y="52" width="16" height="16" rx="3" />
+      <rect class="i-soft" x="112" y="55" width="46" height="8" rx="3" />
+      <rect class="i-tint-f" x="88" y="78" width="54" height="8" rx="3" />
+      <circle class="i-lit i-move" cx="270" cy="122" r="8" />
+    </g>
+  )}
+</svg>

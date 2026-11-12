@@ -64,7 +64,7 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
 - [x] **R4.2 Services index + division pages + service detail.** (Services are listed within their division page; there is no separate service-detail route.)
 - [x] **R4.3 Pricing / packages** (presentation only; desktop comparison + mobile swipe/selector; price-accuracy test from B.6).
 - [x] **R4.4 Our Work / portfolio + case study** (image transitions, empty state that still looks designed).
-- [ ] **R4.5 About, How we work, Industries, Technologies.**
+- [x] **R4.5 About, How we work, Industries, Technologies.** (2026-11-12; technologies live on How we work.)
 - [ ] **R4.6 Contact + consultation booking** (forms: mobile usability first). Contact form reads `?service=` / `?package=` to preselect.
 - [x] **R4.6b Remove the Start-a-project wizard (owner rule BRIEF B.0c).** Delete the page, component, nav and CTA links, search and sitemap
   entries; 301 `/start-a-project` → `/contact`; CTAs become "Get a quote" / "Request this package" → contact with preselection. AC: grep finds

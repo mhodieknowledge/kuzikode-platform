@@ -1,0 +1,24 @@
+---
+/**
+ * Mission and vision (R4.5): the two CMS statements as one night band, set as display sentences side by side with a hairline
+ * between them (desktop) or one above the other (phones). The headings stay real headings ("Mission", "Vision") set small, in the
+ * lit gold, so the sentence is the hero of the band. No cards, no quotation marks.
+ */
+interface Props {
+  items: { key: string; title: string; body: string }[];
+}
+const { items } = Astro.props;
+---
+
+<section class="kz-sec kz-stmt on-night" aria-label="Mission and vision">
+  <div class="container-wide kz-stmt__grid" data-reveal-group>
+    {
+      items.map((s) => (
+        <div class="kz-stmt__item" id={s.key}>
+          <h2 class="kz-stmt__h">{s.title}</h2>
+          <p class="kz-stmt__body">{s.body}</p>
+        </div>
+      ))
+    }
+  </div>
+</section>

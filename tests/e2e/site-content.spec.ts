@@ -39,7 +39,10 @@ test('How we work page renders process, engagement models, expectations, practic
   for (const h of ['Our process', 'Ways to work with us', 'What you can expect', 'Quality and security practices']) {
     await expect(page.getByRole('heading', { level: 2, name: h })).toBeVisible();
   }
-  await expect(page.getByRole('heading', { name: 'Technologies we work with' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Tools we build with' })).toBeVisible();
+  // The process is one road with every stop shown in full, and the hero shows the same stops on the scope sheet.
+  await expect(page.locator('.kz-proad__stop')).toHaveCount(5);
+  await expect(page.locator('.kz-scope__ms li')).toHaveCount(5);
   await expect(page.getByText(/clients include|trusted by|partners/i)).toHaveCount(0);
   await expectAccessible(page);
   await screenshots(page, 'how-we-work');

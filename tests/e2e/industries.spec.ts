@@ -28,6 +28,10 @@ test('industry page: packages to start from and accessible layout', async ({ pag
   await page.goto('/industries/retail-wholesale');
   await expect(page.getByRole('heading', { name: 'Packages to start from' })).toBeVisible();
   await expect(page.locator('[data-package]').first()).toBeVisible();
+  // The areas of work that serve the sector link to their division pages.
+  const areas = page.getByRole('navigation', { name: 'Areas of work for Retail & Wholesale' }).getByRole('link');
+  expect(await areas.count()).toBeGreaterThan(0);
+  await expect(areas.first()).toHaveAttribute('href', /^\/services\/[a-z0-9-]+$/);
   await expectAccessible(page);
   await screenshots(page, 'industry-retail');
   expect((await page.goto('/industries/no-such-sector'))!.status()).toBe(404);

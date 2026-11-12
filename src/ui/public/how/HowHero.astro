@@ -1,0 +1,83 @@
+---
+/**
+ * How we work hero (R4.5, BRIEF B.0e: a crafted composition with depth). Night band: headline, the CMS intro, one action. The visual
+ * is the promise made concrete: a paper scope sheet (the written scope, its milestones taken from the CMS process steps, each
+ * approved by the client) with this week's update note lifted over its edge. One labelled illustration with demo data; it depicts
+ * real workspace features (written scope, milestone approval, weekly updates) and claims no client, figure or date.
+ * Desktop: copy 5 columns, composition 7. Phones: headline, intro, action, then the composition (first screen shows its top).
+ */
+import Icon from '../../icons/Icon.astro';
+
+interface Props {
+  title: string;
+  html: string | null;
+  steps: string[];
+}
+const { title, html, steps } = Astro.props;
+const now = Math.min(2, steps.length - 1);
+---
+
+<section class="kz-hhero on-night" aria-labelledby="how-title">
+  <div class="container-wide kz-hhero__grid">
+    <div class="kz-hhero__copy">
+      <h1 id="how-title" class="kz-hhero__title" data-enter>{title}</h1>
+      {html ? <div class="kz-hhero__intro" data-enter="2" set:html={html} /> : null}
+      <div class="kz-hhero__acts" data-enter="3">
+        <a class="kz-btn kz-btn--primary kz-btn--lg" href="/contact" data-hero-cta><span>Get a quote</span></a>
+        <a class="kz-link" href="#process-title">
+          See the process
+          <Icon name="chevron-down" size={16} />
+        </a>
+      </div>
+    </div>
+    <figure class="kz-hhero__fig" data-enter="2">
+      <div
+        class="kz-scope"
+        role="img"
+        aria-label="Illustration with demo data: a written project scope with its milestones, the first ones approved by the client, and this week's progress update."
+      >
+        <div class="kz-scope__sheet" aria-hidden="true">
+          <div class="kz-scope__top">
+            <span class="kz-scope__doc">Project scope</span>
+            <span class="kz-scope__ok"><Icon name="status-ok" size={16} /> Agreed in writing</span>
+          </div>
+          <span class="kz-scope__bar kz-scope__bar--l"></span>
+          <span class="kz-scope__bar"></span>
+          <ol class="kz-scope__ms">
+            {
+              steps.map((s, i) => (
+                <li class:list={[i < now ? 'is-done' : i === now ? 'is-now' : 'is-next']}>
+                  <span class="kz-scope__n">{String(i + 1).padStart(2, '0')}</span>
+                  <span class="kz-scope__name">{s}</span>
+                  <span class="kz-scope__st">
+                    {i < now ? (
+                      <>
+                        <Icon name="status-ok" size={16} /> Approved
+                      </>
+                    ) : i === now ? (
+                      'In progress'
+                    ) : (
+                      'Next'
+                    )}
+                  </span>
+                </li>
+              ))
+            }
+          </ol>
+          <div class="kz-scope__sign">
+            <span>Client approval</span>
+            <svg viewBox="0 0 120 28" class="kz-scope__sig"><path d="M4 20c10-14 16-14 18-4s8 8 14-2 10-10 12 0 6 8 16-2 16-6 22-2 14 4 26-2" /></svg>
+          </div>
+        </div>
+        <div class="kz-scope__note" aria-hidden="true">
+          <p class="kz-scope__note-h"><Icon name="activity" size={16} /> This week</p>
+          <span class="kz-scope__bar kz-scope__bar--l"></span>
+          <span class="kz-scope__bar"></span>
+          <span class="kz-scope__bar kz-scope__bar--s"></span>
+          <p class="kz-scope__note-f">Update posted in your workspace</p>
+        </div>
+      </div>
+      <figcaption class="kz-hhero__cap">Illustration with demo data: scope, milestones and weekly updates.</figcaption>
+    </figure>
+  </div>
+</section>

@@ -1,0 +1,44 @@
+---
+/**
+ * Engagement models (R4.5): the CMS features as a ruled set of four "ways in", each with its icon beside the title (DESIGN_DIRECTION
+ * §7: icons sit beside words). Desktop: heading + intro left, the models as a 2 × 2 ledger right. Phones: a swipe track with the next
+ * model peeking and progress dots (BRIEF B.1a).
+ */
+import Icon from '../../icons/Icon.astro';
+import { cmsIcon } from '../../icons/registry';
+import type { SectionContent } from '../../../shared/schemas/cms';
+
+interface Props {
+  content: SectionContent<'features'>;
+  anchor: string;
+}
+const { content: c, anchor } = Astro.props;
+---
+
+<section class="kz-sec kz-sec--inset kz-models" id={anchor} aria-labelledby={`${anchor}-title`}>
+  <div class="container-wide kz-models__grid">
+    <header class="kz-models__head">
+      <h2 id={`${anchor}-title`} class="kz-h2">{c.title}</h2>
+      {c.intro ? <p class="kz-lede">{c.intro}</p> : null}
+    </header>
+    <div>
+      <ul class="kz-models__list" role="list" data-kz-track data-reveal-group>
+        {
+          c.items.map((it, i) => (
+            <li class="kz-model">
+              <span class="kz-model__n">{String(i + 1).padStart(2, '0')}</span>
+              <h3 class="kz-model__title">
+                <Icon name={cmsIcon(it.icon)} size={20} />
+                {it.title}
+              </h3>
+              <p class="kz-model__body">{it.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="kz-track__dots kz-models__dots" aria-hidden="true" data-kz-track-dots>
+        {c.items.map((_, i) => <i class:list={[i === 0 && 'is-on']} />)}
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,32 @@
+---
+/**
+ * "What you can expect" (R4.5) inside the mid-page photo band (BRIEF B.4a): the four CMS commitments as a description list on the
+ * paper card. Interim photograph until batch 3's `how-we-work-band` is delivered.
+ */
+import PhotoBand from '../shared/PhotoBand.astro';
+import type { SectionContent } from '../../../shared/schemas/cms';
+import manifest from '../../../../design/images/manifest.json';
+
+interface Props {
+  content: SectionContent<'values'>;
+  anchor: string;
+}
+const { content: c, anchor } = Astro.props;
+const image = 'how-we-work-band' in manifest.images ? 'how-we-work-band' : 'work-presentation';
+---
+
+<PhotoBand image={image} label={c.title}>
+  <div id={anchor}>
+    <h2 class="kz-pband__title">{c.title}</h2>
+    <dl class="kz-expect">
+      {
+        c.items.map((it) => (
+          <div>
+            <dt>{it.title}</dt>
+            <dd>{it.body}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</PhotoBand>

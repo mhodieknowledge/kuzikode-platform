@@ -1,0 +1,48 @@
+---
+/**
+ * Core values (R4.5): numbered ledger. Desktop: one row of columns, each value under a hairline with its numeral (IMG_5055 numbered
+ * rows turned on their side). Phones: a swipe track with the next value peeking and progress dots (BRIEF B.1a: five similar items
+ * never stack). Values stay a description list (term + definition) for assistive technology.
+ */
+import Icon from '../../icons/Icon.astro';
+import type { SectionContent } from '../../../shared/schemas/cms';
+
+interface Props {
+  content: SectionContent<'values'>;
+  anchor: string;
+  tone?: 'bone' | 'inset';
+}
+const { content: c, anchor, tone = 'bone' } = Astro.props;
+---
+
+<section class:list={['kz-sec kz-vl', tone === 'inset' && 'kz-sec--inset']} id={anchor} aria-labelledby={`${anchor}-title`}>
+  <div class="container-wide">
+    <header class="kz-sec__head">
+      <h2 id={`${anchor}-title`} class="kz-h2">{c.title}</h2>
+      {
+        c.link ? (
+          <a class="kz-link" href={c.link.href}>
+            {c.link.label}
+            <Icon name="arrow-right" size={16} />
+          </a>
+        ) : null
+      }
+    </header>
+    <dl class="kz-vl__list" data-kz-track data-reveal-group style={`--n:${c.items.length}`}>
+      {
+        c.items.map((it, i) => (
+          <div class="kz-vl__item">
+            <dt>
+              <span class="kz-vl__n">{String(i + 1).padStart(2, '0')}</span>
+              {it.title}
+            </dt>
+            <dd>{it.body}</dd>
+          </div>
+        ))
+      }
+    </dl>
+    <div class="kz-track__dots kz-vl__dots" aria-hidden="true" data-kz-track-dots>
+      {c.items.map((_, i) => <i class:list={[i === 0 && 'is-on']} />)}
+    </div>
+  </div>
+</section>

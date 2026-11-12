@@ -1,0 +1,66 @@
+---
+/**
+ * Industries index (R4.5): every published sector as a numbered directory row (IMG_5055 numbered full-width rows): numeral, the
+ * sector icon beside its name, the summary, and the areas of work that serve it as small numerals in their division hues (the
+ * route mark from the home page; DESIGN_DIRECTION §3 "found landmark"). Desktop: two columns of rows; phones: one column of
+ * rows (links, not boxes). The whole row is the link.
+ */
+import Icon from '../../icons/Icon.astro';
+import { industryIcon } from '../../icons/registry';
+
+interface Props {
+  /** Area names in catalogue order, for the legend of the area numerals. */
+  areas: string[];
+  industries: { slug: string; name: string; summary: string; icon: string | null; areas: { n: number; name: string }[] }[];
+}
+const { industries, areas } = Astro.props;
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<section class="kz-sec kz-sec--inset kz-iidx" aria-label="Industries we serve">
+  <div class="container-wide">
+    {
+      industries.length === 0 ? (
+        <p class="kz-lede">No industries to show yet.</p>
+      ) : (
+        <Fragment>
+        <div class="kz-iidx__legend" aria-hidden="true">
+          <span class="kz-iidx__legend-h">Areas of work</span>
+          {areas.map((a, i) => (
+            <span class={`kz-div-${(i % 6) + 1}`}>
+              <b>{pad(i + 1)}</b> {a}
+            </span>
+          ))}
+        </div>
+        <ol class="kz-iidx__list" role="list" data-reveal-group>
+          {industries.map((i, k) => (
+            <li>
+              <a class="kz-irow" href={`/industries/${i.slug}`}>
+                <span class="kz-irow__n">{pad(k + 1)}</span>
+                <span class="kz-irow__main">
+                  <span class="kz-irow__name">
+                    <Icon name={industryIcon(i.slug, i.icon)} size={20} />
+                    <span>{i.name}</span>
+                  </span>
+                  <span class="kz-irow__sum">{i.summary}</span>
+                  {i.areas.length > 0 ? (
+                    <span class="kz-irow__areas">
+                      <span class="sr-only">Areas of work: {i.areas.map((a) => a.name).join(', ')}</span>
+                      {i.areas.map((a) => (
+                        <span class={`kz-div-${((a.n - 1) % 6) + 1}`} aria-hidden="true">
+                          {pad(a.n)}
+                        </span>
+                      ))}
+                    </span>
+                  ) : null}
+                </span>
+                <Icon name="arrow-right" size={20} class="kz-irow__arrow" />
+              </a>
+            </li>
+          ))}
+        </ol>
+        </Fragment>
+      )
+    }
+  </div>
+</section>

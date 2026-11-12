@@ -1,13 +1,21 @@
 ---
-import { ArrowRight } from 'lucide-react';
+/**
+ * One sector (R4.5, rebuilt from scratch). Header: crumbs, the sector icon beside the route line, "Solutions for …", summary,
+ * actions and the areas of work that serve the sector as numbered chips (numeral in division hue → division page); the Route
+ * drawing of the sector's main area of work is the hero visual (right on desktop, under the copy on phones; BRIEF B.4a). Then: challenges as a numbered ledger + the sector essay, the relevant services as directory rows (area numeral,
+ * name, summary, both ways in), and the packages to start from in the pricing plan deck (prices from the pricing catalogue only).
+ */
 import PublicLayout from '../../layouts/PublicLayout.astro';
-import Icon from '../../components/public/Icon.astro';
-import PackageCard from '../../components/public/pricing/PackageCard.astro';
-import { breadcrumbLd, getIndustry } from '../../server/modules/cms';
+import Icon from '../../ui/icons/Icon.astro';
+import { industryIcon } from '../../ui/icons/registry';
+import DivisionArt from '../../ui/illustrations/DivisionArt.astro';
+import PlanDeck from '../../ui/public/pricing/PlanDeck.astro';
+import { breadcrumbLd, getIndustry, getServiceCatalogue } from '../../server/modules/cms';
+import { divisionShortName } from '../../shared/directory';
 import { quotationHref } from '../../shared/service-display';
 
 const { ctx } = Astro.locals;
-const industry = await getIndustry(ctx, Astro.params.slug ?? '');
+const [industry, categories] = await Promise.all([getIndustry(ctx, Astro.params.slug ?? ''), getServiceCatalogue(ctx)]);
 if (!industry) return new Response(null, { status: 404, statusText: 'Not found' });
 const ld = [
   breadcrumbLd(ctx, [
@@ -15,6 +23,18 @@ const ld = [
     { name: industry.name, path: `/industries/${industry.slug}` },
   ]),
 ];
+const pad = (n: number) => String(n).padStart(2, '0');
+const areaIndex = (slug: string) => categories.findIndex((c) => c.slug === slug);
+const areas = [...new Set(industry.services.map((s) => s.categorySlug))]
+  .map((slug) => ({ slug, i: areaIndex(slug) }))
+  .filter((a) => a.i >= 0)
+  .sort((a, b) => a.i - b.i)
+  .map((a) => ({ ...a, name: divisionShortName(a.slug, categories[a.i]!.name) }));
+// The area with the most relevant services leads the hero drawing (ties go to the earlier area).
+const lead = areas
+  .map((a) => ({ a, n: industry.services.filter((s) => s.categorySlug === a.slug).length }))
+  .sort((x, y) => y.n - x.n || x.a.i - y.a.i)[0]?.a;
+const services = [...industry.services].sort((a, b) => areaIndex(a.categorySlug) - areaIndex(b.categorySlug));
 const packages = industry.packages.slice(0, 3);
 ---
 
@@ -23,109 +43,132 @@ const packages = industry.packages.slice(0, 3);
   title={industry.seoTitle ?? `${industry.name} · Kuzikode Technologies`}
   description={industry.seoDescription ?? industry.summary}
   whatsappMessage={`Hi Kuzikode, I'd like to talk about solutions for ${industry.name}.`}
+  headerTone="bone"
 >
-  <section class="bg-canvas py-14 md:py-20" aria-labelledby="industry-title">
-    <div class="container-content">
-      <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-        <ol class="flex gap-1.5">
-          <li>
-            <a href="/industries" class="hover:text-ink-950 hover:underline">
-              Industries
-            </a>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li aria-current="page" class="text-ink-950">
-            {industry.name}
-          </li>
-        </ol>
-      </nav>
-      <span class="mt-6 flex h-11 w-11 items-center justify-center rounded-sm bg-brand-50 text-brand-600">
-        <Icon name={industry.icon} size={22} />
-      </span>
-      <h1 id="industry-title" class="mt-5 max-w-3xl text-4xl font-bold tracking-display md:text-5xl">
-        Solutions for {industry.name}
-      </h1>
-      <p class="mt-4 max-w-2xl text-lg leading-8 text-ink-600">{industry.summary}</p>
-      <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-        <a
-          href="/contact"
-          class="inline-flex h-12 items-center justify-center rounded-sm bg-brand-600 px-6 text-[15px] font-semibold text-white hover:bg-brand-500"
-        >
-          Get a quote
-        </a>
-        <a
-          href="/contact"
-          class="inline-flex h-12 items-center justify-center rounded-sm border border-line bg-surface px-6 text-[15px] font-semibold text-ink-950 hover:border-ink-400"
-        >
-          Talk to us
-        </a>
+  <section class="kz-isec-head" aria-labelledby="industry-title">
+    <div class="container-wide kz-isec-head__grid">
+      <div class="kz-isec-head__copy">
+        <nav class="kz-crumbs" aria-label="Breadcrumb">
+          <ol>
+            <li>
+              <a href="/industries">Industries</a>
+            </li>
+            <li aria-current="page">{industry.name}</li>
+          </ol>
+        </nav>
+        <p class="kz-isec-head__icon" aria-hidden="true">
+          <Icon name={industryIcon(industry.slug, industry.icon)} size={24} />
+        </p>
+        <h1 id="industry-title" class="kz-isec-head__title" data-enter>
+          Solutions for {industry.name}
+        </h1>
+        <p class="kz-isec-head__sum" data-enter="2">
+          {industry.summary}
+        </p>
+        <div class="kz-isec-head__acts" data-enter="3">
+          <a class="kz-btn kz-btn--primary kz-btn--lg" href="/contact" data-hero-cta>
+            <span>Get a quote</span>
+          </a>
+          <a class="kz-link" href="/pricing">
+            See all pricing
+            <Icon name="arrow-right" size={16} />
+          </a>
+        </div>
+        {areas.length > 0 ? (
+          <nav class="kz-isec-areas" aria-label={`Areas of work for ${industry.name}`} data-enter="3">
+            <p class="kz-isec-areas__h">Areas of work for this sector</p>
+            <ul role="list">
+              {areas.map((a) => (
+                <li class={`kz-div-${(a.i % 6) + 1}`}>
+                  <a href={`/services/${a.slug}`}>
+                    <b>{pad(a.i + 1)}</b>
+                    {a.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ) : null}
       </div>
+      {lead ? (
+        <div class={`kz-isec-head__art kz-div-${(lead.i % 6) + 1}`} data-enter="2">
+          <DivisionArt slug={lead.slug} />
+        </div>
+      ) : null}
     </div>
   </section>
 
   {industry.challenges.length > 0 ? (
-    <section class="bg-surface py-14 md:py-20" aria-labelledby="challenges-title">
-      <div class="container-content">
-        <h2 id="challenges-title" class="text-3xl font-bold tracking-display">
+    <section class="kz-sec kz-ichal" aria-labelledby="challenges-title">
+      <div class="container-wide">
+        <h2 id="challenges-title" class="kz-h2">
           Challenges we solve
         </h2>
-        <ul class="mt-8 grid gap-6 md:grid-cols-3">
-          {industry.challenges.map((c) => (
-            <li class="rounded-md border border-line p-6">
-              <h3 class="font-sans text-base font-semibold text-ink-950">{c.title}</h3>
-              <p class="mt-2 text-[15px] leading-6 text-ink-600">{c.body}</p>
+        <ol class="kz-ichal__list" role="list" data-reveal-group>
+          {industry.challenges.map((c, i) => (
+            <li>
+              <span class="kz-ichal__n">{pad(i + 1)}</span>
+              <h3 class="kz-ichal__title">{c.title}</h3>
+              <p class="kz-ichal__body">{c.body}</p>
             </li>
           ))}
-        </ul>
-        {industry.body ? <div class="prose-kz mt-10 max-w-3xl" set:html={industry.body} /> : null}
+        </ol>
+        {industry.body ? <div class="kz-ichal__essay prose-kz" set:html={industry.body} /> : null}
       </div>
     </section>
   ) : null}
 
-  {industry.services.length > 0 ? (
-    <section class="bg-canvas py-14 md:py-20" aria-labelledby="services-title">
-      <div class="container-content">
-        <h2 id="services-title" class="text-3xl font-bold tracking-display">
+  {services.length > 0 ? (
+    <section class="kz-sec kz-sec--inset kz-isvc" aria-labelledby="services-title">
+      <div class="container-wide">
+        <h2 id="services-title" class="kz-h2">
           Relevant services
         </h2>
-        <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {industry.services.map((s) => (
-            <li class="flex flex-col rounded-md border border-line bg-surface p-6">
-              <p class="text-[13px] font-medium text-ink-600">{s.categoryName}</p>
-              <h3 class="mt-1 font-sans text-base font-semibold text-ink-950">{s.name}</h3>
-              <p class="mt-2 flex-1 text-[15px] leading-6 text-ink-600">{s.summary}</p>
-              <div class="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
-                <a href={`/services/${s.categorySlug}`} class="text-ink-950 underline underline-offset-2">
-                  About this service<span class="sr-only">: {s.name}</span>
-                </a>
-                <a href={quotationHref(s.categorySlug, s.slug)} class="inline-flex items-center gap-1.5 text-brand-600">
-                  Request a quotation <ArrowRight size={16} aria-hidden="true" />
-                  <span class="sr-only">for {s.name}</span>
-                </a>
-              </div>
-            </li>
-          ))}
+        <ul class="kz-track kz-isvc__list" role="list" data-kz-track data-reveal-group>
+          {services.map((s) => {
+            const i = areaIndex(s.categorySlug);
+            return (
+              <li class={i >= 0 ? `kz-div-${(i % 6) + 1}` : undefined}>
+                <p class="kz-isvc__area">
+                  {i >= 0 ? <span class="kz-isvc__n">{pad(i + 1)}</span> : null}
+                  {s.categoryName}
+                </p>
+                <h3 class="kz-isvc__name">{s.name}</h3>
+                <p class="kz-isvc__sum">{s.summary}</p>
+                <div class="kz-isvc__acts">
+                  <a class="kz-link" href={quotationHref(s.categorySlug, s.slug)}>
+                    Request a quotation<span class="sr-only"> for {s.name}</span>
+                  </a>
+                  <a class="kz-isvc__more" href={`/services/${s.categorySlug}`}>
+                    About this service<span class="sr-only">: {s.name}</span>
+                  </a>
+                </div>
+              </li>
+            );
+          })}
         </ul>
+        <div class="kz-track__dots kz-isvc__dots" aria-hidden="true" data-kz-track-dots>
+          {services.map((_, i) => (
+            <i class:list={[i === 0 && 'is-on']} />
+          ))}
+        </div>
       </div>
     </section>
   ) : null}
 
   {packages.length > 0 ? (
-    <section class="bg-surface py-14 md:py-20" aria-labelledby="packages-title">
-      <div class="container-content">
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <h2 id="packages-title" class="text-3xl font-bold tracking-display">
+    <section class="kz-sec kz-ipk" aria-labelledby="packages-title">
+      <div class="container-wide">
+        <header class="kz-sec__head">
+          <h2 id="packages-title" class="kz-h2">
             Packages to start from
           </h2>
-          <a href="/pricing" class="text-sm font-semibold text-brand-600 underline underline-offset-2">
+          <a class="kz-link" href="/pricing">
             See all pricing
+            <Icon name="arrow-right" size={16} />
           </a>
-        </div>
-        <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {packages.map((p) => (
-            <PackageCard pkg={p} />
-          ))}
-        </div>
+        </header>
+        <PlanDeck packages={packages} label="Packages to start from" id={`ind-${industry.slug}`} />
       </div>
     </section>
   ) : null}

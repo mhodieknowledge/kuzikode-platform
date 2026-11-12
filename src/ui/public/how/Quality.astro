@@ -1,0 +1,34 @@
+---
+/**
+ * Quality and security practices (R4.5): a night band read like a release checklist. Desktop: heading left (5 columns), the
+ * practices right as a two-column ticked list under hairlines. Phones: heading, then the ticked list (single sentences, one rule each).
+ * The tick is the only icon; it is the list's meaning (each practice is standard on every project).
+ */
+import Icon from '../../icons/Icon.astro';
+import type { SectionContent } from '../../../shared/schemas/cms';
+
+interface Props {
+  content: SectionContent<'list'>;
+  anchor: string;
+}
+const { content: c, anchor } = Astro.props;
+---
+
+<section class="kz-sec kz-qual on-night" id={anchor} aria-labelledby={`${anchor}-title`}>
+  <div class="container-wide kz-qual__grid">
+    <header>
+      <h2 id={`${anchor}-title`} class="kz-h2">{c.title}</h2>
+      <p class="kz-lede">Standard on every project we build, from a five-page website to a business platform.</p>
+    </header>
+    <ul class="kz-qual__list" role="list" data-reveal-group>
+      {
+        c.items.map((t) => (
+          <li>
+            <Icon name="shield-check" size={20} />
+            <span>{t}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

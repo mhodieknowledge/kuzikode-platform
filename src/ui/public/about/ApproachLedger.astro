@@ -1,0 +1,46 @@
+---
+/**
+ * Approach + objectives (R4.5): an editorial split. Left: the CMS "approach" essay as readable prose under its heading. Right: the
+ * objectives as a numbered ruled list (IMG_5055 numbered full-width rows), each numeral in the next division hue so the six-route
+ * mark carries through the page. Under the essay, the `junction` Route drawing (problem → fit) anchors the section. Phones: essay, then the numbered rows (short sentences, no boxes).
+ */
+import SceneArt from '../../illustrations/SceneArt.astro';
+import type { SectionContent } from '../../../shared/schemas/cms';
+
+interface Props {
+  approach: { anchor: string; content: SectionContent<'rich_text'> } | undefined;
+  objectives: { anchor: string; content: SectionContent<'list'> } | undefined;
+}
+const { approach, objectives } = Astro.props;
+---
+
+<section class="kz-sec kz-sec--inset kz-appr" aria-label="Approach and objectives">
+  <div class="container-wide kz-appr__grid">
+    {
+      approach ? (
+        <div class="kz-appr__essay" id={approach.anchor}>
+          <h2 class="kz-h2">{approach.content.title}</h2>
+          <div class="kz-appr__prose prose-kz" set:html={approach.content.html} />
+          <div class="kz-appr__art kz-div-4" data-reveal>
+            <SceneArt kind="junction" />
+          </div>
+        </div>
+      ) : null
+    }
+    {
+      objectives ? (
+        <div class="kz-appr__obj" id={objectives.anchor}>
+          <h2 class="kz-appr__h">{objectives.content.title}</h2>
+          <ol class="kz-appr__list" role="list" data-reveal-group>
+            {objectives.content.items.map((t, i) => (
+              <li class={`kz-div-${(i % 6) + 1}`}>
+                <span class="kz-appr__n">{String(i + 1).padStart(2, '0')}</span>
+                <span>{t}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : null
+    }
+  </div>
+</section>

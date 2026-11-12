@@ -460,6 +460,20 @@
     margin-top: auto;
     padding-top: 18px;
   }
+  .kz-plan__scope {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--kz-groove, var(--bone-200));
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--kz-fg-2, var(--ink-700));
+  }
+  .kz-plan__scope .kz-icon {
+    flex: none;
+    margin-top: 2px;
+  }
   .kz-plan__soon {
     font-weight: 600;
     color: var(--kz-fg-2, var(--ink-600));

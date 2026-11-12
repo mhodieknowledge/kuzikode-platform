@@ -1,71 +1,78 @@
 ---
+/**
+ * About (R4.5, rebuilt from scratch). Order: photo-led hero with the six-area route plate → the story as an editorial photo band →
+ * mission and vision on night → values ledger → approach essay + numbered objectives → team (only real, published members) →
+ * the careers line → the footer's routes. Data: the about page CMS sections, the service catalogue, team.
+ */
 import PublicLayout from '../layouts/PublicLayout.astro';
-import RichText from '../components/public/sections/RichText.astro';
-import Statement from '../components/public/sections/Statement.astro';
-import Values from '../components/public/sections/Values.astro';
-import ListSection from '../components/public/sections/ListSection.astro';
-import CtaBand from '../components/public/sections/CtaBand.astro';
-import PhotoPair from '../components/public/sections/PhotoPair.astro';
-import { getPage, listTeam } from '../server/modules/cms';
+import AboutHero from '../ui/public/about/AboutHero.astro';
+import Statements from '../ui/public/about/Statements.astro';
+import ValuesLedger from '../ui/public/about/ValuesLedger.astro';
+import ApproachLedger from '../ui/public/about/ApproachLedger.astro';
+import PhotoBand from '../ui/public/shared/PhotoBand.astro';
+import Icon from '../ui/icons/Icon.astro';
+import { getPage, getServiceCatalogue, listTeam } from '../server/modules/cms';
+import { divisionShortName } from '../shared/directory';
 import type { Section } from '../shared/schemas/cms';
+import manifest from '../../design/images/manifest.json';
 
 const { ctx } = Astro.locals;
-const [page, team] = await Promise.all([getPage(ctx, 'about'), listTeam(ctx)]);
+const [page, team, categories] = await Promise.all([getPage(ctx, 'about'), listTeam(ctx), getServiceCatalogue(ctx)]);
 if (!page) return new Response('Not found', { status: 404 });
 const sections = page.sections as Section[];
-const statements = sections.filter((s) => s.type === 'statement') as Section<'statement'>[];
-const firstRichText = sections.find((s) => s.type === 'rich_text')?.key;
-const home = await getPage(ctx, 'home');
-const cta = home?.sections.find((s) => s.type === 'cta') as Section<'cta'> | undefined;
-let statementsRendered = false;
+const rich = sections.filter((s) => s.type === 'rich_text') as Section<'rich_text'>[];
+const overview = rich[0];
+const story = rich.find((s) => s.key === 'story') ?? rich[1];
+const approach = rich.find((s) => s.key === 'approach') ?? rich.find((s) => s !== overview && s !== story);
+const statements = (sections.filter((s) => s.type === 'statement') as Section<'statement'>[]).map((s) => ({
+  key: s.key,
+  ...s.content,
+}));
+const values = sections.find((s) => s.type === 'values') as Section<'values'> | undefined;
+const objectives = sections.find((s) => s.type === 'list') as Section<'list'> | undefined;
+const divisions = categories.map((c) => ({ slug: c.slug, short: divisionShortName(c.slug, c.name) }));
+const bandImage = 'about-studio' in manifest.images ? 'about-studio' : 'home-developer';
 ---
 
 <PublicLayout
   ogImage="/brand/og/about.png"
   title={page.seoTitle ?? 'About Kuzikode Technologies'}
   description={page.seoDescription ?? undefined}
+  headerTone="bone"
 >
-  {sections.map((s) => {
-    switch (s.type) {
-      case 'rich_text':
-        return (
-          <>
-            <RichText
-              content={s.content as Section<'rich_text'>['content']}
-              anchor={s.key}
-              asPageTitle={s.key === firstRichText}
-              tone={s.key === firstRichText ? 'canvas' : 'surface'}
-            />
-            {s.key === firstRichText ? <PhotoPair wide="about-team" narrow="about-workspace" /> : null}
-          </>
-        );
-      case 'statement':
-        if (statementsRendered) return null;
-        statementsRendered = true;
-        return (
-          <section class="bg-canvas py-14 md:py-20" aria-label="Mission and vision">
-            <div class="container-content grid gap-4 md:grid-cols-2">
-              {statements.map((st) => (
-                <Statement content={st.content} anchor={st.key} />
-              ))}
-            </div>
-          </section>
-        );
-      case 'values':
-        return <Values content={s.content as Section<'values'>['content']} anchor={s.key} tone="surface" />;
-      case 'list':
-        return <ListSection content={s.content as Section<'list'>['content']} anchor={s.key} />;
-      default:
-        return null;
-    }
-  })}
+  <AboutHero
+    title={overview?.content.title ?? page.title}
+    html={overview?.content.html ?? null}
+    divisions={divisions}
+  />
+
+  {story ? (
+    <PhotoBand image={bandImage} label={story.content.title ?? 'Our story'}>
+      <div id={story.key}>
+        <h2 class="kz-pband__title">{story.content.title}</h2>
+        <div class="kz-pband__prose prose-kz" set:html={story.content.html} />
+      </div>
+    </PhotoBand>
+  ) : null}
+
+  {statements.length > 0 ? <Statements items={statements} /> : null}
+
+  {values ? <ValuesLedger content={values.content} anchor={values.key} /> : null}
+
+  {approach || objectives ? (
+    <ApproachLedger
+      approach={approach ? { anchor: approach.key, content: approach.content } : undefined}
+      objectives={objectives ? { anchor: objectives.key, content: objectives.content } : undefined}
+    />
+  ) : null}
+
   {team.length > 0 ? (
-    <section id="team" class="bg-canvas py-14 md:py-20" aria-labelledby="team-title">
-      <div class="container-content">
-        <h2 id="team-title" class="mb-10 text-3xl font-bold tracking-display">
+    <section id="team" class="kz-sec kz-team" aria-labelledby="team-title">
+      <div class="container-wide">
+        <h2 id="team-title" class="kz-h2">
           Team
         </h2>
-        <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <ul class="kz-team__list" role="list">
           {team.map((m) => (
             <li>
               <img
@@ -74,28 +81,26 @@ let statementsRendered = false;
                 width={m.photo.width ?? 400}
                 height={m.photo.height ?? 400}
                 loading="lazy"
-                class="aspect-square w-full rounded-md object-cover"
               />
-              <p class="mt-3 font-semibold text-ink-950">{m.name}</p>
-              <p class="text-sm text-ink-600">{m.role}</p>
+              <p class="kz-team__name">{m.name}</p>
+              <p class="kz-team__role">{m.role}</p>
             </li>
           ))}
         </ul>
       </div>
     </section>
   ) : null}
-  <section class="bg-surface py-12" aria-labelledby="join-title">
-    <div class="container-content flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-      <div>
-        <h2 id="join-title" class="text-2xl font-bold tracking-display">
-          Work with us
-        </h2>
-        <p class="mt-1 text-ink-600">See open roles and how we hire.</p>
-      </div>
-      <a href="/careers" class="text-sm font-semibold text-brand-600 underline underline-offset-2">
+
+  <section class="kz-careers-row" aria-labelledby="join-title">
+    <div class="container-wide kz-careers-row__in">
+      <h2 id="join-title" class="kz-careers-row__h">
         Careers at Kuzikode
+      </h2>
+      <p>See open roles and how we hire.</p>
+      <a class="kz-link" href="/careers">
+        Open roles
+        <Icon name="arrow-right" size={16} />
       </a>
     </div>
   </section>
-  {cta ? <CtaBand content={cta.content} /> : null}
 </PublicLayout>

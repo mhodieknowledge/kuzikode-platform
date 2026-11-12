@@ -81,3 +81,17 @@ Harness: `playwright.visual.config.ts` (`SHOOT=… SHOOT_SET=all|core|quick SHOO
   applied and re-shot (monogram plates, phone rail from 3, step labels in the drawing, single action on the empty page, lead row aligned to the
   plate foot, cover/monogram plate + technologies in the spec sheet + "More case studies"). Not re-reviewed (usage economy); verified by screenshots.
 - e2e: `work.spec.ts` (+ designed empty-state test); integration: gallery read (cms-admin).
+
+## R4.5 About, How we work, Industries, Technologies (2026-11-12)
+- References opened: IMG_5048 (cards over the hero edge → About route plate), IMG_5055 (numbered full-width rows → values, objectives,
+  sector directory), IMG_5056 (text-first heroes, directory rhythm), IMG_5066 + IMG_5067 (numbered route / stepper → vertical process road),
+  IMG_5018 (document + summary composition → scope sheet), IMG_5052 (label tile leading a grid), IMG_5060 + IMG_5057 (sector packages deck).
+- Viewports shot: 375, 390, 430, 768, 1024, 1440, 1920 (About, How we work, Industries, Retail, Education). No horizontal overflow (fixed one:
+  implicit grid column sized to the phone swipe track); axe contrast fixed on mono numerals over inset bone (ink-500 → ink-700) and the note footer.
+- Interactions: values / engagement models / sector services swipe tracks with dots (desktop ledgers), package selector ↔ track, area chips → division pages.
+- Boards `docs/screenshots/redesign/boards/{about,how_we_work,industries,industry_retail}-board.webp`. Reviewer (opus/medium): How we work PASS,
+  Industries PASS; About FAIL (duplicate hero photo, all-text lower half, long phone hero) and Retail FAIL (no visual, empty package plates) → 10 fixes;
+  re-review: Retail PASS, About FAIL on the interim group photo → hero now a people-free desk still life (close crop), Retail chips 2-up and plates
+  unstretched. Not re-reviewed after that last About fix (usage economy); verified by screenshots.
+- Interim photos stay until batch 3 (`about-hero`, `about-studio`, `how-we-work-band`) is delivered.
+- e2e: `about.spec.ts`, `industries.spec.ts` (+ areas-of-work links), `site-content.spec.ts` (Tools we build with, 5 road stops, 5 scope milestones).

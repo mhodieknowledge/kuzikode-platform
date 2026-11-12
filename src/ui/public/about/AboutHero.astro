@@ -1,0 +1,59 @@
+---
+/**
+ * About hero (R4.5, BRIEF B.0e / B.4a: photo-led on every breakpoint). Bone page: the headline and the CMS overview on the left; an
+ * inset photograph on the right in the warm duotone, with the route plate (the six areas of work, each numeral in its division hue,
+ * linking to the division page) overlapping the photograph's lower edge (IMG_5048 cards over the hero edge, IMG_5056 text-first).
+ * Phones: headline, photograph, overview, action, then the plate as a compact two-column index.
+ * Phones put the action straight under the photograph, then the overview (B.1a first screen).
+ * Interim photograph: the owner's desk still life (no people; B.0d), cropped close on the notebook and pen in portrait so it does not
+ * read as the Services hero's wide shot, until batch 3's `about-hero` is delivered (IMAGE-REQUESTS.md).
+ */
+import Picture from '../../primitives/Picture.astro';
+import Icon from '../../icons/Icon.astro';
+import manifest from '../../../../design/images/manifest.json';
+
+interface Props {
+  title: string;
+  html: string | null;
+  divisions: { slug: string; short: string }[];
+}
+const { title, html, divisions } = Astro.props;
+const image = 'about-hero' in manifest.images ? 'about-hero' : 'about-workspace';
+const pad = (i: number) => String(i + 1).padStart(2, '0');
+---
+
+<section class="kz-ahero" aria-labelledby="about-title">
+  <div class="container-wide kz-ahero__grid">
+    <h1 id="about-title" class="kz-ahero__title" data-enter>{title}</h1>
+    <div class="kz-ahero__media" data-enter="2">
+      <Picture id={image} alt="" tone="warm" priority class="kz-ahero__img" sizes="(min-width: 1024px) 50vw, 100vw" />
+    </div>
+    <div class="kz-ahero__copy">
+      {html ? <div class="kz-ahero__intro" data-enter="2" set:html={html} /> : null}
+      <div class="kz-ahero__acts" data-enter="3">
+        <a class="kz-btn kz-btn--primary kz-btn--lg" href="/contact" data-hero-cta><span>Get a quote</span></a>
+        <a class="kz-link" href="/how-we-work">
+          How we work
+          <Icon name="arrow-right" size={16} />
+        </a>
+      </div>
+    </div>
+    {
+      divisions.length > 0 ? (
+        <nav class="kz-ahero__plate" aria-label="Our areas of work" data-enter="3">
+          <p class="kz-ahero__plate-h">{`${divisions.length} areas · one team`}</p>
+          <ol role="list">
+            {divisions.map((d, i) => (
+              <li class={`kz-div-${(i % 6) + 1}`}>
+                <a href={`/services/${d.slug}`}>
+                  <span class="kz-ahero__n">{pad(i)}</span>
+                  {d.short}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      ) : null
+    }
+  </div>
+</section>

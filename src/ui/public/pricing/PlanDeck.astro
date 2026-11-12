@@ -5,7 +5,8 @@
  * Below 1200 px the recommended plate and its selector option come first (CSS `order`; DOM order stays the catalogue order).
  * Desktop: plates in one row; the recommended one (CMS "most popular" flag, presented without a usage claim) is a night plate lifted
  * above the others. Phones and tablets: a package selector (buttons, aria-pressed) above a scroll-snap track with the next plate
- * peeking; the selector and the track stay in sync. Each plate: name, tagline, price (from `packagePrice`), minimum quantity,
+ * peeking; the selector and the track stay in sync. A package stored without facts or features says where its scope is set
+ * (the written quotation) instead of leaving an empty plate. Each plate: name, tagline, price (from `packagePrice`), minimum quantity,
  * delivery / revisions / support, the first features, and "All features" disclosing the rest, including what is not included.
  */
 import Icon from '../../icons/Icon.astro';
@@ -117,6 +118,12 @@ const view = packages.map((p) => {
                 </li>
               ))}
             </ul>
+          ) : null}
+          {facts.length === 0 && first.length === 0 ? (
+            <p class="kz-plan__scope">
+              <Icon name="quotations" size={16} />
+              <span>Scope and inclusions are set out in your written quotation.</span>
+            </p>
           ) : null}
           {rest.length > 0 ? (
             <details class="kz-plan__more">

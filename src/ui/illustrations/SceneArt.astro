@@ -5,10 +5,14 @@
  * - `case-files` (Our Work empty state, IMG_5066 pinned step cards): three blank case-study sheets pinned on a board, tied by a
  *   dashed thread; layouts only, no invented project names, logos or figures. The last sheet carries the lit pin (`.i-move`).
  *   Step labels (01 Brief → 02 Build → 03 Launch) sit on the road under the sheets.
+ * - `signpost` (Industries, R4.5): a junction signpost with four direction plates over the dashed road: one road, many sectors.
+ *   Plates carry blank text bars (no invented names); one plate holds the accent square, the post cap is the lit detail (`.i-move`).
+ * - `junction` (About approach, R4.5): the problem → the fit. A paper sheet of crossed-out spreadsheet cells and a tangled line on
+ *   the left, the road with a junction arrow, and a tidy app window with ticked rows on the right; the lit dot marks the result.
  * Decorative by default (aria-hidden); pass `title` when the drawing carries meaning.
  */
 interface Props {
-  kind: 'case-files';
+  kind: 'case-files' | 'signpost' | 'junction';
   title?: string;
   class?: string;
 }
@@ -85,6 +89,55 @@ const { kind, title, class: className } = Astro.props;
       </g>
       <path class="i-ink" d="M118 208H140M216 208H238" />
       <path class="i-ink" d="M135 204L140 208L135 212M233 204L238 208L233 212" fill="none" />
+    </g>
+  )}
+
+  {kind === 'junction' && (
+    <g>
+      <g transform="rotate(-4 96 128)">
+        <rect class="i-paper" x="40" y="58" width="112" height="136" rx="6" />
+        <path class="i-line-s" d="M40 82H152M40 104H152M40 126H152M40 148H152M40 170H152M78 58V194M116 58V194" />
+        <path class="i-ink" d="M52 96C70 70 96 130 110 92S140 150 120 160 62 120 86 176" fill="none" />
+        <path class="i-ink" d="M126 70L144 88M144 70L126 88" />
+      </g>
+      <path class="i-ink" d="M166 126H200" />
+      <path class="i-ink" d="M193 119L200 126L193 133" fill="none" />
+      <rect class="i-paper" x="210" y="52" width="122" height="146" rx="8" />
+      <path class="i-line" d="M210 72H332" />
+      <rect class="i-soft" x="222" y="58" width="40" height="7" rx="3" />
+      <rect class="i-acc" x="222" y="88" width="10" height="10" rx="2" />
+      <rect class="i-soft" x="240" y="89" width="72" height="8" rx="3" />
+      <rect class="i-acc" x="222" y="112" width="10" height="10" rx="2" />
+      <rect class="i-soft" x="240" y="113" width="58" height="8" rx="3" />
+      <rect class="i-acc" x="222" y="136" width="10" height="10" rx="2" />
+      <rect class="i-tint-f" x="240" y="137" width="66" height="8" rx="3" />
+      <path class="i-line-s" d="M222 162H320" />
+      <rect class="i-tint-f" x="222" y="172" width="44" height="14" rx="4" />
+      <circle class="i-lit i-move" cx="314" cy="179" r="6" />
+      <g class="i-label">
+        <text x="96" y="212" text-anchor="middle">
+          Problem
+        </text>
+        <text x="271" y="212" text-anchor="middle">
+          Fit
+        </text>
+      </g>
+    </g>
+  )}
+
+  {kind === 'signpost' && (
+    <g>
+      <rect class="i-solid" x="174" y="40" width="12" height="182" rx="3" />
+      <path class="i-paper" d="M186 52H286L302 68L286 84H186Z" />
+      <path class="i-paper" d="M174 94H82L66 110L82 126H174Z" />
+      <path class="i-paper" d="M186 136H270L286 152L270 168H186Z" />
+      <path class="i-paper" d="M174 178H96L80 194L96 210H174Z" />
+      <rect class="i-soft" x="198" y="64" width="64" height="8" rx="3" />
+      <rect class="i-acc" x="268" y="64" width="8" height="8" rx="2" />
+      <rect class="i-soft" x="92" y="106" width="70" height="8" rx="3" />
+      <rect class="i-tint-f" x="198" y="148" width="54" height="8" rx="3" />
+      <rect class="i-soft" x="106" y="190" width="56" height="8" rx="3" />
+      <circle class="i-lit i-move" cx="180" cy="36" r="8" />
     </g>
   )}
 </svg>

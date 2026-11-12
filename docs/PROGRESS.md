@@ -1094,3 +1094,18 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Tiers: orchestrator build; B.0d review opus/medium.
 - Next step: R4.5 About, How we work, Industries (replace legacy PackageCard with PlanDeck/ServiceRates or a compact package ledger, then
   delete `src/components/public/pricing/PackageCard.astro`), Technologies. Then R4.6 contact + consultation (forms), R4.7, R4.8.
+
+## 2026-11-12 21:30 UTC · R4.5 ✅ About, How we work, Industries (+ Technologies)
+- Session session_01LWwAASfvBAwWzqqTKCD67U (hand-off). Connectors Figma/Canva/Cloudflare present; R2 `images/incoming/` empty; no `design/inbox/`; skills present.
+- New `src/ui/public/about/` (AboutHero with the six-area route plate, Statements, ValuesLedger, ApproachLedger), `src/ui/public/how/`
+  (HowHero scope-sheet composition, ProcessRoad, Models, Expect, Quality, Tools), `src/ui/public/industries/IndustryIndex.astro`;
+  SceneArt `signpost` + `junction`; `src/ui/tokens/company.css`. Pages rewritten: `/about`, `/how-we-work`, `/industries`, `/industries/[slug]`
+  (sector hero uses the lead area's DivisionArt; packages via PlanDeck). PlanDeck: scope note when a package has no stored facts/features.
+- Legacy deleted: PackageCard, sections/{CtaBand,Features,ListSection,PhotoPair,Process,RichText,Statement,TechnologiesStrip,Values}.
+  Remaining legacy public sections: Hero, SectionHeading (R4.7 pages).
+- Boards: about, how_we_work, industries, industry_retail. Reviewer: How we work + Industries PASS; About + Retail FAIL → 10 fixes applied.
+- verify green (unit 465, integration 308); about/industries/site-content/mobile-limits/pricing/pricing-accuracy/public-layout/links/ui-kit/motion/
+  services-public/sweep/engagement/public e2e green.
+- Tiers (CLAUDE.md §2b): build by the orchestrator; B.0d review impeccable-finish-reviewer opus/medium.
+- Next step: R4.6 contact + consultation booking (`src/pages/contact.astro`, `consultation.astro`, `src/components/forms/ContactForm.tsx` →
+  new markup in `src/ui/public/forms/`, keep the submit handlers/endpoints; `?category=`/`?service=`/`?package=` preselect stays), then R4.7, R4.8.

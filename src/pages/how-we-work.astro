@@ -1,12 +1,16 @@
 ---
+/**
+ * How we work (R4.5, rebuilt from scratch). Order: night hero with the scope-sheet composition → the process road → ways to work
+ * with us → what you can expect (photo band) → quality and security (night checklist) → tools we build with → the footer's routes,
+ * led by the CMS closing call to action. Data: the how-we-work page CMS sections and the published technologies.
+ */
 import PublicLayout from '../layouts/PublicLayout.astro';
-import RichText from '../components/public/sections/RichText.astro';
-import Process from '../components/public/sections/Process.astro';
-import Features from '../components/public/sections/Features.astro';
-import Values from '../components/public/sections/Values.astro';
-import ListSection from '../components/public/sections/ListSection.astro';
-import CtaBand from '../components/public/sections/CtaBand.astro';
-import TechnologiesStrip from '../components/public/sections/TechnologiesStrip.astro';
+import HowHero from '../ui/public/how/HowHero.astro';
+import ProcessRoad from '../ui/public/how/ProcessRoad.astro';
+import Models from '../ui/public/how/Models.astro';
+import Expect from '../ui/public/how/Expect.astro';
+import Quality from '../ui/public/how/Quality.astro';
+import Tools from '../ui/public/how/Tools.astro';
 import { breadcrumbLd, getPage, listTechnologies } from '../server/modules/cms';
 import type { Section } from '../shared/schemas/cms';
 
@@ -14,48 +18,29 @@ const { ctx } = Astro.locals;
 const [page, technologies] = await Promise.all([getPage(ctx, 'how-we-work'), listTechnologies(ctx)]);
 if (!page) return new Response(null, { status: 404, statusText: 'Not found' });
 const sections = page.sections as Section[];
-const firstRichText = sections.find((s) => s.type === 'rich_text')?.key;
+const intro = sections.find((s) => s.type === 'rich_text') as Section<'rich_text'> | undefined;
+const process = sections.find((s) => s.type === 'process') as Section<'process'> | undefined;
+const models = sections.find((s) => s.type === 'features') as Section<'features'> | undefined;
+const expect = sections.find((s) => s.type === 'values') as Section<'values'> | undefined;
+const quality = sections.find((s) => s.type === 'list') as Section<'list'> | undefined;
+const cta = sections.find((s) => s.type === 'cta') as Section<'cta'> | undefined;
 ---
 
 <PublicLayout
   structuredData={[breadcrumbLd(ctx, [{ name: 'How we work', path: '/how-we-work' }])]}
   title={page.seoTitle ?? 'How we work · Kuzikode Technologies'}
   description={page.seoDescription ?? undefined}
+  headerTone="night"
+  footerLead={cta ? { title: cta.content.title, body: cta.content.body } : undefined}
 >
-  {sections.map((s) => {
-    switch (s.type) {
-      case 'rich_text':
-        return (
-          <RichText
-            content={s.content as Section<'rich_text'>['content']}
-            anchor={s.key}
-            asPageTitle={s.key === firstRichText}
-            tone={s.key === firstRichText ? 'canvas' : 'surface'}
-          />
-        );
-      case 'process':
-        return <Process content={s.content as Section<'process'>['content']} />;
-      case 'features':
-        return (
-          <Features
-            content={s.content as Section<'features'>['content']}
-            anchor={s.key}
-            imageId={s.key === 'engagement' ? 'home-developer' : undefined}
-          />
-        );
-      case 'values':
-        return <Values content={s.content as Section<'values'>['content']} anchor={s.key} tone="canvas" />;
-      case 'list':
-        return <ListSection content={s.content as Section<'list'>['content']} anchor={s.key} />;
-      case 'cta':
-        return (
-          <>
-            <TechnologiesStrip technologies={technologies} tone="canvas" />
-            <CtaBand content={s.content as Section<'cta'>['content']} />
-          </>
-        );
-      default:
-        return null;
-    }
-  })}
+  <HowHero
+    title={intro?.content.title ?? page.title}
+    html={intro?.content.html ?? null}
+    steps={process?.content.steps.map((s) => s.title) ?? []}
+  />
+  {process ? <ProcessRoad content={process.content} anchor={process.key} /> : null}
+  {models ? <Models content={models.content} anchor={models.key} /> : null}
+  {expect ? <Expect content={expect.content} anchor={expect.key} /> : null}
+  {quality ? <Quality content={quality.content} anchor={quality.key} /> : null}
+  <Tools technologies={technologies} />
 </PublicLayout>

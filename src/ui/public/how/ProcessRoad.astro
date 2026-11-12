@@ -1,0 +1,53 @@
+---
+/**
+ * The process as one road read top to bottom (R4.5; IMG_5066 numbered route, IMG_5067 stepper with a connecting line). Desktop: the
+ * heading and the CMS link sit in a sticky column on the left; the stops run down the right on a night road with a dashed centre
+ * line, each stop a plate (S1…Sn) with the title and what happens there. Phones: the same road runs down the left edge. This is the
+ * page's subject, so every stop is shown in full (a swipe track would hide the sequence); it is a single line, not a stack of boxes.
+ */
+import Icon from '../../icons/Icon.astro';
+import type { SectionContent } from '../../../shared/schemas/cms';
+
+interface Props {
+  content: SectionContent<'process'>;
+  anchor: string;
+}
+const { content: c, anchor } = Astro.props;
+---
+
+<section class="kz-sec kz-proad" id={anchor} aria-labelledby="process-title">
+  <div class="container-wide kz-proad__grid">
+    <header class="kz-proad__head">
+      <h2 id="process-title" class="kz-h2">{c.title}</h2>
+      <p class="kz-lede">
+        {c.steps.length} stops, from the first conversation to support after launch. You approve each milestone before the next begins.
+      </p>
+      {
+        c.link ? (
+          <a class="kz-link" href={c.link.href}>
+            {c.link.label}
+            <Icon name="arrow-right" size={16} />
+          </a>
+        ) : null
+      }
+    </header>
+    <ol class="kz-proad__list" role="list" data-reveal-group>
+      {
+        c.steps.map((s, i) => (
+          <li class="kz-proad__stop">
+            <span class="kz-proad__mark" aria-hidden="true">
+              S{i + 1}
+            </span>
+            <div class="kz-proad__text">
+              <h3 class="kz-proad__title">
+                <span class="sr-only">Stop {i + 1}: </span>
+                {s.title}
+              </h3>
+              <p class="kz-proad__body">{s.body}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>

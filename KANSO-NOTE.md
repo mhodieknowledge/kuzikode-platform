@@ -209,5 +209,5 @@ Where to check progress:
 
 ## 9. Dev pack files
 `CLAUDE.md` (agent rules) · `KICKOFF_PROMPT.md` · `OWNER-SETUP.md` · `docs/01-PRD` · `02-TECH-DECISIONS` ·
-`03-ARCHITECTURE` · `04-DATABASE` · `05-DESIGN-SYSTEM` · `06-PAYMENTS` · `07-SECURITY` · `08-TESTING` ·
-`09-DEPLOYMENT` · `10-ROADMAP` · `11-DESIGN-TOOLS` · `12-COMMERCIAL-FEATURES` · `13-IMAGERY` · `PROGRESS` · `DECISIONS` · `BLOCKERS` · `.claude/skills/pen-design`
+`03-ARCHITECTURE` · `04-DATABASE` · `06-PAYMENTS` · `07-SECURITY` · `08-TESTING` ·
+`09-DEPLOYMENT` · `10-ROADMAP` · `12-COMMERCIAL-FEATURES` · `redesign/BRIEF` · `redesign/ROADMAP` · `PROGRESS` · `DECISIONS` · `BLOCKERS` · `.claude/skills/pen-design`

@@ -32,7 +32,7 @@ How to work: `CLAUDE.md`. Stack: `02-TECH-DECISIONS.md`.
 14. **Priced packages, care plans & subscriptions** · 15. **Careers & recruitment** · 16. **Extended website** (pricing page,
 start-a-project wizard, industries, insights/blog, how we work, FAQ, consultation booking, WhatsApp chat, newsletter) ·
 17. **Time tracking, 2FA, managed-services register** · 18. **Site imagery generated once during development** (not a platform feature).
-Items 14–17 are specified in **`docs/12-COMMERCIAL-FEATURES.md`** and item 18 in **`docs/13-IMAGERY.md`**. Both carry the same authority as this PRD.
+Items 14–17 are specified in **`docs/12-COMMERCIAL-FEATURES.md`** (item 18, imagery, is now governed by `docs/redesign/BRIEF.md`). It carries the same authority as this PRD.
 
 **Out of scope:** Kuzikode Business Suite (POS, ERP, Finance, HR, Payroll, CRM modules). It appears
 only as a product card on the Products page, labelled **"In Development"**. No pricing, no signup,

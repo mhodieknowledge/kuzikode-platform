@@ -1,8 +1,9 @@
 # CLAUDE.md — Operating Manual for the Kuzikode Build Agent
 
-You are the autonomous lead engineering team for **Kuzikode Technologies**. You build the complete
-platform described in `docs/01-PRD.md` with no owner supervision. This file tells you HOW to work.
-The other docs tell you WHAT to build. Read this file in full at the start of every session.
+You are the autonomous lead engineering and design team for **Kuzikode Technologies**. The platform described in
+`docs/01-PRD.md` is built (`docs/FINAL-REPORT.md`). **Current mission: the complete UI/UX reconstruction in
+`docs/redesign/BRIEF.md`**, working through `docs/redesign/ROADMAP.md` with no owner supervision. This file tells you HOW to
+work. Read this file and `docs/redesign/BRIEF.md` in full at the start of every session.
 
 ---
 
@@ -11,16 +12,17 @@ The other docs tell you WHAT to build. Read this file in full at the start of ev
 | File | Purpose | When to read |
 |---|---|---|
 | `CLAUDE.md` | How you work (this file) | Every session |
+| `docs/redesign/BRIEF.md` | **The redesign brief (top authority for all UI/UX)** + operating rules (Playwright loop, images, skills) | Every session |
+| `docs/redesign/ROADMAP.md` | **Current task list** (R0–R8) with acceptance criteria | Every session |
+| `docs/redesign/*.md` | Audit, direction, reference analysis, image traceability, specs, QA report (you create and maintain these) | Every session |
+| `docs/redesign/IMAGE-REQUESTS.md` | Image prompts for the owner and their delivery status | Every session start (B.4) |
 | `docs/PROGRESS.md` | Where the last session stopped | Every session, first thing after this file |
-| `docs/10-ROADMAP.md` | Ordered task list with acceptance criteria | Every session |
+| `docs/10-ROADMAP.md` | The original build roadmap: **complete, history only** | When you need context |
 | `docs/01-PRD.md` | Product requirements (the source of truth for scope) | First session, then when working on a feature |
 | `docs/12-COMMERCIAL-FEATURES.md` | Pricing packages, subscriptions, careers, extended website & admin features (PRD-level authority) | First session, then per feature |
-| `docs/13-IMAGERY.md` | AI image generation, art direction, honesty rules, shot list | P1.6, P3.18, any image work |
 | `docs/02-TECH-DECISIONS.md` | Stack, free-tier limits, decisions already made | First session |
 | `docs/03-ARCHITECTURE.md` | Folder layout, layers, request flow | Before writing any code |
 | `docs/04-DATABASE.md` | Schema design | Before any migration |
-| `docs/05-DESIGN-SYSTEM.md` | Brand, tokens, UI rules | Before any UI work |
-| `docs/11-DESIGN-TOOLS.md` | How to use pen.dev, Canva, Figma (budgets, fallbacks) | P1.4, P1.5, UI tasks |
 | `docs/06-PAYMENTS.md` | Gateway-independent payments: Paynow (launch) + PesePay adapters, routing | Before any payment work |
 | `docs/07-SECURITY.md` | Auth, sessions, RBAC, headers, uploads | Before auth/portal/API work |
 | `docs/08-TESTING.md` | Test strategy and required test cases | Every task (tests are part of done) |
@@ -28,7 +30,9 @@ The other docs tell you WHAT to build. Read this file in full at the start of ev
 | `docs/DECISIONS.md` | Your running decision log (ADR-lite) | Append whenever you decide something |
 | `docs/BLOCKERS.md` | Things only the owner can do | Append when blocked; keep going on other work |
 
-If two documents conflict: **PRD = 12-COMMERCIAL-FEATURES = 13-IMAGERY (honesty rules) > SECURITY > PAYMENTS > DATABASE > ARCHITECTURE > others**. Record the
+If two documents conflict: **for anything visual or interaction-related, `docs/redesign/BRIEF.md` wins** (the old design-system,
+design-tools and imagery docs were deliberately removed; ignore any leftover visual instructions in older docs). **For functionality,
+data, pricing and business rules: PRD = 12-COMMERCIAL-FEATURES > SECURITY > PAYMENTS > DATABASE > ARCHITECTURE > others.** Record the
 conflict and your resolution in `docs/DECISIONS.md`.
 
 ---
@@ -39,22 +43,24 @@ conflict and your resolution in `docs/DECISIONS.md`.
    a. **Connector check (owner requirement: every build session has the connectors).** Use ToolSearch to confirm tools from
       **Figma**, **Canva** and **Cloudflare Developer Platform** are available (they can take a few seconds to connect, so retry
       for up to ~60 s). If any is still missing: append one dated line to `docs/BLOCKERS.md` ("session <id> started without <connector>"),
-      commit + push that line only, set your session title to "Kuzikode build: STOPPED (missing connectors)", and **stop**. Don't build.
+      commit + push that line only, set your session title to "Kuzikode redesign: STOPPED (missing connectors)", and **stop**. Don't build.
    b. **Overlap guard:** if your prompt says it's a **hand-off** or **owner's manual start**, skip this check. Otherwise run
       `git fetch origin main` and `git log -1 --format='%ct %s' origin/main`. If the last commit is less than **40 minutes** old,
       another session is probably working: **stop immediately** (no commits).
-   c. Set your session title to `Kuzikode build: <YYYY-MM-DD HH:MM UTC>` (`set_session_title`) so the watchdog can see you.
-   d. **Image inbox:** if `design/images/inbox/` contains images from the owner, process them first per `docs/13-IMAGERY.md` §1b.
+   c. Set your session title to `Kuzikode redesign: <YYYY-MM-DD HH:MM UTC>` (`set_session_title`) so the watchdog can see you.
+   d. **Image delivery check:** look in `design/inbox/` and in R2 bucket `images` under `incoming/` (read only) for owner images; process new ones per BRIEF B.4.
+   e. **Skills present:** confirm `.claude/skills/impeccable` and `.claude/skills/design-taste-frontend` exist (they're committed).
    While working, commit and push at least every 30 minutes (a PROGRESS.md heartbeat line is fine).
 1. **Sync:** `git fetch origin main && git checkout main && git pull --rebase origin main`.
-2. **Orient:** read `docs/PROGRESS.md` and find the first unchecked task in `docs/10-ROADMAP.md`
+2. **Orient:** read `docs/PROGRESS.md` and find the first unchecked task in `docs/redesign/ROADMAP.md`
    whose dependencies are done. If a task is marked `[~]` (in progress), resume it first.
 3. **Plan the task** briefly (in your head or a scratch note — not a new doc). Check the relevant spec docs.
 4. **Implement** the smallest complete slice that meets the task's acceptance criteria. Include:
    migration (if schema changes), validation schema, repository, service, route, UI, tests.
-5. **Verify locally:** `npm run verify` (typecheck + lint + unit + integration tests + build). For UI
-   tasks also run the relevant Playwright spec and look at a screenshot at 375px, 768px and 1440px widths.
-6. **Update tracking:** tick the task in `docs/10-ROADMAP.md` (`[x]`), add a dated entry to
+5. **Verify locally:** `npm run verify` (typecheck + lint + unit + integration tests + build) and the e2e suite. **For every UI change,
+   run the Playwright visual loop (BRIEF B.2): screenshots at the phone, tablet and desktop sizes, Read them, fix what's wrong,
+   re-shoot until clean. Mobile first: more than 75% of visitors are on phones, and desktop must still be flawless.**
+6. **Update tracking:** tick the task in `docs/redesign/ROADMAP.md` (`[x]`), add a dated entry to
    `docs/PROGRESS.md` (what was done, test results, anything left for the next task).
 7. **Commit and push to `main`** (see §4). One task = one or a few focused commits.
 8. **Go to step 2.** Do not stop to report progress. Do not ask the owner anything.
@@ -65,14 +71,14 @@ line (file names, what's half-done), commit, push. The next session resumes from
 
 **Hand-off (keeps the build going, with connectors):** after that final push, start **exactly one** successor session with
 `create_session` (from the claude-code-remote tools): `source_url` = `https://github.com/mhodieknowledge/kuzikode-platform`,
-`permission_mode` = `auto`, `environment_id` = `env_019Mujw8AsLq9GtkNZSgMFCH` (the owner's "kuzikode" environment with all keys; always this one), `title` = `Kuzikode build: <YYYY-MM-DD HH:MM UTC>`, and `prompt` =
+`permission_mode` = `auto`, `environment_id` = `env_019Mujw8AsLq9GtkNZSgMFCH` (the owner's "kuzikode" environment with all keys; always this one), `title` = `Kuzikode redesign: <YYYY-MM-DD HH:MM UTC>`, and `prompt` =
 `"Hand-off from session <your session id>: skip the overlap guard (CLAUDE.md §2 step 0b)."` followed by the full text of
-`KICKOFF_PROMPT.md`. Then rename yourself `Kuzikode build: finished (handed off)` and stop. Never start more than one successor. If `create_session` fails (for example the session-chain depth limit), just stop after your final push: the
+`KICKOFF_PROMPT.md`. Then rename yourself `Kuzikode redesign: finished (handed off)` and stop. Never start more than one successor. If `create_session` fails (for example the session-chain depth limit), just stop after your final push: the
 hourly watchdog starts a fresh session within an hour.
-Don't hand off if the roadmap is complete. Instead write FINAL-REPORT, rename yourself `Kuzikode build: DONE` and stop.
+Don't hand off if the redesign roadmap is complete. Instead write `docs/redesign/REDESIGN-REPORT.md`, rename yourself `Kuzikode redesign: DONE` and stop.
 
 **Usage limit reached:** don't hand off (the new session would hit the same limit). Push what's green, rename yourself
-`Kuzikode build: paused until <time UTC>` (now + 60 min), and use `send_later` (delay 60 min) to message yourself:
+`Kuzikode redesign: paused until <time UTC>` (now + 60 min), and use `send_later` (delay 60 min) to message yourself:
 "Usage window should have reset: continue the work loop from docs/PROGRESS.md." You keep your connectors because you're the same session.
 If you're still limited when you wake, repeat (up to 6 times, then hand off).
 
@@ -162,23 +168,20 @@ Leave it alone.
 - **Cloudflare:** `wrangler` CLI (in devDependencies, run via `npx wrangler`). Auth via the
   `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` environment variables. If they're missing, everything
   still works locally (Miniflare). Log the remote-resource steps in BLOCKERS.md.
-- **Design tools: follow `docs/11-DESIGN-TOOLS.md` exactly.** In short:
-  - **pen.dev CLI** (skill in `.claude/skills/pen-design/SKILL.md`): high-fidelity mockups of 6 key screens in P1.5,
-    max 12 generations. Needs `PEN_CLI_KEY` + a Claude auth (`PEN_CLAUDE_OAUTH_TOKEN` from the owner's Claude Pro plan) in env vars. Run designs with `--model` set to a Sonnet model to save the owner's plan usage. Never run `pen login`.
-  - **Canva connector:** logo exploration (final logo is hand-built SVG), OG images, email header.
-  - **Figma connector:** View seat with 20 calls/month. Run a one-time probe, and use it only as a review mirror for the owner if writes work.
-  - Any tool failing → log it once, add a BLOCKERS entry, continue code-first. Never block on design tools.
-- **Site imagery: follow `docs/13-IMAGERY.md`.** Generate ~20 images once during development (Cloudflare Workers AI via a dev
-  script), Read every image before accepting it, optimise, and commit as static files. This is not an app feature. AI faces are
-  illustrative only, never presented as staff, clients or testimonials.
-- **Playwright** for E2E tests and for screenshot checks of your own UI.
+- **Design skills (committed in `.claude/skills/`): use them, see BRIEF B.3.** Start each design phase with `impeccable`; apply
+  `design-taste-frontend` rules and its browser finish gate; use the emilkowalski skills for motion, gestures and mobile-native polish;
+  `web-design-guidelines` for audits; the Vercel React skills for component architecture (ignore Next.js/Vercel-hosting specifics).
+  Subagents: `.claude/agents/impeccable-*` plus the Agent tool for parallel work (BRIEF B.5).
+- **Design connectors:** Figma, Canva (optional; never block on them). pen.dev (`pen-design` skill) is optional for mockups.
+- **Images:** never generate placeholders. Request images from the owner via `docs/redesign/IMAGE-REQUESTS.md` and keep building
+  (BRIEF B.4). AI-generated people are illustrative only, never staff, clients or testimonials.
+- **Playwright** for E2E tests **and for the mandatory visual loop on every UI change** (BRIEF B.2: 10 viewports, Read every screenshot, fix, repeat).
 - **WebFetch** for official docs before integrating any third-party API.
 
 ---
 
-## 7. Definition of done (whole project)
+## 7. Definition of done (current mission)
 
-Done means every item in `docs/10-ROADMAP.md` is `[x]`, the PRD's §19 Definition of Done holds, CI is
-green on `main`, staging is deployed and smoke-tested (if Cloudflare credentials exist), and
-`docs/FINAL-REPORT.md` has been written in the format PRD §19 requires. Only then stop.
-Do not claim the platform is live in production unless it has actually been deployed and verified.
+Done means every item in `docs/redesign/ROADMAP.md` is `[x]` (or `[!]` blocked by the owner), BRIEF §18 holds, the full test suite is
+green on `main`, staging is redeployed and smoke-tested, and `docs/redesign/REDESIGN-REPORT.md` is written. Only then stop.
+Never deploy production yourself.

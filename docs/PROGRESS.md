@@ -19,6 +19,11 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Staging URL: — (workers.dev subdomain `mhodieknowledge`) · Figma file: https://www.figma.com/design/xB9rBVFa7BKitPiUqcYdhh · CI: green on main
 - New entries are appended at the **bottom** of this file.
 
+
+## 2026-11-12: NEW MISSION, UI/UX reconstruction
+- Owner brief: `docs/redesign/BRIEF.md`. Roadmap: `docs/redesign/ROADMAP.md`. Old design docs (05-DESIGN-SYSTEM, 11-DESIGN-TOOLS,
+  13-IMAGERY, design/briefs, design/mockups, PROMPT-PACK) removed on purpose. Design skills installed in `.claude/skills/`.
+- **Next step:** R0.1 skills check, then R0.2 audit and R0.3 the 29 inspiration images.
 ---
 
 ## 2026-11-05 23:50 UTC — P1.6, P3.1–P3.9 public site

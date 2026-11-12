@@ -16,7 +16,7 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
 - [x] **R1.3 First image batch.** Write batch 1 of image prompts for the new direction in `IMAGE-REQUESTS.md` and notify the owner (B.4). AC: committed; notification sent or failure logged.
 
 ## R1.4: Clean-slate correction (inserted 2026-11-12 by the owner)
-- [ ] **R1.4 Rewrite the plan for a clean slate (BRIEF B.0).** Revise `IMPLEMENTATION_PLAN.md` and `UI_UX_RECONSTRUCTION_PLAN.md`: every
+- [x] **R1.4 Rewrite the plan for a clean slate (BRIEF B.0).** Revise `IMPLEMENTATION_PLAN.md` and `UI_UX_RECONSTRUCTION_PLAN.md`: every
   "Restyle"/"reuse presentation" entry becomes **Rebuild (new component in `src/ui/…`)**, with only logic reuse listed. Add the
   "legacy presentation removed" checklist (every old component and layout file, with the task that deletes it). AC: grep of both plans
   finds no "restyle"/"reskin" strategy entries. Logged in DECISIONS.md.

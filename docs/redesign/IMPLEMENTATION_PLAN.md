@@ -1,70 +1,115 @@
-# Implementation plan (R1.2)
+# Implementation plan (R1.2, rewritten for the clean slate in R1.4)
 
-Engineering order, component inventory and reuse decisions. Stack: Astro 5 SSR + React islands + Tailwind 4 on Workers.
+**Rule (BRIEF B.0):** the UI is rebuilt from scratch in a new component tree. Nothing visible is restyled or reskinned. Only logic is
+reused: server services, API routes, repositories, Zod schemas, auth, payments, page-frontmatter data loaders, submit handlers and
+endpoint contracts, pure utilities, CMS content. Where an old React island mixes logic and markup, the logic is extracted into a hook
+or module (`src/ui/**/use*.ts` or `src/shared/`) and new markup is written around it. Old presentation files are deleted when nothing
+references them; the checklist in §8 tracks every one.
 
-## 1. Tokens and styles (R2.1)
-- `src/styles/tokens.css` → new CSS variables: felt, concrete, ink, cobalt, status, spacing, radius, shadow, z-index, motion, type
-  scale (fluid `clamp`), and a `[data-theme="dark"]` override for the workspace.
-- `src/styles/global.css` `@theme` → new Tailwind names (`felt-*`, `concrete-*`, `cobalt-*`, `font-display`, `font-mono`, `text-*`
-  fluid sizes) **plus compatibility aliases**: `ink-950/800/600/400`, `line`, `surface`, `canvas`, `brand-600/500/50`, `dark-*`,
-  status names map onto the new values. Untouched admin/portal markup therefore adopts the new palette immediately; rebuilt markup
-  uses the new names. Aliases are removed in R8 once nothing references them (grep-checked).
-- Fonts: add `@fontsource-variable/archivo` (wdth axis file) and `@fontsource-variable/jetbrains-mono`; remove Manrope and Inter
-  packages. Preload the latin Archivo file in `BaseHead.astro`.
+Stack: Astro 5 SSR + React islands + Tailwind 4 on Workers.
 
-## 2. Primitives (R2.2–R2.3)
-| Primitive | Where | Reuse vs rebuild |
-|---|---|---|
-| `Icon.astro` (public) + `lucide-react` (islands) | all | **Keep**, normalise sizes/stroke; add `label` prop → `aria-label` or `aria-hidden` |
-| Button (`ui/Button.tsx` + new `Button.astro`) | all | **Rebuild** visuals: pill primary (cobalt, arrow knob), secondary (felt/ink outline), quiet, danger; sizes 40/48/52 |
-| Input, Field, Choice, MoneyInput, FileUpload | forms, admin | **Restyle**: 16 px text, 48/52 px height, inline validation slot, grouped choice tiles |
-| SegmentedControl (new, Astro + script; React twin for islands) | pricing, FAQ, division tabs, workspace | **New** |
-| Tabs (new) | division sub-services, admin | **New** (roving tabindex) |
-| Accordion (`<details>` based, new) | FAQ, pricing features, footer groups | **New** |
-| Rail / carousel (new Astro + script) | packages, work, insights, home workspace | **New** (scroll-snap, buttons, dots, fade) |
-| Sheet (new) | mobile menu, filters, compare | **New** (dialog element, focus trap, swipe-to-dismiss) |
-| Dialog (`ui/Dialog.tsx`) | admin/portal | **Restyle** + bottom-sheet variant on phones |
-| Toast (`ui/Toast.tsx`) | admin/portal | **Restyle** |
-| Badge / StatusPill | all | **Restyle** to dot + label |
-| DataTable (`ui/DataTable.tsx`) | admin | **Extend** with list-row mode < 768 px |
-| Card (`ui/Card.tsx`) | admin | **Restyle**; public pages stop using generic cards |
-| DirectoryRow / DirectoryBoard (new Astro) | home, services, mega-panel, mobile menu, industries, careers | **New**, the signature component |
-| FloorIndicator (new) | pricing, long pages | **New** (segmented + scroll-spy) |
-| SectionHeader (replaces `SectionHeading.astro`) | public | **Rebuild**: title + optional intro right + link (no eyebrow above the title) |
+## 1. New tree
 
-## 3. Shell (R3)
-`SiteHeader.astro` (rebuild: desktop nav with indicator + mega-panels; mobile sheet), `SiteFooter.astro` (rebuild), `PublicLayout.astro`
-(load motion module, header theme per page: `felt` or `concrete` start), `AnnouncementBar.astro` (restyle), `WhatsAppButton.astro`
-(restyle as a compact round button above the bottom safe area; hidden when a sticky action bar is present).
+```
+src/ui/
+  tokens/            (CSS only: tokens.css, base.css: the R2.1 token layer moves here)
+  icons/             Icon.astro, icon.tsx (Lucide wrapper), registry of named icons per meaning
+  motion/            reveal.ts, scrollspy.ts, rail.ts, sheet.ts (vanilla, bundled, CSP-safe)
+  primitives/        Button, Link, Field + Input/Select/Textarea/Checkbox/Radio/ChoiceTile, SegmentedControl, Tabs,
+                     Accordion, Rail, Sheet, Dialog, Toast, Badge/StatusPill, ListRow, DataTable (list-row mode), Spinner,
+                     EmptyState, Pagination, Menu, FileDrop, MoneyField, RichTextEditor shell  (.astro and/or .tsx twins)
+  public/            shell (Header, MegaPanel, MobileMenu, Footer, WhatsApp), sections (Hero, DirectoryBoard, WorkspaceShowcase,
+                     Approach, ProcessTimeline, WorkRail, ProductRow, TechMarquee, CtaPanel), pricing (FloorSelector, PackageCard,
+                     PackageRail, CompareSheet, CompareTable, AddonList), work, insights, careers, forms (Contact, Wizard,
+                     Consultation, Interest, Newsletter, Application, QuotationResponse), documents, checkout
+  workspace/         shell (StatusBar, Dock, BottomDock, Window, CommandPalette, ThemeToggle), overview, projects, documents,
+                     payments, services, support, account, auth
+  admin/             shell (Sidebar, TopBar, Pane, CommandPalette, NotificationsBell, UserMenu), one folder per module
+src/layouts/          rewritten from scratch: PublicLayout, WorkspaceLayout, AdminLayout, AuthLayout, DocumentLayout
+```
 
-## 4. Pages (R4) and their components
-| Page | Components (new / rebuilt) |
+`src/components/` is legacy. Nothing new is added there; it empties as R3–R6 progress and is deleted by the end of R6.
+
+## 2. Tokens (R2.1, done) and what changes
+The token layer (`src/styles/tokens.css`, `global.css`) was written new for the Directory world. Its **compatibility aliases** exist
+only so legacy screens remain usable while they wait for their rebuild; they are not a strategy. They move to `src/ui/tokens/` and the
+aliases are deleted when the last legacy screen is deleted (R6.2 exit check: `grep` finds no alias name).
+
+## 3. Primitives (R2.3): all new
+| Primitive (new, `src/ui/primitives/`) | Logic reused from |
 |---|---|
-| Home | `Hero` (rebuilt: felt, route list, desktop board), `DirectoryBoard`, `WorkspaceShowcase` (new, renders real portal UI fragments with fixture data), `Approach` (replaces Features/"Why"), `Process` (rebuilt timeline), `WorkGallery` (rebuilt rail), `ProductsGrid` (modest row), `TechnologiesStrip` (marquee), `CtaBand` (rebuilt) |
-| Services | `DirectoryBoard` (expanded), division page sections: `SubServiceTabs`, `PackageRail`, `IncludedStrip`, `DeliveryBars`, FAQ accordion, `StickyActionBar` |
-| Pricing | `FloorIndicator`, `PackageCard` (rebuilt), `PackageSelector` + rail, `CompareSheet` (phone) / `ComparisonTable` (rebuilt), add-ons list |
-| Work | empty state panel, `WorkGrid` (rebuilt), case-study sections |
-| About group | `Statement`, `Values` (directory list), `Process`, industries rows |
-| Contact group | `ContactForm`, `StartProjectWizard`, `ConsultationForm` restyled through primitives; channel tiles |
-| Rest | insights listing/cards, careers rows, FAQ, products, legal prose, search, 404/500 |
-| Documents / checkout | `QuotationDocument`, `InvoiceDocument`, `CheckoutPage`, `CheckoutSummary` restyled |
+| Button / Link (pill primary with arrow knob, secondary, quiet, danger, icon) | none |
+| Field, Input, Select, Textarea, Checkbox, Radio, ChoiceTile, MoneyField, FileDrop | validation/formatting helpers in `src/shared/money.ts`, upload contract of `ui/FileUpload.tsx` (extracted to a hook) |
+| SegmentedControl, Tabs, Accordion, Rail, Sheet, Dialog, Toast | none (new behaviour) |
+| Badge / StatusPill | status → label maps in `src/shared/*` |
+| DataTable (desktop table + list-row mode) | sort/filter/pagination state from `ui/DataTable.tsx`, `FilterBar.tsx`, `Pagination.tsx` extracted to `useTable` |
+| Menu, Spinner, EmptyState | none |
+| RichTextEditor shell | editor logic from `ui/RichTextEditor.tsx` extracted |
+| api client | `ui/api.ts` moved as is (pure logic) |
 
-Data access stays in `src/server/modules/*` services (no business logic in components). New derived values (division "from" price,
-"included in every package") are computed by small pure helpers in `src/shared/` with unit tests, fed from the existing catalogue.
+## 4. Public (R3–R4): all new
+| Page | New components | Logic reused |
+|---|---|---|
+| Layout + shell | PublicLayout, Header, MegaPanel, MobileMenu, Footer, WhatsApp, Announcement | settings/nav loaders, announcement query |
+| Home | Hero (route list + board), DirectoryBoard, WorkspaceShowcase, Approach, ProcessTimeline, WorkRail, ProductRow, TechMarquee, CtaPanel | `getPage`, `sectionOf`, services/portfolio/products loaders, new pure helper `divisionFromPrice` |
+| Services, division | DirectoryBoard (index), DivisionHero, SubServiceTabs, PackageRail, IncludedStrip, DeliveryBars, FaqAccordion, StickyActionBar | service + catalogue loaders, new helper `includedInEvery` |
+| Pricing | FloorSelector, PackageCard, PackageSelector + PackageRail, CompareSheet, CompareTable, AddonList | `getPricingCatalogue`, `comparisonRows`, `formatPriceTag` |
+| Work, case study | WorkIndex, EmptyWork, CaseStudy | portfolio loaders |
+| About, How we work, Industries, Technologies | Statement, ValuesList, ProcessTimeline, IndustryRows | CMS loaders |
+| Contact, Start a project, Consultation | ContactPage, ChannelTiles, ContactForm, ProjectWizard, ConsultationForm | submit handlers/endpoint contracts and Turnstile logic extracted from `forms/*.tsx` into hooks |
+| Insights, Careers, FAQ, Products, legal, search, 404/500 | new page components | loaders; Interest/Application form logic extracted |
+| Documents and checkout | DocumentSheet, QuotationView, InvoiceView, CheckoutFlow, MethodTiles, MobileMoneyStep, ReceiptSummary | checkout state machine from `payments/CheckoutPage.tsx` extracted to `useCheckout`; `CardReturn`, `QuotationResponse` logic extracted |
 
-## 5. Panels (R5–R6)
-`PortalLayout.astro` → workspace shell (status bar, dock, bottom dock on phones, theme toggle island, command palette island reused
-from admin with portal-scoped results). `AdminLayout.astro` → felt sidebar + top bar. Restyle portal pages and admin modules through
-primitives; list-row mode for tables.
+## 5. Workspace (R5) and admin (R6): all new
+- Workspace: new WorkspaceLayout (status bar, dock, bottom dock, windows, palette, theme). Portal pages rewritten to compose new
+  components; logic from `portal/*.tsx` (account, saved cards, support forms, project messages, attempt status) extracted to hooks.
+- Admin: new AdminLayout (felt sidebar, top bar, panes). Each `admin/*Admin.tsx` module (≈ 15 000 lines across islands) is split:
+  data/state/actions → `src/ui/admin/<module>/use<Module>.ts` (unchanged API calls and validation), markup → new components. Done
+  module by module in R6.2 with that module's e2e spec green after each.
+- Auth (portal + admin): new split layout; logic from `auth/AuthForms.tsx` extracted (`useSignIn`, `usePasswordReset`, `useMfa`, …).
 
 ## 6. Testing per task
 - `npm run verify` + the affected e2e specs (full e2e before each push of a page group).
 - Visual loop: `SHOOT=<pages> SHOOT_SET=core npx playwright test -c playwright.visual.config.ts` (all 10 viewports for major pages),
   read screenshots, fix, re-shoot; `SHOOT_REDUCED=1` once per component family.
-- New tests: pricing accuracy (R4.3), helpers for derived pricing values (unit), mobile menu / segmented control / rail keyboard and
-  touch behaviour (e2e), reduced-motion check (e2e).
+- **Freshness check (B.0):** each rebuilt page's new screenshot is put beside its before-shot (`docs/screenshots/redesign/before/`);
+  if it reads as the same layout in new colours, it is redesigned.
+- New tests: pricing accuracy (R4.3), unit tests for extracted hooks' pure parts and new helpers, mobile menu / segmented control /
+  rail keyboard and touch behaviour (e2e), reduced motion (e2e). e2e specs keep their `data-*` hooks and accessible names; where a
+  visible label changes, the spec changes in the same commit with the reason.
 
-## 7. Order of work and commits
-R2.1 tokens+fonts → R2.2 icons → R2.3 primitives → R2.4 gallery → R3.1 header → R3.2 footer → R3.3 motion → R4.1 home → R4.2
-services → R4.3 pricing → R4.4 work → R4.5 → R4.6 → R4.7 → R4.8 → R5.1–R5.4 → R6.1–R6.2 → R7 → R8. One task = one or a few
-commits, each with verify green, pushed to `main`.
+## 7. Order of work
+R1.4 → R2.1 (done; tokens) → R2.2 icons → R2.3 primitives → R2.4 gallery → R3 shell → R4.1–R4.8 → R5.1–R5.4 → R6.1–R6.2 →
+R7 → R8. One task = one or a few commits, each with verify green, pushed to `main`.
+
+## 8. Legacy presentation removed (checklist)
+
+Ticked when the file is deleted (or, for the logic-only files marked *logic*, moved/rewritten into `src/ui` or `src/shared`).
+
+| Legacy file | Replaced by | Deleted in |
+|---|---|---|
+| layouts/PublicLayout.astro | new PublicLayout | [ ] R3.1 |
+| layouts/AppLayout.astro | new base layout | [ ] R3.1 |
+| layouts/PortalLayout.astro | WorkspaceLayout | [ ] R5.1 |
+| layouts/AdminLayout.astro | new AdminLayout | [ ] R6.1 |
+| layouts/AuthLayout.astro | new AuthLayout | [ ] R5.4 |
+| layouts/DocumentLayout.astro | new DocumentLayout | [ ] R4.8 |
+| components/BaseHead.astro, JsonLd.astro (*logic*) | src/ui/public/head | [ ] R3.1 |
+| components/Logo.astro | src/ui/brand/Logo.astro (new) | [ ] R3.1 |
+| components/ResponsiveImage.astro | src/ui/primitives/Picture.astro (new) | [ ] R4.1 |
+| public/SiteHeader.astro, AnnouncementBar.astro, WhatsAppButton.astro, Icon.astro | public shell, icons | [ ] R3.1 |
+| public/SiteFooter.astro | Footer | [ ] R3.2 |
+| public/sections/Hero, ServicesGrid, Features, Process, PhotoPair, WorkGallery, ProductsGrid, TechnologiesStrip, CtaBand, SectionHeading, Statement, Values, Testimonials, ListSection, RichText, WorkGrid | new public sections | [ ] R4.1–R4.5 (each deleted with its last user) |
+| public/pricing/PackageCard.astro, ComparisonTable.astro | pricing components | [ ] R4.3 |
+| public/insights/InsightsListing, PostCard, PostCover | insights components | [ ] R4.7 |
+| forms/ContactForm, StartProjectWizard, ConsultationForm, Turnstile | new forms + hooks | [ ] R4.6 |
+| forms/InterestForm, NewsletterForm, ApplicationForm | new forms + hooks | [ ] R4.7 (newsletter with R3.2) |
+| forms/QuotationResponse, documents/QuotationDocument, InvoiceDocument | documents | [ ] R4.8 |
+| payments/CheckoutPage, CheckoutSummary, CardReturn | checkout | [ ] R4.8 |
+| portal/StatusPill, AttemptStatus, PortalAccount, ProjectMessageForm, SavedCards, SupportForms | workspace | [ ] R5.2–R5.4 |
+| auth/AuthForms | workspace/admin auth | [ ] R5.4 |
+| admin/UserMenu, NotificationsBell, CommandPalette, actions | admin shell | [ ] R6.1 |
+| admin/*Admin.tsx (22 modules), LineItemEditor, BarChart, CmsTabs, ContentTabs, SettingsNav, SettingsSections, PaymentGateways, AccountActions | admin modules | [ ] R6.2 |
+| ui/* (Badge, Button, Card, Choice, DataTable, Dialog, Field, FileUpload, FilterBar, Input, Menu, MoneyInput, Pagination, QrCode, RichTextEditor, Spinner, States, Toast, cn, index; api.ts *logic*) | src/ui/primitives | [ ] R6.2 (last users are admin modules) |
+| dev/KitchenSink.tsx, pages/dev/ui.astro | new dev gallery | [ ] R2.4 |
+| Token aliases in tokens.css / global.css | — | [ ] R6.2 exit |

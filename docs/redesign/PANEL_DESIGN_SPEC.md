@@ -14,7 +14,7 @@ The two panels are **related but distinct**:
 | Chrome | Light concrete desktop, felt **top status bar**, left **dock** of workspaces (icons + labels), windows with title bars | Felt **sidebar** (grouped modules), concrete top bar with search + bell + user, content as panes without window title bars |
 | Density | Comfortable (row 56 px, body 16 px) | Compact (row 44 px, body 15 px, mono figures 14 px) |
 | Theme | Light default + **dark (felt) theme** toggle, remembered per device | Light only (dark later if wanted) |
-| Command palette | Yes (⌘K / Ctrl K): jump to project, invoice, quotation, page, action | Already exists (CommandPalette.tsx): restyled |
+| Command palette | Yes (⌘K / Ctrl K): jump to project, invoice, quotation, page, action | Rebuilt (new component; search logic of the old CommandPalette.tsx extracted to a hook) |
 
 ## 1. Shared building blocks
 - **Status bar** (workspace) / **top bar** (admin): 40 px, mono 13 px. Workspace left: wordmark + current workspace name; centre:
@@ -73,6 +73,6 @@ below. Workspace and admin auth differ by the panel copy and a "Staff sign-in" l
 marketing copy.
 
 ## 5. What must not change
-Every route, form field, permission check, API call and test hook (`data-*`, accessible names used by e2e). Restyling happens in
-layouts (`PortalLayout.astro`, `AdminLayout.astro`, `AuthLayout.astro`), shared UI primitives (`src/components/ui/*`) and page-level
-markup only. Where an e2e test pins a visible label that changes, the test is updated in the same commit with the reason.
+Every route, form field, permission check, API call and test hook (`data-*`, accessible names used by e2e). Clean slate (BRIEF B.0): new layouts
+(`WorkspaceLayout`, `AdminLayout`, `AuthLayout` written from scratch) and new components in `src/ui/workspace/` and `src/ui/admin/`;
+only logic is reused (extracted into hooks). Where an e2e test pins a visible label that changes, the test is updated in the same commit with the reason.

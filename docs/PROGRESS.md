@@ -922,3 +922,8 @@ The **Next step** line must be specific enough that a fresh session can continue
   OG render script switched to Archivo. Eyebrow labels removed from the specs (impeccable craft-floor ban; DECISIONS).
 - verify green (unit 355, integration 308). Helper: `.shots/restart.sh` (ignored) rebuilds and restarts wrangler dev.
 - Next step: R2.2 icon system (Icon.astro wrapper sizes/stroke/label; audit list of icon placements in IMPLEMENTATION_PLAN or a new ICONS section).
+
+## 2026-11-12 11:06 UTC · Redesign R1.4 ✅ clean-slate plan
+- Owner inserted BRIEF B.0 (rebuild from zero, never restyle) + R1.4. IMPLEMENTATION_PLAN.md rewritten (new `src/ui/` tree, logic-only
+  reuse per area, legacy removal checklist for all 98 legacy files), UI_UX_RECONSTRUCTION_PLAN.md and PANEL_DESIGN_SPEC.md aligned.
+- Next step: R2.2 icon system in `src/ui/icons/` (Icon.astro + icon.tsx, semantic registry, sizes/stroke/labels) + icon placement audit.

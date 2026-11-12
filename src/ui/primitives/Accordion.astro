@@ -1,0 +1,11 @@
+---
+/** Groove-ruled accordion of <details>. Use AccordionItem.astro inside. Works without JavaScript. */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<div class={['kz-acc', className].filter(Boolean).join(' ')}>
+  <slot />
+</div>

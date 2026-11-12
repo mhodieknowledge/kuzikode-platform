@@ -933,3 +933,16 @@ The **Next step** line must be specific enough that a fresh session can continue
   sizes 16/20/24/32 with matched strokes; decorative by default, `label` for meaningful icons. Unit test `ui-icons.test.ts` (4).
   Placement audit: docs/redesign/ICONS.md.
 - Next step: R2.3 primitives in `src/ui/primitives/` (Button/Link, fields, SegmentedControl, Tabs, Accordion, Rail, Sheet, Dialog, Toast, Badge/StatusPill, ListRow, DataTable list mode) + motion scripts in `src/ui/motion/`.
+
+## 2026-11-12 11:31 UTC · Redesign R2.3 ✅ primitives · R2.4 ✅ gallery
+- Token layer moved to `src/ui/tokens/` (tokens.css, base.css, components.css with all primitive recipes). New `src/layouts/Base.astro`
+  + `src/ui/head/Head.astro` (document shell for every new layout; boots `src/ui/motion/controllers.ts`: segmented/tabs/rail/sheet/reveal).
+- Astro primitives (`src/ui/primitives/*.astro`): Button, SegmentedControl (links/tabs/buttons), Tabs, Accordion(+Item), Rail, Sheet,
+  StatusPill, ListRow, EmptyState. React twins (`index.ts`): Button/LinkButton/IconButton, Field/TextField/SelectField/TextareaField/
+  CheckRow/ChoiceGroup, MoneyInput, Segmented, Sheet/ConfirmSheet (typed confirm), ToastProvider/useToast, StatusPill, Spinner,
+  EmptyState, ListRow, DataTable (list rows < 768 px). `stack` utility for vertical grids.
+- `/dev/ui` rewritten as the new gallery; legacy KitchenSink deleted; `tests/e2e/ui-kit.spec.ts` rewritten (8 green). QA_REPORT.md started.
+- verify green (unit 359, integration 308).
+- Next step: R3.1 new PublicLayout + Header (desktop nav with sliding indicator + Services directory mega-panel + About panel;
+  mobile full-height top sheet directory; sticky felt → concrete-glass) in `src/ui/public/shell/`, replacing SiteHeader/
+  AnnouncementBar/WhatsAppButton/BaseHead/Logo/AppLayout per IMPLEMENTATION_PLAN §8. Run the full e2e suite (not run since R2.1).

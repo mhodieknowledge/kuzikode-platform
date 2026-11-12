@@ -1,0 +1,32 @@
+---
+/** Underline tabs (tablist only). Panels are rendered by the page with matching ids and `class="kz-panel" role="tabpanel"`. */
+export interface TabItem {
+  id: string;
+  label: string;
+  controls: string;
+}
+interface Props {
+  items: TabItem[];
+  selected?: number;
+  label: string;
+  class?: string;
+}
+const { items, selected = 0, label, class: className } = Astro.props;
+---
+
+<div class={['kz-tabs', className].filter(Boolean).join(' ')} role="tablist" aria-label={label} data-kz-tabs>
+  {items.map((t, i) => (
+    <button
+      type="button"
+      role="tab"
+      class="kz-tab"
+      id={t.id}
+      aria-controls={t.controls}
+      aria-selected={i === selected ? 'true' : 'false'}
+      tabindex={i === selected ? 0 : -1}
+    >
+      {t.label}
+    </button>
+  ))}
+  <span class="kz-tabs__bar" aria-hidden="true"></span>
+</div>

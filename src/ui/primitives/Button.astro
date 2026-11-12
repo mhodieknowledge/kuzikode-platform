@@ -1,0 +1,73 @@
+---
+/**
+ * Button or link-button of the Directory world. `knob` adds the round arrow knob (primary calls to action).
+ * Renders <a> when `href` is set, otherwise <button>. Extra attributes (data-*, aria-*) pass through.
+ */
+import type { HTMLAttributes } from 'astro/types';
+import Icon from '../icons/Icon.astro';
+import type { IconName } from '../icons/registry';
+
+type Variant = 'primary' | 'secondary' | 'solid' | 'quiet' | 'danger';
+interface Props extends Omit<HTMLAttributes<'a'> & HTMLAttributes<'button'>, 'type'> {
+  variant?: Variant;
+  size?: 'sm' | 'md' | 'lg';
+  href?: string | undefined;
+  type?: 'button' | 'submit' | 'reset';
+  knob?: boolean;
+  /** Knob / trailing icon (defaults to arrow-right when `knob`). */
+  icon?: IconName | undefined;
+  /** Leading icon. */
+  lead?: IconName | undefined;
+  block?: boolean;
+  /** Icon-only button: `label` becomes the accessible name. */
+  iconOnly?: IconName | undefined;
+  label?: string | undefined;
+}
+const {
+  variant = 'primary',
+  size = 'md',
+  href,
+  type = 'button',
+  knob = false,
+  icon,
+  lead,
+  block = false,
+  iconOnly,
+  label,
+  class: className,
+  ...rest
+} = Astro.props;
+const cls = [
+  'kz-btn',
+  `kz-btn--${variant}`,
+  size !== 'md' && `kz-btn--${size}`,
+  knob && 'kz-btn--knob',
+  block && 'kz-btn--block',
+  iconOnly && 'kz-btn--icon',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+const trailing = icon ?? (knob ? 'arrow-right' : undefined);
+const Tag = href ? 'a' : 'button';
+---
+
+<Tag class={cls} href={href} type={href ? undefined : type} aria-label={iconOnly ? label : undefined} {...rest}>
+  {iconOnly ? (
+    <Icon name={iconOnly} />
+  ) : (
+    <>
+      {lead ? <Icon name={lead} /> : null}
+      <span>
+        <slot />
+      </span>
+      {trailing && knob ? (
+        <span class="kz-btn__knob">
+          <Icon name={trailing} size={size === 'sm' ? 16 : 20} />
+        </span>
+      ) : trailing ? (
+        <Icon name={trailing} />
+      ) : null}
+    </>
+  )}
+</Tag>

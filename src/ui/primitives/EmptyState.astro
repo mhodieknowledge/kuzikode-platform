@@ -1,0 +1,22 @@
+---
+/** Quiet empty state: a mono status line, a title, a sentence and an optional action (slot). No illustration. */
+interface Props {
+  code?: string;
+  title: string;
+  class?: string;
+}
+const { code, title, class: className } = Astro.props;
+---
+
+<div class={['kz-empty', className].filter(Boolean).join(' ')}>
+  {code ? <p class="kz-empty__code">{code}</p> : null}
+  <p class="kz-empty__title">{title}</p>
+  <div class="text-[var(--kz-fg-2)]">
+    <slot />
+  </div>
+  {Astro.slots.has('action') ? (
+    <div class="mt-2">
+      <slot name="action" />
+    </div>
+  ) : null}
+</div>

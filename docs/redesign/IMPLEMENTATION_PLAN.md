@@ -111,5 +111,5 @@ Ticked when the file is deleted (or, for the logic-only files marked *logic*, mo
 | admin/UserMenu, NotificationsBell, CommandPalette, actions | admin shell | [ ] R6.1 |
 | admin/*Admin.tsx (22 modules), LineItemEditor, BarChart, CmsTabs, ContentTabs, SettingsNav, SettingsSections, PaymentGateways, AccountActions | admin modules | [ ] R6.2 |
 | ui/* (Badge, Button, Card, Choice, DataTable, Dialog, Field, FileUpload, FilterBar, Input, Menu, MoneyInput, Pagination, QrCode, RichTextEditor, Spinner, States, Toast, cn, index; api.ts *logic*) | src/ui/primitives | [ ] R6.2 (last users are admin modules) |
-| dev/KitchenSink.tsx, pages/dev/ui.astro | new dev gallery | [ ] R2.4 |
+| dev/KitchenSink.tsx, pages/dev/ui.astro | new dev gallery | [x] R2.4 |
 | Token aliases in tokens.css / global.css | — | [ ] R6.2 exit |

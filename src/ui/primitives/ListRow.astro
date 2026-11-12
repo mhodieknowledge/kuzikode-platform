@@ -1,0 +1,23 @@
+---
+/** One list row: title + meta on the left, aside (amount, status) on the right; a link when `href` is set. */
+interface Props {
+  href?: string | undefined;
+  title: string;
+  meta?: string | undefined;
+  class?: string;
+}
+const { href, title, meta, class: className } = Astro.props;
+const Tag = href ? 'a' : 'div';
+---
+
+<Tag class={['kz-row', className].filter(Boolean).join(' ')} href={href}>
+  <span class="kz-row__main">
+    <span class="kz-row__title">{title}</span>
+    {meta ? <span class="kz-row__meta">{meta}</span> : null}
+  </span>
+  {Astro.slots.has('default') ? (
+    <span class="kz-row__aside">
+      <slot />
+    </span>
+  ) : null}
+</Tag>

@@ -1,0 +1,22 @@
+---
+interface Props {
+  title: string;
+  open?: boolean;
+  /** Heading level wrapping the summary text (keeps the document outline). */
+  level?: 'h2' | 'h3' | 'h4' | 'span';
+  id?: string;
+  name?: string;
+}
+const { title, open = false, level = 'h3', id, name } = Astro.props;
+const H = level;
+---
+
+<details open={open} id={id} name={name}>
+  <summary>
+    <H class="text-[1.0625rem] leading-snug font-[inherit]">{title}</H>
+    <span class="kz-acc__sign" aria-hidden="true"></span>
+  </summary>
+  <div class="kz-acc__body">
+    <slot />
+  </div>
+</details>

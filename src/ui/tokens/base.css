@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import './tokens.css';
+@import './components.css';
 @import '@fontsource-variable/archivo/wdth.css';
 @import '@fontsource-variable/jetbrains-mono/wght.css';
 
@@ -172,6 +173,12 @@
   font-weight: 620;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+}
+
+/* Vertical stack: a one-column grid whose column can shrink below its content (scrolling children never widen the page). */
+@utility stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 @utility wide {

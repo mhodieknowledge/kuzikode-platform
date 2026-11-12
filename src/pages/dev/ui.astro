@@ -1,21 +1,191 @@
 ---
-/** Development-only component gallery (roadmap P2.15). 404 outside APP_ENV=development. */
-import AdminLayout from '../../layouts/AdminLayout.astro';
-import KitchenSink from '../../components/dev/KitchenSink';
+/** Development-only gallery of the new UI primitives (R2.4). 404 outside APP_ENV=development. */
+import Base from '../../layouts/Base.astro';
+import Button from '../../ui/primitives/Button.astro';
+import SegmentedControl from '../../ui/primitives/SegmentedControl.astro';
+import Tabs from '../../ui/primitives/Tabs.astro';
+import Accordion from '../../ui/primitives/Accordion.astro';
+import AccordionItem from '../../ui/primitives/AccordionItem.astro';
+import Rail from '../../ui/primitives/Rail.astro';
+import Sheet from '../../ui/primitives/Sheet.astro';
+import StatusPill from '../../ui/primitives/StatusPill.astro';
+import ListRow from '../../ui/primitives/ListRow.astro';
+import EmptyState from '../../ui/primitives/EmptyState.astro';
+import Icon from '../../ui/icons/Icon.astro';
+import ReactGallery from '../../ui/dev/ReactGallery';
 
 if (Astro.locals.ctx.config.appEnv !== 'development') return new Response('Not found', { status: 404 });
-const nav = [
-  { label: 'Overview', items: [{ label: 'UI kit', href: '/dev/ui', active: true }] },
-  {
-    label: 'Development',
-    items: [
-      { label: 'Mailbox', href: '/admin/dev/mailbox' },
-      { label: 'Email templates', href: '/dev/emails' },
-    ],
-  },
-];
+const floors = ['Websites', 'Care plans', 'Email & domains', 'Other services'];
 ---
 
-<AdminLayout title="UI kit" nav={nav} userName="Developer">
-  <KitchenSink client:load />
-</AdminLayout>
+<Base title="UI kit · Kuzikode" noindex>
+  <header class="on-felt">
+    <div class="container-content py-10 sm:py-14">
+      <h1 class="display text-display">UI kit</h1>
+      <p class="mt-3 max-w-[56ch] text-on-felt-2">
+        Primitives of the Directory world, server-rendered (Astro) and interactive (React). Development only.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <Button knob href="#buttons">
+          Start a project
+        </Button>
+        <Button variant="secondary" href="#rails">
+          Explore services
+        </Button>
+        <Button variant="solid" lead="whatsapp">
+          WhatsApp
+        </Button>
+      </div>
+      <div class="mt-8">
+        <SegmentedControl label="Floor (on felt)" items={floors.map((f) => ({ label: f, value: f }))} scroll />
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="container-content stack gap-16 py-14">
+    <section aria-labelledby="buttons" class="stack gap-6">
+      <h2 id="buttons" class="text-h2">
+        Buttons
+      </h2>
+      <div class="flex flex-wrap items-center gap-3">
+        <Button knob>Start a project</Button>
+        <Button>Request a quotation</Button>
+        <Button variant="secondary">Secondary</Button>
+        <Button variant="solid">Solid</Button>
+        <Button variant="quiet" icon="arrow-right">
+          Quiet link
+        </Button>
+        <Button variant="danger">Delete</Button>
+        <Button disabled>Disabled</Button>
+        <Button size="sm" knob>
+          Small
+        </Button>
+        <Button size="lg" knob>
+          Large
+        </Button>
+        <Button iconOnly="search" label="Search" variant="secondary" />
+      </div>
+      <div class="max-w-sm">
+        <Button knob block size="lg">
+          Block (phones)
+        </Button>
+      </div>
+      <p>
+        <a class="kz-link" href="#buttons">
+          Text link <Icon name="arrow-right" size={16} />
+        </a>
+      </p>
+    </section>
+
+    <section aria-labelledby="segmented" class="stack gap-6">
+      <h2 id="segmented" class="text-h2">
+        Segmented controls and tabs
+      </h2>
+      <SegmentedControl label="Pricing categories" items={floors.map((f) => ({ label: f, value: f }))} scroll />
+      <SegmentedControl
+        label="Sub-services"
+        mode="tabs"
+        items={[
+          { label: 'Corporate sites', id: 'st-1', controls: 'sp-1' },
+          { label: 'E-commerce', id: 'st-2', controls: 'sp-2' },
+          { label: 'Web apps', id: 'st-3', controls: 'sp-3' },
+        ]}
+      />
+      <div id="sp-1" role="tabpanel" aria-labelledby="st-1" class="kz-panel">
+        Corporate and business websites.
+      </div>
+      <div id="sp-2" role="tabpanel" aria-labelledby="st-2" class="kz-panel" hidden>
+        Online shops with local payments.
+      </div>
+      <div id="sp-3" role="tabpanel" aria-labelledby="st-3" class="kz-panel" hidden>
+        Portals and dashboards.
+      </div>
+      <Tabs
+        label="Invoice sections"
+        items={[
+          { id: 't-1', label: 'Summary', controls: 'p-1' },
+          { id: 't-2', label: 'Line items', controls: 'p-2' },
+          { id: 't-3', label: 'History', controls: 'p-3' },
+        ]}
+      />
+      <div id="p-1" role="tabpanel" aria-labelledby="t-1" class="kz-panel">
+        Summary panel.
+      </div>
+      <div id="p-2" role="tabpanel" aria-labelledby="t-2" class="kz-panel" hidden>
+        Line items panel.
+      </div>
+      <div id="p-3" role="tabpanel" aria-labelledby="t-3" class="kz-panel" hidden>
+        History panel.
+      </div>
+    </section>
+
+    <section aria-labelledby="rails" class="stack gap-6">
+      <h2 id="rails" class="text-h2">
+        Rails
+      </h2>
+      <Rail label="Packages">
+        {['Starter Website', 'Business Website', 'E-commerce Store', 'Custom Web App'].map((n, i) => (
+          <article class:list={['rounded-[10px] p-6', i === 1 ? 'on-felt' : 'bg-paper']}>
+            <h3 class="text-h3">{n}</h3>
+            <p class="mt-2 font-mono text-[1.75rem] text-[var(--kz-fg)]">$—</p>
+            <p class="mt-2 text-small text-[var(--kz-fg-2)]">Fictional card for the gallery.</p>
+          </article>
+        ))}
+      </Rail>
+    </section>
+
+    <section aria-labelledby="accordion" class="stack gap-6">
+      <h2 id="accordion" class="text-h2">
+        Accordion
+      </h2>
+      <Accordion>
+        <AccordionItem title="Is the price on a package final?">
+          Package prices are a starting point confirmed in a written quotation.
+        </AccordionItem>
+        <AccordionItem title="Which currency do you charge in?">US dollars, with ZWG where supported.</AccordionItem>
+      </Accordion>
+    </section>
+
+    <section aria-labelledby="status" class="stack gap-6">
+      <h2 id="status" class="text-h2">
+        Status and lists
+      </h2>
+      <div class="flex flex-wrap gap-2">
+        <StatusPill>Draft</StatusPill>
+        <StatusPill tone="ok">Paid</StatusPill>
+        <StatusPill tone="warn">Due soon</StatusPill>
+        <StatusPill tone="danger">Overdue</StatusPill>
+        <StatusPill tone="info">Issued</StatusPill>
+        <StatusPill tone="lit">Most popular</StatusPill>
+      </div>
+      <div>
+        <ListRow href="#status" title="INV-2026-00021 · Msasa Hardware (demo)" meta="Due 02 Nov 2026">
+          <span class="font-mono">$1,250.00</span>
+          <StatusPill tone="danger">Overdue</StatusPill>
+        </ListRow>
+        <ListRow title="QUO-2026-00008 · Online ordering website (demo)" meta="Valid until 30 Nov 2026">
+          <span class="font-mono">$2,500.00</span>
+        </ListRow>
+      </div>
+      <EmptyState code="0 case studies" title="Case studies are being prepared">
+        Talk to us about what we can build for you.
+        <Button slot="action" size="sm" variant="secondary" href="#status">
+          Contact us
+        </Button>
+      </EmptyState>
+      <div>
+        <Button variant="secondary" data-kz-sheet-open="demo-sheet">
+          Open bottom sheet
+        </Button>
+      </div>
+      <Sheet id="demo-sheet" title="Compare packages" side="bottom">
+        <p>Sheets slide from the bottom on phones and can be swiped away.</p>
+        <Button slot="foot" block data-kz-sheet-close>
+          Done
+        </Button>
+      </Sheet>
+    </section>
+
+    <ReactGallery client:load />
+  </main>
+</Base>

@@ -1,0 +1,78 @@
+---
+/**
+ * Segmented control with a sliding solid thumb (floor selector). Behaviour: src/ui/motion/controllers.ts.
+ * mode "links": in-page anchors whose selection follows scroll · "tabs": role=tab controlling panels by id ·
+ * "buttons": aria-pressed toggles that emit `kz:change`.
+ */
+import Icon from '../icons/Icon.astro';
+import type { IconName } from '../icons/registry';
+
+export interface SegItem {
+  label: string;
+  value?: string;
+  href?: string;
+  /** Panel id for mode "tabs". */
+  controls?: string;
+  id?: string;
+  icon?: IconName;
+}
+interface Props {
+  items: SegItem[];
+  mode?: 'links' | 'tabs' | 'buttons';
+  /** Index of the initially selected item. */
+  selected?: number;
+  label: string;
+  block?: boolean;
+  scroll?: boolean;
+  class?: string;
+  [key: `data-${string}`]: string | undefined;
+}
+const {
+  items,
+  mode = 'buttons',
+  selected = 0,
+  label,
+  block = false,
+  scroll = false,
+  class: className,
+  ...rest
+} = Astro.props;
+const cls = ['kz-seg', block && 'kz-seg--block', scroll && 'kz-seg--scroll', className].filter(Boolean).join(' ');
+---
+
+<div
+  class={cls}
+  data-kz-seg={mode}
+  role={mode === 'tabs' ? 'tablist' : mode === 'links' ? undefined : 'group'}
+  aria-label={mode === 'links' ? undefined : label}
+  {...rest}
+>
+  <span class="kz-seg__thumb" aria-hidden="true"></span>
+  {items.map((it, i) =>
+    mode === 'links' ? (
+      <a class="kz-seg__opt" href={it.href} aria-current={i === selected ? 'true' : undefined} data-value={it.value}>
+        {it.icon ? <Icon name={it.icon} size={16} /> : null}
+        {it.label}
+      </a>
+    ) : mode === 'tabs' ? (
+      <button
+        type="button"
+        class="kz-seg__opt"
+        role="tab"
+        id={it.id}
+        aria-selected={i === selected ? 'true' : 'false'}
+        aria-controls={it.controls}
+        tabindex={i === selected ? 0 : -1}
+        data-value={it.value}
+      >
+        {it.icon ? <Icon name={it.icon} size={16} /> : null}
+        {it.label}
+      </button>
+    ) : (
+      <button type="button" class="kz-seg__opt" aria-pressed={i === selected ? 'true' : 'false'} data-value={it.value}>
+        {it.icon ? <Icon name={it.icon} size={16} /> : null}
+        {it.label}
+      </button>
+    ),
+  )}
+</div>

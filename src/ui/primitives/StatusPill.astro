@@ -1,0 +1,17 @@
+---
+/** Dot + label status. Tone carries colour; the label always carries the meaning. */
+interface Props {
+  tone?: 'neutral' | 'ok' | 'warn' | 'danger' | 'info' | 'lit';
+  plain?: boolean;
+  class?: string;
+}
+const { tone = 'neutral', plain = false, class: className } = Astro.props;
+---
+
+<span
+  class={['kz-pill', tone !== 'neutral' && `kz-pill--${tone}`, plain && 'kz-pill--plain', className]
+    .filter(Boolean)
+    .join(' ')}
+>
+  <slot />
+</span>

@@ -1,0 +1,44 @@
+---
+/**
+ * Horizontal scroll-snap rail (swipe on phones; buttons, dots and arrow keys elsewhere). Children are the items.
+ * Item widths: `--kz-rail-item` (phone), `--kz-rail-item-md`, `--kz-rail-item-lg` via the `style` prop.
+ */
+import Icon from '../icons/Icon.astro';
+
+interface Props {
+  label: string;
+  class?: string;
+  style?: string;
+  /** Hide the dots (e.g. when an external selector mirrors the position). */
+  dots?: boolean;
+  id?: string;
+}
+const { label, class: className, style, dots = true, id } = Astro.props;
+---
+
+<section
+  class={['kz-rail', className].filter(Boolean).join(' ')}
+  aria-label={label}
+  aria-roledescription="carousel"
+  data-kz-rail
+  style={style}
+  id={id}
+>
+  <div class="kz-rail__track" tabindex="0">
+    <slot />
+  </div>
+  <div class="kz-rail__nav">
+    {dots ? <div class="kz-rail__dots" /> : <div class="mr-auto" />}
+    <button
+      type="button"
+      class="kz-btn kz-btn--secondary kz-btn--icon"
+      data-kz-rail-prev
+      aria-label={`Previous: ${label}`}
+    >
+      <Icon name="arrow-left" />
+    </button>
+    <button type="button" class="kz-btn kz-btn--secondary kz-btn--icon" data-kz-rail-next aria-label={`Next: ${label}`}>
+      <Icon name="arrow-right" />
+    </button>
+  </div>
+</section>

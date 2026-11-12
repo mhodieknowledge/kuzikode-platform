@@ -1,0 +1,50 @@
+---
+/**
+ * Modal sheet on <dialog>: focus trap, Escape, backdrop click and swipe-to-dismiss come from the platform + controllers.ts.
+ * Open it with any element carrying `data-kz-sheet-open="<id>"`; close with `data-kz-sheet-close`.
+ */
+import Icon from '../icons/Icon.astro';
+
+interface Props {
+  id: string;
+  title: string;
+  side?: 'top' | 'bottom' | 'left' | 'center';
+  /** Hide the visible header (the title is still the accessible name). */
+  bare?: boolean;
+  class?: string;
+}
+const { id, title, side = 'center', bare = false, class: className } = Astro.props;
+const titleId = `${id}-title`;
+---
+
+<dialog
+  id={id}
+  class={['kz-sheet', `kz-sheet--${side}`, className].filter(Boolean).join(' ')}
+  aria-labelledby={titleId}
+>
+  <div class="kz-sheet__panel">
+    {side === 'bottom' || side === 'center' ? <div class="kz-sheet__grip sm:hidden" aria-hidden="true" /> : null}
+    {bare ? (
+      <h2 id={titleId} class="sr-only">
+        {title}
+      </h2>
+    ) : (
+      <div class="kz-sheet__head">
+        <h2 id={titleId} class="kz-sheet__title">
+          {title}
+        </h2>
+        <button type="button" class="kz-btn kz-btn--quiet kz-btn--icon" data-kz-sheet-close aria-label="Close">
+          <Icon name="close" />
+        </button>
+      </div>
+    )}
+    <div class="kz-sheet__body">
+      <slot />
+    </div>
+    {Astro.slots.has('foot') ? (
+      <div class="kz-sheet__foot">
+        <slot name="foot" />
+      </div>
+    ) : null}
+  </div>
+</dialog>

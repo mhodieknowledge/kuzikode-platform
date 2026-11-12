@@ -1,0 +1,40 @@
+---
+/**
+ * The document shell of the new UI (BRIEF B.0): head, skip link, body surface and the primitives' behaviour module.
+ * PublicLayout, WorkspaceLayout, AdminLayout, AuthLayout and DocumentLayout build on it.
+ */
+import Head from '../ui/head/Head.astro';
+
+interface Props {
+  title: string;
+  description?: string | undefined;
+  noindex?: boolean;
+  canonicalPath?: string | undefined;
+  csrfToken?: string | undefined;
+  ogImage?: string | undefined;
+  ogType?: 'website' | 'article';
+  themeColor?: string;
+  bodyClass?: string;
+  /** `data-theme` on <html> (workspace dark mode). */
+  theme?: 'light' | 'dark' | undefined;
+}
+const { bodyClass = 'bg-concrete-50 text-ink-700', theme, ...head } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-theme={theme}>
+  <head>
+    <Head {...head} />
+    <slot name="head" />
+  </head>
+  <body class={bodyClass}>
+    <a class="skip-link" href="#main">
+      Skip to content
+    </a>
+    <slot />
+    <script>
+      import { boot } from '../ui/motion/controllers';
+      boot();
+    </script>
+  </body>
+</html>

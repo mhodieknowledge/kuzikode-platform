@@ -1,0 +1,52 @@
+---
+/**
+ * The home hero object (BRIEF B.0e, DESIGN_DIRECTION §3): the client workspace drawn as a layered composition: a night window
+ * with the workspace dock, a project's milestone strip, an approved quotation and the latest update, plus the invoice card with
+ * local payment methods over its edge. Every element depicts a real workspace feature; the project and amounts are fictional and
+ * the whole composition is one labelled illustration (screen readers get the summary, not the parts).
+ */
+const steps = [
+  { label: 'Plan', state: 'done' },
+  { label: 'Design', state: 'done' },
+  { label: 'Build', state: 'now' },
+  { label: 'Launch', state: 'next' },
+] as const;
+const dock = ['Overview', 'Projects', 'Quotations', 'Invoices', 'Support'];
+const methods = ['EcoCash', 'OneMoney', 'InnBucks', 'Card'];
+---
+
+<div
+  class="kz-scene"
+  role="img"
+  aria-label="Illustration of the Kuzikode client workspace: a website project on its build milestone, an approved quotation, the latest weekly update and an invoice that can be paid with EcoCash, OneMoney, InnBucks or card."
+>
+  <div class="kz-win" aria-hidden="true">
+    <div class="kz-win__top">
+      <b>Client workspace</b><span class="kz-win__status">Project on track</span>
+    </div>
+    <div class="kz-win__dock">
+      {dock.map((d) => <span class:list={[d === 'Projects' && 'is-on']}>{d}</span>)}
+    </div>
+    <div class="kz-win__main">
+      <div class="kz-win__head">
+        <span class="kz-win__title">Company website</span><span>Milestone 3 of 4</span>
+      </div>
+      <ol class="kz-strip">
+        {steps.map((s) => <li class={`is-${s.state}`}>{s.label}</li>)}
+      </ol>
+      <div class="kz-win__cards">
+        <div class="kz-wcard">
+          <small>Quotation approved</small><span class="kz-wcard__amt">$750</span><small>Business Website</small>
+        </div>
+        <div class="kz-wcard kz-wcard--update">
+          <small>Update, Monday</small><b>Pages and editor are live on staging.</b><span>Review link sent.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="kz-paycard" aria-hidden="true">
+    <small>Invoice, due in 5 days</small>
+    <span class="kz-paycard__amt">$250.00</span>
+    <div class="kz-paycard__methods">{methods.map((m) => <span>{m}</span>)}</div>
+  </div>
+</div>

@@ -26,9 +26,14 @@ test.describe('home page', () => {
     await expect(services.getByRole('link')).toHaveCount(6);
     await expect(page.getByText('In Development', { exact: true })).toBeVisible();
     await expect(page.locator('a[href="#"]')).toHaveCount(0);
-    const img = page.locator('img[fetchpriority="high"]');
-    await expect(img).toHaveCount(1);
-    await expect(img).toHaveAttribute('alt', /colleagues/);
+    // Premium hero (BRIEF B.0e): the workspace window is one labelled illustration, and the route index lists all six divisions.
+    await expect(page.getByRole('img', { name: /Illustration of the Kuzikode client workspace/ })).toBeVisible();
+    const routes = page.getByRole('navigation', { name: 'Our six areas of work' });
+    await expect(routes.getByRole('link')).toHaveCount(6);
+    await expect(routes.getByRole('link', { name: /Web development\s+from \$350/ })).toHaveAttribute(
+      'href',
+      '/services/web-development',
+    );
     await expectAccessible(page);
     await screenshots(page, 'home');
   });
@@ -36,7 +41,8 @@ test.describe('home page', () => {
   test('primary actions point at real destinations', async ({ page }) => {
     await page.goto('/');
     const hero = page.locator('section[aria-labelledby="hero-title"]');
-    await expect(hero.getByRole('link', { name: 'Start a project' })).toHaveAttribute('href', '/start-a-project');
+    // The CMS call to action still points at the retired wizard; it is presented as a quote request (BRIEF B.0c).
+    await expect(hero.getByRole('link', { name: 'Get a quote' })).toHaveAttribute('href', '/contact');
     await expect(hero.getByRole('link', { name: 'Explore services' })).toHaveAttribute('href', '/services');
     await page
       .getByRole('link', { name: /Web Development & Digital Solutions/ })

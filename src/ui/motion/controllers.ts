@@ -357,6 +357,41 @@ function initReveal() {
   }
 }
 
+/* ---------------- Swipe track dots ---------------- */
+
+/** [data-kz-track]: a scroll-snap list; the sibling [data-kz-track-dots] marks the item nearest the start edge. */
+function initTrack(track: HTMLElement) {
+  const dots = track.parentElement?.querySelector<HTMLElement>('[data-kz-track-dots]');
+  if (!dots) return;
+  const marks = Array.from(dots.children) as HTMLElement[];
+  const items = Array.from(track.children) as HTMLElement[];
+  let frame = 0;
+  const update = () => {
+    frame = 0;
+    const left = track.getBoundingClientRect().left;
+    let best = 0;
+    let dist = Infinity;
+    items.forEach((it, i) => {
+      const d = Math.abs(
+        it.getBoundingClientRect().left - left - parseFloat(getComputedStyle(track).scrollPaddingInlineStart || '0'),
+      );
+      if (d < dist) [dist, best] = [d, i];
+    });
+    marks.forEach((m, i) => m.classList.toggle('is-on', i === best));
+  };
+  track.addEventListener('scroll', () => (frame ||= requestAnimationFrame(update)), { passive: true });
+}
+
+/* ---------------- Hero call to action ---------------- */
+
+/** While the hero's own primary action is on screen, the header's copy of it steps back (phones; CSS decides). */
+function initHeroCta() {
+  const cta = document.querySelector<HTMLElement>('[data-hero-cta]');
+  const header = document.querySelector<HTMLElement>('.kz-header');
+  if (!cta || !header || !('IntersectionObserver' in window)) return;
+  new IntersectionObserver(([e]) => header.toggleAttribute('data-hero-cta', !!e?.isIntersecting)).observe(cta);
+}
+
 /* ---------------- Boot ---------------- */
 
 export function initUi(root: Root = document) {
@@ -371,6 +406,7 @@ export function initUi(root: Root = document) {
   once<HTMLElement>('[data-kz-tabs]', initTabs);
   once<HTMLElement>('[data-kz-rail]', initRail);
   once<HTMLDialogElement>('dialog.kz-sheet', initSheet);
+  once<HTMLElement>('[data-kz-track]', initTrack);
 }
 
 let booted = false;
@@ -380,4 +416,5 @@ export function boot() {
   initUi();
   initSheetOpeners();
   initReveal();
+  initHeroCta();
 }

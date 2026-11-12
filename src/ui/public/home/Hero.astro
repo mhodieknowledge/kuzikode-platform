@@ -1,0 +1,49 @@
+---
+/**
+ * Home hero (BRIEF B.0e premium hero, B.1a phone limits; prototype design/concepts/b2). Copy from the CMS hero section
+ * (title, body, calls to action); wizard links are presented as "Get a quote" (B.0c). Phones: headline, one value line, one
+ * primary action + a quiet link, the starting price, then the workspace window in the first screen and the route track peeking.
+ */
+import type { SectionContent } from '../../../shared/schemas/cms';
+import type { FromPrice } from '../../../shared/directory';
+import { publicCta } from '../lib/cta';
+import WorkspaceWindow from './WorkspaceWindow.astro';
+import RouteIndex from './RouteIndex.astro';
+
+interface Props {
+  content: SectionContent<'hero'>;
+  divisions: { slug: string; name: string; href: string; from: FromPrice | null }[];
+}
+const { content: c, divisions } = Astro.props;
+const primary = publicCta(c.primaryCta);
+const secondary = publicCta(c.secondaryCta);
+const quiet = secondary && secondary.href !== primary.href ? secondary : { label: 'See all prices', href: '/pricing' };
+const websites = divisions.find((d) => d.slug === 'web-development')?.from ?? null;
+---
+
+<section class="kz-hero" aria-labelledby="hero-title">
+  <div class="container-wide kz-hero__grid">
+    <div class="kz-hero__copy">
+      <h1 id="hero-title" class="kz-hero__title" data-enter>{c.title}</h1>
+      <p class="kz-hero__value" data-enter="2">{c.body}</p>
+      <div class="kz-hero__acts" data-enter="2">
+        <a class="kz-btn kz-btn--primary kz-btn--lg" href={primary.href} data-hero-cta><span>{primary.label}</span></a>
+        <a class="kz-link" href={quiet.href}>{quiet.label}</a>
+      </div>
+      <p class="kz-hero__proof" data-enter="3">
+        {
+          websites ? (
+            <span>
+              Websites from <b class="tnum">{websites.amount}</b>
+            </span>
+          ) : null
+        }
+        <span>Pay with EcoCash, OneMoney, InnBucks or card</span>
+      </p>
+    </div>
+    <WorkspaceWindow />
+  </div>
+  <div class="container-wide">
+    <RouteIndex divisions={divisions} />
+  </div>
+</section>

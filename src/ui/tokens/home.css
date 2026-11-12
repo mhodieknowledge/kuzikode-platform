@@ -1,0 +1,459 @@
+/*
+ * Home: premium hero (workspace window) and route index. Prototype: design/concepts/b2. Phone limits (BRIEF B.1a):
+ * H1 32 px ≤ 3 lines, body 15–16 px, buttons on one line, the visual inside the first screen.
+ */
+@layer components {
+  .kz-hero {
+    padding: 20px 0 8px;
+    overflow: clip;
+  }
+  .kz-hero__grid {
+    display: grid;
+    gap: 20px;
+  }
+  .kz-hero__title {
+    font-size: 2rem;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    color: var(--ink-900);
+    max-width: 16ch;
+  }
+  .kz-hero__value {
+    margin-top: 10px;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--ink-700);
+    max-width: 46ch;
+  }
+  .kz-hero__acts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 20px;
+    margin-top: 16px;
+  }
+  .kz-hero__proof {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 14px;
+    margin-top: 12px;
+    font-size: 0.8125rem;
+    color: var(--ink-500);
+  }
+  .kz-hero__proof b {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--ink-900);
+  }
+
+  /* The workspace window: real product UI as the hero object, with depth from layering. */
+  .kz-scene {
+    position: relative;
+    isolation: isolate;
+    padding-bottom: 18px;
+  }
+  .kz-win {
+    position: relative;
+    display: grid;
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--night-900);
+    color: var(--on-night-2);
+    box-shadow:
+      0 0 0 1px var(--night-950),
+      0 30px 60px -28px rgb(0 0 0 / 0.55),
+      0 10px 20px -12px rgb(0 0 0 / 0.3);
+  }
+  .kz-win__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--night-700);
+    font-size: 0.75rem;
+  }
+  .kz-win__top b {
+    color: var(--on-night);
+    font-size: 0.8125rem;
+  }
+  .kz-win__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .kz-win__status::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--lit);
+  }
+  .kz-win__dock {
+    display: none;
+  }
+  .kz-win__main {
+    display: grid;
+    gap: 14px;
+    padding: 16px;
+  }
+  .kz-win__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    font-size: 0.75rem;
+  }
+  .kz-win__title {
+    color: var(--on-night);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .kz-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    padding: 0;
+    list-style: none;
+  }
+  .kz-strip li {
+    display: grid;
+    gap: 6px;
+    font-size: 0.71875rem;
+    line-height: 1.25;
+  }
+  .kz-strip li::before {
+    content: '';
+    height: 6px;
+    border-radius: 2px;
+    background: var(--night-700);
+  }
+  .kz-strip .is-done::before {
+    background: var(--on-night-2);
+  }
+  .kz-strip .is-now {
+    color: var(--on-night);
+  }
+  .kz-strip .is-now::before {
+    background: var(--lit);
+  }
+  .kz-win__cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .kz-wcard {
+    display: grid;
+    gap: 6px;
+    align-content: start;
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--night-800);
+    box-shadow: inset 0 0 0 1px var(--night-700);
+    font-size: 0.78125rem;
+  }
+  .kz-wcard small {
+    font-size: 0.71875rem;
+  }
+  .kz-wcard b {
+    color: var(--on-night);
+    font-weight: 600;
+  }
+  .kz-wcard__amt {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 1.375rem;
+    letter-spacing: -0.02em;
+    color: var(--on-night);
+  }
+  .kz-paycard {
+    position: absolute;
+    right: -6px;
+    bottom: 0;
+    display: grid;
+    gap: 8px;
+    width: 58%;
+    max-width: 260px;
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--paper);
+    color: var(--ink-900);
+    box-shadow:
+      0 0 0 1px rgb(20 20 18 / 0.1),
+      0 24px 44px -18px rgb(0 0 0 / 0.5),
+      0 6px 12px -6px rgb(0 0 0 / 0.2);
+  }
+  .kz-paycard small {
+    font-size: 0.71875rem;
+    color: var(--ink-500);
+  }
+  .kz-paycard__amt {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+  .kz-paycard__methods {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+  }
+  .kz-paycard__methods span {
+    padding: 8px;
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 1px var(--bone-200);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+  }
+  .kz-paycard__methods span:first-child {
+    background: var(--action);
+    color: var(--on-action);
+    box-shadow: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .kz-win {
+      animation: kz-rise 0.9s var(--ease-out) both;
+    }
+    .kz-paycard {
+      animation: kz-rise 0.9s 0.25s var(--ease-out) both;
+    }
+    [data-enter] {
+      animation: kz-rise 0.7s var(--ease-out) both;
+    }
+    [data-enter='2'] {
+      animation-delay: 0.08s;
+    }
+    [data-enter='3'] {
+      animation-delay: 0.16s;
+    }
+  }
+  @keyframes kz-rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+  }
+
+  /* Route index: swipe track on phones, typographic index on desktop. */
+  .kz-routes {
+    padding: 20px 0 48px;
+  }
+  .kz-routes__track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 74%;
+    gap: 10px;
+    margin: 0 calc(-1 * var(--gutter));
+    padding: 2px var(--gutter) 6px;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .kz-routes__track::-webkit-scrollbar {
+    display: none;
+  }
+  .kz-routes__track > li {
+    scroll-snap-align: start;
+    display: grid;
+  }
+  .kz-route {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: baseline;
+    gap: 2px 12px;
+    min-height: 76px;
+    padding: 16px 14px;
+    border-radius: 10px;
+    background: var(--paper);
+    box-shadow: inset 0 0 0 1px var(--bone-200);
+    color: var(--ink-900);
+    text-decoration: none;
+    transition:
+      transform var(--dur-state) var(--ease-out),
+      box-shadow var(--dur-state) var(--ease-out);
+  }
+  .kz-route__n {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: var(--kz-div-ink);
+  }
+  .kz-route__name {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+  .kz-route__from {
+    grid-column: 2;
+    font-size: 0.875rem;
+    color: var(--ink-700);
+  }
+  .kz-route__from b {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--ink-900);
+  }
+  .kz-routes__dots {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .kz-routes__dots i {
+    width: 14px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--bone-300);
+    transition:
+      width var(--dur-state) var(--ease-out),
+      background-color var(--dur-state) var(--ease-out);
+  }
+  .kz-routes__dots i.is-on {
+    width: 28px;
+    background: var(--ink-900);
+  }
+  @media (hover: hover) {
+    .kz-route:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        inset 0 0 0 1.5px var(--kz-div),
+        0 12px 24px -16px rgb(0 0 0 / 0.35);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .kz-hero__title {
+      font-size: clamp(2.5rem, 1rem + 3.1vw, 3.875rem);
+    }
+    .kz-hero__value {
+      font-size: 1.125rem;
+    }
+    .kz-routes__track {
+      grid-auto-columns: 40%;
+    }
+  }
+  @media (min-width: 1024px) {
+    .kz-hero {
+      padding: 56px 0 8px;
+    }
+    .kz-hero__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      align-items: center;
+      gap: 56px;
+    }
+    .kz-hero__value {
+      font-size: 1.1875rem;
+      margin-top: 20px;
+    }
+    .kz-hero__acts {
+      margin-top: 28px;
+    }
+    .kz-hero__proof {
+      margin-top: 18px;
+    }
+    .kz-scene {
+      padding-bottom: 36px;
+      margin-right: 12px;
+    }
+    .kz-win {
+      grid-template-columns: 168px minmax(0, 1fr);
+    }
+    .kz-win__top {
+      grid-column: 1 / -1;
+      padding: 14px 20px;
+    }
+    .kz-win__dock {
+      display: grid;
+      align-content: start;
+      gap: 2px;
+      padding: 14px 10px;
+      border-right: 1px solid var(--night-700);
+      font-size: 0.8125rem;
+    }
+    .kz-win__dock span {
+      padding: 8px 10px;
+      border-radius: 6px;
+    }
+    .kz-win__dock .is-on {
+      background: var(--night-800);
+      color: var(--on-night);
+    }
+    .kz-win__main {
+      padding: 22px;
+      gap: 18px;
+    }
+    .kz-win__title {
+      font-size: 1.3125rem;
+    }
+    .kz-strip li {
+      font-size: 0.78125rem;
+    }
+    .kz-wcard__amt {
+      font-size: 1.625rem;
+    }
+    .kz-paycard {
+      right: -12px;
+      bottom: -4px;
+      width: 300px;
+      max-width: none;
+      padding: 18px;
+    }
+    .kz-paycard__amt {
+      font-size: 1.875rem;
+    }
+    .kz-routes {
+      padding: 48px 0 64px;
+    }
+    .kz-routes__track {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: 40px;
+      margin: 0;
+      padding: 0;
+      overflow: visible;
+      border-top: 1px solid var(--bone-200);
+    }
+    .kz-route {
+      grid-template-columns: 36px minmax(0, 1fr) auto;
+      border-radius: 0;
+      background: none;
+      box-shadow: none;
+      border-bottom: 1px solid var(--bone-200);
+      padding: 18px 0;
+    }
+    .kz-route__from {
+      grid-column: 3;
+      text-align: right;
+    }
+    .kz-routes__dots {
+      display: none;
+    }
+  }
+  @media (min-width: 1024px) and (hover: hover) {
+    .kz-route:hover {
+      transform: none;
+      box-shadow: none;
+    }
+    .kz-route:hover .kz-route__name {
+      text-decoration: underline;
+      text-decoration-color: var(--kz-div);
+      text-decoration-thickness: 2px;
+      text-underline-offset: 0.25em;
+    }
+  }
+}
+
+/* The header's copy of the primary action steps back while the hero's own is on screen (phones). */
+@media (max-width: 1023px) {
+  .kz-header[data-hero-cta] .kz-header__cta {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+}

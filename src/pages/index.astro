@@ -1,6 +1,6 @@
 ---
 import PublicLayout from '../layouts/PublicLayout.astro';
-import Hero from '../components/public/sections/Hero.astro';
+import Hero from '../ui/public/home/Hero.astro';
 import ServicesGrid from '../components/public/sections/ServicesGrid.astro';
 import Features from '../components/public/sections/Features.astro';
 import WorkGallery from '../components/public/sections/WorkGallery.astro';
@@ -11,8 +11,10 @@ import ProductsGrid from '../components/public/sections/ProductsGrid.astro';
 import CtaBand from '../components/public/sections/CtaBand.astro';
 import Testimonials from '../components/public/sections/Testimonials.astro';
 import TechnologiesStrip from '../components/public/sections/TechnologiesStrip.astro';
+import { divisionFromPrice } from '../shared/directory';
 import {
   getPage,
+  getPricingCatalogue,
   getServiceCatalogue,
   listPortfolio,
   listProducts,
@@ -22,9 +24,10 @@ import {
 import type { Section } from '../shared/schemas/cms';
 
 const { ctx } = Astro.locals;
-const [page, categories, portfolio, products, testimonials, technologies] = await Promise.all([
+const [page, categories, pricing, portfolio, products, testimonials, technologies] = await Promise.all([
   getPage(ctx, 'home'),
   getServiceCatalogue(ctx),
+  getPricingCatalogue(ctx),
   listPortfolio(ctx),
   listProducts(ctx),
   listTestimonials(ctx),
@@ -33,18 +36,24 @@ const [page, categories, portfolio, products, testimonials, technologies] = awai
 if (!page) return new Response('Not found', { status: 404 });
 const featured = portfolio.filter((p) => p.featured).length ? portfolio.filter((p) => p.featured) : portfolio;
 const sections = page.sections as Section[];
+const divisions = categories.map((c) => ({
+  slug: c.slug,
+  name: c.name,
+  href: `/services/${c.slug}`,
+  from: pricing.showPrices ? divisionFromPrice(pricing.packages, c.slug) : null,
+}));
 ---
 
 <PublicLayout
   title={page.seoTitle ?? 'Kuzikode Technologies'}
   description={page.seoDescription ?? undefined}
   canonicalPath="/"
-  headerTone="dark"
+  headerTone="bone"
 >
   {sections.map((s) => {
     switch (s.type) {
       case 'hero':
-        return <Hero content={s.content as Section<'hero'>['content']} />;
+        return <Hero content={s.content as Section<'hero'>['content']} divisions={divisions} />;
       case 'services_grid':
         return <ServicesGrid content={s.content as Section<'services_grid'>['content']} categories={categories} />;
       case 'features':

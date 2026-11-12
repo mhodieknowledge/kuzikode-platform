@@ -1,0 +1,42 @@
+---
+/**
+ * The six divisions as numbered routes with their published "from" price (DESIGN_DIRECTION §3): a swipe track with the next
+ * plate peeking on phones, a typographic 3 × 2 index on desktop. Each numeral carries its division hue (`kz-div-N`).
+ * Prices come from `divisionFromPrice` (the pricing catalogue); nothing is computed or stored here.
+ */
+import type { FromPrice } from '../../../shared/directory';
+import { divisionShortName } from '../../../shared/directory';
+
+interface Props {
+  divisions: { slug: string; name: string; href: string; from: FromPrice | null }[];
+  label?: string;
+}
+const { divisions, label = 'Our six areas of work' } = Astro.props;
+const suffix = (f: FromPrice) => (f.suffix === 'one-off' ? '' : ` ${f.suffix.replace(/^per /, '/ ')}`);
+---
+
+<nav class="kz-routes" aria-label={label}>
+  <ol class="kz-routes__track" data-kz-track>
+    {
+      divisions.map((d, i) => (
+        <li class={`kz-div-${(i % 6) + 1}`}>
+          <a class="kz-route" href={d.href}>
+            <span class="kz-route__n">{String(i + 1).padStart(2, '0')}</span>
+            <span class="kz-route__name">{divisionShortName(d.slug, d.name)}</span>
+            {d.from ? (
+              <span class="kz-route__from">
+                from <b>{d.from.amount}</b>
+                {suffix(d.from)}
+              </span>
+            ) : (
+              <span class="kz-route__from">Quoted</span>
+            )}
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+  <div class="kz-routes__dots" aria-hidden="true" data-kz-track-dots>
+    {divisions.map((_, i) => <i class:list={[i === 0 && 'is-on']} />)}
+  </div>
+</nav>

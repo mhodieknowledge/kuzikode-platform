@@ -42,3 +42,17 @@ export function divisionFromPrice(packages: DirectoryPackage[], categorySlug: st
   const display = packagePrice(best);
   return { amount: formatPriceTag(best.priceMinor!, currency), suffix: display.suffix ?? 'one-off' };
 }
+
+/** Short division names for compact navigation (route index, tabs); the full CMS name stays on the division page. */
+const SHORT_NAMES: Record<string, string> = {
+  'web-development': 'Web development',
+  'mobile-desktop-apps': 'Mobile & desktop apps',
+  'business-software': 'Business software',
+  'ai-data': 'AI, data & intelligence',
+  'automation-integration': 'Automation & integration',
+  'cloud-it': 'Cloud & IT',
+};
+
+export function divisionShortName(slug: string, name: string): string {
+  return SHORT_NAMES[slug] ?? name;
+}

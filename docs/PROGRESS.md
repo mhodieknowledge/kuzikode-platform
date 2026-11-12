@@ -1023,3 +1023,10 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Fixed inherited red e2e (contact strict label, legal footer overlay, newsletter hydration, products hydration race).
 - Next step: R3.3 (reveal framework already in controllers.ts: add reduced-motion e2e), then R4.1 home body rebuild (remove the
   `[data-legacy]` wrappers in src/pages/index.astro), R4.6b wizard removal + 301, R4.3 pricing.
+
+## 2026-11-12 15:35 UTC · R3.3 ✅ motion framework
+- CSS cross-document view transitions (180 ms, header held, off for reduced motion); reveal framework documented; `tests/e2e/
+  motion.spec.ts` (reduced motion hides nothing / no entrance animations; reveal fires once on scroll). ui-kit spec waits for
+  hydration (`openKit`).
+- Next step: R4.1 home body rebuild in `src/ui/public/home/` (services night band with route tabs, why/process road strip,
+  values, products modest, CTA) replacing the `[data-legacy]` wrappers in `src/pages/index.astro`; then R4.6b, R4.3.

@@ -52,7 +52,7 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
 ## R3: Public site shell
 - [x] **R3.1 Header + mobile navigation** (REDO on the new foundation) (designed mobile menu/sheet, animated indicators, sticky behaviour, primary CTA always reachable).
 - [x] **R3.2 Footer** (distinct mobile composition, contact channels with icons, legal).
-- [ ] **R3.3 Page transitions / section reveal** framework per the motion spec.
+- [x] **R3.3 Page transitions / section reveal** framework per the motion spec.
 
 ## R4: Public pages (mobile first, each with its own mobile composition)
 - [ ] **R4.1 Home.**

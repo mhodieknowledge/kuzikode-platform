@@ -52,3 +52,13 @@ board does not cycle. Tested in the harness (`SHOOT_REDUCED=1`) and in e2e.
 - Interactive components (directory, segmented control, rail, sheet) are **Astro components with a co-located `<script>`** (bundled by
   Astro, hashed for CSP) where no React state is needed; React islands only where existing forms and panels already are React.
 - No animation library is added. CSS transitions + WAAPI where a sequence needs it.
+
+## R3.3 framework (2026-11-12, Route / Zimbabwe earth)
+- **Page transitions:** CSS cross-document view transitions (`@view-transition { navigation: auto }`), root cross-fade 180 ms,
+  the header held still (`view-transition-name: site-header`). Off under `prefers-reduced-motion`. No JS, no router.
+- **Section reveal:** `[data-reveal]` (one element) and `[data-reveal-group]` (children, 50 ms stagger, max 4) in
+  `src/ui/motion/controllers.ts`: 12 px rise + fade, only for elements below the first screen at load, once. Used sparingly:
+  at most one or two dealt moments per page (design-taste-frontend bans a fade-in on every section).
+- **Hero entrance:** `[data-enter]` (CSS only) + the workspace window layers (window → note 180 ms → invoice 320 ms).
+- **Reduced motion:** reveal never hides anything, entrance animations do not run, page transitions are off.
+  Tested in `tests/e2e/motion.spec.ts`.

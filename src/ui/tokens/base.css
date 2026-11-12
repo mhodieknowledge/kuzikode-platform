@@ -288,3 +288,25 @@
     @apply font-semibold text-ink-950;
   }
 }
+
+/*
+ * Page transitions (R3.3, MOTION_AND_INTERACTION_SPEC): same-origin navigations cross-fade in 180 ms with the header held
+ * still, so moving between pages feels like one place. Browsers without cross-document view transitions simply navigate.
+ * Reduced motion: no transition at all.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 180ms;
+    animation-timing-function: var(--ease-out);
+  }
+  .kz-header {
+    view-transition-name: site-header;
+  }
+  ::view-transition-group(site-header) {
+    animation: none;
+  }
+}

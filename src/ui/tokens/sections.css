@@ -704,7 +704,7 @@
     .kz-slip-scene {
       grid-area: slip;
     }
-    .kz-track:not(.kz-road__track) {
+    .kz-approach__track {
       grid-auto-flow: row;
       grid-template-columns: minmax(0, 1fr);
       gap: 0;
@@ -774,6 +774,55 @@
     }
     .kz-values__row dt {
       font-size: 1.25rem;
+    }
+  }
+}
+
+/* ---------- Mid-page photo band with an editorial card ---------- */
+@layer components {
+  .kz-pband {
+    position: relative;
+    padding-bottom: var(--section-y);
+  }
+  .kz-pband__img {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+  }
+  .kz-pband__wrap {
+    position: relative;
+    margin-top: -48px;
+  }
+  .kz-pband__card {
+    padding: 22px 20px 24px;
+    border-radius: 12px;
+    background: var(--paper);
+    box-shadow:
+      0 0 0 1px var(--bone-200),
+      0 24px 48px -28px rgb(20 20 18 / 0.4);
+  }
+  @media (min-width: 1024px) {
+    .kz-pband {
+      padding-bottom: 0;
+      height: clamp(520px, 44vw, 640px);
+      display: grid;
+      overflow: clip;
+    }
+    .kz-pband__img {
+      grid-area: 1 / 1;
+      aspect-ratio: auto;
+      height: 100%;
+    }
+    .kz-pband__wrap {
+      grid-area: 1 / 1;
+      display: grid;
+      align-items: center;
+      justify-items: end;
+      margin-top: 0;
+      padding-block: 64px;
+    }
+    .kz-pband__card {
+      max-width: 560px;
+      padding: 36px 40px;
     }
   }
 }

@@ -1,0 +1,39 @@
+---
+/**
+ * Services index hero (R4.2, BRIEF B.4a: photo-led). Night band: headline, intro and the count of areas on the left; a full-height
+ * photograph bleeding off the right edge (desktop) or across the top (phones), in the warm duotone. Interim image: the owner's
+ * `about-workspace` desk photograph until batch 3's `services-hero` is delivered (IMAGE-REQUESTS.md).
+ */
+import Picture from '../../primitives/Picture.astro';
+import Icon from '../../icons/Icon.astro';
+import manifest from '../../../../design/images/manifest.json';
+
+interface Props {
+  title: string;
+  html: string | null;
+  areas: number;
+  services: number;
+}
+const { title, html, areas, services } = Astro.props;
+const image = 'services-hero' in manifest.images ? 'services-hero' : 'about-workspace';
+---
+
+<section class="kz-shero on-night" aria-labelledby="services-title">
+  <Picture id={image} alt="" tone="warm" priority class="kz-shero__img" sizes="(min-width: 1024px) 55vw, 100vw" />
+  <div class="container-wide kz-shero__grid">
+    <div class="kz-shero__copy">
+      <h1 id="services-title" class="kz-shero__title" data-enter>{title}</h1>
+      {html ? <div class="kz-shero__intro" data-enter="2" set:html={html} /> : null}
+      <p class="kz-shero__count" data-enter="2">
+        <b>{String(areas).padStart(2, '0')}</b> areas · <b>{services}</b> services · one team
+      </p>
+      <div class="kz-shero__acts" data-enter="3">
+        <a class="kz-btn kz-btn--primary kz-btn--lg" href="/contact" data-hero-cta><span>Get a quote</span></a>
+        <a class="kz-link" href="#atlas-title">
+          Browse by area
+          <Icon name="chevron-down" size={16} />
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

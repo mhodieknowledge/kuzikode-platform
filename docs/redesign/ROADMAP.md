@@ -61,7 +61,7 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
   heroes, mid-page bands and editorial sections. AC: division illustrations at 390 + 1440 pass the reviewer ("custom, consistent, premium");
   IMAGE-REQUESTS.md updated; owner notified.
 - [x] **R4.1 Home.** (2026-11-12; its services band now uses the R2.5c division drawings.)
-- [ ] **R4.2 Services index + division pages + service detail.**
+- [x] **R4.2 Services index + division pages + service detail.** (Services are listed within their division page; there is no separate service-detail route.)
 - [ ] **R4.3 Pricing / packages** (presentation only; desktop comparison + mobile swipe/selector; price-accuracy test from B.6).
 - [ ] **R4.4 Our Work / portfolio + case study** (image transitions, empty state that still looks designed).
 - [ ] **R4.5 About, How we work, Industries, Technologies.**

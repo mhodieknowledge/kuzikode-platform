@@ -1,0 +1,51 @@
+---
+/**
+ * "What we offer" (R4.2): the division's services as numbered ledger entries (N.1, N.2 …) with their published pricing label and a
+ * quote link that preselects the service. Phones: a compact ruled list so every service name is visible at once (board review);
+ * desktop: two columns of ruled entries (IMG_5055 numbered rows, IMG_5067 title-left/link-right header).
+ */
+import Icon from '../../icons/Icon.astro';
+import type { PublicCategory } from '../../../server/modules/cms';
+import { canRequestQuote, pricingLabel, quotationHref } from '../../../shared/service-display';
+
+interface Props {
+  cat: PublicCategory;
+  n: number;
+  showPrices: boolean;
+}
+const { cat, n, showPrices } = Astro.props;
+---
+
+<section class="kz-sec kz-offer" aria-labelledby="offer-title">
+  <div class="container-wide">
+    <header class="kz-sec__head">
+      <h2 id="offer-title" class="kz-h2">What we offer</h2>
+      <p class="kz-offer__count">{cat.services.length} {cat.services.length === 1 ? 'service' : 'services'}</p>
+    </header>
+    <ol class="kz-offer__list" role="list">
+      {
+        cat.services.map((s, i) => (
+          <li class="kz-offer__item">
+            <span class="kz-offer__n">
+              {n}.{i + 1}
+            </span>
+            <h3 class="kz-offer__name">{s.name}</h3>
+            <p class="kz-offer__sum">{s.summary}</p>
+            <p class="kz-offer__price">{pricingLabel(s.pricingModel, s.priceMinor, s.currency, showPrices)}</p>
+            {s.status === 'coming_soon' ? (
+              <p class="kz-offer__soon">
+                <Icon name="status-pending" size={16} /> Coming soon
+              </p>
+            ) : canRequestQuote(cat.status, s.status) ? (
+              <a class="kz-link" href={quotationHref(cat.slug, s.slug)}>
+                Ask about this
+                <span class="sr-only">: {s.name}</span>
+                <Icon name="arrow-right" size={16} />
+              </a>
+            ) : null}
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>

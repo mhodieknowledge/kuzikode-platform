@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { divisionFromPrice, type DirectoryPackage } from '../../src/shared/directory';
+import { divisionFromPrice, fromSuffix, type DirectoryPackage } from '../../src/shared/directory';
 
 const pkg = (over: Partial<DirectoryPackage>): DirectoryPackage => ({
   categorySlug: 'web-development',
@@ -58,5 +58,13 @@ describe('divisionFromPrice', () => {
       'web-development',
     );
     expect(r).toBeNull();
+  });
+});
+
+describe('fromSuffix', () => {
+  it('shows nothing for one-off prices and a short unit otherwise', () => {
+    expect(fromSuffix({ amount: '$350', suffix: 'one-off' })).toBe('');
+    expect(fromSuffix({ amount: '$25', suffix: 'per hour' })).toBe(' / hour');
+    expect(fromSuffix({ amount: '$3', suffix: 'per mailbox / month' })).toBe(' / mailbox / month');
   });
 });

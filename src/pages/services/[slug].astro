@@ -1,28 +1,43 @@
 ---
-import { ArrowRight, Check } from 'lucide-react';
+/**
+ * Division page (R4.2, clean slate; recomposed after the B.0d board review): header with the division drawing → packages first,
+ * as a comparison table on the night band (IMG_5071; "Recommended" from the CMS flag) → what we offer (numbered ledger) → a
+ * full-bleed photo band carrying the overview (B.4a) → why it matters + typical deliverables → questions; the footer's routes
+ * close the page under "Tell us what you need". Data and URLs unchanged (catalogue, packagesForCategory, quotationHref).
+ */
 import PublicLayout from '../../layouts/PublicLayout.astro';
-import Icon from '../../components/public/Icon.astro';
-import PackageCard from '../../components/public/pricing/PackageCard.astro';
-import ResponsiveImage from '../../components/ResponsiveImage.astro';
+import DivisionHeader from '../../ui/public/services/DivisionHeader.astro';
+import ServiceLedger from '../../ui/public/services/ServiceLedger.astro';
+import PackageCompare from '../../ui/public/services/PackageCompare.astro';
+import PhotoBand from '../../ui/public/shared/PhotoBand.astro';
+import Accordion from '../../ui/primitives/Accordion.astro';
+import AccordionItem from '../../ui/primitives/AccordionItem.astro';
+import Icon from '../../ui/icons/Icon.astro';
 import manifest from '../../../design/images/manifest.json';
 import {
   breadcrumbLd,
-  getCategory,
+  getServiceCatalogue,
   getSettings,
   packagesForCategory,
   serviceLd,
   settingBool,
 } from '../../server/modules/cms';
-import { canRequestQuote, pricingLabel, quotationHref } from '../../shared/service-display';
+import { canRequestQuote, quotationHref } from '../../shared/service-display';
+import { divisionFromPrice, divisionShortName } from '../../shared/directory';
 
 const { ctx } = Astro.locals;
-const cat = await getCategory(ctx, Astro.params.slug ?? '');
+const catalogue = await getServiceCatalogue(ctx);
+const index = catalogue.findIndex((c) => c.slug === (Astro.params.slug ?? ''));
+const cat = catalogue[index];
 if (!cat) return new Response(null, { status: 404, statusText: 'Not found' });
 const settings = await getSettings(ctx);
 const showPrices = settingBool(settings, 'pricing.show_prices');
 const { packages } = await packagesForCategory(ctx, cat.slug);
 const quotable = canRequestQuote(cat.status);
-const heroImage = `svc-${cat.slug}` in manifest.images ? `svc-${cat.slug}` : undefined;
+const n = index + 1;
+const hue = `kz-div-${((n - 1) % 6) + 1}`;
+const from = showPrices ? divisionFromPrice(packages, cat.slug) : null;
+const bandImage = `svc-${cat.slug}` in manifest.images ? `svc-${cat.slug}` : 'about-workspace';
 const ld = [
   serviceLd(ctx, cat),
   breadcrumbLd(ctx, [
@@ -38,213 +53,98 @@ const ld = [
   title={`${cat.seoTitle ?? cat.name} · Kuzikode Technologies`}
   description={cat.seoDescription ?? cat.summary}
   whatsappMessage={`Hi Kuzikode, I'm interested in ${cat.name}.`}
+  headerTone="bone"
+  footerLead={quotable ? { title: 'Tell us what you need' } : undefined}
 >
-  <section class="bg-canvas py-14 md:py-20" aria-labelledby="division-title">
-    <div class="container-content">
-      <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-        <ol class="flex gap-1.5">
-          <li>
-            <a href="/services" class="hover:text-ink-950 hover:underline">
-              Services
-            </a>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li aria-current="page" class="text-ink-950">
-            {cat.name}
-          </li>
-        </ol>
-      </nav>
-      <div class:list={['mt-6', heroImage && 'grid items-center gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-14']}>
-        <div>
-          <div class="flex items-center gap-3">
-            <span class="flex h-11 w-11 items-center justify-center rounded-sm bg-brand-50 text-brand-600">
-              <Icon name={cat.icon} size={22} />
-            </span>
-            {cat.status === 'coming_soon' ? (
-              <span class="rounded-full bg-ink-950/5 px-2.5 py-0.5 text-xs font-semibold text-ink-800">
-                Coming soon
-              </span>
-            ) : null}
+  <DivisionHeader
+    slug={cat.slug}
+    name={cat.name}
+    summary={cat.summary}
+    n={n}
+    total={catalogue.length}
+    comingSoon={cat.status === 'coming_soon'}
+    quoteHref={quotable ? quotationHref(cat.slug) : null}
+    from={from}
+  />
+
+  {packages.length > 0 ? (
+    <section class={`kz-band on-night ${hue}`} aria-labelledby="packages-title">
+      <div class="container-wide">
+        <header class="kz-sec__head">
+          <div>
+            <h2 id="packages-title" class="kz-h2">
+              Packages and prices
+            </h2>
+            <p class="kz-lede">Published prices. The written quotation confirms the final amount before work starts.</p>
           </div>
-          <h1 id="division-title" class="mt-5 max-w-3xl text-4xl font-bold tracking-display md:text-5xl">
-            {cat.name}
-          </h1>
-          <p class="mt-4 max-w-2xl text-lg leading-8 text-ink-600">{cat.summary}</p>
-          {quotable ? (
-            <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-              <a
-                href={quotationHref(cat.slug)}
-                class="inline-flex h-12 items-center justify-center rounded-sm bg-brand-600 px-6 text-[15px] font-semibold text-white hover:bg-brand-500"
-              >
-                Request a quotation
-              </a>
-              <a
-                href="/pricing"
-                class="inline-flex h-12 items-center justify-center rounded-sm border border-line bg-surface px-6 text-[15px] font-semibold text-ink-950 hover:border-ink-400"
-              >
-                See pricing
-              </a>
-            </div>
-          ) : (
-            <p class="mt-8 max-w-xl text-[15px] text-ink-600">
-              We are preparing this service.{' '}
-              <a href="/contact" class="font-semibold text-brand-600 underline underline-offset-2">
-                Contact us
-              </a>{' '}
-              to hear when it opens.
-            </p>
-          )}
-        </div>
-        {heroImage ? (
-          <div class="overflow-hidden rounded-lg">
-            <ResponsiveImage
-              id={heroImage}
-              priority
-              sizes="(min-width: 1024px) 560px, 100vw"
-              class="aspect-[4/3] h-auto w-full object-cover"
-            />
+          <a class="kz-link" href="/pricing">
+            Compare all pricing
+            <Icon name="arrow-right" size={16} />
+          </a>
+        </header>
+        <PackageCompare packages={packages} caption={`${cat.name} packages compared`} id="compare" />
+      </div>
+    </section>
+  ) : null}
+
+  {cat.services.length > 0 ? <ServiceLedger cat={cat} n={n} showPrices={showPrices} /> : null}
+
+  {cat.description ? (
+    <PhotoBand image={bandImage} label="Overview">
+      <h2 class="kz-pband__title">How we approach {divisionShortName(cat.slug, cat.name).toLowerCase()}</h2>
+      <div class="prose-kz kz-pband__prose" set:html={cat.description} />
+    </PhotoBand>
+  ) : null}
+
+  {cat.benefits.length > 0 || cat.deliverables.length > 0 ? (
+    <section class={`kz-sec kz-gains ${hue}`} aria-label="Benefits and deliverables">
+      <div class="container-wide kz-gains__grid">
+        {cat.benefits.length > 0 ? (
+          <div>
+            <h2 class="kz-h2">Why it matters</h2>
+            <dl class="kz-gains__list" data-reveal-group>
+              {cat.benefits.map((b, i) => (
+                <div class="kz-gains__row">
+                  <dt>
+                    <span class="kz-gains__n">{String(i + 1).padStart(2, '0')}</span>
+                    {b.title}
+                  </dt>
+                  <dd>{b.body}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ) : null}
+        {cat.deliverables.length > 0 ? (
+          <div class="kz-gains__deliver">
+            <h2 class="kz-h2">Typical deliverables</h2>
+            <ul class="kz-gains__checks" role="list">
+              {cat.deliverables.map((d) => (
+                <li>
+                  <Icon name="check" size={16} />
+                  {d}
+                </li>
+              ))}
+            </ul>
           </div>
         ) : null}
       </div>
-    </div>
-  </section>
-
-  {cat.description ? (
-    <section class="bg-surface py-14 md:py-20" aria-label="Overview">
-      <div class="container-content">
-        <div class="prose-kz" set:html={cat.description} />
-      </div>
     </section>
   ) : null}
-
-  <section class="bg-surface pb-14 md:pb-20" aria-labelledby="what-title">
-    <div class="container-content">
-      <h2 id="what-title" class="mb-8 text-3xl font-bold tracking-display">
-        What we offer
-      </h2>
-      <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {cat.services.map((s) => (
-          <li class="flex flex-col rounded-md border border-line p-6">
-            <h3 class="font-sans text-base font-semibold text-ink-950">{s.name}</h3>
-            <p class="mt-2 flex-1 text-[15px] leading-6 text-ink-600">{s.summary}</p>
-            <p class="mt-4 text-[13px] font-medium text-ink-600">
-              {pricingLabel(s.pricingModel, s.priceMinor, s.currency, showPrices)}
-            </p>
-            {s.status === 'coming_soon' ? (
-              <span class="mt-3 inline-flex w-fit rounded-full bg-ink-950/5 px-2 py-0.5 text-xs font-semibold text-ink-800">
-                Coming soon
-              </span>
-            ) : canRequestQuote(cat.status, s.status) ? (
-              <a
-                href={quotationHref(cat.slug, s.slug)}
-                class="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600"
-              >
-                Request a quotation <ArrowRight size={16} aria-hidden="true" />
-                <span class="sr-only">for {s.name}</span>
-              </a>
-            ) : null}
-          </li>
-        ))}
-      </ul>
-    </div>
-  </section>
-
-  {packages.length > 0 ? (
-    <section class="bg-canvas py-14 md:py-20" aria-labelledby="packages-title">
-      <div class="container-content">
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <h2 id="packages-title" class="text-3xl font-bold tracking-display">
-            Packages
-          </h2>
-          <a href="/pricing" class="text-sm font-semibold text-brand-600 underline underline-offset-2">
-            Compare all pricing
-          </a>
-        </div>
-        <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {packages.map((p) => (
-            <PackageCard pkg={p} />
-          ))}
-        </div>
-      </div>
-    </section>
-  ) : null}
-
-  <section class="bg-surface py-14 md:py-20" aria-label="Benefits and deliverables">
-    <div class="container-content grid gap-12 lg:grid-cols-2">
-      {cat.benefits.length > 0 ? (
-        <div>
-          <h2 class="text-3xl font-bold tracking-display">Why it matters</h2>
-          <dl class="mt-8 grid gap-6 sm:grid-cols-2">
-            {cat.benefits.map((b) => (
-              <div>
-                <dt class="font-semibold text-ink-950">{b.title}</dt>
-                <dd class="mt-1 text-[15px] leading-6 text-ink-600">{b.body}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      ) : null}
-      {cat.deliverables.length > 0 ? (
-        <div>
-          <h2 class="text-3xl font-bold tracking-display">Typical deliverables</h2>
-          <ul class="mt-8 flex flex-col gap-3">
-            {cat.deliverables.map((d) => (
-              <li class="flex gap-3 text-[15px] text-ink-800">
-                <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-600">
-                  <Check size={12} strokeWidth={3} aria-hidden="true" />
-                </span>
-                {d}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-    </div>
-  </section>
 
   {cat.faq.length > 0 ? (
-    <section class="bg-surface py-14 md:py-20" aria-labelledby="faq-title">
-      <div class="container-content max-w-3xl">
-        <h2 id="faq-title" class="text-3xl font-bold tracking-display">
+    <section class="kz-sec kz-sec--inset kz-faq" aria-labelledby="faq-title">
+      <div class="container-wide kz-faq__grid">
+        <h2 id="faq-title" class="kz-h2">
           Questions
         </h2>
-        <div class="mt-8 divide-y divide-line border-y border-line">
+        <Accordion>
           {cat.faq.map((f, i) => (
-            <details class="group py-5" open={i === 0}>
-              <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-ink-950">
-                {f.q}
-                <span
-                  aria-hidden="true"
-                  class="text-xl leading-none text-ink-600 transition-transform group-open:rotate-45"
-                >
-                  +
-                </span>
-              </summary>
-              <p class="mt-3 text-[15px] leading-7 text-ink-600">{f.a}</p>
-            </details>
+            <AccordionItem title={f.q} open={i === 0}>
+              <p>{f.a}</p>
+            </AccordionItem>
           ))}
-        </div>
-      </div>
-    </section>
-  ) : null}
-
-  {quotable ? (
-    <section class="bg-surface pb-16 md:pb-24" aria-labelledby="quote-title">
-      <div class="container-content">
-        <div class="flex flex-col items-start gap-6 rounded-lg bg-ink-950 px-6 py-12 text-white md:flex-row md:items-center md:justify-between md:px-12">
-          <div>
-            <h2 id="quote-title" class="text-3xl font-bold tracking-display text-white">
-              Tell us what you need
-            </h2>
-            <p class="mt-2 text-white/70">We reply to every enquiry, usually within one business day.</p>
-          </div>
-          <a
-            href={quotationHref(cat.slug)}
-            class="inline-flex h-12 items-center rounded-sm bg-brand-600 px-6 text-[15px] font-semibold text-white hover:bg-brand-500"
-          >
-            Request a quotation
-          </a>
-        </div>
+        </Accordion>
       </div>
     </section>
   ) : null}

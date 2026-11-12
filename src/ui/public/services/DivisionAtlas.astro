@@ -1,0 +1,111 @@
+---
+/**
+ * Services index atlas (R4.2, recomposed after the board review): every division with its summary, its services and the way in.
+ * Desktop: one chapter per division: its Route drawing, the numeral at display size in the division hue, name + summary + the
+ * services as one run-on line, and the published "from" price as the row's figure with the way in. Phones: the same chapters as an accordion
+ * (numeral, name, from price in the summary row) so six divisions never become a long column of boxes (BRIEF B.1a); nothing is
+ * hidden, it is one tap away.
+ */
+import Icon from '../../icons/Icon.astro';
+import DivisionArt from '../../illustrations/DivisionArt.astro';
+import type { PublicCategory } from '../../../server/modules/cms';
+import { fromSuffix, type FromPrice } from '../../../shared/directory';
+
+interface Props {
+  categories: PublicCategory[];
+  froms: Record<string, FromPrice | null>;
+}
+const { categories, froms } = Astro.props;
+const pad = (i: number) => String(i + 1).padStart(2, '0');
+---
+
+<section class="kz-sec kz-atlas" aria-labelledby="atlas-title">
+  <div class="container-wide">
+    <header class="kz-sec__head">
+      <h2 id="atlas-title" class="kz-h2">Every service, by area</h2>
+      <a class="kz-link" href="/pricing">
+        See all prices
+        <Icon name="arrow-right" size={16} />
+      </a>
+    </header>
+
+    {/* Phones and tablets */}
+    <div class="kz-atlas__acc kz-acc">
+      {
+        categories.map((c, i) => (
+          <details class={`kz-div-${(i % 6) + 1}`} name="atlas">
+            <summary>
+              <span class="kz-atlas__sum">
+                <span class="kz-atlas__n">{pad(i)}</span>
+                <span class="kz-atlas__name">{c.name}</span>
+                {c.status === 'coming_soon' ? (
+                  <span class="kz-atlas__from">Coming soon</span>
+                ) : froms[c.slug] ? (
+                  <span class="kz-atlas__from">
+                    from <b>{froms[c.slug]!.amount}</b>
+                    {fromSuffix(froms[c.slug]!)}
+                  </span>
+                ) : null}
+              </span>
+              <span class="kz-acc__sign" aria-hidden="true" />
+            </summary>
+            <div class="kz-acc__body">
+              <p>{c.summary}</p>
+              <ul class="kz-atlas__svc" role="list">
+                {c.services.map((s) => (
+                  <li>
+                    {s.name}
+                    {s.status === 'coming_soon' ? <small> (coming soon)</small> : null}
+                  </li>
+                ))}
+              </ul>
+              <a class="kz-link" href={`/services/${c.slug}`}>
+                Open {c.name}
+                <Icon name="arrow-right" size={16} />
+              </a>
+            </div>
+          </details>
+        ))
+      }
+    </div>
+
+    {/* Desktop */}
+    <ol class="kz-atlas__list" role="list">
+      {
+        categories.map((c, i) => (
+          <li class={`kz-atlas__row kz-div-${(i % 6) + 1}`} data-ill-host>
+            <a class="kz-atlas__art" href={`/services/${c.slug}`} tabindex="-1" aria-hidden="true">
+              <DivisionArt slug={c.slug} />
+            </a>
+            <span class="kz-atlas__big">{pad(i)}</span>
+            <div class="kz-atlas__lead">
+              <h3 class="kz-atlas__title">
+                <a href={`/services/${c.slug}`}>{c.name}</a>
+              </h3>
+              <p>{c.summary}</p>
+              <p class="kz-atlas__run">
+                {c.services.map((s) => (s.status === 'coming_soon' ? `${s.name} (coming soon)` : s.name)).join(' · ')}
+              </p>
+            </div>
+            <div class="kz-atlas__fig">
+              {c.status === 'coming_soon' ? (
+                <span class="kz-atlas__figsoon">Coming soon</span>
+              ) : froms[c.slug] ? (
+                <span class="kz-atlas__figp">
+                  <small>from</small>
+                  <b>{froms[c.slug]!.amount}</b>
+                  <small>{froms[c.slug]!.suffix}</small>
+                </span>
+              ) : null}
+              <a class="kz-link" href={`/services/${c.slug}`}>
+                Open
+                <span class="sr-only">{c.name}</span>
+                <Icon name="arrow-right" size={16} />
+              </a>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>

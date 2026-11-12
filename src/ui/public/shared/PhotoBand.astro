@@ -1,0 +1,23 @@
+---
+/**
+ * Mid-page full-bleed photo band (BRIEF B.4a: 1–2 per long page) with an editorial card overlapping it. The photograph is shown in
+ * the warm duotone; the card (paper) carries the text, so legibility never depends on the image. Phones: photo strip, then the
+ * card pulled up over its lower edge; desktop: the card sits over the photo's right half.
+ */
+import Picture from '../../primitives/Picture.astro';
+
+interface Props {
+  image: string;
+  label: string;
+}
+const { image, label } = Astro.props;
+---
+
+<section class="kz-pband" aria-label={label}>
+  <Picture id={image} alt="" tone="warm" class="kz-pband__img" sizes="100vw" />
+  <div class="container-wide kz-pband__wrap">
+    <div class="kz-pband__card" data-reveal>
+      <slot />
+    </div>
+  </div>
+</section>

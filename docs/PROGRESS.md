@@ -1056,3 +1056,13 @@ The **Next step** line must be specific enough that a fresh session can continue
   sub-service route tabs, packages ledger, quote CTA with `?category=`/`?service=`), photo only in the index hero (services-hero, interim
   treatment until delivered); then R4.6b wizard removal + 301, R4.3 pricing. Further drawings (features, process, industries, empty
   states, 404/500) are added to `src/ui/illustrations/` as each page needs them.
+
+## 2026-11-12 21:00 UTC · R4.2 ✅ services index + division pages
+- New `src/ui/public/services/`: ServicesHero (photo-led night hero), DivisionAtlas (drawing · display numeral · run-on services ·
+  from figure; phone accordion), DivisionHeader (5/7 with the division drawing), ServiceLedger (ruled list), PackageCompare
+  (IMG_5071 table, phone selector + full-width action). `src/ui/public/shared/PhotoBand.astro` (mid-page band + editorial card).
+  `src/ui/tokens/services.css`. `fromSuffix` helper (+ unit test). Pages rewritten: `src/pages/services/index.astro`, `[slug].astro`.
+- Board review: FAIL → recomposed → PASS. verify green (unit 445, integration 308); services/home/mobile-limits e2e green.
+- Next step: R4.6b (wizard removal + 301 /start-a-project → /contact; contact form reads `?package=`; remove StartProjectWizard,
+  wizard e2e, `startProjectHref`), then R4.3 pricing (reuse PackageCompare per pricing tab; price-accuracy test per B.6), R4.4–R4.8.
+  Legacy `PackageCard` is still used by pricing and industries (removed in R4.3/R4.5).

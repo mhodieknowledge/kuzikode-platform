@@ -46,7 +46,7 @@ test('pricing page: tabs, packages, comparison table, add-ons, VAT note and FAQ'
 
 test('division page shows its packages with a link to pricing', async ({ page }) => {
   await page.goto('/services/cloud-it');
-  await expect(page.getByRole('heading', { name: 'Packages', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Packages and prices', exact: true })).toBeVisible();
   await expect(page.locator('[data-package="business-email"]')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Compare all pricing' })).toHaveAttribute('href', '/pricing');
   await expectAccessible(page);

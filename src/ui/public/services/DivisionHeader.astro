@@ -1,0 +1,69 @@
+---
+/**
+ * Division page header (R4.2): breadcrumb, the division's route number in its hue, the name, summary, one primary action (quote
+ * for this division) + a quiet link, the published "from" price, and the division's Route drawing (BRIEF B.4a) as the visual.
+ * Phones: drawing directly under the headline so the first screen has a visual (B.1a); desktop: 6/6 split, drawing on the right.
+ */
+import DivisionArt from '../../illustrations/DivisionArt.astro';
+import Icon from '../../icons/Icon.astro';
+import type { FromPrice } from '../../../shared/directory';
+
+interface Props {
+  slug: string;
+  name: string;
+  summary: string;
+  n: number;
+  total: number;
+  comingSoon: boolean;
+  quoteHref: string | null;
+  from: FromPrice | null;
+}
+const { slug, name, summary, n, total, comingSoon, quoteHref, from } = Astro.props;
+const pad = (x: number) => String(x).padStart(2, '0');
+---
+
+<section class={`kz-dhead kz-div-${((n - 1) % 6) + 1}`} aria-labelledby="division-title">
+  <div class="container-wide kz-dhead__grid">
+    <div class="kz-dhead__copy">
+      <nav aria-label="Breadcrumb" class="kz-crumbs">
+        <ol>
+          <li><a href="/services">Services</a></li>
+          <li aria-current="page">{name}</li>
+        </ol>
+      </nav>
+      <p class="kz-dhead__route">
+        <span class="kz-dhead__n">{pad(n)}</span> of {pad(total)}
+        {comingSoon ? <span class="kz-dhead__soon">· Coming soon</span> : null}
+      </p>
+      <h1 id="division-title" class="kz-dhead__title" data-enter>{name}</h1>
+      <p class="kz-dhead__sum" data-enter="2">{summary}</p>
+      {
+        quoteHref ? (
+          <div class="kz-dhead__acts" data-enter="2">
+            <a class="kz-btn kz-btn--primary kz-btn--lg" href={quoteHref} data-hero-cta>
+              <span>Get a quote</span>
+            </a>
+            <a class="kz-link" href="/pricing">
+              See all prices
+              <Icon name="arrow-right" size={16} />
+            </a>
+          </div>
+        ) : (
+          <p class="kz-dhead__sum">
+            We are preparing this service. <a class="kz-link" href="/contact">Contact us</a> to hear when it opens.
+          </p>
+        )
+      }
+      {
+        from ? (
+          <p class="kz-dhead__from">
+            Packages from <b>{from.amount}</b> {from.suffix}, confirmed in a written quotation
+          </p>
+        ) : null
+      }
+    </div>
+    <div class="kz-dhead__art" data-ill-host data-enter="2">
+      <DivisionArt slug={slug} />
+    </div>
+  </div>
+</section>

@@ -56,3 +56,8 @@ const SHORT_NAMES: Record<string, string> = {
 export function divisionShortName(slug: string, name: string): string {
   return SHORT_NAMES[slug] ?? name;
 }
+
+/** Unit after a "from" price for compact labels: "" for one-off, " / hour", " / mailbox / month" … */
+export function fromSuffix(f: FromPrice): string {
+  return f.suffix === 'one-off' ? '' : ` ${f.suffix.replace(/^per /, '/ ')}`;
+}

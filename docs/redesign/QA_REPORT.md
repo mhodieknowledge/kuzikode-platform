@@ -46,3 +46,14 @@ Harness: `playwright.visual.config.ts` (`SHOOT=… SHOOT_SET=all|core|quick SHOO
   web mountain/sun placeholder and gold lit collision; muddy night tints; generic sync glyph) → fixes (lagoon accent for division 06,
   cabinet → mailbox + backup cards, product grid, 58% night tints, packet on an arc) → PASS.
 - Reduced motion: `.i-move` animations are inside `prefers-reduced-motion: no-preference` only.
+
+## 2026-11-12 · R4.2 services index + division pages
+- Viewports 360, 390, 430, 768, 1024, 1440 on /services and all six division pages: no overflow, no sub-44 px controls.
+- Found and fixed: a broad desktop `.kz-track` rule stacked the packages full width; offer track lost its side padding; tablet header
+  drawing pushed the action below the fold (capped at 440 px); price units missing in the index ("from $25" → "per hour");
+  mono comma at display size ("$1, 500") → Overpass 800 tabular; phone table action clipped in the narrow column → separate full-width row.
+- Boards `docs/screenshots/redesign/boards/services-board.webp`, `services_web_development-board.webp`. Reviewer: both FAIL (six-tile
+  hero, BEFORE-shaped atlas rows, stock service-page order with card plates) → recomposed → index PASS; division PASS after the phone
+  action fix.
+- e2e: `services-public.spec.ts` (photo hero, atlas rows with drawings + units, phone accordion, comparison table, recommended column,
+  package preselect links, phone package selector).

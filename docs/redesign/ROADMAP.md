@@ -40,6 +40,11 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
   palette (mark the old prompts "superseded: palette change, don't generate") and notify the owner. AC: no blue/indigo/violet hue
   (≈200°–290°) left in tokens or components (grep + a token test); /dev/ui visual loop clean in light and dark; contrast checks pass.
 
+- [ ] **R2.6 Mobile hard-limits guard (BRIEF B.1a).** Apply the mobile type scale in tokens, rework the chosen concept's mobile hero
+  (new structure, with a visual in the first screen, short mobile headline) and convert long stacks to swipe tracks. Add the automated
+  Playwright guard spec to CI. AC: guard green on all built pages; first-screen boards (360/390/430) committed in
+  `docs/screenshots/redesign/boards/` next to the old home and webdev.co.zw.
+
 ## R3: Public site shell
 - [ ] **R3.1 Header + mobile navigation** (REDO on the new foundation) (designed mobile menu/sheet, animated indicators, sticky behaviour, primary CTA always reachable).
 - [ ] **R3.2 Footer** (distinct mobile composition, contact channels with icons, legal).

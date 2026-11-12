@@ -404,6 +404,33 @@ fails either question, redo the page before ticking the task. Store boards in `d
 More than 75% of visitors use phones. Design and verify **mobile first**, at several real sizes, on every UI change. Desktop must
 still be 100% on point; neither may be an afterthought.
 
+### B.1a MOBILE HARD LIMITS (owner, 2026-11-12: "similar hero from before and weirdly large fonts on mobile; I'm emphasising mobile view")
+Measured problem in concept "Route" at 390 px: H1 40 px over 4 lines (11-word headline), section titles ~32 px, the hero again a
+full-bleed solid-colour block with a headline, a paragraph and a stack of 6 bordered rows (the old hero structure in a new colour), and a
+button label wrapping onto two lines. These limits are **mandatory** at 360–430 px wide and enforced by an automated test:
+
+| Element (phones 360–430 px) | Limit |
+|---|---|
+| H1 | **28–34 px**, weight ≤ 700, line-height 1.05–1.15, **max 3 lines**. Write a **short mobile headline (≤ 7 words)** if the desktop one is longer |
+| H2 / section title | **22–26 px**, max 3 lines |
+| H3 / card title | 17–20 px |
+| Body | 15–16 px, line-height 1.5–1.6. Captions/meta 12–13 px |
+| Buttons | 15–16 px text, **never wrap** (one line), height ≥ 44 px |
+| Side padding | 16–20 px. Section spacing 48–72 px (not 100 px+) |
+| Mono/label text | 11–13 px, used sparingly |
+
+**Hero (phones):** the first screen (390×844) must show the headline, a one-line value statement, the primary CTA **and a visual**
+(photo, product/workspace UI fragment or a designed composition). **Banned:** the old hero structure, i.e. a full-bleed solid-colour
+block holding only a big headline + paragraph + a vertical list of boxes. Hero height ≤ ~85 svh. Compare your first screen side by side
+with the old "before" home and with webdev.co.zw mobile. If a visitor would say "same layout, new colour", redo it.
+
+**No long stacks:** more than 3 similar items in a row on mobile become a **horizontal swipe track with the next card peeking**
+(scroll-snap), a segmented control, or a compact 2-column grid. Never a column of 6 bordered boxes.
+
+**Automated guard (add in R2.x, run in CI):** a Playwright spec visits every public page at 360, 390 and 430 px and fails if: any H1 is
+> 34 px or > 3 lines; any H2 > 26 px; body text < 15 px; any button label wraps; horizontal overflow exists; the first viewport of the
+home page lacks a CTA or an image/visual element.
+
 ### B.2 Playwright visual loop (mandatory on every UI change)
 - Viewports: **360×740, 375×667, 390×844, 412×915, 430×932** (phones), **768×1024, 1024×1366** (tablets), **1280×800, 1440×900,
   1920×1080** (desktop).

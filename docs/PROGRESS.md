@@ -25,6 +25,13 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Owner brief: `docs/redesign/BRIEF.md`. Roadmap: `docs/redesign/ROADMAP.md`. Old design docs (05-DESIGN-SYSTEM, 11-DESIGN-TOOLS,
   13-IMAGERY, design/briefs, design/mockups, PROMPT-PACK) removed on purpose. Design skills installed in `.claude/skills/`.
 - **Next step:** R0.1 skills check, then R0.2 audit and R0.3 the 29 inspiration images.
+
+## 2026-11-12 11:50 UTC: OWNER STOP, design reset
+- The owner rejected the first foundation as a generic "dead UI" (navy hero, blue pill buttons with round arrow knobs, pill tabs).
+  The session was stopped. New rules: BRIEF B.0b (no blue), B.0c (no wizard), **B.0d (concept gate + anti-generic list + side-by-side
+  boards + reviewer subagent)**. R1.1, R2.1–R2.4 and R3.1–R3.2 are reopened.
+- Research (R0.x) and specs (R1.2) stay valid where they don't conflict with B.0b/B.0d. The code in `src/ui/` is replaced from the new concept.
+- **Next step:** R1.5 visual concept gate. Open the inspiration image files themselves, then build 3 concepts with comparison boards.
 ---
 
 ## 2026-11-05 23:50 UTC — P1.6, P3.1–P3.9 public site

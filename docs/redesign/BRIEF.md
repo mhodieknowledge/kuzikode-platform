@@ -373,6 +373,33 @@ not for people to come and start projects."*
   Only remove the wizard-specific endpoint/schema if nothing else uses it, and keep tests green (update or remove the wizard e2e/integration
   tests with a note in DECISIONS.md). Consultation booking and the contact form stay.
 
+### B.0d VISUAL CONCEPT GATE and ANTI-GENERIC RULES (owner, 2026-11-12)
+The owner reviewed the first build (navy hero, blue pill buttons with round arrow knobs, pill tab bar) and called it **"a dead UI…
+not referencing my images and not using any skills"**. It was the generic AI-SaaS look. Therefore:
+
+**1. Images are design inputs, not text notes.** Before designing any page, section or component, **open (Read) the actual
+reference image files** mapped to it in `IMAGE_TRACEABILITY.md`, and name in the commit/PR notes which images and which specific
+traits (composition, type scale, crop, rhythm, interaction) the design takes from them. Text summaries alone are not enough.
+
+**2. Concept gate before any foundation code (R1.5).** Build **3 genuinely different full home-page concepts** (desktop and mobile)
+as static HTML/CSS prototypes in `design/concepts/<a|b|c>/`. Each is composed from named reference images and uses a non-blue palette
+(B.0b). Render each with Playwright at 390 and 1440 and make a **comparison board** image per concept: concept screenshots next to
+the reference images that inspired it. Critique each with `impeccable` (critique/craft-floor) and the `design-taste-frontend` checker,
+and score them against the anti-generic list below. Pick the strongest and push the boards to `docs/screenshots/redesign/concepts/`.
+Then send the owner a push notification with the links (FYI only, don't wait for a reply). The tokens and components are derived
+**from the chosen concept**, not invented first.
+
+**3. Banned generic patterns** (unless a reference image clearly calls for it, in which case cite it):
+pill-shaped buttons everywhere; a circular arrow "knob" inside buttons; navy/dark hero + bright blue CTA; centred hero with two
+buttons and a subtitle; pill tab bars as the main navigation device; eyebrow labels above every heading; uniform 3-column card grids
+repeated down the page; icon-in-rounded-square feature grids; gradient blobs, glows, glassmorphism; generic "trusted by" strips;
+stock smiling-team photos; identical section rhythm on every page; default Tailwind/shadcn look.
+
+**4. Distinctiveness test (every page, R4–R6).** Make a side-by-side board: new screenshot (390 + 1440), its reference images, and the
+old "before" screenshot. A fresh reviewer subagent (`impeccable-finish-reviewer`, given only the board, BRIEF B.0b/B.0d and the
+direction) must answer: *Would a design lead call this generic or template-like?* and *Does it visibly use the referenced ideas?* If it
+fails either question, redo the page before ticking the task. Store boards in `docs/screenshots/redesign/boards/`.
+
 ### B.1 Mobile is the priority, and both are 100%
 More than 75% of visitors use phones. Design and verify **mobile first**, at several real sizes, on every UI change. Desktop must
 still be 100% on point; neither may be an afterthought.

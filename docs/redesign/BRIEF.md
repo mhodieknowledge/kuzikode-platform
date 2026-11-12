@@ -323,6 +323,27 @@ me to supervise the process.
 
 ## B. Owner additions and operating rules for the agent
 
+### B.0 CLEAN SLATE: rebuild from zero, never restyle (owner's explicit rule, overrides any plan)
+The owner's words: *"We are not fixing but starting afresh completely. Just the UI/UX."*
+- **The visual layer is rebuilt from scratch.** Every page, layout, section and component the user sees (public site, client
+  workspace, admin, documents/checkout, emails' web views) gets **new markup, new structure and new styles** designed from the new
+  direction. **"Restyle", "reskin", "re-theme", "adapt the existing component" are not allowed** as a strategy. Don't open an old
+  component and change its classes. Write the new one.
+- **Build the new UI in a new tree:** `src/ui/` (design system primitives, icons, motion utilities), `src/ui/public/`,
+  `src/ui/workspace/`, `src/ui/admin/`, and new layouts (`src/layouts/v2/` or replace the files with new contents written from scratch).
+  Pages are rewritten to compose the new components. The page's **information architecture and section order come from the new
+  specs, not from the old page.**
+- **What may be reused (logic only, never presentation):** server services, API routes, DB/repositories, Zod schemas, auth,
+  payments, data loaders in page frontmatter, form submit handlers and endpoint contracts, validation, pure utility functions,
+  i18n/content strings from the CMS. If an old React island mixes logic and markup, extract the logic into a hook or module and write
+  new markup around it.
+- **Delete the old presentation code** (old components, old layouts, old CSS/tokens) once nothing references it. By the end of R6,
+  `src/components/` legacy UI must be gone (or contain only code that was rewritten under the new system). Track this in
+  `IMPLEMENTATION_PLAN.md` with a "legacy removed" checklist.
+- **Test for freshness:** for each rebuilt page, put the old "before" screenshot next to the new one. If a visitor could recognise it as
+  the same layout with new colours, it isn't done. Redesign it.
+- Behaviour, data, URLs, form fields, pricing values and functional flows stay identical (the e2e and pricing-accuracy tests prove it).
+
 ### B.1 Mobile is the priority, and both are 100%
 More than 75% of visitors use phones. Design and verify **mobile first**, at several real sizes, on every UI change. Desktop must
 still be 100% on point; neither may be an afterthought.

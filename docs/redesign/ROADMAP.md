@@ -15,6 +15,12 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
 - [x] **R1.2 Specs.** `RESPONSIVE_DESIGN_SPEC.md` (per page: mobile composition first, then tablet and desktop; carousels, segmented controls and sticky CTAs where they help), `MOTION_AND_INTERACTION_SPEC.md` (durations, easings, choreography, reduced motion), `PANEL_DESIGN_SPEC.md` (Linux-inspired client workspace + admin, distinct but related), `UI_UX_RECONSTRUCTION_PLAN.md` + `IMPLEMENTATION_PLAN.md` (order, component inventory, what's reused vs rebuilt). AC: files exist and agree with each other.
 - [x] **R1.3 First image batch.** Write batch 1 of image prompts for the new direction in `IMAGE-REQUESTS.md` and notify the owner (B.4). AC: committed; notification sent or failure logged.
 
+## R1.4: Clean-slate correction (inserted 2026-11-12 by the owner)
+- [ ] **R1.4 Rewrite the plan for a clean slate (BRIEF B.0).** Revise `IMPLEMENTATION_PLAN.md` and `UI_UX_RECONSTRUCTION_PLAN.md`: every
+  "Restyle"/"reuse presentation" entry becomes **Rebuild (new component in `src/ui/…`)**, with only logic reuse listed. Add the
+  "legacy presentation removed" checklist (every old component and layout file, with the task that deletes it). AC: grep of both plans
+  finds no "restyle"/"reskin" strategy entries. Logged in DECISIONS.md.
+
 ## R2: Foundation
 - [ ] **R2.1 Design tokens + base styles** (colour, type scale with fluid mobile→desktop sizing, spacing, radius, shadows, z-index, motion tokens, dark/light surfaces for panels). Replace the old token set.
 - [ ] **R2.2 Icon system** (single family, wrapper component, sizes, stroke, a11y labels) and an audit list of every place that needs an icon.

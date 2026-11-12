@@ -1,0 +1,497 @@
+/*
+ * Contact + consultation (R4.6): channel ledger, phone quick row, the enquiry sheet (numbered parts, preview line), the
+ * consultation night band. Forms follow mobile-native: 16 px inputs (no zoom), ≥ 44 px targets, one column on phones,
+ * the action full width on phones.
+ */
+@layer components {
+  /* ---------- Contact page ---------- */
+  .kz-contact {
+    padding-block: 16px 72px;
+  }
+  .kz-contact__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+  .kz-contact__title {
+    font-size: 2rem;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+  }
+  .kz-contact__intro {
+    margin-top: 10px;
+    max-width: 52ch;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--ink-700);
+  }
+  .kz-contact__quick {
+    margin-top: 16px;
+  }
+  .kz-quick {
+    display: flex;
+    gap: 8px;
+    padding: 0;
+    list-style: none;
+  }
+  .kz-quick li {
+    flex: 1 1 0;
+  }
+  .kz-quick a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    border-radius: var(--radius-plate);
+    background: var(--paper);
+    box-shadow: inset 0 0 0 1px var(--bone-300);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--ink-900);
+    white-space: nowrap;
+  }
+  .kz-contact__sheet,
+  .kz-consult__sheet {
+    margin-inline: calc(-1 * var(--gutter));
+    padding: 24px var(--gutter) 28px;
+    background: var(--paper);
+    color: var(--ink-700);
+    box-shadow: 0 0 0 1px var(--bone-200);
+  }
+  .kz-contact__sheet-h {
+    font-size: 1.25rem;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--ink-900);
+    margin-bottom: 20px;
+  }
+  .kz-contact__side {
+    display: grid;
+    gap: 24px;
+    align-content: start;
+  }
+  .kz-channels {
+    border-top: 2px solid var(--ink-900);
+  }
+  .kz-channels div {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    min-height: 52px;
+    padding-block: 8px;
+    border-bottom: 1px solid var(--bone-300);
+  }
+  .kz-channels dt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ink-700);
+  }
+  .kz-channels dd {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-weight: 600;
+    color: var(--ink-900);
+  }
+  .kz-channels dd a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--ink-900);
+    text-decoration: underline;
+    text-decoration-color: var(--bone-300);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.3em;
+  }
+  .kz-consult-plate {
+    display: grid;
+    gap: 6px;
+    padding: 20px 20px 10px;
+    border-radius: 10px;
+  }
+  .kz-consult-plate__h {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    color: var(--on-night);
+  }
+  .kz-consult-plate__h .kz-icon {
+    color: var(--lit);
+  }
+  @media (min-width: 640px) {
+    .kz-contact__title {
+      font-size: clamp(2.5rem, 1rem + 3.1vw, 3.75rem);
+    }
+    .kz-contact__intro {
+      font-size: 1.125rem;
+    }
+    .kz-contact__sheet,
+    .kz-consult__sheet {
+      margin-inline: 0;
+      padding: 32px;
+      border-radius: 14px;
+    }
+    .kz-quick {
+      max-width: 420px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .kz-contact {
+      padding-block: 48px 112px;
+    }
+    .kz-contact__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      grid-template-rows: auto 1fr;
+      column-gap: 72px;
+      row-gap: 40px;
+    }
+    .kz-contact__head {
+      grid-column: 1;
+      grid-row: 1;
+    }
+    .kz-contact__quick {
+      display: none;
+    }
+    .kz-contact__sheet {
+      grid-column: 2;
+      grid-row: 1 / 3;
+      padding: 40px 44px 44px;
+      box-shadow:
+        0 0 0 1px var(--bone-200),
+        0 30px 60px -36px rgb(20 20 18 / 0.35);
+    }
+    .kz-contact__side {
+      grid-column: 1;
+      grid-row: 2;
+      position: sticky;
+      top: 104px;
+    }
+  }
+
+  /* ---------- Enquiry form ---------- */
+  .kz-eform {
+    display: grid;
+    gap: 28px;
+  }
+  .kz-eform__part {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .kz-eform__part legend {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--bone-200);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .kz-eform__n {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--ink-700);
+  }
+  .kz-eform__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 16px;
+  }
+  .kz-eform__slots {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .kz-eform__slots .kz-input {
+    min-width: 0;
+    width: 100%;
+  }
+  .kz-eform__alert {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm, 4px);
+    background: color-mix(in srgb, var(--danger-600, #c9372c) 8%, var(--paper));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger-600, #c9372c) 35%, transparent);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--danger-700, #a3281f);
+  }
+  .kz-eform__pkg {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: var(--radius-plate);
+    background: var(--bone-100);
+    font-size: 0.9375rem;
+    color: var(--ink-700);
+  }
+  .kz-eform__pkg strong {
+    color: var(--ink-900);
+  }
+  .kz-eform__foot {
+    display: grid;
+    gap: 14px;
+    padding-top: 4px;
+  }
+  .kz-eform__summary {
+    padding: 12px 14px;
+    border-radius: var(--radius-plate);
+    background: var(--bone-100);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--ink-900);
+  }
+  .kz-eform__summary span {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ink-700);
+  }
+  .kz-eform .kz-check a {
+    color: var(--link);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .kz-eform__send {
+    width: 100%;
+  }
+  .kz-hp {
+    position: absolute;
+    left: -9999px;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+  .kz-sent {
+    display: grid;
+    justify-items: start;
+    gap: 12px;
+    padding-block: 12px;
+    color: var(--ink-700);
+  }
+  .kz-sent > .kz-icon {
+    color: var(--ok-700);
+  }
+  .kz-sent__title {
+    font-size: 1.5rem;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--ink-900);
+  }
+  .kz-sent__ref {
+    font-family: var(--font-mono);
+    color: var(--ink-900);
+  }
+  @media (min-width: 640px) {
+    .kz-eform__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 20px;
+    }
+    .kz-eform__send {
+      width: auto;
+      justify-self: start;
+    }
+  }
+
+  /* ---------- Consultation ---------- */
+  .kz-consult {
+    padding-block: 16px 0;
+  }
+  .kz-consult__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+  .kz-consult__meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--on-night-2);
+  }
+  .kz-consult__meta .kz-icon {
+    color: var(--lit);
+  }
+  .kz-consult__title {
+    margin-top: 12px;
+    font-size: 2rem;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    max-width: 16ch;
+  }
+  .kz-consult__lede {
+    margin-top: 12px;
+    max-width: 50ch;
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+  .kz-consult__h {
+    margin-top: 28px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--lit);
+  }
+  .kz-consult__points {
+    margin-top: 10px;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--night-700);
+  }
+  .kz-consult__points li {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 8px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--night-700);
+    font-size: 1rem;
+    line-height: 1.45;
+    color: var(--on-night);
+  }
+  .kz-consult__n {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.8;
+    color: var(--on-night-3);
+  }
+  .kz-consult__sheet {
+    color-scheme: light;
+  }
+  .kz-consult__sheet :where(h2, h3, legend) {
+    color: var(--ink-900);
+  }
+  .kz-consult__cal {
+    margin-bottom: 20px;
+  }
+  @media (min-width: 640px) {
+    .kz-consult__title {
+      font-size: clamp(2.5rem, 1rem + 3.1vw, 3.5rem);
+    }
+    .kz-consult__lede {
+      font-size: 1.125rem;
+    }
+    .kz-consult {
+      padding-bottom: 72px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .kz-consult {
+      padding-block: 64px 112px;
+    }
+    .kz-consult__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: 72px;
+      align-items: start;
+    }
+    .kz-consult__grid {
+      grid-template-rows: auto 1fr;
+      row-gap: 40px;
+    }
+    .kz-consult__copy {
+      grid-column: 1;
+      grid-row: 1;
+    }
+    .kz-consult__after {
+      grid-column: 1;
+      grid-row: 2;
+    }
+    .kz-consult__sheet {
+      grid-column: 2;
+      grid-row: 1 / 3;
+    }
+    .kz-consult__sheet {
+      padding: 40px 44px 44px;
+      box-shadow: 0 30px 60px -28px rgb(0 0 0 / 0.55);
+    }
+  }
+
+  .kz-consult__after {
+    padding-bottom: 56px;
+  }
+  .kz-consult__after .kz-consult__h {
+    margin-top: 0;
+  }
+  @media (min-width: 1024px) {
+    .kz-consult__after {
+      padding-bottom: 0;
+    }
+  }
+  .kz-nowrap {
+    white-space: nowrap;
+  }
+  .kz-contact__h {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  /* "After you send": the next steps as stops on a short road (DESIGN_DIRECTION §3 road strip, vertical). */
+  .kz-next {
+    position: relative;
+    display: grid;
+    gap: 14px;
+    margin-top: 12px;
+    padding: 0;
+    list-style: none;
+  }
+  .kz-next::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    background: repeating-linear-gradient(180deg, var(--ink-900) 0 6px, transparent 6px 11px);
+  }
+  .kz-next li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--ink-900);
+  }
+  .kz-next__mark {
+    display: grid;
+    place-items: center;
+    height: 32px;
+    border-radius: var(--radius-plate);
+    background: var(--paper);
+    box-shadow:
+      inset 0 0 0 2px var(--ink-900),
+      0 0 0 3px var(--bone-50);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .kz-next--night::before {
+    background: repeating-linear-gradient(180deg, var(--on-night-3) 0 6px, transparent 6px 11px);
+  }
+  .kz-next--night li {
+    color: var(--on-night);
+  }
+  .kz-next--night .kz-next__mark {
+    background: var(--night-800);
+    color: var(--on-night);
+    box-shadow:
+      inset 0 0 0 2px var(--on-night-3),
+      0 0 0 3px var(--night-900);
+  }
+}

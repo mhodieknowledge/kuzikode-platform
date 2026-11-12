@@ -95,3 +95,14 @@ Harness: `playwright.visual.config.ts` (`SHOOT=… SHOOT_SET=all|core|quick SHOO
   unstretched. Not re-reviewed after that last About fix (usage economy); verified by screenshots.
 - Interim photos stay until batch 3 (`about-hero`, `about-studio`, `how-we-work-band`) is delivered.
 - e2e: `about.spec.ts`, `industries.spec.ts` (+ areas-of-work links), `site-content.spec.ts` (Tools we build with, 5 road stops, 5 scope milestones).
+
+## R4.6 Contact + consultation (2026-11-12)
+- References opened: IMG_5018 (two-column form + summary), IMG_5017 (split brand panel + form), IMG_5015 (step progress → numbered parts).
+- Viewports: 360, 390, 768, 1440 (+ package preselect at 390/1440). No overflow; inputs 16 px; targets ≥ 44 px; one column and a full-width action on phones.
+- Interactions: category → service select, package preselect + message prefill, "You are sending" preview (always shown), server field errors,
+  consultation times (client-side "at least one time" check), success panels with the reference.
+- Boards `contact-board.webp`, `consultation-board.webp`. Reviewer (opus/medium): both FAIL (desktop voids, plain preview only on package
+  links, H1 breaking "30-/minute", time slots, eyebrow-like meta line, "Service" label pattern) → all fixed: "After you send" road stops on both
+  pages, preview on every visit, no-wrap "30-minute", slots full width with "(optional)" labels, meta line removed, Service "(optional)".
+  Not re-reviewed (usage economy); verified by screenshots.
+- e2e: `contact.spec.ts` (+ preview line), `engagement.spec.ts` consultation flow unchanged and green.

@@ -1,7 +1,11 @@
 ---
-import { CalendarClock } from 'lucide-react';
+/**
+ * Consultation booking (R4.6, rebuilt from scratch). Night band: the offer and what the call covers (numbered) on the left; on
+ * the right a paper sheet with either the booking calendar link (when `booking.cal_url` is an https link) or the request form with
+ * up to three preferred times. Phones: heading, offer, the three points as a compact numbered list, then the sheet.
+ */
 import PublicLayout from '../layouts/PublicLayout.astro';
-import ConsultationForm from '../components/forms/ConsultationForm';
+import ConsultationForm from '../ui/public/forms/ConsultationForm';
 import { breadcrumbLd, getSettings, settingText } from '../server/modules/cms';
 
 const { ctx } = Astro.locals;
@@ -9,6 +13,16 @@ const settings = await getSettings(ctx);
 const raw = settingText(settings, 'booking.cal_url');
 // Only an https link is used; anything else falls back to the request form.
 const calUrl = raw && /^https:\/\/[^\s"'<>]+$/.test(raw) ? raw : null;
+const after = [
+  'We confirm one of your times by email, usually within one business day.',
+  'We talk by video or phone for up to 30 minutes.',
+  'If you want to go ahead, we follow up with a written quotation.',
+];
+const points = [
+  'A clear picture of what your project involves',
+  'Which package or approach fits, and why',
+  'What a quotation will cover',
+];
 ---
 
 <PublicLayout
@@ -16,46 +30,65 @@ const calUrl = raw && /^https:\/\/[^\s"'<>]+$/.test(raw) ? raw : null;
   title="Book a free consultation · Kuzikode Technologies"
   description="Book a free 30-minute consultation with Kuzikode Technologies to talk through your website, app or system."
   whatsappMessage="Hi Kuzikode, I'd like to book a free consultation."
+  headerTone="night"
+  footerCta={false}
 >
-  <section class="bg-canvas py-14 md:py-20" aria-labelledby="consult-title">
-    <div class="container-content grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_1.3fr]">
-      <div>
-        <span class="flex h-11 w-11 items-center justify-center rounded-sm bg-brand-50 text-brand-600">
-          <CalendarClock size={22} aria-hidden="true" />
-        </span>
-        <h1 id="consult-title" class="mt-5 text-4xl font-bold tracking-display md:text-5xl">
-          Book a free 30-minute consultation
+  <section class="kz-consult on-night" aria-labelledby="consult-title">
+    <div class="container-wide kz-consult__grid">
+      <div class="kz-consult__copy">
+        <h1 id="consult-title" class="kz-consult__title" data-enter>
+          Book a free <span class="kz-nowrap">30-minute</span> consultation
         </h1>
-        <p class="mt-4 text-lg leading-8 text-ink-600">
+        <p class="kz-consult__lede" data-enter="2">
           Talk through what you need with us by video or phone. We will ask about your goals, suggest options and
           explain the next steps. There is no charge and no obligation.
         </p>
-        <ul class="mt-6 flex flex-col gap-2 text-[15px] text-ink-800">
-          <li>· A clear picture of what your project involves</li>
-          <li>· Which package or approach fits, and why</li>
-          <li>· What a quotation will cover</li>
-        </ul>
+        <h2 class="kz-consult__h" data-enter="2">
+          You leave the call with
+        </h2>
+        <ol class="kz-consult__points" role="list" data-enter="3">
+          {points.map((p, i) => (
+            <li>
+              <span class="kz-consult__n">{String(i + 1).padStart(2, '0')}</span>
+              {p}
+            </li>
+          ))}
+        </ol>
       </div>
-      <div class="rounded-lg border border-line bg-surface p-6 md:p-8">
+      <div class="kz-consult__sheet on-bone" data-enter="3">
         {calUrl ? (
           <div data-booking-link>
-            <h2 class="text-2xl font-bold tracking-display">Choose a time</h2>
-            <p class="mt-2 text-ink-600">Pick a slot in our online calendar. You will get a confirmation by email.</p>
+            <h2 class="kz-contact__sheet-h">Choose a time</h2>
+            <p class="kz-consult__cal">Pick a slot in our online calendar. You will get a confirmation by email.</p>
             <a
+              class="kz-btn kz-btn--primary kz-btn--lg kz-btn--block"
               href={calUrl}
               target="_blank"
               rel="noopener noreferrer"
-              class="mt-6 inline-flex h-12 items-center rounded-sm bg-brand-600 px-6 text-[15px] font-semibold text-white hover:bg-brand-500"
             >
-              Open the booking calendar<span class="sr-only"> (opens in a new tab)</span>
+              <span>Open the booking calendar</span>
+              <span class="sr-only"> (opens in a new tab)</span>
             </a>
           </div>
         ) : (
           <>
-            <h2 class="mb-6 text-2xl font-bold tracking-display">Request a time</h2>
+            <h2 class="kz-contact__sheet-h">Request a time</h2>
             <ConsultationForm client:load siteKey={ctx.config.turnstileSiteKey} />
           </>
         )}
+      </div>
+      <div class="kz-consult__after">
+        <h2 class="kz-consult__h">After you send</h2>
+        <ol class="kz-next kz-next--night" role="list">
+          {after.map((t, i) => (
+            <li>
+              <span class="kz-next__mark" aria-hidden="true">
+                S{i + 1}
+              </span>
+              <span>{t}</span>
+            </li>
+          ))}
+        </ol>
       </div>
     </div>
   </section>

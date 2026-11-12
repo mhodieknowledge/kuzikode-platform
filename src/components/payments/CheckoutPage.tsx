@@ -12,7 +12,7 @@
 import { CheckCircle2, Clock, CreditCard, Landmark, Smartphone, Wallet, XCircle, type LucideIcon } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type ClipboardEvent, type KeyboardEvent } from 'react';
 import { ApiError, Button, Field, Input, QrCode, Spinner, apiFetch, cn, newIdempotencyKey } from '../ui';
-import { Turnstile } from '../forms/Turnstile';
+import { Turnstile } from '../../ui/public/forms/Turnstile';
 import { formatMoney } from '../../shared/money';
 import { normalizeZimPhone, walletDeepLink } from '../../shared/payment-methods';
 

@@ -2,7 +2,7 @@ import { CheckCircle2 } from 'lucide-react';
 import { useCallback, useState, type FormEvent } from 'react';
 import type { CustomQuestion } from '../../shared/schemas/careers';
 import { ApiError, apiFetch, Button, Checkbox, Field, FileUpload, Input, Select, Textarea } from '../ui';
-import { Turnstile } from './Turnstile';
+import { Turnstile } from '../../ui/public/forms/Turnstile';
 
 interface Props {
   /** Posting slug, or null for a general application. */

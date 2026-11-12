@@ -41,7 +41,7 @@ const pad = (i: number) => String(i + 1).padStart(2, '0');
     {
       divisions.length > 0 ? (
         <nav class="kz-ahero__plate" aria-label="Our areas of work" data-enter="3">
-          <p class="kz-ahero__plate-h">{`${divisions.length} areas · one team`}</p>
+          <p class="kz-ahero__plate-h">{`${divisions.length} areas, one team`}</p>
           <ol role="list">
             {divisions.map((d, i) => (
               <li class={`kz-div-${(i % 6) + 1}`}>

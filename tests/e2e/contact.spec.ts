@@ -7,7 +7,7 @@ test('visitor sends an enquiry and sees a reference; quotation links preselect t
   await page.goto('/contact?category=web-development&service=e-commerce');
   await expect(page.getByRole('heading', { level: 1, name: 'Contact us' })).toBeVisible();
   await expect(page.getByLabel('What is this about?')).toHaveValue('web-development');
-  await expect(page.getByLabel('Service', { exact: true })).toHaveValue('e-commerce');
+  await expect(page.getByLabel('Service (optional)', { exact: true })).toHaveValue('e-commerce');
   await expectAccessible(page);
   await screenshots(page, 'contact');
 
@@ -43,5 +43,7 @@ test('the retired wizard URL 301s to the contact form, keeping the package prese
   await expect(page.locator('[data-package="business-website"]')).toContainText('Package: Business Website');
   await expect(page.getByLabel('What is this about?')).not.toHaveValue('');
   await expect(page.getByLabel('Message')).toHaveValue(/request the Business Website package/);
+  // The request is previewed before it is sent.
+  await expect(page.locator('.kz-eform__summary')).toContainText('Business Website package');
   expect(await page.locator('a[href^="/start-a-project"]').count()).toBe(0);
 });

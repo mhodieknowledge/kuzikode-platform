@@ -1,8 +1,14 @@
 ---
-import { Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
+/**
+ * Contact (R4.6, rebuilt from scratch). Desktop: the heading, intro, channel ledger and the consultation plate on the left; the
+ * enquiry form on a paper sheet on the right (three numbered parts and a "you are sending" preview). Phones: heading, intro, a
+ * quick row of the tappable channels, the form, then the channel ledger and the consultation plate. No photograph (B.4a).
+ * `?category=`, `?service=` and `?package=` preselect the form (BRIEF B.0c); the package decides its division and service.
+ */
 import PublicLayout from '../layouts/PublicLayout.astro';
-import ContactForm from '../components/forms/ContactForm';
-import ResponsiveImage from '../components/ResponsiveImage.astro';
+import ContactForm from '../ui/public/forms/ContactForm';
+import Channels from '../ui/public/forms/Channels.astro';
+import Icon from '../ui/icons/Icon.astro';
 import { getPage, getPricingCatalogue, getServiceCatalogue, getSettings, settingText } from '../server/modules/cms';
 import type { Section } from '../shared/schemas/cms';
 
@@ -21,18 +27,24 @@ const divisions = catalogue
     name: c.name,
     services: c.services.filter((s) => s.status === 'active').map((s) => ({ slug: s.slug, name: s.name })),
   }));
-const email = settingText(settings, 'contact.email');
-const phone = settingText(settings, 'contact.phone');
-const whatsapp = settingText(settings, 'contact.whatsapp_number');
-const whatsappMsg = settingText(settings, 'contact.whatsapp_message') ?? '';
-const location = settingText(settings, 'contact.address') ?? settingText(settings, 'contact.location');
-const hours = settingText(settings, 'contact.hours');
-// "Request this package" links carry ?package= (BRIEF B.0c): the package decides the division and service it belongs to.
+const channels = {
+  email: settingText(settings, 'contact.email') ?? null,
+  phone: settingText(settings, 'contact.phone') ?? null,
+  whatsapp: settingText(settings, 'contact.whatsapp_number') ?? null,
+  whatsappMsg: settingText(settings, 'contact.whatsapp_message') ?? '',
+  location: settingText(settings, 'contact.address') ?? settingText(settings, 'contact.location') ?? null,
+  hours: settingText(settings, 'contact.hours') ?? null,
+};
 const packageSlug = Astro.url.searchParams.get('package')?.slice(0, 80);
 const chosen = packageSlug ? pricing.packages.find((p) => p.slug === packageSlug && p.status === 'active') : undefined;
 const category = chosen?.categorySlug ?? Astro.url.searchParams.get('category') ?? undefined;
 const service = (chosen ? chosen.serviceSlug : Astro.url.searchParams.get('service')) ?? undefined;
 const initialPackage = chosen ? { slug: chosen.slug, name: chosen.name } : undefined;
+const next = [
+  'We read your message and reply, usually within one business day.',
+  'We come back with questions or a written quotation.',
+  'Work starts only once you approve the scope in writing.',
+];
 ---
 
 <PublicLayout
@@ -40,69 +52,22 @@ const initialPackage = chosen ? { slug: chosen.slug, name: chosen.name } : undef
   title={page?.seoTitle ?? 'Contact Kuzikode Technologies'}
   description={page?.seoDescription ?? undefined}
   canonicalPath="/contact"
+  headerTone="bone"
+  footerCta={false}
 >
-  <section class="bg-canvas py-14 md:py-20">
-    <div class="container-content grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_1.5fr]">
-      <div>
-        <h1 class="text-4xl font-bold tracking-display md:text-5xl">{intro?.content.title ?? 'Contact us'}</h1>
-        {intro ? <div class="prose-kz mt-5" set:html={intro.content.html} /> : null}
-        <ul class="mt-8 flex flex-col gap-4 text-[15px]">
-          {email ? (
-            <li class="flex items-center gap-3">
-              <Mail size={18} aria-hidden="true" className="text-brand-600" />
-              <a href={`mailto:${email}`} class="text-ink-950 hover:underline">
-                {email}
-              </a>
-            </li>
-          ) : null}
-          {phone ? (
-            <li class="flex items-center gap-3">
-              <Phone size={18} aria-hidden="true" className="text-brand-600" />
-              <a href={`tel:${phone.replace(/[^\d+]/g, '')}`} class="text-ink-950 hover:underline">
-                {phone}
-              </a>
-            </li>
-          ) : null}
-          {whatsapp ? (
-            <li class="flex items-center gap-3">
-              <MessageCircle size={18} aria-hidden="true" className="text-brand-600" />
-              <a
-                href={`https://wa.me/${whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappMsg)}`}
-                rel="noopener noreferrer"
-                target="_blank"
-                class="text-ink-950 hover:underline"
-              >
-                Chat on WhatsApp
-              </a>
-            </li>
-          ) : null}
-          {location ? (
-            <li class="flex items-center gap-3">
-              <MapPin size={18} aria-hidden="true" className="text-brand-600" />
-              <span class="text-ink-950">{location}</span>
-            </li>
-          ) : null}
-          {hours ? <li class="text-ink-600">{hours}</li> : null}
-        </ul>
-        <div class="mt-8 rounded-md bg-surface p-5">
-          <p class="font-semibold text-ink-950">Prefer to talk it through?</p>
-          <p class="mt-1 text-[15px] text-ink-600">Book a free 30-minute call by video or phone.</p>
-          <a
-            href="/consultation"
-            class="mt-3 inline-flex text-sm font-semibold text-brand-600 underline underline-offset-2"
-          >
-            Book a free consultation
-          </a>
-        </div>
-        <div class="mt-8 hidden overflow-hidden rounded-lg lg:block">
-          <ResponsiveImage
-            id="contact-office"
-            sizes="(min-width: 1024px) 460px, 100vw"
-            class="aspect-[16/9] h-auto w-full object-cover"
-          />
+  <section class="kz-contact" aria-labelledby="contact-title">
+    <div class="container-wide kz-contact__grid">
+      <div class="kz-contact__head">
+        <h1 id="contact-title" class="kz-contact__title" data-enter>
+          {intro?.content.title ?? 'Contact us'}
+        </h1>
+        {intro ? <div class="kz-contact__intro" data-enter="2" set:html={intro.content.html} /> : null}
+        <div class="kz-contact__quick" data-enter="2">
+          <Channels {...channels} compact />
         </div>
       </div>
-      <div class="rounded-lg border border-line bg-surface p-6 md:p-8">
+      <div class="kz-contact__sheet" data-enter="3">
+        <h2 class="kz-contact__sheet-h">Send us a message</h2>
         <ContactForm
           client:load
           divisions={divisions}
@@ -112,6 +77,33 @@ const initialPackage = chosen ? { slug: chosen.slug, name: chosen.name } : undef
           initialPackage={initialPackage}
         />
       </div>
+      <aside class="kz-contact__side" aria-label="Other ways to reach us">
+        <div>
+          <h2 class="kz-contact__h">After you send</h2>
+          <ol class="kz-next" role="list">
+            {next.map((t, i) => (
+              <li>
+                <span class="kz-next__mark" aria-hidden="true">
+                  S{i + 1}
+                </span>
+                <span>{t}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <Channels {...channels} />
+        <div class="kz-consult-plate on-night">
+          <p class="kz-consult-plate__h">
+            <Icon name="calendar" size={20} />
+            Prefer to talk it through?
+          </p>
+          <p>Book a free 30-minute call by video or phone.</p>
+          <a class="kz-link" href="/consultation">
+            Book a free consultation
+            <Icon name="arrow-right" size={16} />
+          </a>
+        </div>
+      </aside>
     </div>
   </section>
 </PublicLayout>

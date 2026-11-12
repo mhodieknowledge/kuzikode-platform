@@ -45,7 +45,7 @@ const rows = industries.map((i) => {
         {intro ? <div class="kz-ihead__intro" data-enter="2" set:html={intro.content.html} /> : null}
         <p class="kz-ihead__count" data-enter="2">
           <b>{String(industries.length).padStart(2, '0')}</b>
-          {' sectors · served by '}
+          {' sectors, served by '}
           <b>{categories.length}</b>
           {' areas of work'}
         </p>

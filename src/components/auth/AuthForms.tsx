@@ -5,7 +5,7 @@
 import { CheckCircle2 } from 'lucide-react';
 import { useCallback, useState, type FormEvent, type ReactNode } from 'react';
 import { ApiError, apiFetch, Button, Field, Input, QrCode } from '../ui';
-import { Turnstile } from '../forms/Turnstile';
+import { Turnstile } from '../../ui/public/forms/Turnstile';
 
 type Audience = 'admin' | 'portal';
 const base = (a: Audience) => `/api/v1/auth/${a}`;

@@ -1,7 +1,7 @@
 import { CheckCircle2 } from 'lucide-react';
 import { useCallback, useState, type FormEvent } from 'react';
 import { ApiError, apiFetch, Button, Checkbox, Field, Input, Textarea } from '../ui';
-import { Turnstile } from './Turnstile';
+import { Turnstile } from '../../ui/public/forms/Turnstile';
 
 /** "Register interest" for a product in development. Creates a product_interest enquiry; promises nothing. */
 export default function InterestForm({

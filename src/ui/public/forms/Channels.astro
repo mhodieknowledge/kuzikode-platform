@@ -1,0 +1,110 @@
+---
+/**
+ * Contact channels (R4.6): every configured way to reach Kuzikode as a ruled ledger (icon, what it is, the value as the link).
+ * `compact`: the phone quick row above the form (only the tappable channels, icon + short word, one line, ≥ 44 px).
+ * Nothing renders for a channel that is not configured in settings (no blank placeholders).
+ */
+import Icon from '../../icons/Icon.astro';
+
+interface Props {
+  email: string | null;
+  phone: string | null;
+  whatsapp: string | null;
+  whatsappMsg: string;
+  location: string | null;
+  hours: string | null;
+  compact?: boolean;
+}
+const { email, phone, whatsapp, whatsappMsg, location, hours, compact = false } = Astro.props;
+const wa = whatsapp ? `https://wa.me/${whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappMsg)}` : null;
+const tel = phone ? `tel:${phone.replace(/[^\d+]/g, '')}` : null;
+---
+
+{
+  compact ? (
+    email || tel || wa ? (
+      <ul class="kz-quick" role="list" aria-label="Reach us directly">
+        {wa ? (
+          <li>
+            <a href={wa} rel="noopener noreferrer" target="_blank">
+              <Icon name="whatsapp" size={20} />
+              WhatsApp<span class="sr-only"> (opens in a new tab)</span>
+            </a>
+          </li>
+        ) : null}
+        {tel ? (
+          <li>
+            <a href={tel}>
+              <Icon name="phone" size={20} />
+              Call
+            </a>
+          </li>
+        ) : null}
+        {email ? (
+          <li>
+            <a href={`mailto:${email}`}>
+              <Icon name="email" size={20} />
+              Email
+            </a>
+          </li>
+        ) : null}
+      </ul>
+    ) : null
+  ) : (
+    <dl class="kz-channels">
+      {email ? (
+        <div>
+          <dt>
+            <Icon name="email" size={20} />
+            Email
+          </dt>
+          <dd>
+            <a href={`mailto:${email}`}>{email}</a>
+          </dd>
+        </div>
+      ) : null}
+      {tel ? (
+        <div>
+          <dt>
+            <Icon name="phone" size={20} />
+            Phone
+          </dt>
+          <dd>
+            <a href={tel}>{phone}</a>
+          </dd>
+        </div>
+      ) : null}
+      {wa ? (
+        <div>
+          <dt>
+            <Icon name="whatsapp" size={20} />
+            WhatsApp
+          </dt>
+          <dd>
+            <a href={wa} rel="noopener noreferrer" target="_blank">
+              Chat on WhatsApp<span class="sr-only"> (opens in a new tab)</span>
+            </a>
+          </dd>
+        </div>
+      ) : null}
+      {location ? (
+        <div>
+          <dt>
+            <Icon name="location" size={20} />
+            Location
+          </dt>
+          <dd>{location}</dd>
+        </div>
+      ) : null}
+      {hours ? (
+        <div>
+          <dt>
+            <Icon name="hours" size={20} />
+            Hours
+          </dt>
+          <dd>{hours}</dd>
+        </div>
+      ) : null}
+    </dl>
+  )
+}

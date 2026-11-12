@@ -1109,3 +1109,14 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Tiers (CLAUDE.md §2b): build by the orchestrator; B.0d review impeccable-finish-reviewer opus/medium.
 - Next step: R4.6 contact + consultation booking (`src/pages/contact.astro`, `consultation.astro`, `src/components/forms/ContactForm.tsx` →
   new markup in `src/ui/public/forms/`, keep the submit handlers/endpoints; `?category=`/`?service=`/`?package=` preselect stays), then R4.7, R4.8.
+
+## 2026-11-12 21:50 UTC · R4.6 ✅ Contact + consultation
+- New `src/ui/public/forms/` ContactForm (three numbered parts + always-on "You are sending" preview), ConsultationForm, `useEnquiry` hook,
+  Channels (ledger + phone quick row), Turnstile moved here; `src/ui/tokens/contact.css`. `/contact` and `/consultation` rewritten
+  ("After you send" road stops, night consultation band). Old ContactForm/ConsultationForm deleted.
+- Board review FAIL → 6 fixes applied. verify green (unit 471, integration 308); contact/engagement/mobile-limits/about/industries/
+  public-layout/sweep + security/portal-auth/checkout/full-journey/careers/products e2e green.
+- Tiers: orchestrator build; review opus/medium.
+- Next step: R4.7 Insights/blog, Careers (+ apply, InterestForm/ApplicationForm → new forms using useEnquiry-style hooks), FAQ, Products
+  (in-development item modest), legal, search, 404/500; remove legacy `src/components/public/sections/{Hero,SectionHeading}` and other
+  public legacy as their last users go. Then R4.8 public documents/checkout.

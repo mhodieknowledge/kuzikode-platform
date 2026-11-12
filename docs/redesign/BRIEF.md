@@ -496,6 +496,23 @@ Existing site images may not fit the new direction. Reuse the ones that do. For 
 5. Honesty: AI-generated people are illustrative only. Never label them as Kuzikode staff, founders, clients or testimonial authors.
    No fake logos, client names or statistics.
 
+### B.4a IMAGERY ALLOCATION: SVG for services, photos only where they make impact (owner, 2026-11-12)
+The owner: *"Revert those image prompts in most sections, e.g. service types. It's neater to draw SVGs. Images should appear in heroes,
+mid-page hero backgrounds and styled sections."*
+- **Custom SVG illustrations (drawn in code, no photos)** for: service divisions and service types, sub-services, features and benefits,
+  process steps, industries, technologies, pricing-tier visuals, empty states, 404/500, and workspace/admin illustrations. **One
+  illustration system:** a single drawing style (e.g. geometric line + fill compositions, or crafted isometric UI fragments), a consistent
+  stroke weight and corner logic, the multi-accent palette with **each division keeping its own accent** (B.0b+), and subtle, reduced-motion-safe
+  hover/scroll animation where it adds meaning. **Banned:** generic clip-art, unDraw/Humaaans-style people, mismatched stock icon packs
+  pretending to be illustrations, emoji. Inline SVG or optimised SVG files with `aria-hidden` (or a title when informative). Specify the
+  system in `DESIGN_DIRECTION.md` and show it on the /dev/ui gallery.
+- **Photographs only for high-impact placements:** (1) page heroes (home, about, services index, work and careers where it fits), (2)
+  **mid-page full-bleed image bands/backgrounds** behind text (1–2 per long page, with designed overlays for legibility on mobile and desktop),
+  (3) **styled editorial sections** (About story, How we work, careers culture), (4) real portfolio screenshots. Nowhere else.
+- **Image requests:** mark every per-service/division photo request in `IMAGE-REQUESTS.md` as `superseded: SVG instead (B.4a)`, and write a
+  **new, smaller batch (≈ 6–10 images)** only for the placements above, matching the chosen multi-accent palette and premium hero rules (B.0e),
+  with desktop + mobile crop guidance. Notify the owner. Interim treatments still apply until the photos arrive.
+
 ### B.5 Delegation
 Parallelise inside your session with **subagents** (the Agent tool, including the impeccable agents) for independent areas (e.g.
 the reference-image analysis split into batches, page groups, the panel design). The orchestrating session reviews and integrates

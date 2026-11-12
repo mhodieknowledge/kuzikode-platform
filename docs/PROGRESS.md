@@ -927,3 +927,9 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Owner inserted BRIEF B.0 (rebuild from zero, never restyle) + R1.4. IMPLEMENTATION_PLAN.md rewritten (new `src/ui/` tree, logic-only
   reuse per area, legacy removal checklist for all 98 legacy files), UI_UX_RECONSTRUCTION_PLAN.md and PANEL_DESIGN_SPEC.md aligned.
 - Next step: R2.2 icon system in `src/ui/icons/` (Icon.astro + icon.tsx, semantic registry, sizes/stroke/labels) + icon placement audit.
+
+## 2026-11-12 11:08 UTC · Redesign R2.2 ✅ icon system
+- `src/ui/icons/`: registry (meaning → Lucide glyph, division/industry slug mapping, CMS names), `Icon.astro`, `icon.tsx`;
+  sizes 16/20/24/32 with matched strokes; decorative by default, `label` for meaningful icons. Unit test `ui-icons.test.ts` (4).
+  Placement audit: docs/redesign/ICONS.md.
+- Next step: R2.3 primitives in `src/ui/primitives/` (Button/Link, fields, SegmentedControl, Tabs, Accordion, Rail, Sheet, Dialog, Toast, Badge/StatusPill, ListRow, DataTable list mode) + motion scripts in `src/ui/motion/`.

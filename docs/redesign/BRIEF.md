@@ -358,6 +358,31 @@ websites."* So:
 - Must pass WCAG AA contrast in light and dark surfaces, and work for the Linux-inspired workspace as well as the public site.
 - Record the comparison and choice in `DESIGN_DIRECTION.md` (replace the cobalt section) and in `DECISIONS.md`.
 
+### B.0b+ MULTI-ACCENT PREMIUM PALETTE (owner, 2026-11-12, refines B.0b)
+The owner: *"The most premium UIs have different accent colours that work together, like in my examples, we had 3, but you can even go
+above."* The single green family chosen in R1.5 ("sign green + verge + mint") is one accent in three shades and reads as road
+signage, not premium. Replace it with a **disciplined multi-accent system (3–5 accents)**:
+- **Base carries 80–90% of every screen:** a rich neutral (near-black / warm ink, bone or warm off-white, refined greys). Accents
+  appear in small, deliberate doses. That restraint is what makes it feel premium.
+- **Accents are tuned as one family:** similar chroma and lightness (check in OKLCH), all passing WCAG AA where used for text or controls.
+  None from the banned blue/indigo/violet range (B.0b); teal and cyan are allowed.
+- **Every accent has a job:** e.g. one per service division (cycled consistently on cards, icons, the division page), colour-coding of
+  pricing tiers, data viz and status in the client workspace, and **one accent reserved for the primary action**.
+- **Compare at least 3 multi-accent palettes on the chosen concept** (render the home hero + services + pricing at 390 and 1440 for each,
+  as boards), then pick one and record why in DESIGN_DIRECTION.md. Include these candidates:
+  1. **Zimbabwe-earth (recommended by the owner's planning session):** near-black + bone base, with **deep emerald**, **saffron/gold**,
+     **clay/terracotta red** and **teal**, refined (not flag-bright), echoing the national colours without being literal.
+  2. **Creatix-inspired:** black + bone with **lime**, **coral** and **cyan** accents (IMG_5054/5055/5065).
+  3. One palette of the agent's own derived from the references.
+
+### B.0e PREMIUM HERO (owner, 2026-11-12)
+"The hero needs to be premium." On every breakpoint the hero must have: proportionate, confident typography (B.1a limits on phones);
+**a high-quality image or a crafted product/workspace composition with real depth** (layering, crisp hairlines, fine detail, a sense of
+craft); one strong primary CTA (+ at most one quiet secondary); subtle purposeful motion (text reveal, gentle image parallax or shift,
+reduced-motion safe). On phones it is **visual-led**, never a solid colour block with text. It must clearly differ from the old hero and
+from the generic "big headline + two buttons" template. Judge it with the B.0d board and reviewer: *"Does this look like a premium,
+established technology company?"*
+
 ### B.0c REMOVE the "Start a project" wizard (owner's explicit rule)
 The owner's words: *"Remove that start-a-project thing. This is a website where we offer our web design services etc. with pricing,
 not for people to come and start projects."*

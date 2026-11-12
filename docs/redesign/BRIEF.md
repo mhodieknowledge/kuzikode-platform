@@ -358,6 +358,21 @@ websites."* So:
 - Must pass WCAG AA contrast in light and dark surfaces, and work for the Linux-inspired workspace as well as the public site.
 - Record the comparison and choice in `DESIGN_DIRECTION.md` (replace the cobalt section) and in `DECISIONS.md`.
 
+### B.0c REMOVE the "Start a project" wizard (owner's explicit rule)
+The owner's words: *"Remove that start-a-project thing. This is a website where we offer our web design services etc. with pricing,
+not for people to come and start projects."*
+- **Delete from the public experience:** the `/start-a-project` page, the `StartProjectWizard` component, the header/nav "Start a
+  project" button, and every "Start a project" or "Get started" link to the wizard (pricing cards, industries, home, footer, search
+  results, sitemap, /dev/ui). Remove wizard-only frontend code (`src/shared/wizard.ts` if nothing else needs it).
+- **301-redirect** `/start-a-project` (and any query variants) to `/contact` so old links and shared URLs keep working.
+- **Replace the calls to action** with the site's real purpose: services and pricing. Primary CTAs become e.g. **"Get a quote"**,
+  **"Request this package"** or **"Talk to us"**, all leading to the **contact/enquiry form** with the service or package preselected
+  (a query parameter the contact form reads), plus WhatsApp where configured. The header's primary action becomes "Get a quote" or
+  "Contact".
+- **Backend stays safe:** keep the enquiries API and data. Existing enquiries of kind `wizard` remain readable in admin (old data).
+  Only remove the wizard-specific endpoint/schema if nothing else uses it, and keep tests green (update or remove the wizard e2e/integration
+  tests with a note in DECISIONS.md). Consultation booking and the contact form stay.
+
 ### B.1 Mobile is the priority, and both are 100%
 More than 75% of visitors use phones. Design and verify **mobile first**, at several real sizes, on every UI change. Desktop must
 still be 100% on point; neither may be an afterthought.

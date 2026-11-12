@@ -29,6 +29,9 @@ test.describe('home page', () => {
     await expect(web.getByText('Starter Website')).toBeVisible();
     await expect(web.getByText('$350', { exact: true })).toBeVisible();
     await expect(page.getByText('In development', { exact: true })).toBeVisible();
+    // Division panels carry their Route drawing (BRIEF B.4a), never a photograph.
+    await expect(web.locator('svg[data-ill="web-development"]')).toHaveCount(1);
+    await expect(page.locator('.kz-band__panel img')).toHaveCount(0);
     await expect(page.locator('a[href="#"]')).toHaveCount(0);
     // Premium hero (BRIEF B.0e): the workspace window is one labelled illustration, and the route index lists all six divisions.
     await expect(page.getByRole('img', { name: /Illustration of the Kuzikode client workspace/ })).toBeVisible();

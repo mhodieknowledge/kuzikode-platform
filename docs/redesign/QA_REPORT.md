@@ -39,3 +39,10 @@ Harness: `playwright.visual.config.ts` (`SHOOT=… SHOOT_SET=all|core|quick SHOO
 - Distinctiveness board `docs/screenshots/redesign/boards/home-board.webp` (before 390/1440, new 390/1440, IMG_5056/5066/5055).
   Fresh impeccable-finish-reviewer: first cut FAIL (stock photo + icon grid in Why, three sparse splits, old section order) →
   fixes → PASS.
+
+## 2026-11-12 · R2.5c Route drawings
+- /dev/ui gallery (bone + night) at 390 and 1440; home services band at 360–1440: no overflow; drawings scale with their column.
+- Board `docs/screenshots/redesign/boards/division-drawings-board.webp`. Fresh reviewer: FAIL (Cloud & IT grey and three stock icons;
+  web mountain/sun placeholder and gold lit collision; muddy night tints; generic sync glyph) → fixes (lagoon accent for division 06,
+  cabinet → mailbox + backup cards, product grid, 58% night tints, packet on an arc) → PASS.
+- Reduced motion: `.i-move` animations are inside `prefers-reduced-motion: no-preference` only.

@@ -13,9 +13,18 @@ import ListRow from '../../ui/primitives/ListRow.astro';
 import EmptyState from '../../ui/primitives/EmptyState.astro';
 import Icon from '../../ui/icons/Icon.astro';
 import ReactGallery from '../../ui/dev/ReactGallery';
+import DivisionArt from '../../ui/illustrations/DivisionArt.astro';
 
 if (Astro.locals.ctx.config.appEnv !== 'development') return new Response('Not found', { status: 404 });
 const floors = ['Websites', 'Care plans', 'Email & domains', 'Other services'];
+const drawings = [
+  ['web-development', 'Web development'],
+  ['mobile-desktop-apps', 'Mobile & desktop apps'],
+  ['business-software', 'Business software'],
+  ['ai-data', 'AI, data & intelligence'],
+  ['automation-integration', 'Automation & integration'],
+  ['cloud-it', 'Cloud & IT'],
+] as const;
 ---
 
 <Base title="UI kit · Kuzikode" noindex>
@@ -132,6 +141,31 @@ const floors = ['Websites', 'Care plans', 'Email & domains', 'Other services'];
           </article>
         ))}
       </Rail>
+    </section>
+
+    <section aria-labelledby="drawings" class="stack gap-6" data-ill-gallery>
+      <h2 id="drawings" class="text-h2">
+        Route drawings
+      </h2>
+      <p class="text-small max-w-[60ch] text-[var(--kz-fg-2)]">
+        Division illustrations (BRIEF B.4a): one system, each in its division accent, on bone and on night.
+      </p>
+      <ul class="grid grid-cols-2 gap-3 lg:grid-cols-3" role="list">
+        {drawings.map(([slug, name], i) => (
+          <li class={`kz-div-${i + 1} grid gap-2`} data-ill-host>
+            <DivisionArt slug={slug} />
+            <span class="text-small font-semibold">{name}</span>
+          </li>
+        ))}
+      </ul>
+      <ul class="on-night grid grid-cols-2 gap-3 rounded-[12px] p-3 lg:grid-cols-3" role="list">
+        {drawings.map(([slug, name], i) => (
+          <li class={`kz-div-${i + 1} grid gap-2`} data-ill-host>
+            <DivisionArt slug={slug} />
+            <span class="text-small font-semibold text-[var(--on-night)]">{name}</span>
+          </li>
+        ))}
+      </ul>
     </section>
 
     <section aria-labelledby="shields" class="stack gap-6">

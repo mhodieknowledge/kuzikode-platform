@@ -1,0 +1,124 @@
+/*
+ * Route drawings (BRIEF B.4a, DESIGN_DIRECTION §8a): colour roles for the inline SVG illustrations. Light by default; inside
+ * `.on-night` the same drawing uses night surfaces. The accent is the division's own (`--kz-div` from `.kz-div-N`).
+ */
+@layer components {
+  .kz-ill {
+    --ill-ink: var(--ink-900);
+    --ill-paper: var(--paper);
+    --ill-ground: var(--bone-100);
+    --ill-line: var(--bone-300);
+    --ill-acc: var(--kz-div, var(--emerald-500));
+    --ill-lit: var(--gold-400);
+    --ill-tint: 30%;
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .on-night .kz-ill {
+    --ill-ink: var(--on-night);
+    --ill-paper: var(--night-900);
+    --ill-ground: var(--night-800);
+    --ill-line: var(--night-600);
+    --ill-tint: 58%;
+  }
+  .kz-ill :where(path, rect, circle) {
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .kz-ill .i-ground {
+    fill: var(--ill-ground);
+    stroke: none;
+  }
+  .kz-ill .i-road {
+    fill: none;
+    stroke: var(--ill-line);
+    stroke-dasharray: 8 7;
+  }
+  .kz-ill .i-paper {
+    fill: var(--ill-paper);
+    stroke: var(--ill-ink);
+  }
+  .kz-ill .i-ink {
+    fill: none;
+    stroke: var(--ill-ink);
+  }
+  .kz-ill .i-solid {
+    fill: var(--ill-ink);
+    stroke: none;
+  }
+  .kz-ill .i-soft {
+    fill: var(--ill-line);
+    stroke: none;
+  }
+  .kz-ill .i-line {
+    fill: none;
+    stroke: var(--ill-line);
+  }
+  .kz-ill .i-line-s {
+    fill: none;
+    stroke: var(--ill-line);
+    stroke-width: 1.5;
+  }
+  .kz-ill .i-acc {
+    fill: var(--ill-acc);
+    stroke: var(--ill-ink);
+  }
+  .kz-ill .i-tint {
+    fill: color-mix(in oklab, var(--ill-acc) var(--ill-tint), var(--ill-paper));
+    stroke: var(--ill-ink);
+  }
+  .kz-ill .i-tint-f {
+    fill: color-mix(in oklab, var(--ill-acc) var(--ill-tint), var(--ill-paper));
+    stroke: none;
+  }
+  .kz-ill .i-lit {
+    fill: var(--ill-lit);
+    stroke: var(--ill-ink);
+  }
+  .kz-ill .i-acc-stroke {
+    fill: none;
+    stroke: var(--ill-acc);
+    stroke-width: 3;
+  }
+
+  /* One meaningful movement: the pointer clicks, the stock box settles, the packet travels, the backup rises. */
+  @media (prefers-reduced-motion: no-preference) {
+    .kz-ill .i-move {
+      transition: translate var(--dur-move) var(--ease-out);
+    }
+    :where(.kz-panel, [data-ill-host]):hover .kz-ill .i-move,
+    .kz-panel:not([hidden]) .kz-ill .i-move {
+      animation: kz-ill-nudge 900ms var(--ease-out) 120ms both;
+    }
+    .kz-ill[data-ill='automation-integration'] .i-move {
+      animation-name: kz-ill-travel;
+    }
+  }
+}
+
+@keyframes kz-ill-nudge {
+  0% {
+    translate: 0 6px;
+    opacity: 0;
+  }
+  100% {
+    translate: 0 0;
+    opacity: 1;
+  }
+}
+@keyframes kz-ill-travel {
+  0% {
+    translate: -8px 0;
+    opacity: 0;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    translate: 0 0;
+    opacity: 1;
+  }
+}

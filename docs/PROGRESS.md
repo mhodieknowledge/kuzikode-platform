@@ -1044,3 +1044,15 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Board + reviewer: FAIL → fixes → PASS. home.spec updated (tabs, panel prices, keyboard, quote preselect). verify green.
 - Next step: R4.2 services index + division pages + service detail (rebuild in `src/ui/public/services/`, reuse ServicesBand ideas:
   route tabs for sub-services, packages ledger; delete legacy Features/Process/CtaBand users as they go), then R4.6b wizard removal + 301, R4.3 pricing.
+
+## 2026-11-12 20:00 UTC · R2.5c ✅ Route drawings + image batch 3
+- Owner added BRIEF B.4a + R2.5c during R4.1 (pushed R4.1 first, then did R2.5c). `src/ui/illustrations/DivisionArt.astro` (six division
+  drawings, one system), `src/ui/tokens/illustrations.css` (colour roles, light/night, one `.i-move` motion), /dev/ui "Route drawings",
+  DESIGN_DIRECTION §8a. Division 06 accent → lagoon #1C6E7A (token + test). Services band uses the drawings (no photos).
+- IMAGE-REQUESTS: division photos and contact-street superseded (B.4a); batch 3 (6 new: about-hero, services-hero, home-band,
+  how-we-work-editorial, how-we-work-band, careers-culture) + about-studio, careers-desk still wanted. Owner notified.
+- Reviewer FAIL → fixes → PASS. verify green; home/mobile-limits/motion/ui-kit/public-layout e2e green.
+- Next step: R4.2 services index + division pages + service detail in `src/ui/public/services/` using DivisionArt (division hero drawing,
+  sub-service route tabs, packages ledger, quote CTA with `?category=`/`?service=`), photo only in the index hero (services-hero, interim
+  treatment until delivered); then R4.6b wizard removal + 301, R4.3 pricing. Further drawings (features, process, industries, empty
+  states, 404/500) are added to `src/ui/illustrations/` as each page needs them.

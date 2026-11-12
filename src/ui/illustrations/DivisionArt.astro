@@ -1,0 +1,222 @@
+---
+/**
+ * Division illustrations (BRIEF B.4a, DESIGN_DIRECTION §8a "Route drawings"): one drawing system for the six service divisions.
+ * Rules: 240 × 160 plate (3:2), 2 px ink strokes with round joins, 4–7 px corners (the plate radius), surfaces in paper, the division
+ * accent (`--kz-div` from `.kz-div-N`) as the only colour fill (solid + one tint), gold for a single lit detail, and the dashed road
+ * baseline that ties every drawing to the Route world. Colours are CSS classes (`.i-*`, illustrations.css) so one SVG serves light
+ * and night surfaces. Motion: the `.i-move` element shifts once when the drawing becomes visible or is hovered (reduced-motion safe).
+ * Decorative by default (aria-hidden); pass `title` when the drawing carries meaning.
+ */
+interface Props {
+  slug: string;
+  title?: string;
+  class?: string;
+}
+const { slug, title, class: className } = Astro.props;
+const known = [
+  'web-development',
+  'mobile-desktop-apps',
+  'business-software',
+  'ai-data',
+  'automation-integration',
+  'cloud-it',
+];
+const kind = known.includes(slug) ? slug : 'web-development';
+---
+
+<svg
+  class={['kz-ill', className].filter(Boolean).join(' ')}
+  viewBox="0 0 240 160"
+  xmlns="http://www.w3.org/2000/svg"
+  role={title ? 'img' : undefined}
+  aria-hidden={title ? undefined : 'true'}
+  focusable="false"
+  data-ill={kind}
+>
+  {title ? <title>{title}</title> : null}
+  <rect class="i-ground" x="0" y="0" width="240" height="160" rx="10"></rect>
+  <path class="i-road" d="M16 146H224"></path>
+
+  {kind === 'web-development' && (
+    <g>
+      {/* Browser window with a page layout */}
+      <rect class="i-paper" x="22" y="22" width="150" height="104" rx="7" />
+      <path class="i-ink" d="M22 40H172" />
+      <rect class="i-soft" x="34" y="28" width="70" height="6" rx="3" />
+      <rect class="i-solid" x="34" y="50" width="62" height="7" rx="2" />
+      <rect class="i-soft" x="34" y="62" width="50" height="5" rx="2" />
+      <rect class="i-soft" x="34" y="71" width="42" height="5" rx="2" />
+      <rect class="i-acc" x="34" y="84" width="34" height="11" rx="3" />
+      <rect class="i-tint" x="106" y="50" width="25" height="20" rx="3" />
+      <rect class="i-line" x="135" y="50" width="25" height="20" rx="3" />
+      <rect class="i-line" x="106" y="75" width="25" height="20" rx="3" />
+      <rect class="i-tint" x="135" y="75" width="25" height="20" rx="3" />
+      <rect class="i-solid" x="111" y="63" width="12" height="3" rx="1.5" />
+      <rect class="i-solid" x="140" y="88" width="12" height="3" rx="1.5" />
+      <rect class="i-line" x="34" y="104" width="36" height="14" rx="3" />
+      <rect class="i-line" x="78" y="104" width="36" height="14" rx="3" />
+      <rect class="i-line" x="122" y="104" width="38" height="14" rx="3" />
+      {/* The same page on a phone */}
+      <rect class="i-paper" x="164" y="56" width="52" height="88" rx="8" />
+      <path class="i-ink" d="M183 63h14" />
+      <rect class="i-tint" x="172" y="72" width="36" height="22" rx="3" />
+      <rect class="i-solid" x="172" y="100" width="30" height="5" rx="2" />
+      <rect class="i-soft" x="172" y="109" width="24" height="4" rx="2" />
+      <rect class="i-acc" x="172" y="122" width="36" height="10" rx="3" />
+      {/* Pointer on the call to action */}
+      <path class="i-solid i-move" d="M60 90l0 17 4.5-4.2 3.6 7.6 3.4-1.6-3.6-7.6 6.1-.4z" />
+    </g>
+  )}
+
+  {kind === 'mobile-desktop-apps' && (
+    <g>
+      {/* Desktop app: sidebar + list */}
+      <rect class="i-paper" x="20" y="26" width="128" height="96" rx="7" />
+      <path class="i-ink" d="M50 26v96" />
+      <rect class="i-acc" x="28" y="36" width="14" height="14" rx="4" />
+      <rect class="i-soft" x="28" y="58" width="14" height="4" rx="2" />
+      <rect class="i-soft" x="28" y="68" width="14" height="4" rx="2" />
+      <rect class="i-soft" x="28" y="78" width="14" height="4" rx="2" />
+      <rect class="i-solid" x="60" y="36" width="52" height="7" rx="2" />
+      <rect class="i-line" x="60" y="52" width="78" height="16" rx="3" />
+      <rect class="i-tint" x="60" y="74" width="78" height="16" rx="3" />
+      <rect class="i-line" x="60" y="96" width="78" height="16" rx="3" />
+      <circle class="i-acc" cx="68" cy="82" r="3" />
+      <rect class="i-soft" x="76" y="80" width="40" height="4" rx="2" />
+      {/* Phone app: icon grid */}
+      <rect class="i-paper" x="160" y="34" width="58" height="104" rx="9" />
+      <path class="i-ink" d="M181 42h16" />
+      <rect class="i-acc" x="170" y="54" width="16" height="16" rx="5" />
+      <rect class="i-line" x="192" y="54" width="16" height="16" rx="5" />
+      <rect class="i-line" x="170" y="76" width="16" height="16" rx="5" />
+      <rect class="i-tint" x="192" y="76" width="16" height="16" rx="5" />
+      <rect class="i-line" x="170" y="98" width="16" height="16" rx="5" />
+      <rect class="i-line" x="192" y="98" width="16" height="16" rx="5" />
+      <circle class="i-lit" cx="208" cy="124" r="3.5" />
+      {/* Sync: a packet travels on an arc from the desktop app to the phone */}
+      <path class="i-line-s" d="M118 122c0 18 46 18 46 4" stroke-dasharray="4 4" />
+      <rect class="i-acc i-move" x="132" y="129" width="17" height="12" rx="3" />
+    </g>
+  )}
+
+  {kind === 'business-software' && (
+    <g>
+      {/* Till slip with a zigzag tear */}
+      <path class="i-paper" d="M24 24h62v100l-5.2 5-5.2-5-5.2 5-5.2-5-5.2 5-5.2-5-5.2 5-5.2-5-5.2 5-5.2-5-5.2 5z" />
+      <rect class="i-solid" x="34" y="34" width="34" height="6" rx="2" />
+      <path class="i-line-s" d="M34 52h42M34 62h42M34 72h42" />
+      <rect class="i-soft" x="34" y="50" width="22" height="4" rx="2" />
+      <rect class="i-soft" x="34" y="60" width="16" height="4" rx="2" />
+      <rect class="i-soft" x="34" y="70" width="26" height="4" rx="2" />
+      <path class="i-ink" d="M34 86h42" />
+      <rect class="i-acc" x="54" y="92" width="22" height="7" rx="2" />
+      <path
+        class="i-ink"
+        d="M36 106v10M40 106v10M43 106v10M48 106v10M51 106v10M55 106v10M60 106v10M63 106v10M68 106v10M72 106v10"
+      />
+      {/* Stock: a stack of boxes */}
+      <rect class="i-paper" x="104" y="96" width="44" height="44" rx="4" />
+      <path class="i-ink" d="M126 96v12" />
+      <rect class="i-tint" x="152" y="96" width="44" height="44" rx="4" />
+      <path class="i-ink" d="M174 96v12" />
+      <g class="i-move">
+        <rect class="i-acc" x="128" y="50" width="44" height="44" rx="4" />
+        <path class="i-ink" d="M150 50v12" />
+      </g>
+      {/* Stock level card */}
+      <rect class="i-paper" x="176" y="22" width="44" height="58" rx="6" />
+      <rect class="i-soft" x="184" y="30" width="22" height="4" rx="2" />
+      <rect class="i-line" x="184" y="40" width="28" height="7" rx="2" />
+      <rect class="i-acc" x="184" y="40" width="18" height="7" rx="2" />
+      <rect class="i-line" x="184" y="52" width="28" height="7" rx="2" />
+      <rect class="i-acc" x="184" y="52" width="8" height="7" rx="2" />
+      <circle class="i-lit" cx="208" cy="70" r="3.5" />
+    </g>
+  )}
+
+  {kind === 'ai-data' && (
+    <g>
+      {/* Chart card */}
+      <rect class="i-paper" x="20" y="24" width="140" height="104" rx="7" />
+      <rect class="i-solid" x="32" y="34" width="40" height="6" rx="2" />
+      <path class="i-line-s" d="M32 116h116M32 96h116M32 76h116" />
+      <rect class="i-tint" x="40" y="92" width="14" height="24" rx="2" />
+      <rect class="i-tint" x="62" y="80" width="14" height="36" rx="2" />
+      <rect class="i-tint" x="84" y="86" width="14" height="30" rx="2" />
+      <rect class="i-tint" x="106" y="70" width="14" height="46" rx="2" />
+      <rect class="i-acc" x="128" y="56" width="14" height="60" rx="2" />
+      <path class="i-ink" d="M47 84l22-12 22 6 22-16 22-14" />
+      <circle class="i-paper" cx="47" cy="84" r="3.5" />
+      <circle class="i-paper" cx="69" cy="72" r="3.5" />
+      <circle class="i-paper" cx="91" cy="78" r="3.5" />
+      <circle class="i-paper" cx="113" cy="62" r="3.5" />
+      <circle class="i-lit i-move" cx="135" cy="48" r="5" />
+      {/* A small model graph */}
+      <path class="i-ink" d="M184 46l26 18M184 46l-6 34M210 64l-32 16M210 64l2 40M178 80l34 24" />
+      <circle class="i-paper" cx="184" cy="46" r="8" />
+      <circle class="i-acc" cx="210" cy="64" r="10" />
+      <circle class="i-paper" cx="178" cy="80" r="7" />
+      <circle class="i-tint" cx="212" cy="104" r="8" />
+    </g>
+  )}
+
+  {kind === 'automation-integration' && (
+    <g>
+      {/* System A */}
+      <rect class="i-paper" x="18" y="30" width="62" height="48" rx="6" />
+      <rect class="i-solid" x="27" y="39" width="30" height="6" rx="2" />
+      <rect class="i-soft" x="27" y="51" width="44" height="5" rx="2" />
+      <rect class="i-soft" x="27" y="61" width="36" height="5" rx="2" />
+      {/* System B */}
+      <rect class="i-paper" x="160" y="30" width="62" height="48" rx="6" />
+      <rect class="i-solid" x="169" y="39" width="30" height="6" rx="2" />
+      <rect class="i-soft" x="169" y="51" width="44" height="5" rx="2" />
+      <rect class="i-soft" x="169" y="61" width="36" height="5" rx="2" />
+      {/* Pipes through the junction */}
+      <path class="i-ink" d="M80 54h28M132 54h28M120 66v30" />
+      <path class="i-ink" d="M152 49l8 5-8 5" />
+      <rect class="i-acc" x="106" y="42" width="28" height="24" rx="5" transform="rotate(45 120 54)" />
+      <circle class="i-paper" cx="120" cy="54" r="5" />
+      <rect class="i-acc i-move" x="86" y="50" width="12" height="8" rx="2" />
+      {/* A payment card at the end of the branch */}
+      <rect class="i-paper" x="88" y="96" width="64" height="40" rx="6" />
+      <rect class="i-tint" x="88" y="104" width="64" height="8" />
+      <rect class="i-lit" x="96" y="118" width="12" height="9" rx="2" />
+      <rect class="i-soft" x="114" y="121" width="30" height="4" rx="2" />
+    </g>
+  )}
+
+  {kind === 'cloud-it' && (
+    <g>
+      {/* Server cabinet */}
+      <rect class="i-paper" x="24" y="22" width="68" height="114" rx="6" />
+      <rect class="i-line" x="32" y="32" width="52" height="20" rx="3" />
+      <rect class="i-line" x="32" y="58" width="52" height="20" rx="3" />
+      <rect class="i-tint" x="32" y="84" width="52" height="20" rx="3" />
+      <rect class="i-line" x="32" y="110" width="52" height="18" rx="3" />
+      <circle class="i-acc" cx="74" cy="42" r="3.5" />
+      <circle class="i-acc" cx="74" cy="68" r="3.5" />
+      <circle class="i-lit" cx="74" cy="94" r="3.5" />
+      <path class="i-ink" d="M40 42h20M40 68h20M40 94h20" />
+      {/* Business email: a mailbox list */}
+      <rect class="i-paper" x="122" y="22" width="96" height="58" rx="6" />
+      <rect class="i-solid" x="130" y="30" width="34" height="5" rx="2" />
+      <circle class="i-acc" cx="135" cy="47" r="4" />
+      <rect class="i-soft" x="144" y="45" width="48" height="4" rx="2" />
+      <circle class="i-line" cx="135" cy="59" r="4" />
+      <rect class="i-soft" x="144" y="57" width="40" height="4" rx="2" />
+      <circle class="i-line" cx="135" cy="71" r="4" />
+      <rect class="i-soft" x="144" y="69" width="44" height="4" rx="2" />
+      <rect class="i-tint" x="198" y="43" width="12" height="8" rx="2" />
+      {/* Nightly backup: progress card */}
+      <rect class="i-paper" x="122" y="92" width="96" height="44" rx="6" />
+      <rect class="i-solid" x="130" y="100" width="28" height="5" rx="2" />
+      <rect class="i-line" x="130" y="113" width="80" height="9" rx="3" />
+      <rect class="i-acc" x="130" y="113" width="56" height="9" rx="3" />
+      <rect class="i-soft" x="130" y="127" width="22" height="3" rx="1.5" />
+      {/* The cabinet feeds both */}
+      <path class="i-line-s" d="M92 51h30M92 117h30" />
+      <rect class="i-acc i-move" x="101" y="113" width="10" height="8" rx="2" />
+    </g>
+  )}
+</svg>

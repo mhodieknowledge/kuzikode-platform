@@ -2,17 +2,16 @@
 /**
  * "What each route covers" (R4.1, DESIGN_DIRECTION §3 route tabs): the one night band on the home page. Route tabs (division hue
  * swatch + numeral + short name; IMG_5056 tabbed offering switcher, IMG_5066 dark "what we do" band) switch a panel holding the
- * division summary, its published packages with their prices and a warm-duotone photograph; the panel cross-fades in
- * (`.kz-panel`). Phones: the tab strip scrolls sideways, the panel reads photo → name → packages → action.
+ * division summary, its published packages with their prices and the division's Route drawing (BRIEF B.4a); the panel cross-fades in
+ * (`.kz-panel`). Phones: the tab strip scrolls sideways, the panel reads drawing → name → packages → action.
  * Prices come from the pricing catalogue through `packagePrice` (presentation only); with prices hidden nothing is shown.
  */
-import Picture from '../../primitives/Picture.astro';
+import DivisionArt from '../../illustrations/DivisionArt.astro';
 import Icon from '../../icons/Icon.astro';
 import type { SectionContent } from '../../../shared/schemas/cms';
 import type { PublicCategory, PublicPackage } from '../../../server/modules/cms';
 import { divisionShortName } from '../../../shared/directory';
 import { packagePrice, quotationHref, canRequestQuote } from '../../../shared/service-display';
-import manifest from '../../../../design/images/manifest.json';
 
 interface Props {
   content: SectionContent<'services_grid'>;
@@ -21,7 +20,6 @@ interface Props {
   showPrices: boolean;
 }
 const { content: c, categories, packages, showPrices } = Astro.props;
-const images = (manifest as { images: Record<string, unknown> }).images;
 const MAX_ROWS = 4;
 
 const routes = categories.map((cat, i) => {
@@ -49,7 +47,6 @@ const routes = categories.map((cat, i) => {
     short: divisionShortName(cat.slug, cat.name),
     rows: rows.slice(0, MAX_ROWS),
     more: Math.max(0, rows.length - MAX_ROWS),
-    image: images[`svc-${cat.slug}`] ? `svc-${cat.slug}` : null,
     quote: canRequestQuote(cat.status),
   };
 });
@@ -92,15 +89,9 @@ const routes = categories.map((cat, i) => {
           aria-labelledby={`band-tab-${r.cat.slug}`}
           hidden={i !== 0}
         >
-          {r.image ? (
-            <Picture
-              id={r.image}
-              alt=""
-              tone="warm"
-              class="kz-band__photo"
-              sizes="(min-width: 1024px) 560px, (min-width: 640px) 90vw, 100vw"
-            />
-          ) : null}
+          <div class="kz-band__art" data-ill-host>
+            <DivisionArt slug={r.cat.slug} />
+          </div>
           <div class="kz-band__body">
             <p class="kz-band__route">
               <span class="kz-band__n">{r.n}</span> of {String(routes.length).padStart(2, '0')}

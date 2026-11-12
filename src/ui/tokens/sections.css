@@ -150,10 +150,9 @@
     gap: 20px;
     padding-top: 24px;
   }
-  .kz-band__photo {
-    aspect-ratio: 16 / 9;
+  .kz-band__art {
     border-radius: 10px;
-    box-shadow: 0 0 0 1px var(--night-700);
+    overflow: hidden;
   }
   .kz-band__route {
     display: flex;
@@ -629,8 +628,7 @@
       gap: 32px;
       align-items: start;
     }
-    .kz-band__photo {
-      aspect-ratio: 4 / 5;
+    .kz-band__art {
       order: 2;
     }
     .kz-band__name {
@@ -669,11 +667,8 @@
       gap: 56px;
       padding-top: 40px;
     }
-    .kz-band__photo {
+    .kz-band__art {
       order: 0;
-      aspect-ratio: 4 / 5;
-      max-height: 560px;
-      width: 100%;
     }
     .kz-band__body {
       padding-top: 8px;

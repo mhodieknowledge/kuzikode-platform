@@ -203,3 +203,4 @@ One line per decision (newest at the bottom). Format:
 - 2026-11-12 · R4.1 · Technologies render as a static wrapped line (no marquee motion); testimonials render only when consented ones exist (none today).
 - 2026-11-12 · tests · motion.spec counted reduced-motion animations (0.01 ms) caught in their single frame as running entrance animations (flaky on /dev/ui); it now counts only animations longer than 1 ms.
 - 2026-11-12 · R4.1 · Header fix: a pending hover-intent timer could reopen the mega-menu after Escape or a click closed it (seen as an intermittent public-layout e2e failure); close() and click now clear it.
+- 2026-11-12 · R2.5c · Division 06 (Cloud & IT) accent changes from granite grey to a deep lagoon teal #1C6E7A (hue ≈188°, AA on bone): the drawings reviewer found the grey division had no hue (B.0b+ "every accent has a job"). Teal #1F8478 stays reserved for data series because it sits too close to the emerald action.

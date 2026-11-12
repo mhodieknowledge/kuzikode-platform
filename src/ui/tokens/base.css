@@ -4,6 +4,7 @@
 @import './public.css';
 @import './home.css';
 @import './sections.css';
+@import './illustrations.css';
 @import '@fontsource-variable/overpass/wght.css';
 @import '@fontsource-variable/overpass-mono/wght.css';
 
@@ -40,6 +41,7 @@
   --color-moss-ink: var(--moss-ink);
   --color-msasa: var(--msasa);
   --color-umber: var(--umber);
+  --color-lagoon: var(--lagoon);
   --color-granite: var(--granite);
   --color-granite-ink: var(--granite-ink);
   --color-on-action: var(--on-action);

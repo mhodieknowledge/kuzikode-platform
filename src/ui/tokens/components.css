@@ -209,8 +209,8 @@
     --kz-div-ink: var(--msasa-ink);
   }
   .kz-div-6 {
-    --kz-div: var(--granite);
-    --kz-div-ink: var(--granite-ink);
+    --kz-div: var(--lagoon);
+    --kz-div-ink: var(--lagoon-ink);
   }
   :is(.kz-div-1, .kz-div-2, .kz-div-3, .kz-div-4, .kz-div-5, .kz-div-6) .kz-shield,
   .kz-shield:is(.kz-div-1, .kz-div-2, .kz-div-3, .kz-div-4, .kz-div-5, .kz-div-6) {

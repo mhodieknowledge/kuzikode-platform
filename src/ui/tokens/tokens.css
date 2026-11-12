@@ -2,7 +2,7 @@
  * Design tokens: Route structure in the "Zimbabwe earth" multi-accent palette (docs/redesign/DESIGN_DIRECTION.md §4,
  * BRIEF B.0b+, chosen at R2.5b; prototype design/concepts/b2/?p=1). Neutrals carry 80–90% of every screen: night (near-black)
  * and bone. Emerald is reserved for the primary action. Six earth hues have jobs: one per division (saffron, clay, umber, moss,
- * msasa, granite; teal for data series), pricing tier coding, data and status in the workspace. No blue, indigo or violet (tests/unit/ui-tokens.test.ts).
+ * msasa, lagoon; teal and granite for data series), pricing tier coding, data and status in the workspace. No blue, indigo or violet (tests/unit/ui-tokens.test.ts).
  * Components use these through the Tailwind theme names in base.css; no raw hex in components.
  */
 :root {
@@ -55,6 +55,8 @@
   --msasa-ink: #8e3b52;
   --umber: #7c5a3a; /* the brown of Great Zimbabwe granite in shade */
   --umber-ink: #7c5a3a;
+  --lagoon: #1c6e7a; /* deep lagoon teal (hue ≈188°), division 06 Cloud & IT since R2.5c; distinct from the emerald action */
+  --lagoon-ink: #1c6e7a;
   --granite: #7a7468;
   --granite-ink: #5a554c;
 

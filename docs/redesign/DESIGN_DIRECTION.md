@@ -118,7 +118,8 @@ only as small marks (numerals, a hover rule, a 8 px swatch, chart series, tier r
 | teal | #1F8478 (text #16695F) | Data series 3 and workspace charts only (not a division colour) |
 | moss | #6F8A2A (text #536A1C) | Division 04 AI & data; series 4 |
 | msasa | #8E3B52 | Division 05 Automation & payments (the spring wine-red of msasa leaves); series 5 |
-| granite | #7A7468 (text #5A554C) | Division 06 Cloud & IT; series 6 |
+| lagoon | #1C6E7A | Division 06 Cloud & IT since R2.5c (deep lagoon teal, hue ≈188°, outside the banned range; far enough from the emerald action at hue ≈155°). Granite read as "no colour" in the drawings review |
+| granite | #7A7468 (text #5A554C) | Neutral data series 6 (was division 06 until R2.5c) |
 | status | ok #1E7A52 · warn #9C5B0A · danger #C9372C · info = ink | Always with an icon and words |
 
 OKLCH: accents sit at L ≈ .47–.68, C ≈ .08–.14 (one family); every text use has an AA "-ink" variant; tested in
@@ -153,10 +154,34 @@ are type, not icons.
 ## 8. Imagery art direction
 
 - The hero object is the crafted workspace window (real product UI with fictional demo data, layered with depth), never a stock photo.
+- Photographs only in page heroes, mid-page full-bleed bands, editorial sections and real portfolio screenshots (B.4a); everything
+  else is a Route drawing (§8a).
 - Existing owner photos are reused in a **warm neutral duotone** (#151412 shadows → #F4F1EA highlights) for the division panels and
   editorial sections, never as the hero and never as "our team". New owner images (IMAGE-REQUESTS batch 2) follow the same grade:
   identifiably local places and hands at work in Harare daylight; they may later sit beside the workspace window, never under it.
 - No gradients, glows, blobs, glass or 3D.
+
+## 8a. Illustration system: "Route drawings" (BRIEF B.4a, R2.5c)
+
+Services, divisions, features, process, industries, pricing tiers, empty states and error pages are **drawn in code**, never photographed.
+One system, implemented in `src/ui/illustrations/` (first set: `DivisionArt.astro`, the six divisions) with colour roles in
+`src/ui/tokens/illustrations.css`; shown on /dev/ui ("Route drawings").
+
+- **Subject:** crafted fragments of the real work, not people or metaphors: a page on a browser and a phone (web), a desktop app and a
+  phone app in sync (apps), a till slip, stock boxes and a stock-level card (business software), a chart and a small model graph (AI &
+  data), two systems joined through a junction to a payment card (automation & payments), a server cabinet feeding a mailbox list and a
+  backup-progress card (cloud & IT). No stock tropes (image placeholders, envelopes, cloud-upload glyphs).
+- **Geometry:** 240 × 160 plate (3:2) with a 10 px corner; objects use the plate radii (4–9 px); every drawing stands on the **dashed road
+  baseline** (8/7 dash) that ties it to the Route world; flat, front-on, no perspective or isometry, no shadows or gradients.
+- **Line:** 2 px strokes (1.5 px for guide lines, 3 px for the one accent stroke), round joins and caps, ink (#141412) on light, on-night
+  (#F2EEE6) on night.
+- **Colour:** surfaces in paper (night-900 on night); greys for placeholder text bars; **the division accent is the only hue** (solid +
+  one 30% tint, `--kz-div` from `.kz-div-N`), and gold marks at most one lit detail (status, latest point; none in the saffron web drawing). Night tints mix 58% (30% on light). Same SVG on bone and night via
+  CSS classes (`.i-paper`, `.i-ink`, `.i-acc`, `.i-tint`, `.i-lit`, …).
+- **Motion:** one meaningful element per drawing (`.i-move`: the pointer, the settling box, the travelling packets (sync, integration, backup))
+  eases in once when its panel appears or on hover, 900 ms ease-out; none under reduced motion.
+- **Banned:** clip-art people (unDraw/Humaaans style), emoji, mixed icon packs posing as illustrations, 3D, glows.
+- **Accessibility:** decorative by default (`aria-hidden`); a `title` when the drawing carries meaning.
 
 ## 9. Motion principles (full spec: MOTION_AND_INTERACTION_SPEC.md)
 

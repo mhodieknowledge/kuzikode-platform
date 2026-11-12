@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en" data-type="service">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kuzikode: websites, apps and business software for organisations in Zimbabwe</title>
+<meta name="description" content="Concept A (Coursing). Static prototype for the R1.5 concept gate.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!--
+  Concept A: "Coursing". World: the dry-stone courses of Great Zimbabwe's walls; horizontal courses of different heights
+  laid without mortar, one chevron band as the only ornament. Palette: granite neutrals + dolerite near-black + lichen ochre
+  (the orange-yellow lichen on Zimbabwe's granite kopjes) spent only on the active / primary thing.
+  References opened: IMG_5066 (monochrome editorial, greyscale photos, black bands), IMG_5065 (greyscale photos unified by one
+  accent), IMG_5055 (numbered full-width service rows), IMG_5054 (oversized wordmark footer, product-UI bento),
+  IMG_5057 (segmented control above plans, inset mobile sections), IMG_5060 (calm pricing, one filled featured plan).
+-->
+<style>
+:root{
+  --dolerite:#171614; --dolerite-2:#24221F; --granite-9:#3A3733; --granite-7:#5F5A53; --granite-5:#8C867D;
+  --granite-3:#C9C5BE; --granite-2:#DEDBD5; --granite-1:#ECEAE6; --granite-0:#F6F5F2;
+  --lichen:#E3A21A; --lichen-ink:#7A5200; --white:#fff;
+  --display:"Familjen Grotesk", system-ui, sans-serif; --mono:"Martian Mono", ui-monospace, monospace;
+  --wrap:min(1320px, 100% - 32px); --ease:cubic-bezier(.16,1,.3,1);
+}
+@media (min-width:768px){:root{--wrap:min(1320px, 100% - 64px)}}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--display);background:var(--granite-0);color:var(--dolerite);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
+::selection{background:var(--lichen);color:var(--dolerite)}
+a{color:inherit}
+img{display:block;max-width:100%}
+:focus-visible{outline:3px solid var(--lichen);outline-offset:3px}
+.wrap{width:var(--wrap);margin-inline:auto}
+.mono{font-family:var(--mono);font-size:.78em;letter-spacing:0;font-variant-numeric:tabular-nums}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.chevron{height:20px;background:
+  linear-gradient(135deg,var(--dolerite) 25%,transparent 25%) -10px 0/20px 20px,
+  linear-gradient(225deg,var(--dolerite) 25%,transparent 25%) -10px 0/20px 20px;}
+
+/* header */
+.hd{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--granite-0) 92%,transparent);backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid var(--granite-2)}
+.hd .wrap{display:flex;align-items:center;gap:24px;height:68px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:700;font-size:22px;letter-spacing:-.02em}
+.brand svg{width:26px;height:26px}
+.nav{display:none;gap:4px;margin-left:auto}
+.nav a{position:relative;text-decoration:none;font-weight:500;padding:10px 14px;font-size:16px}
+.nav a::after{content:"";position:absolute;left:14px;right:14px;bottom:2px;height:6px;opacity:0;transform:translateY(3px);transition:.25s var(--ease);
+  background:linear-gradient(135deg,var(--lichen) 25%,transparent 25%) -3px 0/6px 6px,linear-gradient(225deg,var(--lichen) 25%,transparent 25%) -3px 0/6px 6px}
+.nav a:hover::after,.nav a[aria-current]::after{opacity:1;transform:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 22px;border-radius:2px;font:600 16px/1 var(--display);text-decoration:none;border:0;cursor:pointer;transition:transform .15s var(--ease),background .2s}
+.btn:active{transform:translateY(1px)}
+.btn-ink{background:var(--dolerite);color:var(--white)}
+.btn-ink:hover{background:var(--granite-9)}
+.btn-lichen{background:var(--lichen);color:var(--dolerite)}
+.btn-lichen:hover{background:#F0B230}
+.btn svg{width:18px;height:18px}
+.hd .btn{margin-left:auto}
+.menu-btn{width:48px;height:48px;border:1px solid var(--granite-3);background:none;border-radius:2px;display:grid;place-items:center}
+@media (min-width:1024px){.nav{display:flex}.hd .btn{margin-left:8px}.menu-btn{display:none}}
+@media (max-width:519px){.hd .btn{display:none}.menu-btn{margin-left:auto}}
+
+/* hero */
+.hero{padding:40px 0 0}
+.hero-grid{display:grid;gap:32px}
+h1{font-size:clamp(40px,10.4vw,92px);line-height:.98;letter-spacing:-.035em;font-weight:700;text-wrap:balance;max-width:13ch}
+.lede{font-size:clamp(18px,2vw,21px);max-width:44ch;color:var(--granite-9);margin-top:20px}
+.fact{margin-top:24px;display:flex;flex-wrap:wrap;gap:6px 20px;color:var(--granite-7)}
+.fact b{color:var(--dolerite);font-weight:500}
+.picker{border:1px solid var(--dolerite);background:var(--white)}
+.picker h2{font-size:15px;font-weight:600;padding:14px 18px;border-bottom:1px solid var(--dolerite);display:flex;justify-content:space-between}
+.pick{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 16px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--granite-2);padding:16px 18px;font:inherit;cursor:pointer;transition:background .2s var(--ease)}
+.pick:nth-child(2){padding-block:22px}.pick:nth-child(4){padding-block:12px}
+.pick strong{font-size:20px;font-weight:600;letter-spacing:-.01em}
+.pick span{color:var(--granite-7);font-size:15px}
+.pick .mono{grid-row:span 2;color:var(--dolerite);text-align:right}
+.pick:hover{background:var(--granite-1)}
+.pick[aria-pressed=true]{background:var(--dolerite);color:var(--white)}
+.pick[aria-pressed=true] span{color:var(--granite-3)}
+.pick[aria-pressed=true] .mono{color:var(--lichen)}
+.picker-go{display:flex;padding:16px 18px;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.picker-go .btn{flex:1 1 auto}
+.picker-go small{color:var(--granite-7);font-size:14px}
+.course-photo{margin-top:48px;position:relative}
+.course-photo img{width:100%;height:clamp(220px,34vw,460px);object-fit:cover;object-position:50% 35%}
+@media (min-width:1024px){
+  .hero{padding-top:72px}
+  .hero-grid{grid-template-columns:7fr 5fr;align-items:end;gap:64px}
+}
+
+/* sections */
+section{padding:72px 0}
+.sec-head{display:grid;gap:12px;margin-bottom:36px}
+h2{font-size:clamp(32px,5vw,56px);line-height:1.02;letter-spacing:-.03em;font-weight:700;text-wrap:balance;max-width:18ch}
+.sec-head p{color:var(--granite-7);max-width:52ch;font-size:18px}
+@media (min-width:1024px){section{padding:112px 0}.sec-head{grid-template-columns:7fr 5fr;align-items:end;gap:64px;margin-bottom:56px}}
+
+/* services: courses */
+.courses{display:grid;gap:4px}
+.course{background:var(--granite-1)}
+.course:nth-child(3n+2){background:var(--granite-2)}
+.course:nth-child(3n){background:#E5E2DC}
+.course > a{display:grid;grid-template-columns:36px 1fr 24px;gap:6px 12px;padding:22px 16px;text-decoration:none;align-items:start;transition:background .25s var(--ease),color .25s,padding .25s var(--ease)}
+.course .no{font-family:var(--mono);font-size:13px;color:var(--granite-5);padding-top:8px}
+.course h3{font-size:clamp(24px,3.4vw,40px);font-weight:600;letter-spacing:-.025em;line-height:1.1}
+.course p{grid-column:2;color:var(--granite-7);font-size:16px;max-width:52ch}
+.course .from{grid-column:2;font-family:var(--mono);font-size:13px}
+.course .from b{font-weight:500;background:var(--granite-1);padding:3px 6px}
+.course svg{width:22px;height:22px;margin-top:8px;transition:transform .25s var(--ease)}
+.course:nth-child(odd) > a{padding-block:30px}
+@media (min-width:1024px){
+  .course > a{grid-template-columns:72px 5fr 4fr 2fr 32px;align-items:center;padding:28px 16px}
+  .course p,.course .from{grid-column:auto}
+  .course .from{text-align:right}
+  .course:nth-child(odd) > a{padding-block:40px}
+  .course > a:hover{background:var(--dolerite);color:var(--white)}
+  .course > a:hover p{color:var(--granite-3)}
+  .course > a:hover .from b{background:var(--lichen);color:var(--dolerite)}
+  .course > a:hover svg{transform:translateX(4px)}
+}
+
+/* pricing */
+.pricing{background:var(--granite-1)}
+.seg{display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--dolerite);background:var(--white);position:relative;margin-bottom:28px;max-width:100%}
+.seg button{font:600 15px var(--display);min-height:46px;padding:0 18px;background:none;border:0;cursor:pointer;position:relative;z-index:1;transition:color .25s}
+.seg button[aria-selected=true]{color:var(--white)}
+.seg .thumb{position:absolute;inset:0 auto 0 0;background:var(--dolerite);transition:transform .35s var(--ease),width .35s var(--ease)}
+.rail{display:grid;grid-auto-flow:column;grid-auto-columns:84%;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px;scrollbar-width:none;margin-inline:calc(50% - 50vw);padding-inline:calc(50vw - 50%);scroll-padding-inline:calc(50vw - 50%)}
+.rail::-webkit-scrollbar{display:none}
+.pkg{scroll-snap-align:start;background:var(--white);border:1px solid var(--granite-3);padding:24px;display:flex;flex-direction:column;gap:14px;min-height:100%}
+.pkg h3{font-size:22px;font-weight:600;letter-spacing:-.015em}
+.pkg .tag{color:var(--granite-7);font-size:15px}
+.price{font-family:var(--mono);font-size:30px;font-weight:500;letter-spacing:-.02em}
+.price small{font-size:12px;color:var(--granite-7);display:block;letter-spacing:0;font-weight:400}
+.pkg ul{list-style:none;padding:0;display:grid;gap:8px;font-size:15px;border-top:1px solid var(--granite-2);padding-top:14px}
+.pkg li{display:grid;grid-template-columns:18px 1fr;gap:8px}
+.pkg li::before{content:"";width:10px;height:6px;border-left:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg) translate(2px,4px)}
+.pkg .btn{margin-top:auto}
+.pkg.featured{background:var(--dolerite);color:var(--white);border-color:var(--dolerite)}
+.pkg.featured .tag,.pkg.featured .price small{color:var(--granite-3)}
+.pkg.featured ul{border-color:var(--granite-9)}
+.flag{font-family:var(--mono);font-size:11px;background:var(--lichen);color:var(--dolerite);padding:4px 8px;align-self:flex-start}
+.dots{display:flex;gap:8px;justify-content:center;margin-top:16px}
+.dots i{width:22px;height:4px;background:var(--granite-3);transition:background .25s,width .25s var(--ease)}
+.dots i.on{background:var(--dolerite);width:40px}
+.panel[hidden]{display:none}
+@media (min-width:1024px){.rail{grid-auto-flow:initial;grid-template-columns:repeat(4,1fr);overflow:visible;margin:0;padding:0}.dots{display:none}}
+
+/* workspace */
+.workspace{background:var(--dolerite);color:var(--white)}
+.workspace .sec-head p{color:var(--granite-3)}
+.ws{display:grid;gap:12px}
+.win{background:var(--dolerite-2);border:1px solid var(--granite-9);border-radius:4px;overflow:hidden}
+.win-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--granite-9);font-family:var(--mono);font-size:11px;color:var(--granite-3)}
+.win-bar i{width:8px;height:8px;border-radius:50%;background:var(--granite-7)}
+.win-bar i:first-child{background:var(--lichen)}
+.win-body{padding:18px}
+.ms{display:grid;gap:12px;list-style:none;padding:0}
+.ms li{display:grid;grid-template-columns:20px 1fr auto;gap:12px;align-items:center;font-size:15px}
+.ms .st{width:14px;height:14px;border:2px solid var(--granite-5);border-radius:50%}
+.ms .done .st{background:var(--lichen);border-color:var(--lichen)}
+.ms .now .st{border-color:var(--lichen);box-shadow:inset 0 0 0 3px var(--dolerite-2),inset 0 0 0 10px var(--lichen)}
+.ms .mono{color:var(--granite-3)}
+.inv{display:grid;gap:10px;font-size:15px}
+.inv .row{display:flex;justify-content:space-between;border-bottom:1px dashed var(--granite-9);padding-bottom:8px}
+.inv .total{font-family:var(--mono);font-size:26px}
+.methods{display:flex;flex-wrap:wrap;gap:8px}
+.methods span{font-size:13px;border:1px solid var(--granite-7);padding:6px 10px}
+.methods span:first-child{border-color:var(--lichen);color:var(--lichen)}
+@media (min-width:1024px){.ws{grid-template-columns:7fr 5fr}}
+
+/* process */
+.steps{display:grid;grid-auto-flow:column;grid-auto-columns:72%;gap:0;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:calc(50% - 50vw);padding-inline:calc(50vw - 50%);scroll-padding-inline:calc(50vw - 50%);list-style:none}
+.steps::-webkit-scrollbar{display:none}
+.steps li{scroll-snap-align:start;border-top:2px solid var(--dolerite);padding:20px 24px 0 0;position:relative}
+.steps li::before{content:"";position:absolute;top:-8px;left:0;width:14px;height:14px;background:var(--granite-0);border:2px solid var(--dolerite);transform:rotate(45deg)}
+.steps .mono{color:var(--granite-5);display:block;margin:8px 0 6px}
+.steps h3{font-size:24px;font-weight:600;letter-spacing:-.015em;margin-bottom:6px}
+.steps p{color:var(--granite-7);font-size:16px}
+@media (min-width:1024px){.steps{grid-auto-flow:initial;grid-template-columns:repeat(5,1fr);overflow:visible;margin:0;padding:0}}
+
+/* cta + footer */
+.cta{background:var(--lichen);padding:64px 0}
+.cta .wrap{display:grid;gap:24px}
+.cta h2{max-width:16ch}
+.cta p{font-size:18px;max-width:46ch}
+.cta .acts{display:flex;flex-wrap:wrap;gap:12px}
+.cta .btn-line{border:2px solid var(--dolerite);background:none;color:var(--dolerite)}
+@media (min-width:1024px){.cta .wrap{grid-template-columns:7fr 5fr;align-items:end}.cta .acts{justify-content:flex-end}}
+footer{background:var(--dolerite);color:var(--granite-3);padding:56px 0 0;overflow:hidden}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+footer h3{color:var(--white);font-size:14px;font-weight:600;margin-bottom:12px}
+footer ul{list-style:none;padding:0;display:grid;gap:4px}
+footer li a{text-decoration:none;display:inline-block;padding:6px 0;min-height:36px}
+footer li a:hover{color:var(--white)}
+.wordmark{font-size:clamp(84px,25vw,380px);font-weight:700;letter-spacing:-.06em;line-height:.74;color:var(--white);margin-top:48px;white-space:nowrap;transform:translateY(8%)}
+.legal{display:flex;flex-wrap:wrap;gap:8px 24px;font-size:13px;padding:24px 0;border-top:1px solid var(--granite-9);margin-top:40px}
+@media (min-width:1024px){.fgrid{grid-template-columns:4fr 2fr 2fr 2fr 2fr}}
+
+/* mobile menu */
+.sheet{position:fixed;inset:0;z-index:40;background:var(--dolerite);color:var(--white);padding:16px;display:flex;flex-direction:column;transform:translateY(-100%);transition:transform .45s var(--ease);visibility:hidden}
+.sheet.open{transform:none;visibility:visible}
+.sheet nav a{display:flex;justify-content:space-between;font-size:30px;font-weight:600;padding:14px 0;border-bottom:1px solid var(--granite-9);text-decoration:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+[data-enter]{animation:enter .7s var(--ease) both}
+[data-enter="2"]{animation-delay:.08s}[data-enter="3"]{animation-delay:.16s}
+@keyframes enter{from{opacity:0;transform:translateY(14px)}}
+</style>
+</head>
+<body>
+<header class="hd">
+  <div class="wrap">
+    <a class="brand" href="/"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="4" width="6.5" height="24" fill="#171614"/><path d="M14 14.4 22.6 4H29.2L20.6 14.4Z" fill="#E3A21A"/><path d="M14 17.6H20.6L29.2 28H22.6Z" fill="#171614"/></svg>kuzikode</a>
+    <nav class="nav" aria-label="Main">
+      <a href="/services">Services</a><a href="/pricing">Pricing</a><a href="/our-work">Our work</a><a href="/about">About</a><a href="/contact">Contact</a>
+    </nav>
+    <a class="btn btn-ink" href="/contact">Get a quote</a>
+    <button class="menu-btn" aria-expanded="false" aria-controls="sheet" aria-label="Open menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h18"/></svg></button>
+  </div>
+</header>
+<div class="sheet" id="sheet" aria-label="Menu">
+  <div style="display:flex;justify-content:space-between;align-items:center;height:52px"><span class="brand">kuzikode</span><button class="menu-btn" style="border-color:#5F5A53;color:#fff" aria-label="Close menu" data-close><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <nav aria-label="Mobile"><a href="/services">Services <span class="mono">01</span></a><a href="/pricing">Pricing <span class="mono">02</span></a><a href="/our-work">Our work <span class="mono">03</span></a><a href="/about">About <span class="mono">04</span></a><a href="/contact">Contact <span class="mono">05</span></a></nav>
+  <a class="btn btn-lichen" style="margin-top:auto" href="/contact">Get a quote</a>
+</div>
+
+<main>
+<section class="hero" style="padding-bottom:0">
+  <div class="wrap hero-grid">
+    <div>
+      <h1 data-enter>Websites, apps and business software for organisations in Zimbabwe.</h1>
+      <p class="lede" data-enter="2">Kuzikode designs, builds and runs digital systems for organisations in Zimbabwe and across Africa. Published prices, a written quotation, then weekly progress you can see.</p>
+      <p class="fact mono" data-enter="3"><span>Business websites from <b>$350</b></span><span>EcoCash · OneMoney · InnBucks · cards</span></p>
+    </div>
+    <form class="picker" data-enter="3" action="/contact" aria-labelledby="pk">
+      <h2 id="pk">What do you need?</h2>
+      <button type="button" class="pick" aria-pressed="true" data-svc="web-development" data-label="a website"><strong>A website or online shop</strong><span class="mono">from $350</span><span>Business sites, e-commerce, web apps</span></button>
+      <button type="button" class="pick" aria-pressed="false" data-svc="mobile-desktop-apps" data-label="an app"><strong>An app or business system</strong><span class="mono">from $1,500</span><span>Android, iOS, POS, ERP</span></button>
+      <button type="button" class="pick" aria-pressed="false" data-svc="ai-data" data-label="AI or automation"><strong>AI, data or automation</strong><span class="mono">from $25/hour</span><span>Dashboards, assistants, payment integration</span></button>
+      <button type="button" class="pick" aria-pressed="false" data-svc="cloud-it" data-label="email or IT support"><strong>Email, domains or IT support</strong><span class="mono">from $3/mo</span><span>Mailboxes, hosting, support</span></button>
+      <div class="picker-go"><a class="btn btn-lichen" id="go" href="/contact?service=web-development">Get a quote for a website <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    </form>
+  </div>
+  <div class="course-photo wrap">
+    <div class="chevron" aria-hidden="true"></div>
+    <img src="../img/home-hero-grey.webp" alt="A Kuzikode planning session around a laptop and a wall of sticky notes" width="1400" height="875">
+  </div>
+</section>
+
+<section id="services">
+  <div class="wrap">
+    <div class="sec-head"><h2>Six areas of work, one team.</h2><p>Start with what you need now and add more as you grow. Every "from" price is a published package; the quotation confirms it.</p></div>
+    <div class="courses">
+      <div class="course"><a href="/services/web-development"><span class="no">01</span><h3>Web development</h3><p>Business websites, e-commerce and web applications that load fast and are easy to update.</p><span class="from">from <b>$350</b></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+      <div class="course"><a href="/services/mobile-desktop-apps"><span class="no">02</span><h3>Mobile &amp; desktop apps</h3><p>Android, iOS and desktop apps built for real networks and real devices.</p><span class="from">from <b>$2,500</b></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+      <div class="course"><a href="/services/business-software"><span class="no">03</span><h3>Business software</h3><p>ERP, POS, inventory, HR and CRM systems shaped around how you work.</p><span class="from">from <b>$1,500</b></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+      <div class="course"><a href="/services/ai-data"><span class="no">04</span><h3>AI, data &amp; intelligence</h3><p>Dashboards, analytics and practical AI that answer real business questions.</p><span class="from">from <b>$600</b></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+      <div class="course"><a href="/services/automation-integration"><span class="no">05</span><h3>Automation &amp; integration</h3><p>APIs, payment gateways and workflows that remove manual steps.</p><span class="from">from <b>$25/hour</b></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+      <div class="course"><a href="/services/cloud-it"><span class="no">06</span><h3>Cloud &amp; IT</h3><p>Hosting, business email, domains, backups and technical support.</p><span class="from">from <b>$20</b></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing" id="pricing">
+  <div class="wrap">
+    <div class="sec-head"><h2>Website packages, priced in the open.</h2><p>Every package includes a support period. Care plans and business email are on their own tabs.</p></div>
+    <div class="seg" role="tablist" aria-label="Package group"><span class="thumb" aria-hidden="true"></span><button role="tab" aria-selected="true" aria-controls="p-web">Websites</button><button role="tab" aria-selected="false" aria-controls="p-care">Care plans</button><button role="tab" aria-selected="false" aria-controls="p-mail">Email</button></div>
+    <div class="panel" id="p-web" role="tabpanel">
+      <div class="rail">
+        <article class="pkg"><h3>Starter Website</h3><p class="tag">A professional presence for a new or small business.</p><p class="price">$350<small>one-off · 1–2 weeks</small></p><ul><li>1 revision round</li><li>2 weeks support</li><li>Domain and 2 mailboxes for year 1</li></ul><a class="btn btn-ink" href="/contact?package=starter-website">Request this package</a></article>
+        <article class="pkg featured"><span class="flag">Most chosen</span><h3>Business Website</h3><p class="tag">The complete website most growing businesses need.</p><p class="price">$750<small>one-off · 3–4 weeks</small></p><ul><li>3 revision rounds</li><li>1 month support</li><li>Domain and 10 mailboxes for year 1</li></ul><a class="btn btn-lichen" href="/contact?package=business-website">Request this package</a></article>
+        <article class="pkg"><h3>E-commerce Store</h3><p class="tag">Sell online with local payment methods.</p><p class="price">from $1,500<small>one-off · 5–8 weeks</small></p><ul><li>3 revision rounds</li><li>3 months support</li><li>Paynow: EcoCash, OneMoney, cards</li></ul><a class="btn btn-ink" href="/contact?package=ecommerce-store">Request this package</a></article>
+        <article class="pkg"><h3>Custom Web App</h3><p class="tag">Portals, dashboards and systems built around your process.</p><p class="price">Quoted<small>scoped with you</small></p><ul><li>Revisions agreed</li><li>Support agreed</li><li>Milestones in your workspace</li></ul><a class="btn btn-ink" href="/contact?package=custom-web-app">Ask for a quote</a></article>
+      </div>
+      <div class="dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="panel" id="p-care" role="tabpanel" hidden>
+      <div class="rail">
+        <article class="pkg"><h3>Essential Care</h3><p class="tag">Keep your website safe, backed up and online.</p><p class="price">$25<small>per month</small></p><a class="btn btn-ink" href="/contact?package=essential-care">Request this package</a></article>
+        <article class="pkg"><h3>Business Care</h3><p class="tag">Regular updates and a monthly report.</p><p class="price">$60<small>per month</small></p><a class="btn btn-ink" href="/contact?package=business-care">Request this package</a></article>
+        <article class="pkg"><h3>Growth Care</h3><p class="tag">Ongoing improvement for sites that drive your business.</p><p class="price">$150<small>per month</small></p><a class="btn btn-ink" href="/contact?package=growth-care">Request this package</a></article>
+      </div>
+    </div>
+    <div class="panel" id="p-mail" role="tabpanel" hidden>
+      <div class="rail">
+        <article class="pkg"><h3>Business Email</h3><p class="tag">Professional addresses on your own domain.</p><p class="price">$3<small>per mailbox / month</small></p><a class="btn btn-ink" href="/contact?package=business-email">Request this package</a></article>
+        <article class="pkg"><h3>Business Email Pro</h3><p class="tag">Google Workspace, set up and administered for you.</p><p class="price">$10<small>per mailbox / month</small></p><a class="btn btn-ink" href="/contact?package=business-email-pro">Request this package</a></article>
+        <article class="pkg"><h3>Email setup &amp; migration</h3><p class="tag">Move existing mail to your new mailboxes.</p><p class="price">$50<small>one-off</small></p><a class="btn btn-ink" href="/contact?package=email-setup-migration">Request this package</a></article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="workspace">
+  <div class="wrap">
+    <div class="sec-head"><h2>Your project, invoices and payments in one workspace.</h2><p>Every client gets a workspace: milestones, weekly updates, quotations to approve and invoices to pay with local methods.</p></div>
+    <div class="ws">
+      <div class="win"><div class="win-bar"><i></i><i></i><i></i><span>workspace / projects / company-website</span></div>
+        <div class="win-body"><ul class="ms">
+          <li class="done"><span class="st"></span>Discovery and sitemap agreed<span class="mono">done</span></li>
+          <li class="done"><span class="st"></span>Homepage and inner page designs<span class="mono">done</span></li>
+          <li class="now"><span class="st"></span>Build: pages, content editor, forms<span class="mono">this week</span></li>
+          <li><span class="st"></span>Testing, training and launch<span class="mono">next</span></li>
+        </ul></div></div>
+      <div class="win"><div class="win-bar"><i></i><i></i><i></i><span>workspace / invoices</span></div>
+        <div class="win-body inv"><div class="row"><span>Business Website, milestone 2 of 3</span><span class="mono">due in 5 days</span></div><p class="total">$250.00</p><div class="methods"><span>EcoCash</span><span>OneMoney</span><span>InnBucks</span><span>Card</span><span>Bank transfer</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="process">
+  <div class="wrap">
+    <div class="sec-head"><h2>How a project runs.</h2><p>Five stages, each ending in something you can see and approve.</p></div>
+    <ol class="steps">
+      <li><span class="mono">01</span><h3>Discover</h3><p>We learn how your organisation works and agree what success looks like.</p></li>
+      <li><span class="mono">02</span><h3>Design</h3><p>We plan the structure and design the screens before writing code.</p></li>
+      <li><span class="mono">03</span><h3>Build</h3><p>We build in milestones and show you progress every week.</p></li>
+      <li><span class="mono">04</span><h3>Launch</h3><p>We test, migrate your data, train your team and go live.</p></li>
+      <li><span class="mono">05</span><h3>Support</h3><p>We stay on hand to fix, improve and keep things running.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap"><div><h2>Tell us what you need built.</h2><p>We reply with questions or a written quotation, usually within one working day.</p></div>
+  <div class="acts"><a class="btn btn-ink" href="/contact">Get a quote</a><a class="btn btn-line" href="/pricing">See all prices</a></div></div>
+</section>
+</main>
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div><h3>Kuzikode Technologies</h3><p style="max-width:32ch">Websites, apps and business software for organisations in Zimbabwe and across Africa.</p></div>
+      <div><h3>Services</h3><ul><li><a href="/services/web-development">Web development</a></li><li><a href="/services/mobile-desktop-apps">Apps</a></li><li><a href="/services/business-software">Business software</a></li><li><a href="/services/ai-data">AI &amp; data</a></li></ul></div>
+      <div><h3>Company</h3><ul><li><a href="/about">About</a></li><li><a href="/how-we-work">How we work</a></li><li><a href="/careers">Careers</a></li><li><a href="/insights">Insights</a></li></ul></div>
+      <div><h3>Help</h3><ul><li><a href="/pricing">Pricing</a></li><li><a href="/faq">FAQ</a></li><li><a href="/portal">Client workspace</a></li></ul></div>
+      <div><h3>Contact</h3><ul><li><a href="/contact">Contact form</a></li><li><a href="/contact#whatsapp">WhatsApp</a></li></ul></div>
+    </div>
+    <div class="legal"><span>© 2026 Kuzikode Technologies</span><a href="/legal/privacy">Privacy</a><a href="/legal/terms">Terms</a></div>
+    <p class="wordmark" aria-hidden="true">kuzikode</p>
+  </div>
+</footer>
+<script>
+const picks=[...document.querySelectorAll('.pick')],go=document.getElementById('go');
+picks.forEach(p=>p.addEventListener('click',()=>{picks.forEach(q=>q.setAttribute('aria-pressed',q===p));go.href='/contact?service='+p.dataset.svc;go.firstChild.textContent='Get a quote for '+p.dataset.label+' ';}));
+document.querySelectorAll('.seg').forEach(seg=>{const tabs=[...seg.querySelectorAll('[role=tab]')],th=seg.querySelector('.thumb');
+ const place=t=>{th.style.width=t.offsetWidth+'px';th.style.transform=`translateX(${t.offsetLeft}px)`};
+ tabs.forEach(t=>t.addEventListener('click',()=>{tabs.forEach(u=>{u.setAttribute('aria-selected',u===t);document.getElementById(u.getAttribute('aria-controls')).hidden=u!==t});place(t)}));
+ requestAnimationFrame(()=>place(tabs[0]));addEventListener('resize',()=>place(seg.querySelector('[aria-selected=true]')))});
+document.querySelectorAll('.rail').forEach(r=>{const d=r.parentElement.querySelectorAll('.dots i');if(!d.length)return;r.addEventListener('scroll',()=>{const i=Math.round(r.scrollLeft/(r.firstElementChild.offsetWidth+12));d.forEach((x,j)=>x.classList.toggle('on',j===i))},{passive:true})});
+const sh=document.getElementById('sheet'),mb=document.querySelector('.hd .menu-btn');
+mb.addEventListener('click',()=>{sh.classList.add('open');mb.setAttribute('aria-expanded','true')});
+sh.querySelector('[data-close]').addEventListener('click',()=>{sh.classList.remove('open');mb.setAttribute('aria-expanded','false');mb.focus()});
+</script>
+</body>
+</html>

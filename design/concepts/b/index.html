@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en" data-type="service">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kuzikode: websites, apps and business software for organisations in Zimbabwe</title>
+<meta name="description" content="Concept B (Route). Static prototype for the R1.5 concept gate.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;500;600;700;800&family=Overpass+Mono:wght@400;600&display=swap" rel="stylesheet">
+<!--
+  Concept B: "Route". World: road wayfinding: green gantry signs with white letters, numbered exits, route maps with stops.
+  Overpass descends from Highway Gothic, the lettering of road signs. Palette: sign green owns hero, directory and footer;
+  white and pale verge grey carry reading; mint is the only lit colour.
+  References opened: IMG_5056 (deep green + mint, tabbed offering switcher, text-first mobile hero), IMG_5055 (numbered rows),
+  IMG_5071 (comparison table, one column at a time on phones), IMG_5067 (process stepper), IMG_5057 (segmented control).
+-->
+<style>
+:root{
+  --sign:#0B4A2D; --sign-2:#0F5B38; --sign-3:#1B6E47; --deep:#06301C; --mint:#7FE3A8; --mint-2:#B9F2CF;
+  --verge:#F1F4F0; --verge-2:#E2E8E2; --ink:#0D1A12; --ink-2:#3C4A41; --ink-3:#66756B; --white:#fff;
+  --sans:"Overpass",system-ui,sans-serif; --mono:"Overpass Mono",ui-monospace,monospace; --ease:cubic-bezier(.16,1,.3,1);
+  --r:7px;
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--sans);background:var(--verge);color:var(--ink);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
+::selection{background:var(--mint);color:var(--deep)}
+a{color:inherit}img{display:block;max-width:100%}
+:focus-visible{outline:3px solid var(--mint);outline-offset:3px}
+.wrap{width:min(1320px,100% - 32px);margin-inline:auto}
+@media (min-width:768px){.wrap{width:min(1320px,100% - 64px)}}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+svg.i{width:20px;height:20px;flex:none}
+
+/* header on sign field */
+.top{background:var(--sign);color:var(--white)}
+.hd{display:flex;align-items:center;gap:20px;height:72px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:23px;letter-spacing:-.02em;text-decoration:none}
+.brand svg{width:28px;height:28px}
+.nav{display:none;margin-left:auto;gap:2px}
+.nav a{text-decoration:none;font-weight:600;padding:10px 14px;border-radius:var(--r);transition:background .2s}
+.nav a:hover{background:var(--sign-3)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 20px;border-radius:var(--r);font:700 16px/1 var(--sans);text-decoration:none;border:0;cursor:pointer;transition:transform .15s var(--ease),background .2s,box-shadow .2s}
+.btn:active{transform:translateY(1px)}
+.btn-sign{background:var(--white);color:var(--sign);box-shadow:inset 0 0 0 2px var(--white),inset 0 0 0 4px var(--sign)}
+.btn-sign:hover{background:var(--mint-2)}
+.btn-green{background:var(--sign);color:var(--white);box-shadow:inset 0 0 0 2px var(--sign),inset 0 0 0 4px var(--white)}
+.btn-green:hover{background:var(--sign-3)}
+.hd .btn{margin-left:auto}
+.menu{width:48px;height:48px;border-radius:var(--r);border:2px solid var(--white);background:none;color:var(--white);display:grid;place-items:center}
+@media (min-width:1024px){.nav{display:flex}.hd .btn{margin-left:8px}.menu{display:none}}
+@media (max-width:519px){.hd .btn{display:none}.menu{margin-left:auto}}
+
+/* hero */
+.hero{padding:28px 0 56px;display:grid;gap:36px}
+h1{font-size:clamp(40px,9.6vw,86px);line-height:1;letter-spacing:-.03em;font-weight:800;text-wrap:balance;max-width:14ch}
+.hero p.lede{font-size:clamp(18px,1.8vw,21px);color:var(--mint-2);max-width:44ch;margin-top:18px}
+.gantry{display:grid;gap:10px}
+.signp{position:relative;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:2px 16px;padding:16px 18px 16px 14px;border-radius:var(--r);background:var(--sign-2);box-shadow:inset 0 0 0 3px var(--sign-2),inset 0 0 0 5px var(--white);text-decoration:none;transition:background .2s,transform .25s var(--ease)}
+.shield{grid-row:1/3;width:44px;height:48px;display:grid;place-items:center;background:var(--white);color:var(--sign);font:700 17px var(--mono);clip-path:polygon(0 0,100% 0,100% 62%,50% 100%,0 62%);padding-bottom:8px}
+.signp strong{font-size:clamp(21px,2.3vw,27px);font-weight:700;letter-spacing:-.01em;line-height:1.15}
+.signp span.d{font-family:var(--mono);font-size:15px;color:var(--mint)}
+.signp:hover{background:var(--sign-3);box-shadow:inset 0 0 0 3px var(--sign-3),inset 0 0 0 5px var(--white);transform:translateY(-2px)}
+.signp:hover .shield{background:var(--mint)}
+.gantry .note{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:6px;color:var(--mint-2);font-size:15px}
+@media (min-width:1024px){.hero{grid-template-columns:6fr 6fr;align-items:center;padding:56px 0 96px;gap:72px}.gantry{grid-template-columns:1fr 1fr;gap:22px 14px}.gantry .note{grid-column:1/-1}}
+
+/* services switcher */
+section{padding:72px 0}
+@media (min-width:1024px){section{padding:112px 0}}
+.head{display:grid;gap:12px;margin-bottom:32px}
+h2{font-size:clamp(32px,4.8vw,54px);line-height:1.04;letter-spacing:-.025em;font-weight:800;text-wrap:balance;max-width:20ch}
+.head p{color:var(--ink-2);font-size:18px;max-width:56ch}
+.tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-inline:calc(50% - 50vw);padding:4px calc(50vw - 50%);scroll-padding-inline:calc(50vw - 50%)}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:none;display:flex;align-items:center;gap:8px;font:600 15px var(--sans);min-height:46px;padding:0 16px;border-radius:var(--r);border:2px solid var(--verge-2);background:var(--white);cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+.tabs button .mono{font-size:12px;color:var(--ink-3)}
+.tabs button[aria-selected=true]{background:var(--sign);border-color:var(--sign);color:var(--white)}
+.tabs button[aria-selected=true] .mono{color:var(--mint)}
+.stage{margin-top:20px;display:grid;background:var(--white);border-radius:12px;overflow:hidden;border:1px solid var(--verge-2)}
+.stage img{width:100%;height:240px;object-fit:cover}
+.stage .body{padding:24px;display:grid;gap:14px;align-content:start}
+.stage h3{font-size:clamp(26px,3vw,36px);font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.stage p{color:var(--ink-2)}
+.stage ul{list-style:none;padding:0;display:grid;gap:0}
+.stage li{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--verge-2);font-weight:600}
+.stage li .mono{font-weight:400;color:var(--ink-2);white-space:nowrap}
+.fade{animation:fade .45s var(--ease)}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}}
+@media (min-width:1024px){.stage{grid-template-columns:5fr 7fr}.stage img{height:100%;min-height:460px}.stage .body{padding:44px}}
+
+/* pricing table */
+.price-sec{background:var(--white)}
+.picker{display:flex;gap:6px;margin-bottom:16px}
+.cmp{width:100%;border-collapse:separate;border-spacing:0}
+.cmp th,.cmp td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--verge-2);vertical-align:top;font-size:16px}
+.cmp thead th{vertical-align:bottom;border-bottom:2px solid var(--ink)}
+.cmp thead h3{font-size:20px;font-weight:800}
+.cmp thead .mono{font-size:26px;display:block;margin-top:4px}
+.cmp thead small{display:block;color:var(--ink-3);font-weight:400;font-size:13px}
+.cmp tbody th{font-weight:600;color:var(--ink-2);width:22%}
+.cmp .hi{background:var(--verge)}
+.cmp thead .hi{background:var(--sign);color:var(--white);border-radius:10px 10px 0 0}
+.cmp thead .hi small{color:var(--mint-2)}
+.cmp tfoot td{border:0;padding-top:20px}
+.cmp tfoot .btn{width:100%}
+.flag{display:inline-block;font:600 11px var(--mono);background:var(--mint);color:var(--deep);padding:3px 7px;border-radius:4px;margin-bottom:8px}
+.yes{color:var(--sign-3)}
+@media (max-width:899px){
+  .cmp thead th:not(:first-child),.cmp td{display:none}
+  .cmp thead th.show,.cmp td.show{display:table-cell}
+  .cmp tbody th{width:44%}
+}
+@media (min-width:900px){.picker{display:none}}
+
+/* route: a road strip with stop plates */
+.route{list-style:none;padding:0;display:grid;gap:0;position:relative}
+.route li{display:grid;grid-template-columns:52px 1fr;gap:16px;padding-bottom:28px;position:relative}
+.route li::before{content:"";position:absolute;left:20px;top:8px;bottom:-8px;width:12px;background:var(--ink) linear-gradient(var(--white) 50%,transparent 0) 5px 0/2px 18px repeat-y}
+.route li:last-child::before{display:none}
+.stop{width:52px;height:36px;border-radius:5px;background:var(--sign);color:var(--white);box-shadow:inset 0 0 0 2px var(--sign),inset 0 0 0 3.5px var(--white);display:grid;place-items:center;font:600 14px var(--mono);position:relative;z-index:1}
+.route h3{font-size:22px;font-weight:800;margin:4px 0 4px}
+.route p{color:var(--ink-2);max-width:40ch}
+@media (min-width:1024px){
+  .route{grid-template-columns:repeat(5,1fr)}
+  .route li{grid-template-columns:1fr;gap:14px;padding:0 24px 0 0}
+  .route li::before{left:0;right:0;top:12px;bottom:auto;height:12px;width:auto;background:var(--ink) linear-gradient(90deg,var(--white) 50%,transparent 0) 0 5px/18px 2px repeat-x}
+  .route li:first-child::before{left:26px}
+}
+/* workspace strip */
+.ws{background:var(--verge-2)}
+.panes{display:grid;gap:12px}
+.pane{background:var(--sign);color:var(--white);border-radius:10px;padding:20px;display:grid;gap:12px;align-content:start}
+.pane .t{font:600 12px var(--mono);color:var(--mint)}
+.pane .big{font:600 30px var(--mono)}
+.bar{height:8px;border-radius:4px;background:var(--sign-3);overflow:hidden}
+.bar i{display:block;height:100%;width:62%;background:var(--mint)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips span{font-size:13px;padding:6px 10px;border-radius:6px;background:var(--sign-3)}
+@media (min-width:1024px){.panes{grid-template-columns:repeat(3,1fr)}}
+
+footer{background:var(--sign);color:var(--mint-2);padding:64px 0 24px;overflow:hidden}
+.fcta{display:grid;gap:20px;padding-bottom:48px;border-bottom:2px solid var(--sign-3)}
+.fcta h2{color:var(--white)}
+.fcta .acts{display:flex;gap:12px;flex-wrap:wrap}
+.fcols{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:40px 0}
+.fcols h3{font-size:14px;color:var(--white);margin-bottom:8px}
+.fcols ul{list-style:none;padding:0}
+.fcols a{text-decoration:none;display:inline-block;padding:7px 0}
+.fcols a:hover{color:var(--white)}
+.wm{font-weight:800;font-size:clamp(80px,24vw,360px);letter-spacing:-.05em;line-height:.72;color:var(--sign-3);white-space:nowrap;margin-top:8px}
+@media (min-width:1024px){.fcta{grid-template-columns:7fr 5fr;align-items:end}.fcta .acts{justify-content:flex-end}.fcols{grid-template-columns:repeat(5,1fr)}}
+[data-enter]{animation:fade .7s var(--ease) both}[data-enter="2"]{animation-delay:.1s}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="top">
+  <header class="wrap hd">
+    <a class="brand" href="/"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="4" width="6.5" height="24" fill="#fff"/><path d="M14 14.4 22.6 4H29.2L20.6 14.4Z" fill="#7FE3A8"/><path d="M14 17.6H20.6L29.2 28H22.6Z" fill="#fff"/></svg>kuzikode</a>
+    <nav class="nav" aria-label="Main"><a href="/services">Services</a><a href="/pricing">Pricing</a><a href="/our-work">Our work</a><a href="/about">About</a><a href="/contact">Contact</a></nav>
+    <a class="btn btn-sign" href="/contact">Get a quote</a>
+    <button class="menu" aria-label="Open menu" aria-expanded="false"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3 7h18M3 12h18M3 17h18"/></svg></button>
+  </header>
+  <div class="wrap hero">
+    <div>
+      <h1 data-enter>Websites, apps and business software for organisations in Zimbabwe.</h1>
+      <p class="lede" data-enter="2">Pick the road that fits. Every route has a published starting price, a written quotation and a workspace where you follow the build.</p>
+    </div>
+    <nav class="gantry" aria-label="Choose a service" data-enter="2">
+      <a class="signp" href="/services/web-development"><span class="shield" aria-hidden="true">01</span><strong>Websites &amp; online shops</strong><span class="d">from $350</span></a>
+      <a class="signp" href="/services/mobile-desktop-apps"><span class="shield" aria-hidden="true">02</span><strong>Mobile &amp; desktop apps</strong><span class="d">from $2,500</span></a>
+      <a class="signp" href="/services/business-software"><span class="shield" aria-hidden="true">03</span><strong>Business software</strong><span class="d">from $1,500</span></a>
+      <a class="signp" href="/services/ai-data"><span class="shield" aria-hidden="true">04</span><strong>AI, data &amp; intelligence</strong><span class="d">from $600</span></a>
+      <a class="signp" href="/services/automation-integration"><span class="shield" aria-hidden="true">05</span><strong>Automation &amp; payments</strong><span class="d">from $25/hour</span></a>
+      <a class="signp" href="/services/cloud-it"><span class="shield" aria-hidden="true">06</span><strong>Cloud, email &amp; IT</strong><span class="d">from $20</span></a>
+      <div class="note"><span>Not sure which? Tell us the problem.</span><a class="btn btn-sign" href="/contact">Get a quote</a></div>
+    </nav>
+  </div>
+</div>
+
+<main>
+<section>
+  <div class="wrap">
+    <div class="head"><h2>What each route covers.</h2><p>Six areas of work, one team. Choose an area to see what we build in it and where prices start.</p></div>
+    <div class="tabs" role="tablist" aria-label="Service area">
+      <button role="tab" aria-selected="true" data-k="0"><span class="mono">01</span>Websites</button>
+      <button role="tab" aria-selected="false" data-k="1"><span class="mono">02</span>Apps</button>
+      <button role="tab" aria-selected="false" data-k="2"><span class="mono">03</span>Business software</button>
+      <button role="tab" aria-selected="false" data-k="3"><span class="mono">04</span>AI &amp; data</button>
+      <button role="tab" aria-selected="false" data-k="4"><span class="mono">05</span>Automation</button>
+      <button role="tab" aria-selected="false" data-k="5"><span class="mono">06</span>Cloud &amp; IT</button>
+    </div>
+    <div class="stage" role="tabpanel" id="stage"></div>
+  </div>
+</section>
+
+<section class="price-sec">
+  <div class="wrap">
+    <div class="head"><h2>Website packages side by side.</h2><p>Published prices. The written quotation confirms the final amount before any work starts.</p></div>
+    <div class="picker tabs" role="tablist" aria-label="Package">
+      <button role="tab" aria-selected="false" data-c="1">Starter</button><button role="tab" aria-selected="true" data-c="2">Business</button><button role="tab" aria-selected="false" data-c="3">E-commerce</button><button role="tab" aria-selected="false" data-c="4">Custom</button>
+    </div>
+    <table class="cmp">
+      <thead><tr><th scope="col"><span class="mono" style="font-size:14px;color:var(--ink-3)">Compare</span></th>
+        <th scope="col" data-c="1"><h3>Starter Website</h3><span class="mono">$350</span><small>one-off</small></th>
+        <th scope="col" data-c="2" class="hi show"><span class="flag">RECOMMENDED</span><h3>Business Website</h3><span class="mono">$750</span><small>one-off</small></th>
+        <th scope="col" data-c="3"><h3>E-commerce Store</h3><span class="mono">from $1,500</span><small>one-off</small></th>
+        <th scope="col" data-c="4"><h3>Custom Web App</h3><span class="mono">Quoted</span><small>scoped with you</small></th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Delivery time</th><td data-c="1">1–2 weeks</td><td data-c="2" class="hi show">3–4 weeks</td><td data-c="3">5–8 weeks</td><td data-c="4">Scoped</td></tr>
+        <tr><th scope="row">Revision rounds</th><td data-c="1">1 round</td><td data-c="2" class="hi show">3 rounds</td><td data-c="3">3 rounds</td><td data-c="4">Agreed</td></tr>
+        <tr><th scope="row">Support period</th><td data-c="1">2 weeks</td><td data-c="2" class="hi show">1 month</td><td data-c="3">3 months</td><td data-c="4">Agreed</td></tr>
+        <tr><th scope="row">Mailboxes, year 1</th><td data-c="1">2</td><td data-c="2" class="hi show">10</td><td data-c="3">10</td><td data-c="4">Optional</td></tr>
+        <tr><th scope="row">Local payments</th><td data-c="1">–</td><td data-c="2" class="hi show">–</td><td data-c="3" class="yes">EcoCash, OneMoney, cards</td><td data-c="4">Optional</td></tr>
+      </tbody>
+      <tfoot><tr><td></td><td data-c="1"><a class="btn btn-green" href="/contact?package=starter-website">Request Starter</a></td><td data-c="2" class="show"><a class="btn btn-green" href="/contact?package=business-website">Request Business</a></td><td data-c="3"><a class="btn btn-green" href="/contact?package=ecommerce-store">Request E-commerce</a></td><td data-c="4"><a class="btn btn-green" href="/contact?package=custom-web-app">Ask for a quote</a></td></tr></tfoot>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="head"><h2>Five stops from first call to launch.</h2><p>Each stop ends with something you can see and approve.</p></div>
+    <ol class="route">
+      <li><span class="stop">S1</span><div><h3>Discover</h3><p>We learn how your organisation works and agree what success looks like.</p></div></li>
+      <li><span class="stop">S2</span><div><h3>Design</h3><p>We plan the structure and design the screens before writing code.</p></div></li>
+      <li><span class="stop">S3</span><div><h3>Build</h3><p>We build in milestones and show you progress every week.</p></div></li>
+      <li><span class="stop">S4</span><div><h3>Launch</h3><p>We test, migrate your data, train your team and go live.</p></div></li>
+      <li><span class="stop">S5</span><div><h3>Support</h3><p>We stay on hand to fix, improve and keep things running.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<section class="ws">
+  <div class="wrap">
+    <div class="head"><h2>Follow the build in your client workspace.</h2><p>Milestones, weekly updates, quotations to approve and invoices to pay with local methods.</p></div>
+    <div class="panes">
+      <div class="pane"><span class="t">PROJECT · COMPANY WEBSITE</span><strong style="font-size:20px">Build: pages and content editor</strong><div class="bar"><i></i></div><span class="mono" style="font-size:13px;color:var(--mint-2)">milestone 2 of 3 · update posted Monday</span></div>
+      <div class="pane"><span class="t">QUOTATION · Q-0042</span><strong style="font-size:20px">Business Website</strong><span class="big">$750.00</span><a class="btn btn-sign" href="/portal">Review and approve</a></div>
+      <div class="pane"><span class="t">INVOICE · DUE IN 5 DAYS</span><span class="big">$250.00</span><div class="chips"><span>EcoCash</span><span>OneMoney</span><span>InnBucks</span><span>Card</span><span>Bank</span></div></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="fcta"><div><h2>Tell us where you're headed.</h2><p style="margin-top:12px;font-size:18px">We reply with questions or a written quotation, usually within one working day.</p></div><div class="acts"><a class="btn btn-sign" href="/contact">Get a quote</a><a class="btn btn-green" href="/pricing">See all prices</a></div></div>
+    <div class="fcols">
+      <div><h3>Services</h3><ul><li><a href="/services/web-development">Websites</a></li><li><a href="/services/mobile-desktop-apps">Apps</a></li><li><a href="/services/business-software">Business software</a></li></ul></div>
+      <div><h3>More services</h3><ul><li><a href="/services/ai-data">AI &amp; data</a></li><li><a href="/services/automation-integration">Automation</a></li><li><a href="/services/cloud-it">Cloud &amp; IT</a></li></ul></div>
+      <div><h3>Company</h3><ul><li><a href="/about">About</a></li><li><a href="/how-we-work">How we work</a></li><li><a href="/careers">Careers</a></li></ul></div>
+      <div><h3>Help</h3><ul><li><a href="/pricing">Pricing</a></li><li><a href="/faq">FAQ</a></li><li><a href="/portal">Client workspace</a></li></ul></div>
+      <div><h3>Legal</h3><ul><li><a href="/legal/privacy">Privacy</a></li><li><a href="/legal/terms">Terms</a></li></ul></div>
+    </div>
+  </div>
+</footer>
+<script>
+const D=[
+ ['Websites & online shops','Business websites, e-commerce and web applications that load fast on mobile data and are easy to update.','svc-web-development',[['Starter Website','$350'],['Business Website','$750'],['E-commerce Store','from $1,500'],['Custom Web App','quoted']]],
+ ['Mobile & desktop apps','Android, iOS and desktop apps built for real networks and real devices, with offline support.','svc-mobile-desktop-apps',[['MVP mobile app','from $2,500'],['Business app with admin dashboard','from $6,000']]],
+ ['Business software','ERP, POS, inventory, HR and CRM systems shaped around how your organisation works.','svc-business-software',[['POS / inventory system, single branch','from $1,500'],['Custom ERP / business platform','quoted']]],
+ ['AI, data & intelligence','Dashboards, analytics and practical AI features that answer real business questions.','svc-ai-data',[['BI dashboard starter','from $600'],['AI assistant / chatbot integration','from $900'],['Document processing pilot','from $1,200']]],
+ ['Automation & payments','APIs, payment gateways and workflows that remove manual steps between systems.','svc-automation-integration',[['Payment gateway integration','from $400'],['Workflow automation','from $500'],['API development','$25 per hour']]],
+ ['Cloud, email & IT','Hosting, business email, domains, backups and technical support.','svc-cloud-it',[['Business Email','$3 per mailbox / month'],['Cloud deployment & setup','from $200'],['IT support retainer','$100 per month']]]];
+const st=document.getElementById('stage');
+function show(k){const [h,p,img,rows]=D[k];st.innerHTML=`<img class="fade" src="../img/${img}-green.webp" alt="" width="1400" height="875"><div class="body fade"><h3>${h}</h3><p>${p}</p><ul>${rows.map(r=>`<li>${r[0]}<span class="mono">${r[1]}</span></li>`).join('')}</ul><a class="btn btn-green" style="justify-self:start" href="/contact?service=${['web-development','mobile-desktop-apps','business-software','ai-data','automation-integration','cloud-it'][k]}">Get a quote for this</a></div>`}
+show(0);
+document.querySelectorAll('[data-k]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-k]').forEach(x=>x.setAttribute('aria-selected',x===b));show(+b.dataset.k)}));
+document.querySelectorAll('.picker [data-c]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.picker [data-c]').forEach(x=>x.setAttribute('aria-selected',x===b));document.querySelectorAll('.cmp [data-c]').forEach(c=>c.classList.toggle('show',c.dataset.c===b.dataset.c))}));
+</script>
+</body>
+</html>

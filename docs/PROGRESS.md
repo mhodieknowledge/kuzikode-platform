@@ -963,3 +963,19 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Legacy deleted: SiteHeader, SiteFooter, AnnouncementBar, WhatsAppButton, NewsletterForm. verify green (unit 363, integration 308).
 - Next step: run the full e2e suite (server must not be restarted while it runs), then R3.3 (reveal already in controllers.ts:
   add e2e for reduced motion + reveal) and R4.1 Home rebuild in `src/ui/public/home/`.
+
+## 2026-11-12 14:00 UTC · Redesign R1.5 ✅ concept gate · R1.1 ✅ (redone)
+- Session started by the watchdog (session_01LWwAAUtz2tE8RXDbGc2W4B). Connectors: Figma, Canva, Cloudflare present. R2 `images/incoming/`
+  empty; no `design/inbox/`. Skills present. `npm ci` was needed (fresh container).
+- Opened the reference images again (5054, 5055, 5056, 5066, 5065, 5067, 5015, 5057, 5052, 5069, 5072, 5048) and the existing photo set.
+- impeccable context + concept-seed (seed:fc069276a80d2a45, assigned grounded candidate 5). Three static prototypes:
+  `design/concepts/a|b|c/index.html` (+ treated images in `design/concepts/img/`), boards in `docs/screenshots/redesign/concepts/`.
+  Taste consistency checker run on all three; fresh impeccable-finish-reviewer judged the boards: **B "Route" wins** (sign green +
+  verge + mint, Overpass, gantry of route plates with real "from" prices, route tabs, comparison table with phone column picker, road
+  strip). Reviewer fixes applied to B before promotion (real plates, no repeated arrows, no third green band, no footer wordmark,
+  road strip, "Recommended").
+- DESIGN_DIRECTION.md §2–10 rewritten; surface brief + PRODUCT.md updated (no start-a-project); IMAGE_TRACEABILITY updated; DECISIONS.
+- Next step: R2.1 tokens from concept B: replace felt/concrete/cobalt in `src/ui/tokens/tokens.css` + `base.css` @theme with
+  sign/verge/mint/ink (keep compatibility aliases mapped onto the new world), swap fonts to `@fontsource-variable/overpass` +
+  `overpass-mono` (Head.astro preload), then R2.5 (no-blue token test + grep), R2.3 primitives rebuilt as plates (no pills/knobs),
+  R2.4 gallery, R3.1/R3.2 header/footer redo.

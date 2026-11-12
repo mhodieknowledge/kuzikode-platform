@@ -25,7 +25,7 @@ web
 Kuzikode Technologies designs, builds and runs digital solutions for businesses: websites, mobile and desktop apps, business
 software, AI and data work, automation and integrations, and cloud and IT services. One platform carries the public website, the
 client workspace and the internal admin. Success for the public site: a visitor understands what Kuzikode does, trusts it as a
-serious technology partner, finds the right service or priced package, and starts a project or books a consultation.
+serious technology partner, finds the right service or priced package, and requests a quote (with the package preselected) or books a consultation.
 
 ## Positioning
 "Building intelligent digital solutions." A technology partner, not a freelance web shop: published package prices confirmed in a
@@ -35,7 +35,7 @@ real client workspace is the claim neighbouring Zimbabwean studios don't make.)*
 
 ## Operating Context
 Quotation → invoice → payment → receipt, milestones and weekly updates, care plans and subscriptions, support requests, consultation
-booking and the start-a-project wizard. Prices are integer minor units with ISO currency (USD and ZWG). Stack: Astro (SSR) + React
+booking and the contact/enquiry form (the start-a-project wizard is being removed, BRIEF B.0c). Prices are integer minor units with ISO currency (USD and ZWG). Stack: Astro (SSR) + React
 islands + Tailwind 4 on Cloudflare Workers, D1, R2, KV, Queues.
 
 ## Capabilities and Constraints

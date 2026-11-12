@@ -1,0 +1,38 @@
+---
+/**
+ * Client words (R4.1): only testimonials the owner published with recorded consent (listTestimonials). Hidden when there are none;
+ * nothing is invented. One quote at a time in a rail, the quote set large, the name and role below.
+ */
+import Rail from '../../primitives/Rail.astro';
+import type { PublicTestimonial } from '../../../server/modules/cms';
+
+interface Props {
+  testimonials: PublicTestimonial[];
+}
+const { testimonials } = Astro.props;
+---
+
+{
+  testimonials.length > 0 ? (
+    <section class="kz-sec kz-voices" aria-labelledby="voices-title">
+      <div class="container-wide">
+        <h2 id="voices-title" class="kz-h2">
+          In our clients' words
+        </h2>
+        <Rail label="Client testimonials" style="--kz-rail-item: 92%; --kz-rail-item-md: 70%; --kz-rail-item-lg: 56%">
+          {testimonials.map((t) => (
+            <figure class="kz-voice">
+              <blockquote>
+                <p>{t.quote}</p>
+              </blockquote>
+              <figcaption>
+                <b>{t.author}</b>
+                {t.role ? <span>{t.role}</span> : null}
+              </figcaption>
+            </figure>
+          ))}
+        </Rail>
+      </div>
+    </section>
+  ) : null
+}

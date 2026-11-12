@@ -36,6 +36,8 @@ interface Props {
   whatsappMessage?: string;
   /** Hide the footer's closing call to action on pages that are themselves the action (contact, wizard). */
   footerCta?: boolean;
+  /** Closing words above the footer's routes (defaults to "Where next"). */
+  footerLead?: { title: string; body?: string | undefined } | undefined;
 }
 const {
   title,
@@ -48,6 +50,7 @@ const {
   structuredData = [],
   whatsappMessage,
   footerCta = true,
+  footerLead,
 } = Astro.props;
 const { ctx } = Astro.locals;
 const [nav, announcement, org, settings, catalogue, pricing] = await Promise.all([
@@ -100,6 +103,6 @@ const tone = headerTone === 'dark' || headerTone === 'night' ? 'night' : 'bone';
   <main id="main" tabindex="-1" class="flex-1 focus:outline-none">
     <slot />
   </main>
-  <Footer nav={nav} cta={footerCta} />
+  <Footer nav={nav} cta={footerCta} lead={footerLead} />
   <WhatsApp number={whatsappNumber} message={whatsappText} />
 </Base>

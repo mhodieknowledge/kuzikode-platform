@@ -43,6 +43,8 @@ export function initHeader() {
   });
 
   const close = (focusButton = false) => {
+    // A pending hover-intent open must not reopen a menu the visitor just closed (click, Escape, outside click).
+    clearTimeout(openTimer);
     if (!openBtn) return;
     const b = openBtn;
     b.setAttribute('aria-expanded', 'false');
@@ -74,7 +76,11 @@ export function initHeader() {
   };
 
   for (const b of buttons) {
-    b.addEventListener('click', () => (openBtn === b ? close() : open(b)));
+    b.addEventListener('click', () => {
+      clearTimeout(openTimer);
+      if (openBtn === b) close();
+      else open(b);
+    });
     const li = b.closest('[data-menu]');
     const panel = panelOf(b);
     const enter = () => {

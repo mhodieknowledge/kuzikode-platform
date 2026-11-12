@@ -1,0 +1,42 @@
+---
+/**
+ * A committed site image (design/images/manifest.json) as <picture> with AVIF/WebP/JPEG srcsets (DESIGN_DIRECTION §8).
+ * `tone="warm"` applies the warm neutral duotone (#151412 shadows → #F4F1EA highlights) in CSS, so the existing owner photos
+ * (graded cool) sit in the earth palette without new files. Lazy by default; `priority` for an LCP image. Decorative: alt="".
+ */
+import manifest from '../../../design/images/manifest.json';
+
+interface Props {
+  id: string;
+  sizes?: string;
+  priority?: boolean;
+  alt?: string;
+  tone?: 'warm' | 'none';
+  class?: string;
+}
+const { id, sizes = '100vw', priority = false, alt, tone = 'none', class: className } = Astro.props;
+const entry = (
+  manifest as {
+    images: Record<string, { alt: string; width: number; height: number; widths: number[]; placeholder: string }>;
+  }
+).images[id];
+if (!entry) throw new Error(`Unknown site image "${id}"`);
+const set = (ext: string) => entry.widths.map((w) => `/images/site/${id}-${w}.${ext} ${w}w`).join(', ');
+const fallback = `/images/site/${id}-${entry.widths.at(-1)}.jpg`;
+---
+
+<picture class={['kz-pic', tone === 'warm' && 'kz-pic--warm', className].filter(Boolean).join(' ')}>
+  <source type="image/avif" srcset={set('avif')} sizes={sizes} />
+  <source type="image/webp" srcset={set('webp')} sizes={sizes} />
+  <img
+    src={fallback}
+    srcset={set('jpg')}
+    sizes={sizes}
+    alt={alt ?? entry.alt}
+    width={entry.width}
+    height={entry.height}
+    loading={priority ? 'eager' : 'lazy'}
+    decoding={priority ? 'sync' : 'async'}
+    fetchpriority={priority ? 'high' : 'auto'}
+  />
+</picture>

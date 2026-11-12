@@ -60,7 +60,7 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
   first and show it on /dev/ui. Mark per-service/division photo requests `superseded: SVG instead (B.4a)` and write a new 6–10 image batch only for
   heroes, mid-page bands and editorial sections. AC: division illustrations at 390 + 1440 pass the reviewer ("custom, consistent, premium");
   IMAGE-REQUESTS.md updated; owner notified.
-- [ ] **R4.1 Home.**
+- [x] **R4.1 Home.** (2026-11-12, pushed just before R2.5c arrived: the services band still uses warm-duotone division photos; R2.5c swaps them for the division illustrations.)
 - [ ] **R4.2 Services index + division pages + service detail.**
 - [ ] **R4.3 Pricing / packages** (presentation only; desktop comparison + mobile swipe/selector; price-accuracy test from B.6).
 - [ ] **R4.4 Our Work / portfolio + case study** (image transitions, empty state that still looks designed).

@@ -48,7 +48,8 @@ test('How we work page renders process, engagement models, expectations, practic
 test('home hides the testimonials block when none are published and shows technologies', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('[data-testimonials]')).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'Technologies we work with' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: "In our clients' words" })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Tools we build with' })).toBeVisible();
 });
 
 test('site search from the header finds services, packages and articles', async ({ page }) => {

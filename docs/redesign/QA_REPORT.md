@@ -27,3 +27,15 @@ Harness: `playwright.visual.config.ts` (`SHOOT=… SHOOT_SET=all|core|quick SHOO
   → bordered; decorative footer wordmark failed axe contrast even when aria-hidden → generated content (`::before`).
 - e2e: public-layout (mega-menu, Escape returns focus, menu dialog at 1024/768/375, skip link, footer legal, no blank contacts),
   site-content (header search + mobile search), careers (nav shows Careers while a role is open): 9 green.
+
+## 2026-11-12 · R4.1 home body
+- Viewports: 360, 375, 390, 412, 430, 768, 1024, 1280, 1440, 1920: no horizontal overflow, no sub-44 px controls in main.
+- Found and fixed: page overflow of 743 px at 390 from `sr-only` stop labels escaping the road-strip scroll track (absolute
+  descendants whose containing block is outside a scroll container are not clipped) → `.kz-track { position: relative }`;
+  approach grid min-content overflow → `minmax(0, 1fr)`; custom-quote packages showed no price → "Quoted"; values link stretched
+  away from its heading → `align-content: start`; tools line divider started a wrapped line → plain wrapped list.
+- Interactions: route tabs (click, ArrowLeft/Right, panel hidden/visible, cross-fade), quote links preselect `?category=`; reveal
+  groups on the road strip and values; reduced motion shows everything (motion.spec).
+- Distinctiveness board `docs/screenshots/redesign/boards/home-board.webp` (before 390/1440, new 390/1440, IMG_5056/5066/5055).
+  Fresh impeccable-finish-reviewer: first cut FAIL (stock photo + icon grid in Why, three sparse splits, old section order) →
+  fixes → PASS.

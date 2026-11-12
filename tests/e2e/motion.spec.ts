@@ -14,7 +14,11 @@ test('reduced motion: nothing is hidden for a reveal and no entrance animation r
       () =>
         document
           .getAnimations()
-          .filter((a) => a.playState === 'running' && a.effect?.getComputedTiming().iterations !== Infinity).length,
+          // Reduced motion shortens every animation to 0.01 ms; one caught in its only frame is not an entrance animation.
+          .filter((a) => {
+            const t = a.effect?.getComputedTiming();
+            return a.playState === 'running' && t?.iterations !== Infinity && Number(t?.duration) > 1;
+          }).length,
     );
     expect(running, `${path}: running entrance animations`).toBe(0);
     for (const el of await page.locator('[data-reveal]').all()) await expect(el).toBeVisible();

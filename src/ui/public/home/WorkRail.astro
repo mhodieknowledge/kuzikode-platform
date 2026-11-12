@@ -1,0 +1,63 @@
+---
+/**
+ * Selected work (R4.1; PRD: hidden when nothing is published, never invented). A rail of real projects from the CMS: the cover
+ * photograph (or a typographic plate in the division hue when there is none), the project name, category and summary. Phones: swipe
+ * with the next project peeking; tablet and desktop: buttons and dots (IMG_5066 portfolio rail).
+ */
+import Rail from '../../primitives/Rail.astro';
+import Icon from '../../icons/Icon.astro';
+import type { SectionContent } from '../../../shared/schemas/cms';
+import type { PublicPortfolioItem } from '../../../server/modules/cms';
+
+interface Props {
+  content: SectionContent<'work_grid'>;
+  items: PublicPortfolioItem[];
+}
+const { content: c, items } = Astro.props;
+---
+
+{
+  items.length > 0 ? (
+    <section class="kz-sec kz-work" aria-labelledby="work-title">
+      <div class="container-wide">
+        <header class="kz-sec__head">
+          <div>
+            <h2 id="work-title" class="kz-h2">
+              {c.title}
+            </h2>
+            {c.intro ? <p class="kz-lede">{c.intro}</p> : null}
+          </div>
+          <a class="kz-link" href="/work">
+            All work
+            <Icon name="arrow-right" size={16} />
+          </a>
+        </header>
+        <Rail label={c.title} style="--kz-rail-item: 84%; --kz-rail-item-md: 46%; --kz-rail-item-lg: 38%">
+          {items.slice(0, 8).map((p, i) => (
+            <a class:list={['kz-workcard', `kz-div-${(i % 6) + 1}`]} href={`/work/${p.slug}`}>
+              <span class="kz-workcard__media">
+                {p.cover ? (
+                  <img
+                    src={p.cover.src}
+                    alt={p.cover.alt}
+                    width={p.cover.width ?? 1200}
+                    height={p.cover.height ?? 750}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <span class="kz-workcard__plate" aria-hidden="true">
+                    {p.name}
+                  </span>
+                )}
+              </span>
+              <span class="kz-workcard__cat">{p.category}</span>
+              <span class="kz-workcard__name">{p.name}</span>
+              <span class="kz-workcard__sum">{p.summary}</span>
+            </a>
+          ))}
+        </Rail>
+      </div>
+    </section>
+  ) : null
+}

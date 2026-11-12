@@ -15,8 +15,10 @@ interface Props {
   nav: SiteNavigation;
   /** Pages that end with their own call to action (contact, consultation) hide the footer's routes. */
   cta?: boolean;
+  /** The page's own closing words (e.g. the home page's CMS `cta` section) shown above the routes instead of "Where next". */
+  lead?: { title: string; body?: string | undefined } | undefined;
 }
-const { nav, cta = true } = Astro.props;
+const { nav, cta = true, lead } = Astro.props;
 const { footer } = nav;
 const year = new Date().getFullYear();
 const c = footer.contact;
@@ -33,7 +35,10 @@ const routes = [
   {
     cta ? (
       <div class="container-wide kz-footer__next">
-        <h2 class="kz-footer__lead">Where next</h2>
+        <div>
+          <h2 class="kz-footer__lead">{lead?.title ?? 'Where next'}</h2>
+          {lead?.body ? <p class="kz-footer__lead-body">{lead.body}</p> : null}
+        </div>
         <ol class="kz-footer__routes" role="list">
           {routes.map((r, i) => (
             <li>

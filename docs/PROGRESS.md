@@ -1030,3 +1030,17 @@ The **Next step** line must be specific enough that a fresh session can continue
   hydration (`openKit`).
 - Next step: R4.1 home body rebuild in `src/ui/public/home/` (services night band with route tabs, why/process road strip,
   values, products modest, CTA) replacing the `[data-legacy]` wrappers in `src/pages/index.astro`; then R4.6b, R4.3.
+
+## 2026-11-12 19:00 UTC · R4.1 ✅ home body
+- Session started by the watchdog (session_01LWwAATz7q9Z5qUjZjvhSDT). Connectors: Figma, Canva, Cloudflare present; R2 `images/incoming/`
+  empty; no `design/inbox/`; skills present. `npm ci` was needed.
+- References opened: IMG_5056 (tabbed offering switcher on a dark band), IMG_5066 (numbered steps along a dashed route, dark "what we do"),
+  IMG_5067 (title-left/link-right header, stepper with connecting line), IMG_5055 (numbered full-width rows).
+- New `src/ui/public/home/`: ServicesBand (night band, route tabs with division hue swatch, packages + prices from the pricing catalogue,
+  warm-duotone photo, Get a quote → `/contact?category=`), RoadStrip (S1–S5 on a road with a dashed centre line; phone swipe track),
+  Approach (numbered ledger + drawn payment slip), CompanyBand (values 3-up, product with its real status, tools line), WorkRail and
+  Voices (render only with published data). `src/ui/primitives/Picture.astro` (warm tone), `src/ui/tokens/sections.css`.
+  Footer `lead` prop. Legacy deleted: ServicesGrid, WorkGallery, WorkGrid, ProductsGrid, Testimonials.
+- Board + reviewer: FAIL → fixes → PASS. home.spec updated (tabs, panel prices, keyboard, quote preselect). verify green.
+- Next step: R4.2 services index + division pages + service detail (rebuild in `src/ui/public/services/`, reuse ServicesBand ideas:
+  route tabs for sub-services, packages ledger; delete legacy Features/Process/CtaBand users as they go), then R4.6b wizard removal + 301, R4.3 pricing.

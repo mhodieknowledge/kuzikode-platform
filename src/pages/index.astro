@@ -1,16 +1,18 @@
 ---
+/**
+ * Home (R4.1, clean slate). Section order from the Route direction, content from the CMS `home` page:
+ * hero (workspace window + route index) → services night band (route tabs) → road strip (how we work) → why (ledger + payment
+ * slip) → selected work (only when published) → client words (only real, consented) → company band (values, product, tools);
+ * the CMS closing call to action titles the footer's "Where next" routes.
+ */
 import PublicLayout from '../layouts/PublicLayout.astro';
 import Hero from '../ui/public/home/Hero.astro';
-import ServicesGrid from '../components/public/sections/ServicesGrid.astro';
-import Features from '../components/public/sections/Features.astro';
-import WorkGallery from '../components/public/sections/WorkGallery.astro';
-import WorkGrid from '../components/public/sections/WorkGrid.astro';
-import Process from '../components/public/sections/Process.astro';
-import Values from '../components/public/sections/Values.astro';
-import ProductsGrid from '../components/public/sections/ProductsGrid.astro';
-import CtaBand from '../components/public/sections/CtaBand.astro';
-import Testimonials from '../components/public/sections/Testimonials.astro';
-import TechnologiesStrip from '../components/public/sections/TechnologiesStrip.astro';
+import ServicesBand from '../ui/public/home/ServicesBand.astro';
+import Approach from '../ui/public/home/Approach.astro';
+import WorkRail from '../ui/public/home/WorkRail.astro';
+import RoadStrip from '../ui/public/home/RoadStrip.astro';
+import Voices from '../ui/public/home/Voices.astro';
+import CompanyBand from '../ui/public/home/CompanyBand.astro';
 import { divisionFromPrice } from '../shared/directory';
 import {
   getPage,
@@ -42,6 +44,16 @@ const divisions = categories.map((c) => ({
   href: `/services/${c.slug}`,
   from: pricing.showPrices ? divisionFromPrice(pricing.packages, c.slug) : null,
 }));
+// Section order is the design's (RESPONSIVE_DESIGN_SPEC, B.0 clean slate), not the CMS list order; content stays the CMS's.
+const byType = (t: Section['type']) => sections.find((s) => s.type === t);
+const hero = byType('hero');
+const services = byType('services_grid');
+const process = byType('process');
+const why = byType('features');
+const work = byType('work_grid');
+const values = byType('values');
+const productsSec = byType('products_grid');
+const closing = byType('cta')?.content as Section<'cta'>['content'] | undefined;
 ---
 
 <PublicLayout
@@ -49,63 +61,26 @@ const divisions = categories.map((c) => ({
   description={page.seoDescription ?? undefined}
   canonicalPath="/"
   headerTone="bone"
+  footerLead={closing ? { title: closing.title } : undefined}
 >
-  {/* Sections after the hero are still the legacy presentation until R4.1; the B.1a guard skips [data-legacy]. */}
-  {sections.map((s) => {
-    switch (s.type) {
-      case 'hero':
-        return <Hero content={s.content as Section<'hero'>['content']} divisions={divisions} />;
-      case 'services_grid':
-        return (
-          <div data-legacy>
-            <ServicesGrid content={s.content as Section<'services_grid'>['content']} categories={categories} />
-          </div>
-        );
-      case 'features':
-        return (
-          <div data-legacy>
-            <Features
-              content={s.content as Section<'features'>['content']}
-              anchor={s.key}
-              imageId={s.key === 'why' ? 'home-approach' : undefined}
-            />
-          </div>
-        );
-      case 'work_grid':
-        return (
-          <div data-legacy>
-            <WorkGrid content={s.content as Section<'work_grid'>['content']} items={featured} />
-          </div>
-        );
-      case 'process':
-        return (
-          <div data-legacy>
-            <Process content={s.content as Section<'process'>['content']} />
-            <WorkGallery />
-          </div>
-        );
-      case 'values':
-        return (
-          <div data-legacy>
-            <Values content={s.content as Section<'values'>['content']} anchor={s.key} />
-          </div>
-        );
-      case 'products_grid':
-        return (
-          <div data-legacy>
-            <ProductsGrid content={s.content as Section<'products_grid'>['content']} products={products} />
-          </div>
-        );
-      case 'cta':
-        return (
-          <div data-legacy>
-            <Testimonials testimonials={testimonials} />
-            <TechnologiesStrip technologies={technologies} />
-            <CtaBand content={s.content as Section<'cta'>['content']} />
-          </div>
-        );
-      default:
-        return null;
-    }
-  })}
+  {hero ? <Hero content={hero.content as Section<'hero'>['content']} divisions={divisions} /> : null}
+  {services ? (
+    <ServicesBand
+      content={services.content as Section<'services_grid'>['content']}
+      categories={categories}
+      packages={pricing.packages}
+      showPrices={pricing.showPrices}
+    />
+  ) : null}
+  {process ? <RoadStrip content={process.content as Section<'process'>['content']} anchor={process.key} /> : null}
+  {why ? <Approach content={why.content as Section<'features'>['content']} anchor={why.key} /> : null}
+  {work ? <WorkRail content={work.content as Section<'work_grid'>['content']} items={featured} /> : null}
+  <Voices testimonials={testimonials} />
+  <CompanyBand
+    values={values?.content as Section<'values'>['content'] | undefined}
+    anchor={values?.key ?? 'values'}
+    productsContent={productsSec?.content as Section<'products_grid'>['content'] | undefined}
+    products={products}
+    technologies={technologies}
+  />
 </PublicLayout>

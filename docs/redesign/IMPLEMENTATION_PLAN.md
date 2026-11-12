@@ -101,7 +101,8 @@ Ticked when the file is deleted (or, for the logic-only files marked *logic*, mo
 | public/SiteHeader.astro, AnnouncementBar.astro, WhatsAppButton.astro | ui/public/shell Header, Announcement, WhatsApp | [x] R3.1 |
 | public/Icon.astro | ui/icons/Icon.astro | [ ] R4 (last legacy sections use it) |
 | public/SiteFooter.astro | ui/public/shell/Footer.astro | [x] R3.2 |
-| public/sections/Hero, ServicesGrid, Features, Process, PhotoPair, WorkGallery, ProductsGrid, TechnologiesStrip, CtaBand, SectionHeading, Statement, Values, Testimonials, ListSection, RichText, WorkGrid | new public sections | [ ] R4.1–R4.5 (each deleted with its last user) |
+| public/sections/ServicesGrid, WorkGallery, WorkGrid, ProductsGrid, Testimonials | ui/public/home (ServicesBand, WorkRail, CompanyBand, Voices) | [x] R4.1 (deleted) |
+| public/sections/Hero, Features, Process, PhotoPair, TechnologiesStrip, CtaBand, SectionHeading, Statement, Values, ListSection, RichText | new public sections | [ ] R4.2–R4.5 (each deleted with its last user) |
 | public/pricing/PackageCard.astro, ComparisonTable.astro | pricing components | [ ] R4.3 |
 | public/insights/InsightsListing, PostCard, PostCover | insights components | [ ] R4.7 |
 | forms/ContactForm, StartProjectWizard, ConsultationForm, Turnstile | new forms + hooks | [ ] R4.6 |

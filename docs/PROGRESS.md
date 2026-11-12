@@ -906,3 +906,10 @@ The **Next step** line must be specific enough that a fresh session can continue
   via impeccable concept-seed (seed:658d80b5dbf5df50, assigned 7/7); surface brief `.impeccable/surfaces/src-pages-index-astro.md`.
 - Next step: R1.2 specs (RESPONSIVE_DESIGN_SPEC, MOTION_AND_INTERACTION_SPEC, PANEL_DESIGN_SPEC, UI_UX_RECONSTRUCTION_PLAN,
   IMPLEMENTATION_PLAN), then R1.3 image batch 1.
+
+## 2026-11-12 10:56 UTC · Redesign R1.2 ✅ · R1.3 ✅
+- Specs: RESPONSIVE_DESIGN_SPEC.md (breakpoints, global mobile rules, per-page phone → tablet → desktop), MOTION_AND_INTERACTION_SPEC.md
+  (tokens, catalogue, reduced motion), PANEL_DESIGN_SPEC.md (workspace vs admin, windows/status bar/dock, mobile shells, auth),
+  UI_UX_RECONSTRUCTION_PLAN.md (goals, measures), IMPLEMENTATION_PLAN.md (tokens with compatibility aliases, primitive inventory, order).
+- IMAGE-REQUESTS.md batch 1 (9 slots: 6 division frames, about-lobby, contact-counter, careers-desk), ready for owner.
+- Next step: R2.1 tokens + fonts (Archivo wdth + JetBrains Mono variable; remove Manrope/Inter; aliases for old Tailwind names).

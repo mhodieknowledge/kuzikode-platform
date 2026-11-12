@@ -55,6 +55,11 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
 - [x] **R3.3 Page transitions / section reveal** framework per the motion spec.
 
 ## R4: Public pages (mobile first, each with its own mobile composition)
+- [ ] **R2.5c Illustration system + new image batch (BRIEF B.4a, inserted 2026-11-12 by the owner; do before R4.1).** Define and build the
+  custom SVG illustration system (style, stroke, accent-per-division from the Zimbabwe-earth palette, subtle motion), draw the service-division set
+  first and show it on /dev/ui. Mark per-service/division photo requests `superseded: SVG instead (B.4a)` and write a new 6–10 image batch only for
+  heroes, mid-page bands and editorial sections. AC: division illustrations at 390 + 1440 pass the reviewer ("custom, consistent, premium");
+  IMAGE-REQUESTS.md updated; owner notified.
 - [ ] **R4.1 Home.**
 - [ ] **R4.2 Services index + division pages + service detail.**
 - [ ] **R4.3 Pricing / packages** (presentation only; desktop comparison + mobile swipe/selector; price-accuracy test from B.6).

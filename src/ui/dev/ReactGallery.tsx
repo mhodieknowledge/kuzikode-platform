@@ -174,7 +174,7 @@ function Inner() {
             Toast: error
           </Button>
           <IconButton name="refresh" label="Refresh" variant="secondary" />
-          <Button loading knob>
+          <Button loading arrow>
             Saving
           </Button>
         </div>

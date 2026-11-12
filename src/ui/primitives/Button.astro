@@ -1,6 +1,7 @@
 ---
 /**
- * Button or link-button of the Directory world. `knob` adds the round arrow knob (primary calls to action).
+ * Plate button or link-button of the Route world: 7 px corners and an inset ring, never a pill. `arrow` adds a trailing
+ * arrow, only when the action leads to a new page (DESIGN_DIRECTION §7).
  * Renders <a> when `href` is set, otherwise <button>. Extra attributes (data-*, aria-*) pass through.
  */
 import type { HTMLAttributes } from 'astro/types';
@@ -13,8 +14,8 @@ interface Props extends Omit<HTMLAttributes<'a'> & HTMLAttributes<'button'>, 'ty
   size?: 'sm' | 'md' | 'lg';
   href?: string | undefined;
   type?: 'button' | 'submit' | 'reset';
-  knob?: boolean;
-  /** Knob / trailing icon (defaults to arrow-right when `knob`). */
+  arrow?: boolean;
+  /** Trailing icon (defaults to arrow-right when `arrow`). */
   icon?: IconName | undefined;
   /** Leading icon. */
   lead?: IconName | undefined;
@@ -28,7 +29,7 @@ const {
   size = 'md',
   href,
   type = 'button',
-  knob = false,
+  arrow = false,
   icon,
   lead,
   block = false,
@@ -41,14 +42,13 @@ const cls = [
   'kz-btn',
   `kz-btn--${variant}`,
   size !== 'md' && `kz-btn--${size}`,
-  knob && 'kz-btn--knob',
   block && 'kz-btn--block',
   iconOnly && 'kz-btn--icon',
   className,
 ]
   .filter(Boolean)
   .join(' ');
-const trailing = icon ?? (knob ? 'arrow-right' : undefined);
+const trailing = icon ?? (arrow ? 'arrow-right' : undefined);
 const Tag = href ? 'a' : 'button';
 ---
 
@@ -61,12 +61,10 @@ const Tag = href ? 'a' : 'button';
       <span>
         <slot />
       </span>
-      {trailing && knob ? (
-        <span class="kz-btn__knob">
+      {trailing ? (
+        <span class="kz-btn__trail">
           <Icon name={trailing} size={size === 'sm' ? 16 : 20} />
         </span>
-      ) : trailing ? (
-        <Icon name={trailing} />
       ) : null}
     </>
   )}

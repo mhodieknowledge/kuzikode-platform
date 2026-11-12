@@ -988,3 +988,13 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Visual check /, /dev/ui at 390/1440: tokens apply; primitives are still pills + knobs → R2.3 rebuild.
 - Next step: R2.3 primitives as plates (Button/Segmented/Tabs/Rail/Accordion/StatusPill/Sheet + React twins) per concept B,
   rewrite `components.css` recipes; then /dev/ui (R2.4) and R2.5 grep/visual sign-off; R2.2 icon stroke 2.
+
+## 2026-11-12 14:20 UTC · Redesign R2.2 ✅ · R2.3 ✅ plates · R2.4 ✅ gallery
+- Icons: stroke 2 at 16–20 px, 1.75 at 24–32 (sign weight); ICONS.md audit updated (no knobs; gantry plates; road strip).
+- Primitives: `components.css` button/link recipes rewritten as plates (7 px corners, inset ring via `--ring-plate`, white plate on
+  sign); round arrow knob removed (`knob` prop → `arrow`, plain trailing arrow, Astro + React); new `.kz-shield` route shield;
+  segmented, tabs bar (3 px, `--kz-bar`), accordion sign, rail dots and status tags squared; lit states use sign-950 text on mint.
+- /dev/ui: Route copy, route shields, "Recommended". Visual loop at 375/390/430/768/1440: no overflow; ui-kit e2e 8/8; verify green.
+- Header/Footer still carry `kz-btn--knob`/`kz-knob` markup (unstyled now) until the R3.1/R3.2 rebuild.
+- Next step: R2.5 sign-off (grep, IMAGE-REQUESTS batch 1 rewritten for the green palette + owner notification), then R3.1 header +
+  mobile sheet and R3.2 footer rebuilt from concept B (design/concepts/b) with "Get a quote" (wizard links removed per B.0c).

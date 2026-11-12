@@ -23,11 +23,11 @@ const floors = ['Websites', 'Care plans', 'Email & domains', 'Other services'];
     <div class="container-content py-10 sm:py-14">
       <h1 class="display text-display">UI kit</h1>
       <p class="mt-3 max-w-[56ch] text-on-sign-2">
-        Primitives of the Directory world, server-rendered (Astro) and interactive (React). Development only.
+        Primitives of the Route world, server-rendered (Astro) and interactive (React). Development only.
       </p>
       <div class="mt-8 flex flex-wrap gap-3">
-        <Button knob href="#buttons">
-          Start a project
+        <Button arrow href="#buttons">
+          Get a quote
         </Button>
         <Button variant="secondary" href="#rails">
           Explore services
@@ -48,7 +48,7 @@ const floors = ['Websites', 'Care plans', 'Email & domains', 'Other services'];
         Buttons
       </h2>
       <div class="flex flex-wrap items-center gap-3">
-        <Button knob>Start a project</Button>
+        <Button arrow>Request this package</Button>
         <Button>Request a quotation</Button>
         <Button variant="secondary">Secondary</Button>
         <Button variant="solid">Solid</Button>
@@ -57,16 +57,16 @@ const floors = ['Websites', 'Care plans', 'Email & domains', 'Other services'];
         </Button>
         <Button variant="danger">Delete</Button>
         <Button disabled>Disabled</Button>
-        <Button size="sm" knob>
+        <Button size="sm" arrow>
           Small
         </Button>
-        <Button size="lg" knob>
+        <Button size="lg" arrow>
           Large
         </Button>
         <Button iconOnly="search" label="Search" variant="secondary" />
       </div>
       <div class="max-w-sm">
-        <Button knob block size="lg">
+        <Button arrow block size="lg">
           Block (phones)
         </Button>
       </div>
@@ -125,13 +125,29 @@ const floors = ['Websites', 'Care plans', 'Email & domains', 'Other services'];
       </h2>
       <Rail label="Packages">
         {['Starter Website', 'Business Website', 'E-commerce Store', 'Custom Web App'].map((n, i) => (
-          <article class:list={['rounded-[10px] p-6', i === 1 ? 'on-sign' : 'bg-paper']}>
+          <article class:list={['rounded-[var(--radius-panel)] p-6', i === 1 ? 'on-sign' : 'bg-paper']}>
             <h3 class="text-h3">{n}</h3>
             <p class="mt-2 font-mono text-[1.75rem] text-[var(--kz-fg)]">$—</p>
             <p class="mt-2 text-small text-[var(--kz-fg-2)]">Fictional card for the gallery.</p>
           </article>
         ))}
       </Rail>
+    </section>
+
+    <section aria-labelledby="shields" class="stack gap-6">
+      <h2 id="shields" class="text-h2">
+        Route shields
+      </h2>
+      <div class="flex flex-wrap items-center gap-4">
+        <span class="kz-shield">01</span>
+        <span class="kz-lit">
+          <span class="kz-shield">02</span>
+        </span>
+        <span class="on-sign inline-flex rounded-[7px] p-3">
+          <span class="kz-shield">03</span>
+        </span>
+        <span class="text-small text-[var(--kz-fg-2)]">Division numbers on plates, lit when active.</span>
+      </div>
     </section>
 
     <section aria-labelledby="accordion" class="stack gap-6">
@@ -156,7 +172,7 @@ const floors = ['Websites', 'Care plans', 'Email & domains', 'Other services'];
         <StatusPill tone="warn">Due soon</StatusPill>
         <StatusPill tone="danger">Overdue</StatusPill>
         <StatusPill tone="info">Issued</StatusPill>
-        <StatusPill tone="lit">Most popular</StatusPill>
+        <StatusPill tone="lit">Recommended</StatusPill>
       </div>
       <div>
         <ListRow href="#status" title="INV-2026-00021 · Msasa Hardware (demo)" meta="Due 02 Nov 2026">

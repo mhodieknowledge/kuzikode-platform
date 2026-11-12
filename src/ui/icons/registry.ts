@@ -1,5 +1,5 @@
 /**
- * The one icon system (docs/redesign/DESIGN_DIRECTION.md §7): Lucide, 1.75 stroke at 20 px, `currentColor`.
+ * The one icon system (docs/redesign/DESIGN_DIRECTION.md §7): Lucide, stroke 2 at 16–20 px (sign weight, Route world), `currentColor`.
  * Components ask for an icon by meaning (`IconName`), never by Lucide export, so a meaning maps to one glyph everywhere.
  * CMS content stores the older names in `CMS_ICONS` (src/shared/icons.ts); `cmsIcon()` maps them, and division / industry slugs
  * get a more specific glyph through `divisionIcon()` / `industryIcon()`.
@@ -217,8 +217,8 @@ export const ICONS = {
 
 export type IconName = keyof typeof ICONS;
 
-/** Pixel sizes and their stroke widths: 1.75 at 16–20 px, 1.5 at 24–32 px keeps the optical weight even. */
-export const ICON_SIZES = { 16: 1.75, 20: 1.75, 24: 1.5, 32: 1.5 } as const;
+/** Pixel sizes and their stroke widths: 2 at 16–20 px (sign weight), 1.75 at 24–32 px keeps the optical weight even. */
+export const ICON_SIZES = { 16: 2, 20: 2, 24: 1.75, 32: 1.75 } as const;
 export type IconSize = keyof typeof ICON_SIZES;
 
 const DIVISIONS: Record<string, IconName> = {

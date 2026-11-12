@@ -47,7 +47,7 @@ condensed `KUZIKODE` wordmark cropped at the bottom edge (IMG_5054/5072). Tablet
 ## 2. Pages
 
 ### Home (`/`)
-1. **Hero (felt).** Phone: index line ("Kuzikode Technologies · Harare, Zimbabwe"), display headline (CMS hero title) in 3 lines max,
+1. **Hero (felt).** Phone: display headline (CMS hero title) in 3 lines max,
    one sentence, then the **"What do you need?" route list**: 4 tappable directory rows (Website · App or business system · AI, data
    or automation · Pay an invoice / client workspace) each with icon + label + arrow knob, which ARE the hero's action; "Start a
    project" stays in the header. Tablet: headline wider, routes in 2×2. Desktop: 7/5 split: headline + sentence + 2 CTAs left;

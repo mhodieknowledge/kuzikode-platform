@@ -32,7 +32,7 @@ on large areas, `will-change` only during an active gesture.
 | Carousels / rails | Native scroll-snap for swipes (finger 1:1). Button/dot navigation uses smooth scroll. Items entering the centre fade from .55 to 1 and the peeking items stay at .55 opacity on phones (opacity driven by IntersectionObserver ratio, not scroll handlers). Category change: outgoing items fade 160 ms, incoming fade + 8 px slide 240 ms (no hard swap). |
 | Accordions | Height via grid rows 0fr→1fr, 240 ms; +/− icon rotates 90°→0. |
 | Section reveal | Once per element, when 15% visible: opacity 0→1 + translateY 12→0, 240 ms ease-out; groups stagger ≤ 4 × 50 ms. Never on above-the-fold content after first paint. Content is visible without JS (reveal class added by JS only). |
-| Hero entrance | Index line → headline (lines mask-rise 100%→0, 60 ms apart) → sentence → routes (stagger 4 × 50 ms). Total ≤ 600 ms. Desktop board: the lit row cycles 01→06 once (180 ms per row) then rests on 01. |
+| Hero entrance | Headline (lines mask-rise 100%→0, 60 ms apart) → sentence → routes (stagger 4 × 50 ms). Total ≤ 600 ms. Desktop board: the lit row cycles 01→06 once (180 ms per row) then rests on 01. |
 | Image swap (work, division frames) | Cross-fade 240 ms with 1.02→1 scale on the incoming image. |
 | Toasts | Enter from bottom (phones) / top-right (desktop) 240 ms; auto-dismiss 5 s, pause on hover/focus; swipe to dismiss on touch. |
 | Dialogs | Backdrop 180 ms; panel opacity + scale .98→1, 240 ms. Bottom sheet on phones (slide up 320 ms, drag handle, swipe down to dismiss). |

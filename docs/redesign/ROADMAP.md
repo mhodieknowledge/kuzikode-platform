@@ -22,7 +22,7 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
   finds no "restyle"/"reskin" strategy entries. Logged in DECISIONS.md.
 
 ## R2: Foundation
-- [ ] **R2.1 Design tokens + base styles** (colour, type scale with fluid mobile→desktop sizing, spacing, radius, shadows, z-index, motion tokens, dark/light surfaces for panels). Replace the old token set.
+- [x] **R2.1 Design tokens + base styles** (colour, type scale with fluid mobile→desktop sizing, spacing, radius, shadows, z-index, motion tokens, dark/light surfaces for panels). Replace the old token set.
 - [ ] **R2.2 Icon system** (single family, wrapper component, sizes, stroke, a11y labels) and an audit list of every place that needs an icon.
 - [ ] **R2.3 Core primitives rebuilt:** buttons, links, inputs/forms (mobile-friendly: 16 px+ inputs, correct keyboards, inline validation), segmented control, tabs, accordion, carousel/swipe track (scroll-snap + buttons + dots, fade/slide choreography, keyboard + reduced motion), sheet/drawer, dialog, toast, badge/status, table → mobile list pattern.
 - [ ] **R2.4 Dev UI gallery** page (dev-only) showing every primitive at 390 and 1440. AC: visual loop clean.

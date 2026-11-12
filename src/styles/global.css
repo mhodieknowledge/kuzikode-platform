@@ -1,10 +1,40 @@
 @import 'tailwindcss';
 @import './tokens.css';
-@import '@fontsource-variable/inter';
-@import '@fontsource-variable/manrope';
-@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource-variable/jetbrains-mono/wght.css';
 
 @theme {
+  /* The Directory world (tokens.css). */
+  --color-felt-950: var(--felt-950);
+  --color-felt-900: var(--felt-900);
+  --color-felt-800: var(--felt-800);
+  --color-felt-700: var(--felt-700);
+  --color-felt-600: var(--felt-600);
+  --color-on-felt: var(--on-felt);
+  --color-on-felt-2: var(--on-felt-2);
+  --color-on-felt-3: var(--on-felt-3);
+  --color-concrete-50: var(--concrete-50);
+  --color-concrete-100: var(--concrete-100);
+  --color-concrete-200: var(--concrete-200);
+  --color-concrete-300: var(--concrete-300);
+  --color-paper: var(--paper);
+  --color-ink-900: var(--ink-900);
+  --color-ink-700: var(--ink-700);
+  --color-ink-500: var(--ink-500);
+  --color-cobalt-700: var(--cobalt-700);
+  --color-cobalt-600: var(--cobalt-600);
+  --color-cobalt-500: var(--cobalt-500);
+  --color-cobalt-300: var(--cobalt-300);
+  --color-cobalt-100: var(--cobalt-100);
+  --color-cobalt-50: var(--cobalt-50);
+  --color-ok-600: var(--ok-600);
+  --color-ok-700: var(--ok-700);
+  --color-ok-50: var(--ok-50);
+  --color-warn-600: var(--warn-600);
+  --color-warn-700: var(--warn-700);
+  --color-warn-50: var(--warn-50);
+
+  /* Compatibility names (tokens.css aliases), removed in R8. */
   --color-ink-950: var(--ink-950);
   --color-ink-800: var(--ink-800);
   --color-ink-600: var(--ink-600);
@@ -32,18 +62,35 @@
   --color-dark-surface: var(--dark-surface);
   --color-dark-brand: var(--dark-brand);
 
-  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: 'Manrope Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: 'Archivo Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  /* Fluid type scale: phone → 1440. */
+  --text-display-xl: clamp(2.6rem, 1.7rem + 4.2vw, 5.6rem);
+  --text-display-xl--line-height: 0.98;
+  --text-display: clamp(2.1rem, 1.55rem + 2.6vw, 3.8rem);
+  --text-display--line-height: 1.02;
+  --text-h2: clamp(1.7rem, 1.4rem + 1.3vw, 2.6rem);
+  --text-h2--line-height: 1.08;
+  --text-h3: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);
+  --text-h3--line-height: 1.2;
+  --text-body: clamp(1.0625rem, 1.03rem + 0.15vw, 1.125rem);
+  --text-body--line-height: 1.55;
+  --text-small: 0.9375rem;
+  --text-small--line-height: 1.5;
+  --text-micro: 0.8125rem;
+  --text-micro--line-height: 1.3;
 
-  --shadow-1: var(--shadow-1);
-  --shadow-2: var(--shadow-2);
+  --radius-sm: var(--radius-xs);
+  --radius-md: var(--radius-card);
+  --radius-lg: var(--radius-inset);
 
-  --container-content: 1200px;
+  --shadow-1: var(--shadow-raise);
+  --shadow-2: var(--shadow-float);
+
+  --container-content: 1240px;
+  --container-wide: 1440px;
   --container-prose: 68ch;
 }
 
@@ -51,29 +98,60 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
+    scroll-padding-top: calc(var(--header-h) + 16px);
+    accent-color: var(--cobalt-600);
+    caret-color: var(--cobalt-600);
   }
   body {
     @apply bg-canvas font-sans text-ink-800 antialiased;
-    font-feature-settings: 'cv11', 'ss01';
+    font-size: var(--text-body);
+    line-height: 1.55;
+    font-stretch: 100%;
+    font-feature-settings: 'kern', 'liga';
   }
   h1,
   h2,
   h3,
   h4 {
     @apply font-display text-ink-950;
+    font-stretch: 104%;
+    font-weight: 640;
+    letter-spacing: -0.02em;
     text-wrap: balance;
   }
   p {
     text-wrap: pretty;
   }
   :focus-visible {
-    outline: 2px solid var(--brand-500);
-    outline-offset: 2px;
+    outline: 2px solid var(--cobalt-500);
+    outline-offset: 3px;
     border-radius: 4px;
   }
   ::selection {
-    background: var(--brand-50);
-    color: var(--ink-950);
+    background: var(--cobalt-100);
+    color: var(--ink-900);
+  }
+  .on-felt ::selection,
+  .on-felt::selection {
+    background: var(--cobalt-500);
+    color: #fff;
+  }
+  .on-felt :focus-visible {
+    outline-color: var(--cobalt-300);
+  }
+  a {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+  /* Numerals in data are tabular everywhere (glyph-grid discipline). */
+  table,
+  .font-mono,
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  html {
+    scrollbar-color: var(--concrete-300) transparent;
   }
   [hidden] {
     display: none !important;
@@ -88,9 +166,33 @@
   letter-spacing: -0.02em;
 }
 
+/* Archivo width axis: condensed caps for directory rows, table heads and floor numbers (never as eyebrows above headings). */
+@utility caps {
+  font-stretch: 72%;
+  font-weight: 620;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+@utility wide {
+  font-stretch: 112%;
+}
+
+@utility display {
+  font-family: var(--font-display);
+  font-stretch: 108%;
+  font-weight: 640;
+  letter-spacing: -0.028em;
+}
+
 @layer utilities {
   .container-content {
-    @apply mx-auto w-full max-w-[var(--container-content)] px-4 sm:px-6 lg:px-8;
+    @apply mx-auto w-full max-w-[calc(var(--container-content)+2*var(--gutter))];
+    padding-inline: var(--gutter);
+  }
+  .container-wide {
+    @apply mx-auto w-full max-w-[calc(var(--container-wide)+2*var(--gutter))];
+    padding-inline: var(--gutter);
   }
   .skip-link {
     @apply sr-only;
@@ -114,7 +216,9 @@
 /* Typography for sanitized CMS rich text. */
 @layer components {
   .prose-kz {
-    @apply max-w-[var(--container-prose)] text-[17px] leading-8 text-ink-800;
+    @apply max-w-[var(--container-prose)] text-ink-800;
+    font-size: var(--text-body);
+    line-height: 1.7;
   }
   .prose-kz > * + * {
     margin-top: 1.1em;
@@ -141,7 +245,7 @@
     margin-top: 0.4em;
   }
   .prose-kz blockquote {
-    @apply border-l-2 border-brand-600 pl-5 text-ink-600 italic;
+    @apply border-l border-concrete-300 pl-5 text-ink-600 italic;
   }
   .prose-kz code {
     @apply rounded-[4px] bg-canvas px-1.5 py-0.5 font-mono text-[0.9em];

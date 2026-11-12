@@ -104,7 +104,7 @@ Existing tokens in `src/styles/tokens.css` (brand #2747e8, accent amber, Manrope
 ## 5. Type
 
 - **Archivo** (variable, `wdth` 62–125 and `wght` 100–900, self-hosted via `@fontsource-variable/archivo`, latin subset ~90 KB) is the
-  one family. Display: width 108, weight 640, tracking −0.025em, tight leading 0.98–1.05. Directory caps and eyebrows: width 72
+  one family. Display: width 108, weight 640, tracking −0.025em, tight leading 0.98–1.05. Directory caps (row names, floor numbers, table headers; never as an eyebrow above a heading, which impeccable craft-floor bans): width 72
   (condensed), weight 620, uppercase, tracking +0.06em. Body: width 100, weight 400, 17 px on phones / 18 px desktop, leading 1.55.
   UI labels: width 96, weight 560.
 - **JetBrains Mono** (variable) for every figure (prices, references, dates in tables, counts), code-ish labels, the workspace status

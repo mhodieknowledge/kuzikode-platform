@@ -17,7 +17,7 @@ OWN-WORLD: deep felt navy (#0B1428) boards with white condensed-caps directory r
 
 STORY: the visitor sees what Kuzikode does in six numbered floors, sees real "from" prices, opens the floor that fits, compares packages without leaving the phone, and starts a project with the package preselected.
 
-FIRST VIEWPORT: phone: felt board full-bleed; eyebrow index line; display headline (2–3 lines) left; one sentence; a "What do you need?" directory of 4 routes as tappable rows (website · app or system · AI or automation · pay an invoice) that is the working action; primary "Start a project" pill pinned in the header. Desktop: headline left 7 cols, live directory board right 5 cols with the lit row cross-fading a real product UI frame.
+FIRST VIEWPORT: phone: felt board full-bleed; display headline (2–3 lines) left; one sentence; a "What do you need?" directory of 4 routes as tappable rows (website · app or system · AI or automation · pay an invoice) that is the working action; primary "Start a project" pill pinned in the header. Desktop: headline left 7 cols, live directory board right 5 cols with the lit row cross-fading a real product UI frame.
 
 FORM: assigned grounded candidate 7 of 7 (modernist office-tower lobby: felt directory, lift floor indicator, brise-soleil rhythm). seed:658d80b5dbf5df50
 

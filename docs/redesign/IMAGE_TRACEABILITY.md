@@ -17,7 +17,7 @@ The "Built in" column is filled as roadmap tasks ship.
 | 6 | IMG_5018.jpeg | Two-column form + sticky order summary; icon-over-label method tiles | Checkout and long portal forms | adopted | Baseline structure for forms | R4.8 / R5.3 |
 | 7 | IMG_5048.jpeg | Cards overlapping the bottom edge of the hero | Home: route chooser overlapping the hero edge | adapted | Skyline stock + serif-on-photo rejected | R4.1 |
 | 8 | IMG_5049.jpeg | Raised centre card for emphasis | Pricing: recommended package lifted | rejected | Main idea is fabricated stats + stock skyline; only the raised-centre emphasis kept | R4.3 |
-| 9 | IMG_5050.jpeg | Pill eyebrow above headings; corner cut-in card | Section eyebrows ("index labels") site-wide | adapted | Fake stats and award badges rejected | R2.3 |
+| 9 | IMG_5050.jpeg | Corner cut-in card (pill eyebrow considered) | Home route chooser overlapping the hero edge (cut-in corner) | rejected | Eyebrows above headings are banned by impeccable craft-floor; fake stats and award badges rejected; the cut-in card kept | R4.1 |
 | 10 | IMG_5051.jpeg | Edge-peeking scroll-snap carousel | Mobile rails (work, insights, packages) | rejected | Template look rejected (diamond masks, purple gradient); carousel peek kept | R2.3 |
 | 11 | IMG_5052.jpeg | Solid label tile leading a grid; circular arrow knob on cards | Services index lead tile; arrow knob on directory rows | adapted | Diamond photo mask, city stock, "250+ projects" rejected | R4.2 |
 | 12 | IMG_5054.jpeg | Bento of real product-UI fragments; oversized wordmark footer | Home "the workspace" section (real portal UI); footer wordmark | adapted | Chrome sparkles and logo marquee rejected | R4.1 / R3.2 |
@@ -32,11 +32,11 @@ The "Built in" column is filled as roadmap tasks ship.
 | 21 | IMG_5063.jpeg | Navy → electric blue mood; pill + round arrow CTA; full-bleed mobile cards | Palette (felt navy + cobalt); primary CTA shape; mobile hero | adapted | Hand-holding-phone stock and collage rejected | R1.1 / R2.3 |
 | 22 | IMG_5064.jpeg | Card hover: round arrow fills with accent | Directory row + card hover / press state | rejected | Generic 2019 template, red accent; hover pattern kept | R2.3 |
 | 23 | IMG_5065.jpeg | Greyscale photo + single accent unifies mixed imagery | Image art direction for existing photos (duotone treatment) | rejected | Cluttered template, fake logos; unification trick kept | R1.1 / R7.1 |
-| 24 | IMG_5066.jpeg | Pill eyebrows; numbered process timeline; portfolio rail | How we work timeline; Our Work rail | adapted | Fake client chip, logo marquee, doodles rejected | R4.4 / R4.5 |
+| 24 | IMG_5066.jpeg | Numbered process timeline; portfolio rail (pill eyebrows not used: craft-floor ban) | How we work timeline; Our Work rail | adapted | Fake client chip, logo marquee, doodles rejected | R4.4 / R4.5 |
 | 25 | IMG_5067.jpeg | Services row header (title left, link right); process stepper with icons | Section header pattern; process section | adapted | Fabricated stats, CEO signature, ghost words rejected | R2.3 / R4.5 |
 | 26 | IMG_5069.jpeg | Inset hero card; one inverted card in a light row | Home hero inset on desktop; recommended card | rejected | AI-generated, illegible copy; two structural ideas kept | R4.1 |
 | 27 | IMG_5070.jpeg | Period toggle, highlighted plan, comparison table, FAQ | Pricing page structure | adopted | Violet glow replaced by our palette | R4.3 |
 | 28 | IMG_5071.jpeg | Comparison table: lifted column, grouped rows, (i) tooltips, Custom column; one-column-at-a-time on phones | Pricing comparison (desktop) + plan picker (mobile) | adapted | Multi-colour tier coding rejected | R4.3 |
 | 29 | IMG_5072.jpeg | Filled recommended card with dark button; open feature grid; dark surface ladder | Recommended package; feature lists; workspace dark mode | adopted | Duplicated sections and creator-count claims avoided | R4.3 / R5.1 |
 
-Totals: adopted 7 · adapted 15 · rejected (main idea) 7. Every file contributes at least one idea that is used.
+Totals: adopted 6 · adapted 15 · rejected (main idea) 8 (= 29). Every file contributes at least one idea that is used.

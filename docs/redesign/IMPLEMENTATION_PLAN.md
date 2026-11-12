@@ -30,7 +30,7 @@ Engineering order, component inventory and reuse decisions. Stack: Astro 5 SSR +
 | Card (`ui/Card.tsx`) | admin | **Restyle**; public pages stop using generic cards |
 | DirectoryRow / DirectoryBoard (new Astro) | home, services, mega-panel, mobile menu, industries, careers | **New**, the signature component |
 | FloorIndicator (new) | pricing, long pages | **New** (segmented + scroll-spy) |
-| SectionHeader (replaces `SectionHeading.astro`) | public | **Rebuild**: index label + title + optional intro right + link |
+| SectionHeader (replaces `SectionHeading.astro`) | public | **Rebuild**: title + optional intro right + link (no eyebrow above the title) |
 
 ## 3. Shell (R3)
 `SiteHeader.astro` (rebuild: desktop nav with indicator + mega-panels; mobile sheet), `SiteFooter.astro` (rebuild), `PublicLayout.astro`

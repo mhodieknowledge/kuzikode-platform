@@ -913,3 +913,12 @@ The **Next step** line must be specific enough that a fresh session can continue
   UI_UX_RECONSTRUCTION_PLAN.md (goals, measures), IMPLEMENTATION_PLAN.md (tokens with compatibility aliases, primitive inventory, order).
 - IMAGE-REQUESTS.md batch 1 (9 slots: 6 division frames, about-lobby, contact-counter, careers-desk), ready for owner.
 - Next step: R2.1 tokens + fonts (Archivo wdth + JetBrains Mono variable; remove Manrope/Inter; aliases for old Tailwind names).
+
+## 2026-11-12 11:04 UTC · Redesign R2.1 ✅ tokens + fonts
+- `tokens.css` rewritten (felt / concrete / ink / cobalt / status, radius, shadows, z-index, motion, layout vars per breakpoint) with
+  compatibility aliases for old names so admin/portal reskin at once; `global.css` @theme: new colour names, Archivo (wdth) +
+  JetBrains Mono variable, fluid type scale (`text-display-xl` … `text-micro`), utilities `caps`, `wide`, `display`, themed
+  selection / focus / caret / scrollbars, tabular numerals in data. Manrope, Inter, static JetBrains removed; latin Archivo preloaded.
+  OG render script switched to Archivo. Eyebrow labels removed from the specs (impeccable craft-floor ban; DECISIONS).
+- verify green (unit 355, integration 308). Helper: `.shots/restart.sh` (ignored) rebuilds and restarts wrangler dev.
+- Next step: R2.2 icon system (Icon.astro wrapper sizes/stroke/label; audit list of icon placements in IMPLEMENTATION_PLAN or a new ICONS section).

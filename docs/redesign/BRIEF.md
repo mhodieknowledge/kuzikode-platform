@@ -344,6 +344,20 @@ The owner's words: *"We are not fixing but starting afresh completely. Just the 
   the same layout with new colours, it isn't done. Redesign it.
 - Behaviour, data, URLs, form fields, pricing values and functional flows stay identical (the e2e and pricing-accuracy tests prove it).
 
+### B.0b COLOUR: no generic blue (owner's explicit rule)
+The owner's words: *"I don't like the original colour accents… I don't like the original colour that's most used by most vibe-coded
+websites."* So:
+- **Banned as the brand/primary/accent colour:** blue, cobalt, royal/electric blue, indigo, violet, purple, periwinkle (roughly hue
+  200°–290°), including the old `#2747E8` and the R1.1 cobalt `#1F44E0`/`#2F57FF`. **Navy-led layouts** (navy hero, navy panels,
+  navy footer as the identity) are also out, because that is the same look. Blue may appear only inside photographs and in functional
+  status colour if truly needed (prefer neutral or other hues for "info").
+- **Choose ONE direction from the owner's references** (or a refined take on the same idea), e.g.: **black/near-black + lime**
+  (IMG_5054/5055/5065 Creatix), **deep green + emerald/mint** (IMG_5056 Xenon Bank), **monochrome editorial + one distinctive accent**
+  (IMG_5066/5053, e.g. a warm accent such as amber, ochre, terracotta or a Zimbabwe-inspired earth tone), or **teal** (IMG_5015).
+  Neutrals (near-black, warm/cool greys, paper and off-white) carry most surfaces; the single accent is used with restraint.
+- Must pass WCAG AA contrast in light and dark surfaces, and work for the Linux-inspired workspace as well as the public site.
+- Record the comparison and choice in `DESIGN_DIRECTION.md` (replace the cobalt section) and in `DECISIONS.md`.
+
 ### B.1 Mobile is the priority, and both are 100%
 More than 75% of visitors use phones. Design and verify **mobile first**, at several real sizes, on every UI change. Desktop must
 still be 100% on point; neither may be an afterthought.

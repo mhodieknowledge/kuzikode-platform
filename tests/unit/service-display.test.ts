@@ -4,7 +4,7 @@ import {
   packagePrice,
   pricingLabel,
   quotationHref,
-  startProjectHref,
+  packageQuoteHref,
   whatsappHref,
 } from '../../src/shared/service-display';
 
@@ -67,8 +67,10 @@ describe('package price display (docs/12 §A.1)', () => {
     });
   });
 
-  it('"Get started" opens the wizard with the package preselected', () => {
-    expect(startProjectHref('business-website')).toBe('/start-a-project?package=business-website');
+  it('"Request this package" opens the contact form with the division and package preselected', () => {
+    expect(packageQuoteHref({ slug: 'business-website', categorySlug: 'web-development' })).toBe(
+      '/contact?category=web-development&package=business-website',
+    );
   });
 });
 

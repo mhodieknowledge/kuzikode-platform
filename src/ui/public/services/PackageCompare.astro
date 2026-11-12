@@ -9,7 +9,7 @@
  */
 import Icon from '../../icons/Icon.astro';
 import type { PublicPackage } from '../../../server/modules/cms';
-import { packagePrice } from '../../../shared/service-display';
+import { packagePrice, packageQuoteHref } from '../../../shared/service-display';
 
 interface Props {
   packages: PublicPackage[];
@@ -31,8 +31,7 @@ const facts: [string, (p: PublicPackage) => string | null][] = [
 ];
 // The CMS feature lists already carry delivery / revisions / support rows; the package fields fill in only when they don't.
 const shownFacts = labels.length > 0 ? [] : facts.filter(([, get]) => packages.some((p) => get(p)));
-const href = (p: PublicPackage) =>
-  `/contact?${new URLSearchParams({ category: p.categorySlug, package: p.slug }).toString()}`;
+const href = (p: PublicPackage) => packageQuoteHref(p);
 const col = (i: number) => ({ 'data-col': String(i) });
 ---
 

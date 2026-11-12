@@ -3,14 +3,15 @@ import { Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
 import PublicLayout from '../layouts/PublicLayout.astro';
 import ContactForm from '../components/forms/ContactForm';
 import ResponsiveImage from '../components/ResponsiveImage.astro';
-import { getPage, getServiceCatalogue, getSettings, settingText } from '../server/modules/cms';
+import { getPage, getPricingCatalogue, getServiceCatalogue, getSettings, settingText } from '../server/modules/cms';
 import type { Section } from '../shared/schemas/cms';
 
 const { ctx } = Astro.locals;
-const [page, catalogue, settings] = await Promise.all([
+const [page, catalogue, settings, pricing] = await Promise.all([
   getPage(ctx, 'contact'),
   getServiceCatalogue(ctx),
   getSettings(ctx),
+  getPricingCatalogue(ctx),
 ]);
 const intro = page?.sections.find((s) => s.type === 'rich_text') as Section<'rich_text'> | undefined;
 const divisions = catalogue
@@ -26,8 +27,12 @@ const whatsapp = settingText(settings, 'contact.whatsapp_number');
 const whatsappMsg = settingText(settings, 'contact.whatsapp_message') ?? '';
 const location = settingText(settings, 'contact.address') ?? settingText(settings, 'contact.location');
 const hours = settingText(settings, 'contact.hours');
-const category = Astro.url.searchParams.get('category') ?? undefined;
-const service = Astro.url.searchParams.get('service') ?? undefined;
+// "Request this package" links carry ?package= (BRIEF B.0c): the package decides the division and service it belongs to.
+const packageSlug = Astro.url.searchParams.get('package')?.slice(0, 80);
+const chosen = packageSlug ? pricing.packages.find((p) => p.slug === packageSlug && p.status === 'active') : undefined;
+const category = chosen?.categorySlug ?? Astro.url.searchParams.get('category') ?? undefined;
+const service = (chosen ? chosen.serviceSlug : Astro.url.searchParams.get('service')) ?? undefined;
+const initialPackage = chosen ? { slug: chosen.slug, name: chosen.name } : undefined;
 ---
 
 <PublicLayout
@@ -104,6 +109,7 @@ const service = Astro.url.searchParams.get('service') ?? undefined;
           siteKey={ctx.config.turnstileSiteKey}
           initialCategory={category}
           initialService={service}
+          initialPackage={initialPackage}
         />
       </div>
     </div>

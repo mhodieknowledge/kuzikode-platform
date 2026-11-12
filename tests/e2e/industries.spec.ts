@@ -16,7 +16,7 @@ test('industries index links to 8 pages whose service and package links all reso
     await expect(page.getByRole('heading', { name: 'Challenges we solve' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Relevant services' })).toBeVisible();
     const links = await page
-      .locator('main a[href^="/services/"], main a[href^="/start-a-project"], main a[href="/pricing"]')
+      .locator('main a[href^="/services/"], main a[href="/contact"], main a[href="/pricing"]')
       .evaluateAll((els) => [...new Set(els.map((e) => e.getAttribute('href')!))]);
     expect(links.length).toBeGreaterThan(0);
     for (const l of links) expect((await request.get(l)).status(), l).toBe(200);

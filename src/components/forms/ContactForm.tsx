@@ -15,10 +15,12 @@ interface Props {
   siteKey: string;
   initialCategory?: string | undefined;
   initialService?: string | undefined;
+  /** Package chosen on the pricing or division page ("Request this package"). */
+  initialPackage?: { slug: string; name: string } | undefined;
 }
 
 /** Contact / quotation request form (PRD §3.6). */
-export default function ContactForm({ divisions, siteKey, initialCategory, initialService }: Props) {
+export default function ContactForm({ divisions, siteKey, initialCategory, initialService, initialPackage }: Props) {
   const validDivision = divisions.some((d) => d.slug === initialCategory);
   const [category, setCategory] = useState(
     validDivision || GENERAL_CATEGORIES.some((c) => c.value === initialCategory) ? (initialCategory ?? '') : '',
@@ -106,6 +108,11 @@ export default function ContactForm({ divisions, siteKey, initialCategory, initi
           {formError}
         </p>
       ) : null}
+      {initialPackage ? (
+        <p className="text-[15px] text-ink-600" data-package={initialPackage.slug}>
+          Package: <strong className="text-ink-950">{initialPackage.name}</strong>
+        </p>
+      ) : null}
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Your name" required error={errors['name']}>
           <Input name="name" autoComplete="name" maxLength={120} />
@@ -154,7 +161,12 @@ export default function ContactForm({ divisions, siteKey, initialCategory, initi
         </Field>
       </div>
       <Field label="Message" required error={errors['message']} hint="What do you need, and by when?">
-        <Textarea name="message" rows={6} maxLength={5000} />
+        <Textarea
+          name="message"
+          rows={6}
+          maxLength={5000}
+          defaultValue={initialPackage ? `I'd like to request the ${initialPackage.name} package.\n\n` : undefined}
+        />
       </Field>
       <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
         <label>

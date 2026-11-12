@@ -1066,3 +1066,12 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Next step: R4.6b (wizard removal + 301 /start-a-project → /contact; contact form reads `?package=`; remove StartProjectWizard,
   wizard e2e, `startProjectHref`), then R4.3 pricing (reuse PackageCompare per pricing tab; price-accuracy test per B.6), R4.4–R4.8.
   Legacy `PackageCard` is still used by pricing and industries (removed in R4.3/R4.5).
+
+## 2026-11-12 20:20 UTC · R4.6b ✅ wizard removed
+- Session session_01LWwAAW1KK55fFrFWf8a2ch (hand-off). Connectors Figma/Canva/Cloudflare present; R2 `images/incoming/` empty; no `design/inbox/`; skills present.
+- Deleted `StartProjectWizard.tsx` and `tests/e2e/start-a-project.spec.ts`; `src/pages/start-a-project.astro` is now a 301 to `/contact`
+  (forwards package/category/service). Search index + sitemap entries removed; industries CTA → "Get a quote" /contact; PackageCard
+  "Request this package" → `packageQuoteHref`. Contact page/form read `?package=` (division + service preselected, package line, message prefill).
+- verify green (unit 445, integration 308); contact/pricing/industries/services-public e2e green (new redirect + preselect test).
+- Next step: R4.3 pricing rebuild in `src/ui/public/pricing/` (hero rate card, sticky category control, plan deck with phone
+  selector + swipe track, PackageCompare on desktop, service-rates ledger for "Other services", add-ons ledger), price-accuracy e2e (B.6).

@@ -105,7 +105,8 @@ Ticked when the file is deleted (or, for the logic-only files marked *logic*, mo
 | public/sections/Hero, Features, Process, PhotoPair, TechnologiesStrip, CtaBand, SectionHeading, Statement, Values, ListSection, RichText | new public sections | [ ] R4.2–R4.5 (each deleted with its last user) |
 | public/pricing/PackageCard.astro, ComparisonTable.astro | pricing components | [ ] R4.3 |
 | public/insights/InsightsListing, PostCard, PostCover | insights components | [ ] R4.7 |
-| forms/ContactForm, StartProjectWizard, ConsultationForm, Turnstile | new forms + hooks | [ ] R4.6 |
+| forms/StartProjectWizard | removed with the wizard (B.0c); /start-a-project 301 → /contact | [x] R4.6b (deleted) |
+| forms/ContactForm, ConsultationForm, Turnstile | new forms + hooks | [ ] R4.6 |
 | forms/NewsletterForm | ui/public/forms/Newsletter.tsx + useNewsletter | [x] R3.2 |
 | forms/InterestForm, ApplicationForm | new forms + hooks | [ ] R4.7 |
 | forms/QuotationResponse, documents/QuotationDocument, InvoiceDocument | documents | [ ] R4.8 |

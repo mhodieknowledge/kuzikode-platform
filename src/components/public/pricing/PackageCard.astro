@@ -1,7 +1,7 @@
 ---
 import { Check, Minus } from 'lucide-react';
 import type { PublicPackage } from '../../../server/modules/cms';
-import { packagePrice, startProjectHref } from '../../../shared/service-display';
+import { packagePrice, packageQuoteHref } from '../../../shared/service-display';
 
 interface Props {
   pkg: PublicPackage;
@@ -97,7 +97,7 @@ const unitPlural = /(x|s|ch|sh)$/.test(unit) ? `${unit}es` : `${unit}s`;
         </span>
       ) : (
         <a
-          href={startProjectHref(pkg.slug)}
+          href={packageQuoteHref(pkg)}
           class:list={[
             'inline-flex h-11 w-full items-center justify-center rounded-sm px-5 text-[15px] font-semibold',
             pkg.mostPopular
@@ -105,7 +105,7 @@ const unitPlural = /(x|s|ch|sh)$/.test(unit) ? `${unit}es` : `${unit}s`;
               : 'border border-line bg-surface text-ink-950 hover:border-ink-400',
           ]}
         >
-          {price.hasPrice ? 'Get started' : 'Request a quote'}
+          {price.hasPrice ? 'Request this package' : 'Request a quote'}
           <span class="sr-only">: {pkg.name}</span>
         </a>
       )

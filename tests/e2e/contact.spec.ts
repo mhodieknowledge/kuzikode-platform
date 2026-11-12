@@ -24,3 +24,24 @@ test('visitor sends an enquiry and sees a reference; quotation links preselect t
   await expect(done).toBeVisible();
   await expect(done).toContainText(/ENQ-\d{4}-\d{4}/);
 });
+
+test('the retired wizard URL 301s to the contact form, keeping the package preselection (BRIEF B.0c)', async ({
+  page,
+  request,
+}) => {
+  const res = await request.get('/start-a-project?package=business-website&x=<script>', { maxRedirects: 0 });
+  expect(res.status()).toBe(301);
+  expect(res.headers()['location']).toBe('/contact?package=business-website');
+  const bare = await request.get('/start-a-project', { maxRedirects: 0 });
+  expect(bare.headers()['location']).toBe('/contact');
+
+  // "Request this package" on the pricing page → contact form with the package's division and service preselected.
+  await page.goto('/pricing');
+  const link = page.locator('[data-package="business-website"]').getByRole('link', { name: /Request this package/ });
+  await link.click();
+  await expect(page).toHaveURL(/\/contact\?category=[a-z0-9-]+&package=business-website$/);
+  await expect(page.locator('[data-package="business-website"]')).toContainText('Package: Business Website');
+  await expect(page.getByLabel('What is this about?')).not.toHaveValue('');
+  await expect(page.getByLabel('Message')).toHaveValue(/request the Business Website package/);
+  expect(await page.locator('a[href^="/start-a-project"]').count()).toBe(0);
+});

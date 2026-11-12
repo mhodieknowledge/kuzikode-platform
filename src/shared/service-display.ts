@@ -86,9 +86,9 @@ export function packagePrice(p: PackagePriceInput): PackagePriceDisplay {
   };
 }
 
-/** "Get started" opens the Start-a-Project wizard with the package preselected (docs/12 §A.1, §C.2). */
-export function startProjectHref(packageSlug: string): string {
-  return `/start-a-project?${new URLSearchParams({ package: packageSlug }).toString()}`;
+/** "Request this package" opens the contact form with the division and package preselected (BRIEF B.0c). */
+export function packageQuoteHref(pkg: { slug: string; categorySlug: string }): string {
+  return `/contact?${new URLSearchParams({ category: pkg.categorySlug, package: pkg.slug }).toString()}`;
 }
 
 /** "5 November 2026" in the business time zone (Africa/Harare). */

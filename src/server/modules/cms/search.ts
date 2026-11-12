@@ -66,17 +66,10 @@ const STATIC_PAGES: Doc[] = [
   },
   {
     kind: 'page',
-    title: 'Start a project',
-    summary: 'Tell us what you need in five short steps.',
-    href: '/start-a-project',
-    body: 'brief quote quotation enquiry wizard',
-  },
-  {
-    kind: 'page',
     title: 'Contact',
     summary: 'Send us a message or request a quotation.',
     href: '/contact',
-    body: 'email phone whatsapp message enquiry',
+    body: 'email phone whatsapp message enquiry quote quotation brief',
   },
   {
     kind: 'page',

@@ -1,80 +1,14 @@
 ---
-import PublicLayout from '../layouts/PublicLayout.astro';
-import StartProjectWizard from '../components/forms/StartProjectWizard';
-import { getPage, getPricingCatalogue, getServiceCatalogue, sectionOf } from '../server/modules/cms';
-
-const { ctx } = Astro.locals;
-const [page, catalogue, pricing] = await Promise.all([
-  getPage(ctx, 'start-a-project'),
-  getServiceCatalogue(ctx),
-  getPricingCatalogue(ctx),
-]);
-const intro = sectionOf(page, 'intro', 'rich_text');
-const divisions = catalogue
-  .filter((c) => c.status === 'active')
-  .map((c) => ({
-    slug: c.slug,
-    name: c.name,
-    summary: c.summary,
-    services: c.services.filter((s) => s.status === 'active').map((s) => ({ slug: s.slug, name: s.name })),
-  }));
-// Only what the island needs; prices are already redacted when public prices are off.
-const packages = pricing.packages
-  .filter((p) => p.status === 'active' && divisions.some((d) => d.slug === p.categorySlug))
-  .map((p) => ({
-    slug: p.slug,
-    name: p.name,
-    tagline: p.tagline,
-    categorySlug: p.categorySlug,
-    serviceSlug: p.serviceSlug,
-    priceType: p.priceType,
-    priceMinor: p.priceMinor,
-    annualPriceMinor: p.annualPriceMinor,
-    currency: p.currency,
-    billingType: p.billingType,
-    interval: p.interval,
-    priceUnit: p.priceUnit,
-    minQuantity: p.minQuantity,
-    mostPopular: p.mostPopular,
-  }));
-const url = Astro.url;
-const initialPackage = url.searchParams.get('package')?.slice(0, 80) ?? undefined;
-const initialCategory = url.searchParams.get('category')?.slice(0, 80) ?? undefined;
-const chosen = packages.find((p) => p.slug === initialPackage);
+/**
+ * The Start-a-project wizard is retired (BRIEF B.0c). Old links and shared URLs land on the contact form with any package,
+ * division or service preselection carried over. Permanent redirect; only slug-shaped values are forwarded.
+ */
+const SLUG = /^[a-z0-9_-]{1,80}$/;
+const target = new URLSearchParams();
+for (const key of ['category', 'service', 'package'] as const) {
+  const value = Astro.url.searchParams.get(key);
+  if (value && SLUG.test(value)) target.set(key, value);
+}
+const query = target.toString();
+return Astro.redirect(query ? `/contact?${query}` : '/contact', 301);
 ---
-
-<PublicLayout
-  title={page?.seoTitle ?? 'Start a project · Kuzikode Technologies'}
-  description={page?.seoDescription ?? undefined}
-  whatsappMessage={chosen ? `Hi Kuzikode, I'm interested in the ${chosen.name} plan.` : undefined}
->
-  <section class="bg-canvas py-12 md:py-16" aria-labelledby="start-title">
-    <div class="container-content">
-      <h1 id="start-title" class="text-4xl font-bold tracking-display md:text-5xl">
-        {intro?.content.title ?? 'Start a project'}
-      </h1>
-      {intro ? <div class="prose-kz mt-4 max-w-2xl text-lg" set:html={intro.content.html} /> : null}
-      <div class="mt-10">
-        <StartProjectWizard
-          client:load
-          divisions={divisions}
-          packages={packages}
-          addons={pricing.addons}
-          showPrices={pricing.showPrices}
-          siteKey={ctx.config.turnstileSiteKey}
-          initialPackage={initialPackage}
-          initialCategory={initialCategory}
-        />
-      </div>
-      <noscript>
-        <p class="mt-6 text-ink-600">
-          This form needs JavaScript. You can also reach us on the{' '}
-          <a href="/contact" class="font-semibold text-brand-600 underline">
-            contact page
-          </a>
-          .
-        </p>
-      </noscript>
-    </div>
-  </section>
-</PublicLayout>

@@ -114,7 +114,6 @@ test('public pages', async ({ page }) => {
     '/faq',
     '/contact',
     '/consultation',
-    '/start-a-project',
     '/search?q=website',
     '/legal/privacy',
     '/legal/terms',

@@ -19,8 +19,8 @@ test('pricing page: tabs, packages, comparison table, add-ons, VAT note and FAQ'
   await expect(websites.locator('[data-package="custom-web-app"] [data-price]')).toContainText('Custom quote');
   await expect(page.locator('[data-package="business-email"]')).toContainText('Minimum 3 mailboxes');
 
-  const getStarted = popular.getByRole('link', { name: /Get started/ });
-  await expect(getStarted).toHaveAttribute('href', '/start-a-project?package=business-website');
+  const request = popular.getByRole('link', { name: /Request this package/ });
+  await expect(request).toHaveAttribute('href', /^\/contact\?category=[a-z0-9-]+&package=business-website$/);
 
   await page.setViewportSize({ width: 1440, height: 900 });
   const table = websites.getByRole('table', { name: 'Websites: package comparison' });

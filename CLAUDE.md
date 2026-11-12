@@ -89,6 +89,25 @@ Leave it alone.
 
 ---
 
+## 2b. Usage economy: right model, right effort (owner instruction, 2026-11-12)
+
+The owner's Claude plan has a **weekly usage limit**. Spend Opus thinking only where it changes the outcome. As the orchestrator, keep
+your own context lean and **delegate with the Agent tool, setting `model` and `effort` per job** (the owner has explicitly authorised
+you to choose the effort level):
+
+| Tier | Use `model` / `effort` | Typical jobs |
+|---|---|---|
+| **Basic** | `sonnet` / `low` | Running Playwright screenshot batches and reporting the numbers (overflow, font sizes, tap targets); grep and inventory work; renaming and moving files; deleting legacy components once replaced; lint/type fixes; updating PROGRESS/ROADMAP/IMAGE-REQUESTS; image processing with the existing scripts; simple copy edits |
+| **Standard** | `sonnet` / `medium` | Applying an **established** component or pattern to more pages or admin modules; writing unit/integration/e2e tests from a clear spec; converting a list to the agreed swipe-track pattern; routine bug fixes with a known cause; documentation sections |
+| **Design / integration** | `opus` / `medium` | Composing a **new** page or section from the design direction; reviewing subagent output before you push it; the B.0d board review (`impeccable-finish-reviewer`); motion choreography; non-trivial refactors |
+| **Critical** | `opus` / `high` (rarely higher) | Design-direction decisions, payments/auth/pricing-accuracy changes, hard bugs after a failed attempt, final QA judgement |
+
+Rules: default to the **cheapest tier that can do the job well**; escalate only after a real failure or when the table says so. Give
+subagents precise, self-contained briefs (files, the pattern to follow, acceptance checks) so the cheap tier succeeds first time.
+**Always review Sonnet output yourself** (screenshots + diff) before pushing; quality bars don't drop. Don't run several heavy subagents in
+parallel unless it clearly saves total work. When you hand off, start the successor with `model` unset (Opus) unless the remaining
+roadmap is purely mechanical, in which case pass `model: "claude-sonnet-5-5"`. Note in PROGRESS.md which tiers you used for each task.
+
 ## 3. Autonomy rules
 
 - **Never ask the owner for permission or clarification.** When a detail is unspecified, choose the

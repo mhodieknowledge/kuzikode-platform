@@ -24,9 +24,9 @@ export interface DirectoryDivision {
 interface Props {
   nav: SiteNavigation;
   divisions: DirectoryDivision[];
-  tone?: 'sign' | 'verge';
+  tone?: 'night' | 'bone';
 }
-const { nav, divisions, tone = 'verge' } = Astro.props;
+const { nav, divisions, tone = 'bone' } = Astro.props;
 const path = Astro.url.pathname;
 const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
 const servicesActive = path.startsWith('/services') || path.startsWith('/industries');
@@ -56,7 +56,7 @@ const mobileLinks = [
 ---
 
 <header
-  class:list={['kz-header', tone === 'sign' ? 'kz-header--sign on-sign' : 'kz-header--verge']}
+  class:list={['kz-header', tone === 'night' ? 'kz-header--night on-night' : 'kz-header--bone']}
   data-site-header
   data-tone={tone}
 >
@@ -125,7 +125,7 @@ const mobileLinks = [
   </div>
 
   <!-- Services: the directory board (desktop) -->
-  <div id="menu-services" class="kz-mega on-sign" hidden data-menu-panel>
+  <div id="menu-services" class="kz-mega on-night" hidden data-menu-panel>
     <div class="container-wide grid grid-cols-[minmax(0,7fr)_minmax(0,5fr)] gap-10 py-8">
       <div>
         <ul class="kz-dir" role="list">
@@ -137,7 +137,7 @@ const mobileLinks = [
                   <span class="kz-dir__name">{d.name}</span>
                   {d.from ? (
                     <span class="kz-dir__from">
-                      from <span class="font-mono text-on-sign">{d.from.amount}</span>
+                      from <span class="font-mono text-on-night">{d.from.amount}</span>
                       {d.from.suffix !== 'one-off' ? <span class="text-micro"> {d.from.suffix}</span> : null}
                     </span>
                   ) : null}
@@ -165,20 +165,20 @@ const mobileLinks = [
         {
           divisions.map((d, i) => (
             <div id={`lit-${d.slug}`} class="kz-lit__frame" data-lit hidden={i !== 0}>
-              <div class="flex items-center gap-3 text-mint-400">
+              <div class="flex items-center gap-3 text-gold-400">
                 <Icon name={divisionIcon(d.slug, d.icon)} size={24} />
                 <span class="caps text-micro">Floor {floor(i)}</span>
               </div>
-              <p class="mt-4 text-h3 font-[640] text-on-sign">{d.name}</p>
-              {d.summary ? <p class="mt-2 text-small text-on-sign-2">{d.summary}</p> : null}
+              <p class="mt-4 text-h3 font-[640] text-on-night">{d.name}</p>
+              {d.summary ? <p class="mt-2 text-small text-on-night-2">{d.summary}</p> : null}
               <ul class="mt-5 flex flex-wrap gap-2">
                 {d.services.slice(0, 6).map((s) => (
-                  <li class="kz-pill kz-pill--plain border border-sign-700">{s.name}</li>
+                  <li class="kz-pill kz-pill--plain border border-night-700">{s.name}</li>
                 ))}
               </ul>
               {d.from ? (
-                <p class="mt-6 text-small text-on-sign-3">
-                  Packages from <span class="font-mono text-on-sign">{d.from.amount}</span> {d.from.suffix}
+                <p class="mt-6 text-small text-on-night-3">
+                  Packages from <span class="font-mono text-on-night">{d.from.amount}</span> {d.from.suffix}
                 </p>
               ) : null}
             </div>
@@ -207,7 +207,7 @@ const mobileLinks = [
 
 <!-- Phones and tablets: the directory as a full-height sheet -->
 <dialog id="site-menu" class="kz-sheet kz-sheet--top kz-menu" aria-label="Menu">
-  <div class="kz-sheet__panel on-sign">
+  <div class="kz-sheet__panel on-night">
     <div class="container-wide flex h-[var(--header-h)] flex-none items-center justify-between gap-4">
       <Logo height={26} />
       <button type="button" class="kz-btn kz-btn--secondary kz-btn--icon" data-kz-sheet-close aria-label="Close menu">
@@ -217,7 +217,7 @@ const mobileLinks = [
     <div class="kz-sheet__body container-wide">
       <form action="/search" method="get" role="search" class="relative">
         <label for="mobile-search" class="sr-only">Search the site</label>
-        <Icon name="search" class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-on-sign-3" />
+        <Icon name="search" class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-on-night-3" />
         <input
           id="mobile-search"
           name="q"
@@ -229,7 +229,7 @@ const mobileLinks = [
         />
       </form>
 
-      <p class="caps mt-8 text-micro text-on-sign-3" id="menu-dir-label">Services</p>
+      <p class="caps mt-8 text-micro text-on-night-3" id="menu-dir-label">Services</p>
       <ul class="kz-dir mt-2" role="list" aria-labelledby="menu-dir-label" data-reveal-group>
         {
           divisions.map((d, i) => (

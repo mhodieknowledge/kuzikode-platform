@@ -14,14 +14,14 @@ export const CONTENT_WIDTH = A4.width - MARGIN.left - MARGIN.right;
 
 /** docs/05 tokens. */
 export const COLOURS = {
-  ink950: hex('#0D1A12'),
-  ink800: hex('#24312A'),
-  ink600: hex('#4A584F'),
-  ink400: hex('#7D8A81'),
-  line: hex('#DDE4DE'),
-  canvas: hex('#F4F6F3'),
-  brand600: hex('#0B4A2D'),
-  brand50: hex('#E3F6EA'),
+  ink950: hex('#141412'),
+  ink800: hex('#2C2A26'),
+  ink600: hex('#57524A'),
+  ink400: hex('#847D71'),
+  line: hex('#DDD6CA'),
+  canvas: hex('#F6F3EE'),
+  brand600: hex('#1E7A52'),
+  brand50: hex('#E4F1EA'),
   danger600: hex('#C2362F'),
 } as const;
 

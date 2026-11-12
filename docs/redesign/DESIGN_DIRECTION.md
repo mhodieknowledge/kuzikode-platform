@@ -29,8 +29,8 @@ pen-design (22). The four impeccable helper agents are in `.claude/agents/`. `sk
 ## 2. Physical scene → light or dark
 
 A shop owner in Harare checks Kuzikode on a mid-range Android phone in bright daylight between customers, on mobile data; later the
-office manager compares packages on a laptop. Daylight on phones forces **light reading surfaces** (verge); the sign green owns the
-first viewport and the footer, where it reads like a road sign in sun: flat, high contrast, never glowing.
+office manager compares packages on a laptop. Daylight on phones forces **light reading surfaces** (bone); night (near-black) carries
+the services band, the footer and the workspace window, high contrast, never glowing. (R1.5 had sign green here; replaced at R2.5b.)
 
 ## 3. The concept gate (R1.5) and the world: "Route"
 
@@ -64,19 +64,22 @@ rejected first direction).
 price) on every plate, one green you trust because it never changes. It refuses the category default (dark hero + bright CTA +
 stock team photo + identical icon cards) and the AI near-black-plus-neon look.
 
-**Signature devices.**
-- **The gantry** (hero): six sign plates, white inset border on sign green, a route shield with the division number, the division
-  name in Overpass bold, the published "from" price in mono. Each plate is the way into that division. Phone: a stack of plates
-  (the first viewport is the choice, not a picture).
-- **Route tabs** (division switcher, pricing groups): numbered tabs that scroll sideways on phones; content cross-fades + 8 px rise.
-- **Comparison table** (pricing): lifted recommended column on desktop; on phones a package selector shows one column at a time
-  against the row labels (IMG_5071).
-- **Road strip** (process, project milestones): a dark road with a dashed centre line and stop plates S1–S5; vertical on phones.
-- **Plate buttons**: rectangular, 7 px corners, an inset ring (white on green, green on white) like a sign's border. No pills, no
-  round arrow knobs.
+**Signature devices** (as refined at R2.5b, BRIEF B.0b+/B.0e/B.1a, after the second board review):
+- **The workspace window** (hero): the real client workspace drawn as the hero object: a night window with a side dock, the project's
+  milestone strip, an approved quotation and the latest update, with a paper invoice card (local payment methods) layered over its
+  edge. Depth from layering, hairlines and a soft shadow ladder; it rises once on load. No stock photograph under it. Phones: the
+  window is in the first screen under a short headline, one value line, one primary action and the starting price.
+- **The route index**: the six divisions as numbered routes, each numeral in its division hue, with the published "from" price.
+  Phones: a swipe track (next plate peeking, dots). Desktop: a typographic index (3 × 2, rules between rows), never six equal boxes.
+- **Route tabs** (division switcher on the night band, pricing groups): a small hue square + numeral + name; content cross-fades.
+- **Comparison table** (pricing): the recommended column lifted on paper with an emerald top rule and "Recommended" set as part of the
+  column header (no badge); phones show one column at a time with a package selector (IMG_5071).
+- **Road strip** (process, project milestones): four to five segments, done / now (gold) / next.
+- **Buttons**: solid, 7 px corners, emerald for the one primary action; outlined secondary; no pills, no knobs, no inset rings.
+- Dropped at R2.5b: shield badges (read as gamification), coloured top stripes on cards, traffic-light window dots, mono outside figures.
 
 **Raises kept from the declined catalog challengers** (the roll's six challengers were weighed against the build; all declined):
-- Magazine identity program → *found landmark:* the route shield appears once per view as the wayfinding mark, never as ornament.
+- Magazine identity program → *found landmark:* the division numeral in its hue is the wayfinding mark, never ornament.
 - Depot destination blind → *whole-step motion:* state changes move in whole steps (tab thumb, table column swap), never drift.
 - Darkroom safelight → *preview before commit:* the quote summary shows what will be sent before the form is submitted.
 - Menhera pastel, brine calendar, multiplane cel → declined outright; *one-plane discipline* kept: no parallax, text always on the
@@ -86,77 +89,87 @@ Reviewer fixes applied before promotion: signs rebuilt as real plates (route shi
 third green band (workspace) moved to verge; the footer wordmark removed; the copied dot timeline replaced by the road strip;
 "Most chosen" renamed **"Recommended"** (from the package's `most_popular` flag; no usage data is claimed).
 
-## 4. Palette (one direction: sign green)
+## 4. Palette: "Zimbabwe earth" (multi-accent, BRIEF B.0b+, chosen at R2.5b)
 
-Candidates compared (from `/inspiration-images`, BRIEF B.0b): black + lime (5054/5055/5065, concept C), **deep green + mint (5056,
-concept B)**, monochrome + warm accent (5066, concept A, lichen ochre), teal (5015). Blue, cobalt, indigo and violet are excluded by the
-owner. **Chosen: sign green.** Strategy: **Committed** (sign green owns the first viewport, recommended package, CTA and footer;
-verge carries reading; mint is spent only on lit/active things on green).
+The single-green "sign" palette from R1.5 was replaced by the owner's multi-accent rule. Three multi-accent palettes were rendered on
+the same Route page (hero, services, pricing; 390 + 1440): **P1 Zimbabwe earth** (near-black + bone; emerald action; saffron, clay,
+teal, moss), **P2 Creatix** (black + bone; lime action; coral, cyan, amber, mint), **P3 Dusk** (graphite + chalk; apricot action;
+jade, butter, lagoon, rosewood). Board: `docs/screenshots/redesign/concepts/palettes-b2-board.webp`. A fresh reviewer and the author
+agree on **P1**: emerald reads as money and trust and nods to the national colours without being literal; P2's lime-on-bone is the
+young creative-agency look and fails as text; P3's apricot action competes with its own warm accents. Reviewer fixes applied:
+six distinct division hues (no repeats), teal pulled greener, no shields or stripes, solid buttons, a crafted hero object.
 
-| Token | Hex | Use |
+**Strategy:** neutrals (night + bone) carry 80–90% of every screen; emerald appears only on the primary action; division hues appear
+only as small marks (numerals, a hover rule, a 8 px swatch, chart series, tier rules); gold is the lit state on night.
+
+| Token | Hex | Job |
 |---|---|---|
-| sign-950 | #06301C | Deepest green: workspace dark surfaces, footer base |
-| sign-900 | #0B4A2D | The sign: hero, recommended column, primary buttons, footer |
-| sign-800 | #0F5B38 | Raised plate on sign; links on light |
-| sign-700 | #1B6E47 | Hover plate, lines on sign |
-| mint-400 | #7FE3A8 | Lit state on sign (prices, active shield, focus ring on green) |
-| mint-200 | #B9F2CF | Secondary text on sign |
-| mint-50 | #E3F6EA | Selected tint on light (always with an inverted indicator) |
-| verge-50 | #F1F4F0 | Page ground |
-| verge-100 | #E2E8E2 | Inset sections, secondary ground |
-| verge-200 | #CDD6CE | Hairlines on light |
-| paper | #FFFFFF | Cards, inputs, tables |
-| ink-900 | #0D1A12 | Text on light |
-| ink-700 | #3C4A41 | Secondary text (≥ 8:1 on verge) |
-| ink-500 | #56655B | Tertiary text (≥ 5:1 on verge) |
-| status | ok #1E7D46 · warn #9C5B0A · danger #C9372C · info = ink-700 | Always with an icon and words |
+| night-900 / 950 | #141412 / #0E0D0C | Dark surfaces: services band, footer, workspace chrome, admin sidebar |
+| night-800 / 700 | #1F1E1B / #2C2A26 | Raised panels and hairlines on night |
+| on-night / -2 / -3 | #F2EEE6 / #BDB6A9 / #9B9486 | Text on night (≥ 6:1) |
+| bone-50 / 100 / 200 / 300 | #F2EEE6 / #E8E2D7 / #D9D1C3 / #C4BAA8 | Page ground, inset sections, hairlines |
+| paper | #FBF9F5 | Cards, inputs, lifted table column |
+| ink-900 / 700 / 500 | #141412 / #4E4A43 / #6B655B | Text on light (tertiary ≥ 4.9:1 on bone) |
+| **emerald-500** (action) | #1E7A52 (hover #17643F) | **Reserved for the primary action**; links #17643F |
+| gold-400 (lit) | #E3B04B | Active / current on night, focus ring on night, "now" in the road strip |
+| saffron | #C98A17 (text #8A5C08) | Division 01 Websites; tier and chart series 1 |
+| clay | #B84F35 (text #9A3F28) | Division 02 Apps; series 2; also the base for danger states |
+| teal | #1F8478 (text #16695F) | Division 03 Business software; series 3 |
+| moss | #6F8A2A (text #536A1C) | Division 04 AI & data; series 4 |
+| msasa | #8E3B52 | Division 05 Automation & payments (the spring wine-red of msasa leaves); series 5 |
+| granite | #7A7468 (text #5A554C) | Division 06 Cloud & IT; series 6 |
+| status | ok #1E7A52 · warn #9C5B0A · danger #C9372C · info = ink | Always with an icon and words |
 
-Contrast: white on sign-900 13:1; mint-400 on sign-900 8:1; sign-900 on verge-50 12:1; ink-500 on verge-50 5.3:1.
+OKLCH: accents sit at L ≈ .47–.68, C ≈ .08–.14 (one family); every text use has an AA "-ink" variant; tested in
+`tests/unit/ui-tokens.test.ts` (no blue/indigo/violet anywhere, AA pairs).
 
 ## 5. Type
 
 - **Overpass** (variable, wght 100–900, self-hosted via `@fontsource-variable/overpass`): the open-source descendant of Highway
-  Gothic, the lettering of road signs. Display weight 800, tracking −0.03em, leading 0.98–1.04; headings 800; UI labels 600–700;
-  body 400 at 17 px phones / 18 px desktop, leading 1.5.
-- **Overpass Mono** (variable) for every figure: prices, route numbers, references, dates and amounts in tables, the workspace status
-  bar. Tabular numerals.
-- Fluid scale (phone → 1440): display-xl clamp(2.5rem → 5.4rem), display clamp(2rem → 3.4rem), h2 clamp(1.75rem → 2.6rem),
-  h3 1.25 → 1.5rem, body 1.0625 → 1.125rem, small 0.9375rem, micro 0.8125rem. No eyebrow labels above headings.
+  Gothic, the lettering of road signs. Display and headings weight 700, tracking −0.025 to −0.03em, leading 1.05–1.1; UI labels
+  600–700; body 400, leading 1.55.
+- **Overpass Mono** (variable) for figures only: prices, amounts, references, dates in tables, route numerals. Tabular numerals.
+- **Phone hard limits (BRIEF B.1a, 360–430 px, enforced by `tests/e2e/mobile-limits.spec.ts`):** H1 32 px (28–34), max 3 lines, a
+  short mobile headline (≤ 7 words) when the desktop one is longer; H2 24 px (22–26); H3 18 px (17–20); body 16 px (15–16), leading
+  1.55; meta 13 px; buttons 15–16 px on one line, ≥ 44 px tall; side padding 16 px; section spacing 56 px.
+- Tablet / desktop: H1 clamp(40 → 62 px), H2 clamp(30 → 48 px), H3 20–24 px, body 17–18 px. No eyebrow labels above headings.
 - Archivo and JetBrains Mono are removed with the old direction.
 
 ## 6. Grid, spacing, shape, elevation
 
 - 4 px base. Section rhythm 72 px phones, 96 px tablet, 112 px desktop. 4 / 8 / 12 columns; 16 px side margins on phones, 32 px from
   768, 1320 px content max. Equal edges: every section shares the left edge.
-- Radius: 4 px (inputs, small chips), **7 px** (plates, buttons, tabs: a road sign's corner), 12 px (large panels, sheets). No pills.
-- Plates carry an inset double ring instead of a drop shadow; one floating shadow for menus, sheets, dialogs:
-  `0 16px 40px -12px rgb(6 48 28 / .32)`.
+- Radius: 4 px (inputs, small chips), **7 px** (buttons, tabs, plates), 10 px (cards), 14 px (the workspace window, sheets). No pills.
+- Flat by default; a shadow ladder only for layered objects (the hero window and the card over it, menus, sheets, dialogs):
+  `0 30px 60px -28px rgb(0 0 0 / .55), 0 10px 20px -12px rgb(0 0 0 / .3)` plus a 1 px hairline.
 
 ## 7. Icons
 
 **Lucide** as the single family (`lucide-react` + the Astro `Icon` wrapper), stroke 2 at 20 px (sign weight), `currentColor`, sizes
-16/20/24/32. Icons sit beside words; arrows only where the plate leads somewhere new, never repeated on every row. Route shields and
-stop plates are drawn shapes, not icons.
+16/20/24/32. Icons sit beside words; arrows only where an action leads somewhere new, never repeated on every row. Division numerals
+are type, not icons.
 
 ## 8. Imagery art direction
 
-- Real product UI (workspace panes: milestones, quotation, invoice with local payment methods) is the primary image.
-- Existing owner photos are reused in a **green duotone** (#062616 shadows → #E8F2EA highlights), never as the hero, never as "our
-  team". New owner images (IMAGE-REQUESTS batch 2) follow the same grade: places and hands at work in Harare daylight.
+- The hero object is the crafted workspace window (real product UI with fictional demo data, layered with depth), never a stock photo.
+- Existing owner photos are reused in a **warm neutral duotone** (#151412 shadows → #F4F1EA highlights) for the division panels and
+  editorial sections, never as the hero and never as "our team". New owner images (IMAGE-REQUESTS batch 2) follow the same grade:
+  identifiably local places and hands at work in Harare daylight; they may later sit beside the workspace window, never under it.
 - No gradients, glows, blobs, glass or 3D.
 
 ## 9. Motion principles (full spec: MOTION_AND_INTERACTION_SPEC.md)
 
-Mechanical and certain, like a sign flip: 120 ms press, 180 ms state, 240 ms enter, 320 ms panel swap; ease-out
-`cubic-bezier(.16,1,.3,1)` for entering, no bounce. Plates rise 2 px on hover and their shield lights mint; tab thumbs and table
-columns move in whole steps; division content cross-fades with an 8 px rise; the hero enters once. Reduced motion: opacity only.
+Mechanical and certain: 120 ms press, 180 ms state, 240 ms enter, 320 ms panel swap; ease-out `cubic-bezier(.16,1,.3,1)` for
+entering, no bounce. The hero window rises once and the invoice card follows 250 ms later; route plates rise 2 px on hover and gain
+their division rule; tabs and table columns move in whole steps; division content cross-fades with an 8 px rise. Reduced motion: none.
 
 ## 10. Registers across the platform
 
-- **Public (Persuade):** the Route world at full commitment: gantry, route tabs, comparison table, road strip, plate buttons.
-- **Client workspace (Operate):** Linux-desktop clarity in the same language: a mono status bar, a dock of workspaces, window panes
-  with title bars, a command palette; light (verge) by default, dark theme on sign-950. Project milestones use the road strip.
-- **Admin (Operate, utilitarian):** same tokens, denser, verge-only content, a sign-950 sidebar; no hero surfaces.
+- **Public (Persuade):** workspace-window hero, route index, route tabs, comparison table, road strip, solid buttons.
+- **Client workspace (Operate):** the hero window made real: Linux-desktop clarity, a status bar, a dock of workspaces, window panes
+  with title bars, a command palette; light (bone) by default, dark theme on night. Milestones use the road strip; division and data
+  series use the earth hues.
+- **Admin (Operate, utilitarian):** same tokens, denser, bone content, a night sidebar; no hero surfaces.
 
 ## 11. Skills that shaped decisions
 | Skill | Decision |

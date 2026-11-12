@@ -1,6 +1,6 @@
 ---
 /**
- * Kuzikode wordmark as inline SVG so it takes the surface colour (`currentColor`); the K's upper arm is the one lit mint stroke.
+ * Kuzikode wordmark as inline SVG so it takes the surface colour (`currentColor`); the K's upper arm is the one emerald stroke (gold on night).
  * Source artwork: public/brand/logo.svg (Route palette).
  */
 import raw from '../../../public/brand/logo.svg?raw';
@@ -18,8 +18,8 @@ const svg = raw
     / role="img" aria-labelledby="t"/,
     ` width="${width}" height="${height}" aria-hidden="true" focusable="false"`,
   )
-  .replaceAll('fill="#0D1A12"', 'fill="currentColor"')
-  .replaceAll('fill="#1B6E47"', 'fill="var(--kz-logo-accent, var(--sign-700))"');
+  .replaceAll('fill="#141412"', 'fill="currentColor"')
+  .replaceAll('fill="#1E7A52"', 'fill="var(--kz-logo-accent, var(--action))"');
 ---
 
 {href ? (

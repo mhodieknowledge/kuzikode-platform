@@ -998,3 +998,15 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Header/Footer still carry `kz-btn--knob`/`kz-knob` markup (unstyled now) until the R3.1/R3.2 rebuild.
 - Next step: R2.5 sign-off (grep, IMAGE-REQUESTS batch 1 rewritten for the green palette + owner notification), then R3.1 header +
   mobile sheet and R3.2 footer rebuilt from concept B (design/concepts/b) with "Get a quote" (wizard links removed per B.0c).
+
+## 2026-11-12 14:35 UTC · R2.5b [~] multi-accent palette chosen (Zimbabwe earth) + premium hero prototype
+- Owner added BRIEF B.0b+ (multi-accent), B.0e (premium hero), B.1a (phone hard limits) and tasks R2.5b, R2.6 while R2.3 was being pushed.
+- Prototype `design/concepts/b2/index.html` (`?p=1|2|3`): Route structure re-cut with the workspace-window hero (crafted product
+  composition, layered invoice card, no stock photo), route index (phone swipe track / desktop typographic index), route tabs,
+  comparison table with "Recommended" in the column header. Phone 360/390/430: H1 32 px ≤ 3 lines, H2 24 px, no button wraps, no overflow.
+- Palette board `docs/screenshots/redesign/concepts/palettes-b2-board.webp`; reviewer + author chose **P1 Zimbabwe earth**; tokens
+  renamed sign→night, verge→bone, mint→gold, emerald action, six division hues, `.kz-div-1…6`; buttons solid; brand/email/PDF/OG
+  recoloured; DESIGN_DIRECTION §2–10 updated. verify green (unit 419, integration 308).
+- Next step (R2.5b remainder): port the hero to the real home (`src/ui/public/home/Hero.astro` + `WorkspaceWindow.astro` from b2,
+  route index from real division data via `divisionFromPrice`), header CTA "Get a quote" → /contact, then IMAGE-REQUESTS batch 2
+  (local workspace photos, warm-neutral grade) + owner notification; then R2.6 (mobile-limits guard spec in CI + boards).

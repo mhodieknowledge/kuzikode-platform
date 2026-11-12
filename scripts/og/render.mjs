@@ -29,13 +29,13 @@ const cards = [
 const html = (c) => `<!doctype html><html><head><style>
 @font-face{font-family:Overpass;src:url(${overpass}) format('woff2');font-weight:100 900}
 *{margin:0;box-sizing:border-box}
-body{width:1200px;height:630px;background:#0B4A2D url(${bg}) center/cover no-repeat;color:#fff;font-family:Overpass;position:relative;overflow:hidden}
-.shade{position:absolute;inset:0;background:#0B4A2D;opacity:.9}
+body{width:1200px;height:630px;background:#141412 url(${bg}) center/cover no-repeat;color:#fff;font-family:Overpass;position:relative;overflow:hidden}
+.shade{position:absolute;inset:0;background:#141412;opacity:.88}
 .wrap{position:absolute;inset:72px 80px;display:flex;flex-direction:column;justify-content:space-between}
 .logo svg{height:44px;width:auto}
-.eyebrow{font-size:24px;font-weight:600;color:#7FE3A8;letter-spacing:.02em}
+.eyebrow{font-size:24px;font-weight:600;color:#E3B04B;letter-spacing:.02em}
 h1{font-family:Overpass;font-weight:800;font-size:${c.title.length > 48 ? 58 : 68}px;line-height:1.08;letter-spacing:-.03em;max-width:980px;margin-top:18px}
-.bar{height:6px;width:96px;background:#7FE3A8;border-radius:2px}
+.bar{height:6px;width:96px;background:#1E7A52;border-radius:2px}
 </style></head><body><div class="shade"></div><div class="wrap">
 <div class="logo">${logo}</div>
 <div><div class="eyebrow">${c.eyebrow}</div><h1>${c.title.replace(/&/g, '&amp;')}</h1></div>

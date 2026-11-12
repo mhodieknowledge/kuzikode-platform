@@ -27,7 +27,7 @@ interface Props {
   canonicalPath?: string;
   noindex?: boolean;
   /** `dark` (or `sign`): the page opens on a sign hero and the header joins it. */
-  headerTone?: 'light' | 'dark' | 'sign' | 'verge';
+  headerTone?: 'light' | 'dark' | 'night' | 'bone';
   ogImage?: string | undefined;
   ogType?: 'website' | 'article';
   /** Page-specific schema.org objects; Organization is always included, WebSite on the home page. */
@@ -73,7 +73,7 @@ const whatsappText =
   settingText(settings, 'contact.whatsapp_message') ??
   'Hi Kuzikode, I would like to talk about a project.';
 const ld = [org, ...(Astro.url.pathname === '/' ? [websiteLd(ctx)] : []), ...structuredData];
-const tone = headerTone === 'dark' || headerTone === 'sign' ? 'sign' : 'verge';
+const tone = headerTone === 'dark' || headerTone === 'night' ? 'night' : 'bone';
 ---
 
 <Base
@@ -83,8 +83,8 @@ const tone = headerTone === 'dark' || headerTone === 'sign' ? 'sign' : 'verge';
   noindex={noindex}
   ogImage={ogImage}
   ogType={ogType}
-  themeColor={tone === 'sign' ? '#0B4A2D' : '#F1F4F0'}
-  bodyClass="flex min-h-screen flex-col bg-verge-50 text-ink-700"
+  themeColor={tone === 'night' ? '#141412' : '#F2EEE6'}
+  bodyClass="flex min-h-screen flex-col bg-bone-50 text-ink-700"
 >
   <Fragment slot="head">
     {noindex ? null : <JsonLd data={ld} />}

@@ -14,7 +14,7 @@ export default function Newsletter({ source }: { source: string }) {
   return (
     // method="post" keeps the address out of the URL if someone submits before hydration (the page ignores the POST).
     <form onSubmit={submit} method="post" noValidate className="mt-3 grid gap-2">
-      <label htmlFor="newsletter-email" className="text-small text-on-sign-2">
+      <label htmlFor="newsletter-email" className="text-small text-on-night-2">
         Occasional updates and new articles. Unsubscribe any time.
       </label>
       <div className="relative">
@@ -30,7 +30,7 @@ export default function Newsletter({ source }: { source: string }) {
           placeholder="you@example.com"
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? 'newsletter-error' : undefined}
-          className="min-h-[52px] w-full rounded-full border border-sign-700 bg-sign-900 py-3 pr-[120px] pl-5 text-[1.0625rem] text-white placeholder:text-on-sign-3 focus-visible:border-mint-400 focus-visible:outline-none"
+          className="min-h-[52px] w-full rounded-full border border-night-700 bg-night-900 py-3 pr-[120px] pl-5 text-[1.0625rem] text-white placeholder:text-on-night-3 focus-visible:border-gold-400 focus-visible:outline-none"
         />
         <button
           type="submit"
@@ -52,7 +52,7 @@ export default function Newsletter({ source }: { source: string }) {
           <Icon name="status-danger" size={16} /> {error}
         </p>
       ) : null}
-      <a href="/legal/privacy" className="text-micro text-on-sign-3 underline underline-offset-4 hover:text-white">
+      <a href="/legal/privacy" className="text-micro text-on-night-3 underline underline-offset-4 hover:text-white">
         How we handle your email address
       </a>
     </form>

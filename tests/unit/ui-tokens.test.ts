@@ -58,14 +58,29 @@ describe('Route palette tokens (R2.1 / R2.5)', () => {
     expect(isBanned('#1F44E0')).toBe(true);
     expect(isBanned('#5146E5')).toBe(true);
     expect(isBanned('#0B1428')).toBe(true);
-    expect(isBanned('#0B4A2D')).toBe(false);
-    expect(isBanned('#7FE3A8')).toBe(false);
-    expect(isBanned('#F1F4F0')).toBe(false);
+    expect(isBanned('#1E7A52')).toBe(false);
+    expect(isBanned('#1F8478')).toBe(false); // teal is allowed
+    expect(isBanned('#F2EEE6')).toBe(false);
   });
 
   it('defines the Route roles in tokens.css', () => {
     const css = readFileSync('src/ui/tokens/tokens.css', 'utf8');
-    for (const name of ['--sign-900', '--verge-50', '--mint-400', '--ink-900', '--action', '--lit', '--focus'])
+    for (const name of [
+      '--night-900',
+      '--bone-50',
+      '--gold-400',
+      '--ink-900',
+      '--emerald-500',
+      '--saffron',
+      '--clay',
+      '--teal',
+      '--moss',
+      '--msasa',
+      '--granite',
+      '--action',
+      '--lit',
+      '--focus',
+    ])
       expect(css).toContain(`${name}:`);
   });
 
@@ -86,12 +101,17 @@ describe('Route palette tokens (R2.1 / R2.5)', () => {
       const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m) as [number, number];
       return (x + 0.05) / (y + 0.05);
     };
-    expect(ratio('#FFFFFF', '#0B4A2D')).toBeGreaterThan(4.5); // white on sign
-    expect(ratio('#7FE3A8', '#0B4A2D')).toBeGreaterThan(4.5); // mint on sign
-    expect(ratio('#B9F2CF', '#0B4A2D')).toBeGreaterThan(4.5); // secondary text on sign
-    expect(ratio('#8FCFA9', '#0B4A2D')).toBeGreaterThan(4.5); // tertiary text on sign
-    expect(ratio('#56655B', '#F1F4F0')).toBeGreaterThan(4.5); // tertiary ink on verge
-    expect(ratio('#0F5B38', '#FFFFFF')).toBeGreaterThan(4.5); // link on paper
-    expect(ratio('#FFFFFF', '#1B6E47')).toBeGreaterThan(4.5); // white on hover plate
+    expect(ratio('#FFFFFF', '#1E7A52')).toBeGreaterThan(4.5); // primary action label
+    expect(ratio('#FFFFFF', '#17643F')).toBeGreaterThan(4.5); // primary hover
+    expect(ratio('#F2EEE6', '#141412')).toBeGreaterThan(4.5); // text on night
+    expect(ratio('#BDB6A9', '#141412')).toBeGreaterThan(4.5); // secondary on night
+    expect(ratio('#9B9486', '#141412')).toBeGreaterThan(4.5); // tertiary on night
+    expect(ratio('#E3B04B', '#141412')).toBeGreaterThan(4.5); // lit on night
+    expect(ratio('#6B655B', '#F2EEE6')).toBeGreaterThan(4.5); // tertiary ink on bone
+    expect(ratio('#17643F', '#FBF9F5')).toBeGreaterThan(4.5); // link on paper
+    for (const ink of ['#8A5C08', '#9A3F28', '#16695F', '#536A1C', '#8E3B52', '#5A554C'])
+      expect(ratio(ink, '#F2EEE6')).toBeGreaterThan(4.5); // accent text
+    for (const acc of ['#C98A17', '#B84F35', '#1F8478', '#6F8A2A', '#7A7468'])
+      expect(ratio('#0E0D0C', acc)).toBeGreaterThan(3); // large numerals on accent
   });
 });

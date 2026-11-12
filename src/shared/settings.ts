@@ -250,7 +250,7 @@ function fieldSchema(f: SettingField): z.ZodType {
         .min(f.min ?? 0, `Use at least ${f.min ?? 0}.`)
         .max(f.max ?? 1_000_000, `Use at most ${f.max ?? 1_000_000}.`);
     case 'color':
-      return z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Use a colour like #0B4A2D.');
+      return z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Use a colour like #1E7A52.');
     case 'email':
       return text(f.max).refine((v) => v === '' || z.email().safeParse(v).success, 'Enter a valid email address.');
     case 'url':

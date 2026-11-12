@@ -1,41 +1,41 @@
 /*
- * Component recipes of the Route world, shared by the Astro and React twins in src/ui/primitives so both render identically.
+ * Component recipes of the Route world (Zimbabwe earth palette), shared by the Astro and React twins in src/ui/primitives so both render identically.
  * Two-state discipline: active / selected states invert fully (solid thumb, sign row), never a faint tint.
- * Context: anything inside `.on-sign` uses the sign variants automatically.
+ * Context: anything inside `.on-night` uses the sign variants automatically.
  */
 @layer components {
   /* ---------- Surfaces ---------- */
-  .on-sign {
-    background-color: var(--sign-900);
-    color: var(--on-sign-2);
-    --kz-fg: var(--on-sign);
-    --kz-fg-2: var(--on-sign-2);
-    --kz-fg-3: var(--on-sign-3);
-    --kz-groove: var(--sign-700);
-    --kz-raise: var(--sign-800);
-    --kz-link: var(--mint-400);
+  .on-night {
+    background-color: var(--night-900);
+    color: var(--on-night-2);
+    --kz-fg: var(--on-night);
+    --kz-fg-2: var(--on-night-2);
+    --kz-fg-3: var(--on-night-3);
+    --kz-groove: var(--night-700);
+    --kz-raise: var(--night-800);
+    --kz-link: var(--gold-400);
     --kz-bar: var(--lit);
     color-scheme: dark;
   }
-  .on-sign :where(h1, h2, h3, h4) {
-    color: var(--on-sign);
+  .on-night :where(h1, h2, h3, h4) {
+    color: var(--on-night);
   }
-  .on-verge,
+  .on-bone,
   :root {
     --kz-fg: var(--ink-900);
     --kz-fg-2: var(--ink-600);
     --kz-fg-3: var(--ink-500);
-    --kz-groove: var(--verge-200);
+    --kz-groove: var(--bone-200);
     --kz-raise: var(--paper);
     --kz-link: var(--link);
     --kz-bar: var(--action);
   }
 
-  /* ---------- Buttons: plates (a road sign's 7 px corner and inset ring; never a pill, never a round knob) ---------- */
+  /* ---------- Buttons: solid plates with a road sign's 7 px corner (never a pill, never a round knob) ---------- */
   .kz-btn {
     --kz-btn-h: 48px;
     --plate-bg: var(--action);
-    --plate-ring: var(--on-sign);
+    --plate-ring: var(--on-night);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -87,30 +87,24 @@
     display: inline-flex;
     transition: transform var(--dur-state) var(--ease-out);
   }
-  /* Primary: the green plate with a white inner ring (on light); the white plate with a green ring (on sign). */
+  /* Primary: emerald, reserved for the primary action on every surface. */
   .kz-btn--primary {
-    color: var(--on-sign);
-    box-shadow: var(--ring-plate);
-  }
-  .on-sign .kz-btn--primary {
-    --plate-bg: var(--paper);
-    --plate-ring: var(--sign-900);
-    color: var(--sign-900);
+    color: var(--on-action);
   }
   /* Secondary: an outlined plate in the surface's ink. */
   .kz-btn--secondary {
     --plate-bg: transparent;
     color: var(--kz-fg);
-    box-shadow: inset 0 0 0 2px var(--kz-fg);
+    box-shadow: inset 0 0 0 1.5px var(--kz-fg);
   }
   /* Solid: a quieter filled plate (ink on light, raised plate on sign). */
   .kz-btn--solid {
     --plate-bg: var(--ink-900);
     color: #fff;
   }
-  .on-sign .kz-btn--solid {
-    --plate-bg: var(--sign-800);
-    box-shadow: inset 0 0 0 1px var(--sign-700);
+  .on-night .kz-btn--solid {
+    --plate-bg: var(--night-800);
+    box-shadow: inset 0 0 0 1px var(--night-700);
   }
   .kz-btn--quiet {
     --plate-bg: transparent;
@@ -132,17 +126,14 @@
     .kz-btn--primary:hover {
       --plate-bg: var(--action-hover);
     }
-    .on-sign .kz-btn--primary:hover {
-      --plate-bg: var(--mint-200);
-    }
     .kz-btn--secondary:hover {
       --plate-bg: color-mix(in srgb, var(--kz-fg) 6%, transparent);
     }
     .kz-btn--solid:hover {
       --plate-bg: var(--ink-700);
     }
-    .on-sign .kz-btn--solid:hover {
-      --plate-bg: var(--sign-700);
+    .on-night .kz-btn--solid:hover {
+      --plate-bg: var(--night-700);
     }
     .kz-btn--quiet:hover {
       text-decoration-color: currentColor;
@@ -183,7 +174,7 @@
     width: 40px;
     height: 44px;
     padding-bottom: 8px;
-    background: var(--kz-shield-bg, var(--sign-900));
+    background: var(--kz-shield-bg, var(--night-900));
     color: var(--kz-shield-fg, #fff);
     font-family: var(--font-mono);
     font-weight: 600;
@@ -192,14 +183,44 @@
     clip-path: polygon(0 0, 100% 0, 100% 62%, 50% 100%, 0 62%);
     transition: background-color var(--dur-state) var(--ease-out);
   }
-  .on-sign .kz-shield {
-    --kz-shield-bg: #fff;
-    --kz-shield-fg: var(--sign-900);
+  .on-night .kz-shield {
+    --kz-shield-bg: var(--on-night);
+    --kz-shield-fg: var(--night-900);
+  }
+  /* Division colour-coding (DESIGN_DIRECTION §4): one hue per division, shown as the numeral and the hover rule only. */
+  .kz-div-1 {
+    --kz-div: var(--saffron);
+    --kz-div-ink: var(--saffron-ink);
+  }
+  .kz-div-2 {
+    --kz-div: var(--clay);
+    --kz-div-ink: var(--clay-ink);
+  }
+  .kz-div-3 {
+    --kz-div: var(--teal);
+    --kz-div-ink: var(--teal-ink);
+  }
+  .kz-div-4 {
+    --kz-div: var(--moss);
+    --kz-div-ink: var(--moss-ink);
+  }
+  .kz-div-5 {
+    --kz-div: var(--msasa);
+    --kz-div-ink: var(--msasa-ink);
+  }
+  .kz-div-6 {
+    --kz-div: var(--granite);
+    --kz-div-ink: var(--granite-ink);
+  }
+  :is(.kz-div-1, .kz-div-2, .kz-div-3, .kz-div-4, .kz-div-5, .kz-div-6) .kz-shield,
+  .kz-shield:is(.kz-div-1, .kz-div-2, .kz-div-3, .kz-div-4, .kz-div-5, .kz-div-6) {
+    --kz-shield-bg: var(--kz-div);
+    --kz-shield-fg: var(--night-950);
   }
   .kz-lit .kz-shield,
   [aria-expanded='true'] > .kz-shield {
     --kz-shield-bg: var(--lit);
-    --kz-shield-fg: var(--sign-950);
+    --kz-shield-fg: var(--night-950);
   }
 
   /* ---------- Fields ---------- */
@@ -235,7 +256,7 @@
     line-height: 1.4;
     color: var(--ink-900);
     background: var(--paper);
-    border: 1px solid var(--verge-300);
+    border: 1px solid var(--bone-300);
     border-radius: 6px;
     transition:
       border-color var(--dur-state) var(--ease-out),
@@ -258,7 +279,7 @@
   .kz-input:focus-visible {
     outline: none;
     border-color: var(--action);
-    box-shadow: 0 0 0 3px var(--mint-100);
+    box-shadow: 0 0 0 3px var(--gold-100);
   }
   .kz-input[aria-invalid='true'] {
     border-color: var(--danger-600);
@@ -267,7 +288,7 @@
     box-shadow: 0 0 0 3px var(--danger-50);
   }
   .kz-input:disabled {
-    background: var(--verge-50);
+    background: var(--bone-50);
     color: var(--ink-500);
   }
   @media (min-width: 1024px) {
@@ -284,7 +305,7 @@
     gap: 12px;
     min-height: 56px;
     padding: 14px 16px;
-    border: 1px solid var(--verge-300);
+    border: 1px solid var(--bone-300);
     border-radius: var(--radius-plate);
     background: var(--paper);
     color: var(--ink-900);
@@ -307,7 +328,7 @@
     width: 22px;
     height: 22px;
     margin-top: 1px;
-    border: 1.5px solid var(--verge-300);
+    border: 1.5px solid var(--bone-300);
     border-radius: 6px;
     color: transparent;
     background: var(--paper);
@@ -324,17 +345,17 @@
     color: var(--ink-600);
   }
   .kz-choice:has(input:checked) {
-    background: var(--sign-900);
-    border-color: var(--sign-900);
+    background: var(--night-900);
+    border-color: var(--night-900);
     color: #fff;
   }
   .kz-choice:has(input:checked) .kz-choice__hint {
-    color: var(--on-sign-2);
+    color: var(--on-night-2);
   }
   .kz-choice:has(input:checked) .kz-choice__mark {
     background: var(--lit);
     border-color: var(--lit);
-    color: var(--sign-950);
+    color: var(--night-950);
   }
   .kz-choice:has(input:focus-visible) {
     outline: 2px solid var(--focus);
@@ -370,7 +391,7 @@
     padding: 4px;
     gap: 2px;
     border-radius: var(--radius-plate);
-    background: var(--verge-100);
+    background: var(--bone-100);
     isolation: isolate;
     justify-self: start;
     align-self: start;
@@ -410,7 +431,7 @@
     left: 0;
     width: 0;
     border-radius: 5px;
-    background: var(--sign-900);
+    background: var(--night-900);
     transition:
       transform var(--dur-state) var(--ease-in-out),
       width var(--dur-state) var(--ease-in-out);
@@ -446,20 +467,20 @@
   .kz-seg:not([data-ready]) .kz-seg__opt[aria-current='true'],
   .kz-seg:not([data-ready]) .kz-seg__opt[aria-pressed='true'],
   .kz-seg:not([data-ready]) .kz-seg__opt[aria-checked='true'] {
-    background: var(--sign-900);
+    background: var(--night-900);
   }
-  .on-sign .kz-seg {
-    background: var(--sign-800);
+  .on-night .kz-seg {
+    background: var(--night-800);
   }
-  .on-sign .kz-seg__opt {
-    color: var(--on-sign-2);
+  .on-night .kz-seg__opt {
+    color: var(--on-night-2);
   }
-  .on-sign
+  .on-night
     .kz-seg__opt:is([aria-selected='true'], [aria-current='true'], [aria-pressed='true'], [aria-checked='true']) {
-    color: var(--sign-950);
+    color: var(--night-950);
   }
-  .on-sign .kz-seg__thumb,
-  .on-sign
+  .on-night .kz-seg__thumb,
+  .on-night
     .kz-seg:not([data-ready])
     .kz-seg__opt:is([aria-selected='true'], [aria-current='true'], [aria-pressed='true'], [aria-checked='true']) {
     background: var(--lit);
@@ -473,7 +494,7 @@
       ):hover {
       color: var(--ink-900);
     }
-    .on-sign .kz-seg__opt:not([aria-selected='true'], [aria-current='true']):hover {
+    .on-night .kz-seg__opt:not([aria-selected='true'], [aria-current='true']):hover {
       color: #fff;
     }
   }
@@ -753,7 +774,7 @@
     gap: 12px;
     min-height: 60px;
     padding: 8px 8px 8px var(--gutter);
-    border-bottom: 1px solid var(--verge-200);
+    border-bottom: 1px solid var(--bone-200);
   }
   .kz-sheet__title {
     font-weight: 640;
@@ -769,14 +790,14 @@
     display: flex;
     gap: 12px;
     padding: 12px var(--gutter);
-    border-top: 1px solid var(--verge-200);
+    border-top: 1px solid var(--bone-200);
   }
   .kz-sheet__grip {
     width: 40px;
     height: 4px;
     margin: 8px auto 0;
     border-radius: 999px;
-    background: var(--verge-300);
+    background: var(--bone-300);
   }
   html:has(.kz-sheet[open]) {
     overflow: hidden;
@@ -794,7 +815,7 @@
     font-weight: 600;
     line-height: 1.2;
     white-space: nowrap;
-    background: var(--verge-100);
+    background: var(--bone-100);
     color: var(--ink-700);
   }
   .kz-pill::before {
@@ -820,16 +841,16 @@
     color: var(--danger-700);
   }
   .kz-pill--info {
-    background: var(--verge-100);
+    background: var(--bone-100);
     color: var(--ink-900);
   }
   .kz-pill--lit {
-    background: var(--mint-400);
-    color: var(--sign-950);
+    background: var(--gold-400);
+    color: var(--night-950);
   }
-  .on-sign .kz-pill:not(.kz-pill--lit) {
-    background: var(--sign-800);
-    color: var(--on-sign-2);
+  .on-night .kz-pill:not(.kz-pill--lit) {
+    background: var(--night-800);
+    color: var(--on-night-2);
   }
 
   /* ---------- List row (tables become this on phones) ---------- */
@@ -894,7 +915,7 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--kz-fg-3);
-    background: var(--verge-50);
+    background: var(--bone-50);
     border-bottom: 1px solid var(--kz-groove);
   }
   .kz-table td {
@@ -910,7 +931,7 @@
   }
   @media (hover: hover) {
     .kz-table tbody tr:hover td {
-      background: var(--verge-50);
+      background: var(--bone-50);
     }
   }
 
@@ -966,8 +987,8 @@
     gap: 12px;
     padding: 14px 8px 14px 16px;
     border-radius: var(--radius-plate);
-    background: var(--sign-900);
-    color: var(--on-sign);
+    background: var(--night-900);
+    color: var(--on-night);
     box-shadow: var(--shadow-float);
     animation: kz-toast-in var(--dur-enter) var(--ease-out);
   }
@@ -978,7 +999,7 @@
     color: #ff8a80;
   }
   .kz-toast__icon--info {
-    color: var(--mint-400);
+    color: var(--gold-400);
   }
 }
 

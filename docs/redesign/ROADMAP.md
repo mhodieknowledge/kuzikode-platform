@@ -40,7 +40,7 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
   palette (mark the old prompts "superseded: palette change, don't generate") and notify the owner. AC: no blue/indigo/violet hue
   (≈200°–290°) left in tokens or components (grep + a token test); /dev/ui visual loop clean in light and dark; contrast checks pass.
 
-- [ ] **R2.5b Multi-accent palette + premium hero (BRIEF B.0b+ / B.0e).** Compare ≥ 3 multi-accent palettes on the chosen concept (boards at 390
+- [~] **R2.5b Multi-accent palette + premium hero (BRIEF B.0b+ / B.0e).** Compare ≥ 3 multi-accent palettes on the chosen concept (boards at 390
   and 1440), choose one, apply it to tokens with accent roles (division colours, tier coding, primary action, status/data viz), and rebuild the
   hero to the premium definition (visual-led on phones). Notify the owner with the boards (FYI). AC: boards + rationale committed; reviewer passes
   "premium, not generic".

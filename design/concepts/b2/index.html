@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en" data-type="service" data-p="1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kuzikode: websites, apps and business software for organisations in Zimbabwe</title>
+<meta name="description" content="Concept B2 (Route, multi-accent). R2.5b palette comparison prototype: ?p=1 Zimbabwe earth, ?p=2 Creatix, ?p=3 Dusk.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;500;600;700;800&family=Overpass+Mono:wght@400;600&display=swap" rel="stylesheet">
+<!--
+  Concept B2: the Route structure (route plates, route tabs, comparison table, road strip) re-cut for BRIEF B.0b+ (multi-accent),
+  B.0e (premium hero: layered workspace composition over a photograph, depth, one primary action) and B.1a (phone limits:
+  H1 28–34 px max 3 lines, H2 22–26 px, body 15–16 px, buttons on one line, no stacks longer than 3: swipe tracks).
+  References opened for the re-cut: IMG_5054 (product-UI fragments with depth, black + bone), IMG_5055 (lime/coral accents, highlight
+  labels), IMG_5056 (text-first mobile hero with a photo under it), IMG_5057 (inset phone sections, segmented control),
+  IMG_5071 (comparison table, one column on phones), IMG_5051 (peeking swipe track), IMG_5013/5014 (bill strip, method rows).
+-->
+<style>
+/* ---------- Palettes (one active; each accent has a job) ---------- */
+:root,[data-p="1"]{ /* P1 Zimbabwe earth: near-black + bone, emerald (primary action), saffron, clay, teal, moss */
+  --ink:#141412; --ink-2:#1F1E1B; --ink-3:#2C2A26; --on-ink:#F2EEE6; --on-ink-2:#BDB6A9;
+  --bone:#F2EEE6; --bone-2:#E8E2D7; --paper:#FBF9F5; --line:#D9D1C3; --text:#141412; --text-2:#4E4A43; --text-3:#6B655B;
+  --primary:#1E7A52; --primary-hover:#17643F; --on-primary:#FFFFFF;
+  --a1:#C98A17; --a2:#B84F35; --a3:#1F8478; --a4:#6F8A2A; --a5:#8E3B52; --a6:#7A7468;  /* saffron clay teal moss msasa granite */
+  --a1-ink:#8A5C08; --a2-ink:#9A3F28; --a3-ink:#16695F; --a4-ink:#536A1C; --a5-ink:#8E3B52; --a6-ink:#5A554C; /* AA on bone */
+  --lit:#E3B04B;
+}
+[data-p="2"]{ /* P2 Creatix: black + bone, lime (primary action), coral, cyan, amber, mint */
+  --ink:#0B0C0A; --ink-2:#161714; --ink-3:#22241F; --on-ink:#F4F3EE; --on-ink-2:#B3B5AC;
+  --bone:#F4F3EE; --bone-2:#E6E5DD; --paper:#FFFFFF; --line:#D6D5CC; --text:#0B0C0A; --text-2:#4A4C45; --text-3:#64665E;
+  --primary:#C6F135; --primary-hover:#B5E01F; --on-primary:#0B0C0A;
+  --a1:#FF7657; --a2:#2FC2CF; --a3:#FFC23D; --a4:#57D9A3;
+  --a1-ink:#B83E22; --a2-ink:#127A83; --a3-ink:#8A6200; --a4-ink:#1C7A53;
+  --lit:#C6F135;
+}
+[data-p="3"]{ /* P3 Dusk (own, from IMG_5072's dark ladder + IMG_5066's monochrome): graphite + chalk, apricot (primary), jade, butter, lagoon, rosewood */
+  --ink:#191816; --ink-2:#23221F; --ink-3:#302E2A; --on-ink:#F5F3EF; --on-ink-2:#B9B4AB;
+  --bone:#F5F3EF; --bone-2:#EAE7E0; --paper:#FFFFFF; --line:#DAD6CD; --text:#191816; --text-2:#4D4943; --text-3:#68635B;
+  --primary:#E8794A; --primary-hover:#D9693A; --on-primary:#191816;
+  --a1:#3FB38B; --a2:#E3BE5E; --a3:#46ADB0; --a4:#D06F86;
+  --a1-ink:#1F7A5A; --a2-ink:#836414; --a3-ink:#1F7476; --a4-ink:#A3445C;
+  --lit:#E8794A;
+}
+:root{--sans:"Overpass",system-ui,sans-serif;--mono:"Overpass Mono",ui-monospace,monospace;--ease:cubic-bezier(.16,1,.3,1);--r:7px}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--sans);background:var(--bone);color:var(--text);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+::selection{background:var(--lit);color:var(--ink)}
+a{color:inherit}img{display:block;max-width:100%}
+:focus-visible{outline:2px solid var(--text);outline-offset:3px}
+.wrap{width:min(1320px,100% - 32px);margin-inline:auto}
+@media (min-width:768px){.wrap{width:min(1320px,100% - 64px)}}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* plate buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 20px;border-radius:var(--r);font:700 15px/1 var(--sans);text-decoration:none;border:0;cursor:pointer;white-space:nowrap;transition:background .18s,transform .12s var(--ease),box-shadow .18s}
+.btn span{padding-top:.12em}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--primary);color:var(--on-primary)}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-line{background:transparent;color:inherit;box-shadow:inset 0 0 0 1.5px currentColor}
+.btn-line:hover{background:color-mix(in srgb,currentColor 7%,transparent)}
+.link{font-weight:700;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.3em;text-decoration-color:color-mix(in srgb,currentColor 35%,transparent);display:inline-flex;align-items:center;min-height:44px}
+.link:hover{text-decoration-color:currentColor}
+.shield{display:inline-grid;place-items:center;flex:none;width:32px;height:36px;padding-bottom:7px;background:var(--acc,var(--ink));color:var(--on-acc,#fff);font:600 13px var(--mono);clip-path:polygon(0 0,100% 0,100% 62%,50% 100%,0 62%)}
+
+/* header */
+.hd{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bone) 88%,transparent);backdrop-filter:blur(10px) saturate(1.2);border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+.hd .wrap{display:flex;align-items:center;gap:20px;height:60px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:21px;letter-spacing:-.02em;text-decoration:none}
+.brand svg{width:24px;height:24px}
+.nav{display:none;margin-left:auto;gap:2px}
+.nav a{text-decoration:none;font-weight:600;font-size:15px;padding:10px 12px;border-radius:6px}
+.nav a:hover{background:var(--bone-2)}
+.hd .btn{margin-left:auto;min-height:40px;padding:0 14px;transition:opacity .2s,transform .2s var(--ease)}
+@media (max-width:1023px){.hd.hero-cta .btn{opacity:0;pointer-events:none;transform:translateY(-4px)}}
+.menu{width:44px;height:44px;border-radius:var(--r);border:0;background:var(--ink);color:var(--on-ink);display:grid;place-items:center}
+@media (min-width:1024px){.hd .wrap{height:68px}.nav{display:flex}.hd .btn{margin-left:8px}.menu{display:none}}
+
+/* ---------- hero: copy + layered workspace composition over a photograph ---------- */
+.hero{padding:20px 0 28px;overflow:hidden}
+.hero-grid{display:grid;gap:20px}
+h1{font-size:32px;font-weight:700;line-height:1.08;letter-spacing:-.03em;text-wrap:balance}
+h1 .d{display:none}
+.value{font-size:15px;color:var(--text-2);max-width:46ch;margin-top:10px}
+.acts{display:flex;align-items:center;gap:18px;margin-top:16px;flex-wrap:wrap}
+.proof{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:12px;font-size:13px;color:var(--text-3)}
+.proof b{color:var(--text);font-weight:600}
+.scene{position:relative;isolation:isolate;padding:0 0 18px}
+.win{position:relative;border-radius:14px;background:var(--ink);color:var(--on-ink);box-shadow:0 0 0 1px color-mix(in srgb,var(--ink) 80%,transparent),0 30px 60px -28px rgb(0 0 0 / .55),0 10px 20px -12px rgb(0 0 0 / .3);overflow:hidden;display:grid;grid-template-columns:1fr;animation:rise .9s var(--ease) both}
+.win-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;border-bottom:1px solid var(--ink-3);font-size:12px;color:var(--on-ink-2)}
+.win-top b{color:var(--on-ink);font-weight:700;font-size:13px}
+.win-top .st{display:inline-flex;align-items:center;gap:6px}
+.win-top .st::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--lit)}
+.side{display:none}
+.main{padding:16px;display:grid;gap:14px}
+.ph{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.ph h2{font-size:17px;max-width:none;color:var(--on-ink);letter-spacing:-.01em}
+.ph span{font-size:12px;color:var(--on-ink-2)}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:0}
+.strip li{list-style:none;display:grid;gap:6px;font-size:11.5px;line-height:1.25;color:var(--on-ink-2)}
+.strip li::before{content:"";height:6px;border-radius:2px;background:var(--ink-3)}
+.strip .ok::before{background:var(--on-ink-2)}
+.strip .now::before{background:var(--lit)}
+.strip .now{color:var(--on-ink)}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:var(--ink-2);border-radius:10px;padding:12px;display:grid;gap:6px;align-content:start;box-shadow:inset 0 0 0 1px var(--ink-3)}
+.card small{font-size:11.5px;color:var(--on-ink-2)}
+.card .amt{font:600 22px var(--mono);letter-spacing:-.02em;color:var(--on-ink)}
+.upd{display:grid;gap:4px;font-size:12.5px;color:var(--on-ink-2)}
+.upd b{color:var(--on-ink);font-weight:600}
+.pay{position:absolute;right:-6px;bottom:0;width:58%;max-width:260px;background:var(--paper);color:var(--text);border-radius:12px;padding:14px;display:grid;gap:8px;box-shadow:0 0 0 1px color-mix(in srgb,var(--ink) 10%,transparent),0 24px 44px -18px rgb(0 0 0 / .5),0 6px 12px -6px rgb(0 0 0 / .2);animation:rise .9s .25s var(--ease) both}
+.pay small{font-size:11.5px;color:var(--text-3)}
+.pay .amt{font:600 24px var(--mono);letter-spacing:-.02em}
+.meth{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.meth span{font-size:12px;font-weight:600;padding:8px;border-radius:6px;box-shadow:inset 0 0 0 1px var(--line);text-align:center}
+.meth span:first-child{background:var(--primary);color:var(--on-primary);box-shadow:none}
+.photo-chip{display:none}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+@keyframes drift{from{transform:scale(1.1)}}
+@media (min-width:768px){h1{font-size:clamp(40px,1rem + 3.1vw,62px)}h2{font-size:clamp(30px,1rem + 2.2vw,48px)}}
+@media (min-width:1024px){
+  .hero{padding:56px 0 40px}
+  .hero-grid{grid-template-columns:5fr 7fr;align-items:center;gap:56px}
+  h1 .m{display:none} h1 .d{display:inline}
+  .value{font-size:19px;margin-top:20px}
+  .acts{margin-top:28px}
+  .scene{padding:0 0 36px 0;margin-right:-24px}
+  .win{grid-template-columns:168px 1fr}
+  .win-top{grid-column:1/-1;padding:14px 20px}
+  .side{display:grid;align-content:start;gap:2px;padding:14px 10px;border-right:1px solid var(--ink-3);font-size:13px;color:var(--on-ink-2)}
+  .side span{padding:8px 10px;border-radius:6px}
+  .side .on{background:var(--ink-2);color:var(--on-ink)}
+  .main{padding:22px;gap:18px}
+  .ph h2{font-size:21px}
+  .strip li{font-size:12.5px}
+  .card .amt{font-size:26px}
+  .pay{right:-20px;bottom:-4px;width:300px;max-width:none;padding:18px}
+  .pay .amt{font-size:30px}
+  .photo-chip{display:block;position:absolute;left:-36px;bottom:-8px;width:200px;height:132px;border-radius:12px;overflow:hidden;box-shadow:0 0 0 4px var(--bone),0 20px 40px -18px rgb(0 0 0 / .5);animation:rise .9s .4s var(--ease) both}
+  .photo-chip img{width:100%;height:100%;object-fit:cover}
+}
+
+/* ---------- route plates: swipe track on phones, six across on desktop ---------- */
+.routes{padding:8px 0 56px}
+.track{display:grid;grid-auto-flow:column;grid-auto-columns:72%;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:calc(50% - 50vw);padding:2px calc(50vw - 50%) 6px;scroll-padding-inline:calc(50vw - 50%)}
+.track::-webkit-scrollbar{display:none}
+.plate{scroll-snap-align:start;display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:baseline;padding:16px 14px;border-radius:10px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line);text-decoration:none;transition:transform .25s var(--ease),box-shadow .25s}
+.plate .n{font:600 15px var(--mono);color:var(--acc-ink)}
+.plate strong{font-size:17px;font-weight:700;line-height:1.25;letter-spacing:-.01em}
+.plate .from{grid-column:2;font-size:14px;color:var(--text-2)}
+.plate .from b{font:600 14px var(--mono);color:var(--text)}
+.plate:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 1.5px var(--acc),0 12px 24px -16px rgb(0 0 0 / .35)}
+.k1{--acc:var(--a1);--acc-ink:var(--a1-ink)}.k2{--acc:var(--a2);--acc-ink:var(--a2-ink)}.k3{--acc:var(--a3);--acc-ink:var(--a3-ink)}.k4{--acc:var(--a4);--acc-ink:var(--a4-ink)}.k5{--acc:var(--a5);--acc-ink:var(--a5-ink)}.k6{--acc:var(--a6);--acc-ink:var(--a6-ink)}
+.dots{display:flex;gap:6px;margin-top:12px}
+.dots i{width:14px;height:3px;border-radius:2px;background:var(--line)}
+.dots i.on{width:28px;background:var(--text)}
+@media (min-width:1024px){.track{grid-auto-flow:initial;grid-template-columns:1fr 1fr 1fr;column-gap:40px;row-gap:0;overflow:visible;margin:0;padding:0;border-top:1px solid var(--line)}.dots{display:none}.plate{border-radius:0;background:none;box-shadow:none;border-bottom:1px solid var(--line);padding:18px 0;grid-template-columns:36px 1fr auto}.plate .from{grid-column:3;text-align:right}.plate:hover{transform:none;box-shadow:none}.plate:hover strong{text-decoration:underline;text-decoration-color:var(--acc);text-decoration-thickness:2px;text-underline-offset:.25em}}
+
+/* ---------- sections ---------- */
+section.s{padding:56px 0}
+@media (min-width:1024px){section.s{padding:104px 0}}
+h2{font-size:24px;font-weight:700;line-height:1.1;letter-spacing:-.025em;text-wrap:balance;max-width:20ch}
+@media (min-width:768px){h2{font-size:clamp(30px,1rem + 2.2vw,48px)}}
+.lead{color:var(--text-2);max-width:54ch;margin-top:10px}
+.dark{background:var(--ink);color:var(--on-ink)}
+.dark .lead{color:var(--on-ink-2)}
+.tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:24px calc(50% - 50vw) 0;padding:2px calc(50vw - 50%)}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:var(--r);border:0;background:var(--ink-2);color:var(--on-ink-2);font:600 14px var(--sans);cursor:pointer;transition:background .18s,color .18s}
+.tab .sw{width:8px;height:8px;border-radius:2px;background:var(--acc)}.tab .mono{font-size:12px;opacity:.8}
+.tab[aria-selected=true]{background:var(--on-ink);color:var(--ink)}
+.stage{margin-top:16px;display:grid;border-radius:12px;overflow:hidden;background:var(--ink-2);box-shadow:inset 0 0 0 1px var(--ink-3)}
+.stage img{width:100%;height:200px;object-fit:cover}
+.stage .body{padding:20px;display:grid;gap:12px;align-content:start}
+.stage h3{font-size:20px;font-weight:700;letter-spacing:-.015em}
+.stage p{color:var(--on-ink-2);font-size:15px}
+.stage ul{list-style:none;padding:0}
+.stage li{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--ink-3);font-weight:600;font-size:15px}
+.stage li .mono{font-weight:400;color:var(--on-ink-2);white-space:nowrap;font-size:14px}
+.stage .acc-bar{height:3px;background:var(--acc)}
+.stage .btn-primary{justify-self:start}
+.fade{animation:rise .45s var(--ease)}
+@media (min-width:1024px){.stage{grid-template-columns:5fr 7fr}.stage img{height:100%;min-height:420px}.stage .body{padding:40px}.stage h3{font-size:30px}.stage li{font-size:16px}}
+
+/* pricing table with tier coding */
+.picker{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:22px calc(50% - 50vw) 14px;padding:2px calc(50vw - 50%)}
+.picker::-webkit-scrollbar{display:none}
+.picker button{flex:none;min-height:44px;padding:0 14px;border-radius:var(--r);border:0;background:var(--bone-2);font:600 14px var(--sans);cursor:pointer;display:flex;gap:8px;align-items:center}
+
+.picker button[aria-selected=true]{background:var(--ink);color:var(--on-ink)}
+.cmp{width:100%;border-collapse:separate;border-spacing:0;margin-top:8px;font-size:15px}
+.cmp th,.cmp td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+.cmp thead th{vertical-align:bottom;border-bottom:0;position:relative}
+
+.cmp thead h3{font-size:17px;font-weight:700;margin-top:10px}
+.cmp thead .mono{font-size:24px;display:block;margin-top:2px;letter-spacing:-.02em}
+.cmp thead small{display:block;color:var(--text-3);font-size:12px}
+.cmp tbody th{font-weight:600;color:var(--text-2);width:40%}
+.cmp .hi{background:var(--paper)}
+.cmp thead .hi{border-radius:10px 10px 0 0}
+.cmp .rec{color:var(--primary);font-weight:700;font-size:13px;margin-top:2px}
+.cmp thead .hi{box-shadow:inset 0 2px 0 var(--primary)}
+.cmp tfoot td{border:0;padding-top:16px}.cmp tfoot .btn{width:100%}
+@media (max-width:899px){.cmp thead th[data-c]:not(.show),.cmp td[data-c]:not(.show){display:none}}
+@media (min-width:900px){.picker{display:none}.cmp tbody th{width:22%}.cmp{font-size:16px}}
+footer{background:var(--ink);color:var(--on-ink-2);padding:48px 0 28px;font-size:15px}
+footer h2{color:var(--on-ink)}
+footer .acts{margin-top:20px}
+footer .btn-line{color:var(--on-ink)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="hd"><div class="wrap">
+  <a class="brand" href="/"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="4" width="6.5" height="24" fill="currentColor"/><path d="M14 14.4 22.6 4H29.2L20.6 14.4Z" fill="var(--primary)"/><path d="M14 17.6H20.6L29.2 28H22.6Z" fill="currentColor"/></svg>kuzikode</a>
+  <nav class="nav" aria-label="Main"><a href="/services">Services</a><a href="/pricing">Pricing</a><a href="/our-work">Our work</a><a href="/about">About</a><a href="/contact">Contact</a></nav>
+  <a class="btn btn-primary" href="/contact"><span>Get a quote</span></a>
+  <button class="menu" aria-label="Open menu" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
+</div></header>
+
+<main>
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <h1><span class="m">Websites, apps and software, priced openly.</span><span class="d">Websites, apps and business software, priced in the open.</span></h1>
+      <p class="value">For organisations in Zimbabwe. Published prices, a written quotation, then every milestone in your workspace.</p>
+      <div class="acts"><a class="btn btn-primary" href="/contact"><span>Get a quote</span></a><a class="link" href="/pricing">See all prices</a></div>
+      <p class="proof"><span>Websites from <b class="mono">$350</b></span><span>Pay with EcoCash, OneMoney, InnBucks or card</span></p>
+    </div>
+    <div class="scene" role="img" aria-label="The Kuzikode client workspace: a project's milestones, the latest update, an approved quotation and an invoice paid with EcoCash">
+      <div class="win">
+        <div class="win-top"><b>Client workspace</b><span class="st">Project on track</span></div>
+        <div class="side" aria-hidden="true"><span>Overview</span><span class="on">Projects</span><span>Quotations</span><span>Invoices</span><span>Support</span></div>
+        <div class="main">
+          <div class="ph"><h2>Company website</h2><span>Milestone 3 of 4</span></div>
+          <ol class="strip"><li class="ok">Plan</li><li class="ok">Design</li><li class="now">Build</li><li>Launch</li></ol>
+          <div class="cards">
+            <div class="card"><small>Quotation approved</small><span class="amt">$750</span><small>Business Website</small></div>
+            <div class="card upd"><small>Update, Monday</small><b>Pages and editor are live on staging.</b><span>Review link sent.</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="pay"><small>Invoice&nbsp;·&nbsp;due in 5 days</small><span class="amt">$250.00</span><div class="meth"><span>EcoCash</span><span>OneMoney</span><span>InnBucks</span><span>Card</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="routes" aria-labelledby="rt">
+  <div class="wrap">
+    <h2 id="rt" class="sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Six areas of work</h2>
+    <div class="track" id="track">
+      <a class="plate k1" href="/services/web-development"><span class="n">01</span><strong>Websites &amp; online shops</strong><span class="from">from <b>$350</b></span></a>
+      <a class="plate k2" href="/services/mobile-desktop-apps"><span class="n">02</span><strong>Mobile &amp; desktop apps</strong><span class="from">from <b>$2,500</b></span></a>
+      <a class="plate k3" href="/services/business-software"><span class="n">03</span><strong>Business software</strong><span class="from">from <b>$1,500</b></span></a>
+      <a class="plate k4" href="/services/ai-data"><span class="n">04</span><strong>AI, data &amp; intelligence</strong><span class="from">from <b>$600</b></span></a>
+      <a class="plate k5" href="/services/automation-integration"><span class="n">05</span><strong>Automation &amp; payments</strong><span class="from">from <b>$25/hour</b></span></a>
+      <a class="plate k6" href="/services/cloud-it"><span class="n">06</span><strong>Cloud, email &amp; IT</strong><span class="from">from <b>$20</b></span></a>
+    </div>
+    <div class="dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+</section>
+
+<section class="s dark">
+  <div class="wrap">
+    <h2>What each route covers.</h2>
+    <p class="lead">Six areas of work, one team. Choose one to see what we build and where prices start.</p>
+    <div class="tabs" role="tablist" aria-label="Service area">
+      <button class="tab" role="tab" aria-selected="true" data-k="0"><span class="sw" style="--acc:var(--a1)"></span><span class="mono">01</span>Websites</button>
+      <button class="tab" role="tab" aria-selected="false" data-k="1"><span class="sw" style="--acc:var(--a2)"></span><span class="mono">02</span>Apps</button>
+      <button class="tab" role="tab" aria-selected="false" data-k="2"><span class="sw" style="--acc:var(--a3)"></span><span class="mono">03</span>Business software</button>
+      <button class="tab" role="tab" aria-selected="false" data-k="3"><span class="sw" style="--acc:var(--a4)"></span><span class="mono">04</span>AI &amp; data</button>
+      <button class="tab" role="tab" aria-selected="false" data-k="4"><span class="sw" style="--acc:var(--a5)"></span><span class="mono">05</span>Automation</button>
+      <button class="tab" role="tab" aria-selected="false" data-k="5"><span class="sw" style="--acc:var(--a6)"></span><span class="mono">06</span>Cloud &amp; IT</button>
+    </div>
+    <div class="stage" id="stage" role="tabpanel"></div>
+  </div>
+</section>
+
+<section class="s">
+  <div class="wrap">
+    <h2>Website packages side by side.</h2>
+    <p class="lead">Published prices. The written quotation confirms the final amount before work starts.</p>
+    <div class="picker" role="tablist" aria-label="Package">
+      <button role="tab" aria-selected="false" data-c="1" style="--acc:var(--a3)">Starter</button><button role="tab" aria-selected="true" data-c="2" style="--acc:var(--primary)">Business</button><button role="tab" aria-selected="false" data-c="3" style="--acc:var(--a1)">E-commerce</button><button role="tab" aria-selected="false" data-c="4" style="--acc:var(--a2)">Custom</button>
+    </div>
+    <table class="cmp">
+      <thead><tr><th scope="col"></th>
+        <th scope="col" data-c="1" style="--acc:var(--a3)"><h3>Starter Website</h3><span class="mono">$350</span><small>one-off</small></th>
+        <th scope="col" data-c="2" class="hi show" style="--acc:var(--primary)"><h3>Business Website</h3><small class="rec">Recommended</small><span class="mono">$750</span><small>one-off</small></th>
+        <th scope="col" data-c="3" style="--acc:var(--a1)"><h3>E-commerce Store</h3><span class="mono">from $1,500</span><small>one-off</small></th>
+        <th scope="col" data-c="4" style="--acc:var(--a2)"><h3>Custom Web App</h3><span class="mono">Quoted</span><small>scoped with you</small></th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Pages</th><td data-c="1">Up to 5</td><td data-c="2" class="hi show">Up to 12</td><td data-c="3">Up to 15 + shop</td><td data-c="4">Scoped</td></tr>
+        <tr><th scope="row">Content editing</th><td data-c="1">–</td><td data-c="2" class="hi show">Included</td><td data-c="3">Included</td><td data-c="4">Included</td></tr>
+        <tr><th scope="row">Mailboxes, year 1</th><td data-c="1">2</td><td data-c="2" class="hi show">10</td><td data-c="3">10</td><td data-c="4">Optional</td></tr>
+        <tr><th scope="row">Online payments</th><td data-c="1">–</td><td data-c="2" class="hi show">–</td><td data-c="3">Included</td><td data-c="4">Optional</td></tr>
+        <tr><th scope="row">Typical delivery</th><td data-c="1">1–2 weeks</td><td data-c="2" class="hi show">3–4 weeks</td><td data-c="3">5–8 weeks</td><td data-c="4">Scoped</td></tr>
+      </tbody>
+      <tfoot><tr><td></td><td data-c="1"><a class="btn btn-line" href="/contact?package=starter-website"><span>Request Starter</span></a></td><td data-c="2" class="show"><a class="btn btn-primary" href="/contact?package=business-website"><span>Request Business</span></a></td><td data-c="3"><a class="btn btn-line" href="/contact?package=ecommerce-store"><span>Request E-commerce</span></a></td><td data-c="4"><a class="btn btn-line" href="/contact?package=custom-web-app"><span>Ask for a quote</span></a></td></tr></tfoot>
+    </table>
+  </div>
+</section>
+</main>
+<footer><div class="wrap"><h2>Tell us what you need built.</h2><p class="lead">We reply with questions or a written quotation.</p><div class="acts"><a class="btn btn-primary" href="/contact"><span>Get a quote</span></a><a class="btn btn-line" href="/pricing"><span>See all prices</span></a></div></div></footer>
+<script>
+const P=new URLSearchParams(location.search).get('p');if(P)document.documentElement.dataset.p=P;
+const D=[
+ ['Websites & online shops','Business websites, e-commerce and web applications that load fast on mobile data and are easy to update.','svc-web-development-warm',[['Starter Website','$350'],['Business Website','$750'],['E-commerce Store','from $1,500'],['Custom Web App','quoted']],'a1'],
+ ['Mobile & desktop apps','Android, iOS and desktop apps built for real networks and real devices, with offline support.','work-pairing-warm',[['MVP mobile app','from $2,500'],['Business app with admin dashboard','from $6,000']],'a2'],
+ ['Business software','ERP, POS, inventory, HR and CRM systems shaped around how your organisation works.','about-workspace-warm',[['POS / inventory, single branch','from $1,500'],['Custom ERP / business platform','quoted']],'a3'],
+ ['AI, data & intelligence','Dashboards, analytics and practical AI features that answer real business questions.','work-planning-warm',[['BI dashboard starter','from $600'],['AI assistant / chatbot integration','from $900'],['Document processing pilot','from $1,200']],'a4'],
+ ['Automation & payments','APIs, payment gateways and workflows that remove manual steps between systems.','home-hero-warm',[['Payment gateway integration','from $400'],['Workflow automation','from $500'],['API development','$25 per hour']],'a5'],
+ ['Cloud, email & IT','Hosting, business email, domains, backups and technical support.','home-developer-warm',[['Business Email','$3 per mailbox / month'],['Cloud deployment & setup','from $200'],['IT support retainer','$100 per month']],'a6']];
+const slugs=['web-development','mobile-desktop-apps','business-software','ai-data','automation-integration','cloud-it'];
+const st=document.getElementById('stage');
+const hcta=document.querySelector('.hero .btn-primary'),hd=document.querySelector('.hd');if(hcta&&'IntersectionObserver' in window)new IntersectionObserver(([e])=>hd.classList.toggle('hero-cta',e.isIntersecting)).observe(hcta);
+function show(k){const [h,p,img,rows,a]=D[k];st.style.setProperty('--acc',`var(--${a})`);st.innerHTML=`<img class="fade" src="../img/${img}.webp" alt="" width="1400" height="875"><div class="body fade"><div class="acc-bar" style="width:48px"></div><h3>${h}</h3><p>${p}</p><ul>${rows.map(r=>`<li>${r[0]}<span class="mono">${r[1]}</span></li>`).join('')}</ul><a class="btn btn-primary" href="/contact?service=${slugs[k]}"><span>Get a quote</span></a></div>`}
+show(0);
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===b));show(+b.dataset.k)}));
+document.querySelectorAll('.picker [data-c]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.picker [data-c]').forEach(x=>x.setAttribute('aria-selected',x===b));document.querySelectorAll('.cmp [data-c]').forEach(c=>c.classList.toggle('show',c.dataset.c===b.dataset.c))}));
+const tr=document.getElementById('track'),dd=document.querySelectorAll('.dots i');tr.addEventListener('scroll',()=>{const i=Math.round(tr.scrollLeft/(tr.firstElementChild.offsetWidth+10));dd.forEach((x,j)=>x.classList.toggle('on',j===i))},{passive:true});
+</script>
+</body>
+</html>

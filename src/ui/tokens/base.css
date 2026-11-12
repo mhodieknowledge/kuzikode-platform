@@ -6,32 +6,48 @@
 @import '@fontsource-variable/overpass-mono/wght.css';
 
 @theme {
-  /* The Route world (tokens.css). */
-  --color-sign-950: var(--sign-950);
-  --color-sign-900: var(--sign-900);
-  --color-sign-800: var(--sign-800);
-  --color-sign-700: var(--sign-700);
-  --color-sign-600: var(--sign-600);
-  --color-on-sign: var(--on-sign);
-  --color-on-sign-2: var(--on-sign-2);
-  --color-on-sign-3: var(--on-sign-3);
-  --color-verge-50: var(--verge-50);
-  --color-verge-100: var(--verge-100);
-  --color-verge-200: var(--verge-200);
-  --color-verge-300: var(--verge-300);
+  /* Route structure, Zimbabwe earth palette (tokens.css). */
+  --color-night-950: var(--night-950);
+  --color-night-900: var(--night-900);
+  --color-night-800: var(--night-800);
+  --color-night-700: var(--night-700);
+  --color-night-600: var(--night-600);
+  --color-on-night: var(--on-night);
+  --color-on-night-2: var(--on-night-2);
+  --color-on-night-3: var(--on-night-3);
+  --color-bone-50: var(--bone-50);
+  --color-bone-100: var(--bone-100);
+  --color-bone-200: var(--bone-200);
+  --color-bone-300: var(--bone-300);
   --color-paper: var(--paper);
   --color-ink-900: var(--ink-900);
   --color-ink-700: var(--ink-700);
   --color-ink-500: var(--ink-500);
-  --color-mint-200: var(--mint-200);
+  --color-gold-200: var(--gold-200);
+  --color-emerald-700: var(--emerald-700);
+  --color-emerald-600: var(--emerald-600);
+  --color-emerald-500: var(--emerald-500);
+  --color-emerald-50: var(--emerald-50);
+  --color-saffron: var(--saffron);
+  --color-saffron-ink: var(--saffron-ink);
+  --color-clay: var(--clay);
+  --color-clay-ink: var(--clay-ink);
+  --color-teal: var(--teal);
+  --color-teal-ink: var(--teal-ink);
+  --color-moss: var(--moss);
+  --color-moss-ink: var(--moss-ink);
+  --color-msasa: var(--msasa);
+  --color-granite: var(--granite);
+  --color-granite-ink: var(--granite-ink);
+  --color-on-action: var(--on-action);
   --color-action-strong: var(--action-strong);
   --color-action-hover: var(--action-hover);
   --color-link: var(--link);
   --color-action: var(--action);
   --color-lit: var(--lit);
-  --color-mint-400: var(--mint-400);
-  --color-mint-100: var(--mint-100);
-  --color-mint-50: var(--mint-50);
+  --color-gold-400: var(--gold-400);
+  --color-gold-100: var(--gold-100);
+  --color-gold-50: var(--gold-50);
   --color-ok-600: var(--ok-600);
   --color-ok-700: var(--ok-700);
   --color-ok-50: var(--ok-50);
@@ -119,7 +135,7 @@
   h3,
   h4 {
     @apply font-display text-ink-950;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: -0.025em;
     text-wrap: balance;
   }
@@ -132,16 +148,16 @@
     border-radius: 4px;
   }
   ::selection {
-    background: var(--mint-100);
+    background: var(--gold-100);
     color: var(--ink-900);
   }
-  .on-sign ::selection,
-  .on-sign::selection {
+  .on-night ::selection,
+  .on-night::selection {
     background: var(--lit);
-    color: var(--sign-950);
+    color: var(--night-950);
   }
-  .on-sign :focus-visible {
-    outline-color: var(--mint-400);
+  .on-night :focus-visible {
+    outline-color: var(--gold-400);
   }
   a {
     text-underline-offset: 0.2em;
@@ -154,7 +170,7 @@
     font-variant-numeric: tabular-nums;
   }
   html {
-    scrollbar-color: var(--verge-300) transparent;
+    scrollbar-color: var(--bone-300) transparent;
   }
   [hidden] {
     display: none !important;
@@ -184,7 +200,7 @@
 
 @utility display {
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.03em;
 }
 
@@ -248,7 +264,7 @@
     margin-top: 0.4em;
   }
   .prose-kz blockquote {
-    @apply border-l border-verge-300 pl-5 text-ink-600 italic;
+    @apply border-l border-bone-300 pl-5 text-ink-600 italic;
   }
   .prose-kz code {
     @apply rounded-[4px] bg-canvas px-1.5 py-0.5 font-mono text-[0.9em];

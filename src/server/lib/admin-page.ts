@@ -83,9 +83,9 @@ export async function adminAlreadySignedIn(ctx: RequestContext, request: Request
 export function forbiddenPage(): Response {
   const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex"><title>No access · Kuzikode Admin</title>
-<style>body{font-family:system-ui,sans-serif;background:#f6f7f9;color:#0b1020;display:grid;place-items:center;min-height:100vh;margin:0;padding:16px}
-main{max-width:28rem;background:#fff;border:1px solid #e3e6ec;border-radius:12px;padding:32px}h1{font-size:22px;margin:0 0 8px}
-p{color:#4a5263;line-height:1.5}a{color:#2747e8;font-weight:600}</style></head>
+<style>body{font-family:system-ui,sans-serif;background:#f4f6f3;color:#0d1a12;display:grid;place-items:center;min-height:100vh;margin:0;padding:16px}
+main{max-width:28rem;background:#fff;border:1px solid #dde4de;border-radius:12px;padding:32px}h1{font-size:22px;margin:0 0 8px}
+p{color:#4a584f;line-height:1.5}a{color:#0f5b38;font-weight:600}</style></head>
 <body><main><h1>You don't have access to this page</h1><p>Your role doesn't include this section. If you need it, ask an administrator.</p>
 <p><a href="/admin">Back to the dashboard</a></p></main></body></html>`;
   return new Response(html, { status: 403, headers: { 'content-type': 'text/html; charset=utf-8' } });

@@ -1,6 +1,6 @@
 ---
 import '../ui/tokens/base.css';
-import archivoLatin from '@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2?url';
+import overpassLatin from '@fontsource-variable/overpass/files/overpass-latin-wght-normal.woff2?url';
 
 interface Props {
   title: string;
@@ -35,7 +35,7 @@ const image = new URL(ogImage, site).toString();
 {noindex ? <meta name="robots" content="noindex, nofollow" /> : null}
 {csrfToken ? <meta name="csrf-token" content={csrfToken} /> : null}
 <meta name="theme-color" content="#0B1428" />
-<link rel="preload" href={archivoLatin} as="font" type="font/woff2" crossorigin="anonymous" />
+<link rel="preload" href={overpassLatin} as="font" type="font/woff2" crossorigin="anonymous" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

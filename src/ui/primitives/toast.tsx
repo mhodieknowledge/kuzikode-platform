@@ -12,7 +12,7 @@ interface ToastItem {
 const Ctx = createContext<((kind: ToastKind, message: string) => void) | null>(null);
 
 /**
- * Toasts: felt chips, bottom on phones and top-right on wider screens. Polite live region for ok/info, assertive for errors.
+ * Toasts: sign chips, bottom on phones and top-right on wider screens. Polite live region for ok/info, assertive for errors.
  * Auto-dismiss after 5 s (8 s for errors), paused while hovered or focused.
  */
 export function ToastProvider({ children }: { children: ReactNode }) {

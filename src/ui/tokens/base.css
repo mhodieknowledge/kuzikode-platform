@@ -2,33 +2,36 @@
 @import './tokens.css';
 @import './components.css';
 @import './public.css';
-@import '@fontsource-variable/archivo/wdth.css';
-@import '@fontsource-variable/jetbrains-mono/wght.css';
+@import '@fontsource-variable/overpass/wght.css';
+@import '@fontsource-variable/overpass-mono/wght.css';
 
 @theme {
-  /* The Directory world (tokens.css). */
-  --color-felt-950: var(--felt-950);
-  --color-felt-900: var(--felt-900);
-  --color-felt-800: var(--felt-800);
-  --color-felt-700: var(--felt-700);
-  --color-felt-600: var(--felt-600);
-  --color-on-felt: var(--on-felt);
-  --color-on-felt-2: var(--on-felt-2);
-  --color-on-felt-3: var(--on-felt-3);
-  --color-concrete-50: var(--concrete-50);
-  --color-concrete-100: var(--concrete-100);
-  --color-concrete-200: var(--concrete-200);
-  --color-concrete-300: var(--concrete-300);
+  /* The Route world (tokens.css). */
+  --color-sign-950: var(--sign-950);
+  --color-sign-900: var(--sign-900);
+  --color-sign-800: var(--sign-800);
+  --color-sign-700: var(--sign-700);
+  --color-sign-600: var(--sign-600);
+  --color-on-sign: var(--on-sign);
+  --color-on-sign-2: var(--on-sign-2);
+  --color-on-sign-3: var(--on-sign-3);
+  --color-verge-50: var(--verge-50);
+  --color-verge-100: var(--verge-100);
+  --color-verge-200: var(--verge-200);
+  --color-verge-300: var(--verge-300);
   --color-paper: var(--paper);
   --color-ink-900: var(--ink-900);
   --color-ink-700: var(--ink-700);
   --color-ink-500: var(--ink-500);
-  --color-cobalt-700: var(--cobalt-700);
-  --color-cobalt-600: var(--cobalt-600);
-  --color-cobalt-500: var(--cobalt-500);
-  --color-cobalt-300: var(--cobalt-300);
-  --color-cobalt-100: var(--cobalt-100);
-  --color-cobalt-50: var(--cobalt-50);
+  --color-mint-200: var(--mint-200);
+  --color-action-strong: var(--action-strong);
+  --color-action-hover: var(--action-hover);
+  --color-link: var(--link);
+  --color-action: var(--action);
+  --color-lit: var(--lit);
+  --color-mint-400: var(--mint-400);
+  --color-mint-100: var(--mint-100);
+  --color-mint-50: var(--mint-50);
   --color-ok-600: var(--ok-600);
   --color-ok-700: var(--ok-700);
   --color-ok-50: var(--ok-50);
@@ -64,29 +67,29 @@
   --color-dark-surface: var(--dark-surface);
   --color-dark-brand: var(--dark-brand);
 
-  --font-sans: 'Archivo Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: 'Overpass Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Overpass Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Overpass Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Fluid type scale: phone → 1440. */
-  --text-display-xl: clamp(2.6rem, 1.7rem + 4.2vw, 5.6rem);
+  --text-display-xl: clamp(2.5rem, 1.6rem + 4.1vw, 5.4rem);
   --text-display-xl--line-height: 0.98;
-  --text-display: clamp(2.1rem, 1.55rem + 2.6vw, 3.8rem);
+  --text-display: clamp(2rem, 1.55rem + 2.1vw, 3.4rem);
   --text-display--line-height: 1.02;
-  --text-h2: clamp(1.7rem, 1.4rem + 1.3vw, 2.6rem);
-  --text-h2--line-height: 1.08;
+  --text-h2: clamp(1.75rem, 1.45rem + 1.25vw, 2.6rem);
+  --text-h2--line-height: 1.06;
   --text-h3: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);
   --text-h3--line-height: 1.2;
   --text-body: clamp(1.0625rem, 1.03rem + 0.15vw, 1.125rem);
-  --text-body--line-height: 1.55;
+  --text-body--line-height: 1.5;
   --text-small: 0.9375rem;
   --text-small--line-height: 1.5;
   --text-micro: 0.8125rem;
   --text-micro--line-height: 1.3;
 
   --radius-sm: var(--radius-xs);
-  --radius-md: var(--radius-card);
-  --radius-lg: var(--radius-inset);
+  --radius-md: var(--radius-plate);
+  --radius-lg: var(--radius-panel);
 
   --shadow-1: var(--shadow-raise);
   --shadow-2: var(--shadow-float);
@@ -102,14 +105,13 @@
     text-rendering: optimizeLegibility;
     -webkit-tap-highlight-color: transparent;
     scroll-padding-top: calc(var(--header-h) + 16px);
-    accent-color: var(--cobalt-600);
-    caret-color: var(--cobalt-600);
+    accent-color: var(--action);
+    caret-color: var(--action);
   }
   body {
     @apply bg-canvas font-sans text-ink-800 antialiased;
     font-size: var(--text-body);
-    line-height: 1.55;
-    font-stretch: 100%;
+    line-height: 1.5;
     font-feature-settings: 'kern', 'liga';
   }
   h1,
@@ -117,30 +119,29 @@
   h3,
   h4 {
     @apply font-display text-ink-950;
-    font-stretch: 104%;
-    font-weight: 640;
-    letter-spacing: -0.02em;
+    font-weight: 800;
+    letter-spacing: -0.025em;
     text-wrap: balance;
   }
   p {
     text-wrap: pretty;
   }
   :focus-visible {
-    outline: 2px solid var(--cobalt-500);
+    outline: 2px solid var(--focus);
     outline-offset: 3px;
     border-radius: 4px;
   }
   ::selection {
-    background: var(--cobalt-100);
+    background: var(--mint-100);
     color: var(--ink-900);
   }
-  .on-felt ::selection,
-  .on-felt::selection {
-    background: var(--cobalt-500);
-    color: #fff;
+  .on-sign ::selection,
+  .on-sign::selection {
+    background: var(--lit);
+    color: var(--sign-950);
   }
-  .on-felt :focus-visible {
-    outline-color: var(--cobalt-300);
+  .on-sign :focus-visible {
+    outline-color: var(--mint-400);
   }
   a {
     text-underline-offset: 0.2em;
@@ -153,7 +154,7 @@
     font-variant-numeric: tabular-nums;
   }
   html {
-    scrollbar-color: var(--concrete-300) transparent;
+    scrollbar-color: var(--verge-300) transparent;
   }
   [hidden] {
     display: none !important;
@@ -168,12 +169,11 @@
   letter-spacing: -0.02em;
 }
 
-/* Archivo width axis: condensed caps for directory rows, table heads and floor numbers (never as eyebrows above headings). */
+/* Sign caps: short uppercase labels on plates and table heads (never as eyebrows above headings). */
 @utility caps {
-  font-stretch: 72%;
-  font-weight: 620;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
 }
 
 /* Vertical stack: a one-column grid whose column can shrink below its content (scrolling children never widen the page). */
@@ -182,15 +182,10 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
-@utility wide {
-  font-stretch: 112%;
-}
-
 @utility display {
   font-family: var(--font-display);
-  font-stretch: 108%;
-  font-weight: 640;
-  letter-spacing: -0.028em;
+  font-weight: 800;
+  letter-spacing: -0.03em;
 }
 
 @layer utilities {
@@ -253,7 +248,7 @@
     margin-top: 0.4em;
   }
   .prose-kz blockquote {
-    @apply border-l border-concrete-300 pl-5 text-ink-600 italic;
+    @apply border-l border-verge-300 pl-5 text-ink-600 italic;
   }
   .prose-kz code {
     @apply rounded-[4px] bg-canvas px-1.5 py-0.5 font-mono text-[0.9em];

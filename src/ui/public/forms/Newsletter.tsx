@@ -1,7 +1,7 @@
 import { Icon } from '../../icons/icon';
 import { useNewsletter } from './useNewsletter';
 
-/** Footer newsletter field on felt: one pill input with the submit knob inside it. */
+/** Footer newsletter field on sign: one pill input with the submit knob inside it. */
 export default function Newsletter({ source }: { source: string }) {
   const { state, error, submit } = useNewsletter(source);
   if (state === 'sent') {
@@ -14,7 +14,7 @@ export default function Newsletter({ source }: { source: string }) {
   return (
     // method="post" keeps the address out of the URL if someone submits before hydration (the page ignores the POST).
     <form onSubmit={submit} method="post" noValidate className="mt-3 grid gap-2">
-      <label htmlFor="newsletter-email" className="text-small text-on-felt-2">
+      <label htmlFor="newsletter-email" className="text-small text-on-sign-2">
         Occasional updates and new articles. Unsubscribe any time.
       </label>
       <div className="relative">
@@ -30,7 +30,7 @@ export default function Newsletter({ source }: { source: string }) {
           placeholder="you@example.com"
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? 'newsletter-error' : undefined}
-          className="min-h-[52px] w-full rounded-full border border-felt-700 bg-felt-900 py-3 pr-[120px] pl-5 text-[1.0625rem] text-white placeholder:text-on-felt-3 focus-visible:border-cobalt-300 focus-visible:outline-none"
+          className="min-h-[52px] w-full rounded-full border border-sign-700 bg-sign-900 py-3 pr-[120px] pl-5 text-[1.0625rem] text-white placeholder:text-on-sign-3 focus-visible:border-mint-400 focus-visible:outline-none"
         />
         <button
           type="submit"
@@ -52,7 +52,7 @@ export default function Newsletter({ source }: { source: string }) {
           <Icon name="status-danger" size={16} /> {error}
         </p>
       ) : null}
-      <a href="/legal/privacy" className="text-micro text-on-felt-3 underline underline-offset-4 hover:text-white">
+      <a href="/legal/privacy" className="text-micro text-on-sign-3 underline underline-offset-4 hover:text-white">
         How we handle your email address
       </a>
     </form>

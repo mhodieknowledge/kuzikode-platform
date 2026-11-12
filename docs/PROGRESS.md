@@ -979,3 +979,12 @@ The **Next step** line must be specific enough that a fresh session can continue
   sign/verge/mint/ink (keep compatibility aliases mapped onto the new world), swap fonts to `@fontsource-variable/overpass` +
   `overpass-mono` (Head.astro preload), then R2.5 (no-blue token test + grep), R2.3 primitives rebuilt as plates (no pills/knobs),
   R2.4 gallery, R3.1/R3.2 header/footer redo.
+
+## 2026-11-12 14:05 UTC · Redesign R2.1 ✅ tokens (Route)
+- `src/ui/tokens/tokens.css` rewritten (sign / mint / verge / ink + semantic roles, plate radius 7 px, inset ring, motion);
+  `base.css` @theme + Overpass / Overpass Mono (`@fontsource-variable/overpass*` 5.3.0; Archivo + JetBrains removed); old names renamed
+  across `src/ui`, layouts and /dev/ui; brand SVGs, favicon, OG render script, email + PDF + admin-page colours recoloured.
+  New `tests/unit/ui-tokens.test.ts` (no-blue scan + contrast). Email snapshots updated (colour only). verify green (unit 419, integration 308).
+- Visual check /, /dev/ui at 390/1440: tokens apply; primitives are still pills + knobs → R2.3 rebuild.
+- Next step: R2.3 primitives as plates (Button/Segmented/Tabs/Rail/Accordion/StatusPill/Sheet + React twins) per concept B,
+  rewrite `components.css` recipes; then /dev/ui (R2.4) and R2.5 grep/visual sign-off; R2.2 icon stroke 2.

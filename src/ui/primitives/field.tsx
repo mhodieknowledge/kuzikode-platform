@@ -120,7 +120,7 @@ export interface ChoiceOption {
   hint?: ReactNode;
 }
 
-/** Radio or checkbox group as large tiles; the selected tile inverts to felt. */
+/** Radio or checkbox group as large tiles; the selected tile inverts to sign. */
 export function ChoiceGroup({
   legend,
   name,

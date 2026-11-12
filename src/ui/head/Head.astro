@@ -1,7 +1,7 @@
 ---
 /** Document head for every new layout: meta, canonical, social cards, icons, the token stylesheet and the preloaded type. */
 import '../tokens/base.css';
-import archivoLatin from '@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2?url';
+import overpassLatin from '@fontsource-variable/overpass/files/overpass-latin-wght-normal.woff2?url';
 
 interface Props {
   title: string;
@@ -13,7 +13,7 @@ interface Props {
   /** Path of a 1200×630 PNG under /public (defaults to the site-wide card). */
   ogImage?: string | undefined;
   ogType?: 'website' | 'article';
-  /** Browser UI colour (felt by default; concrete for light-first screens). */
+  /** Browser UI colour (sign by default; verge for light-first screens). */
   themeColor?: string;
 }
 const {
@@ -24,7 +24,7 @@ const {
   csrfToken,
   ogImage = '/brand/og/default.png',
   ogType = 'website',
-  themeColor = '#0B1428',
+  themeColor = '#0B4A2D',
 } = Astro.props;
 const site = Astro.locals.ctx.config.siteUrl;
 const canonical = canonicalPath ? new URL(canonicalPath, site).toString() : undefined;
@@ -40,7 +40,7 @@ const image = new URL(ogImage, site).toString();
 {csrfToken ? <meta name="csrf-token" content={csrfToken} /> : null}
 <meta name="theme-color" content={themeColor} />
 <meta name="format-detection" content="telephone=no" />
-<link rel="preload" href={archivoLatin} as="font" type="font/woff2" crossorigin="anonymous" />
+<link rel="preload" href={overpassLatin} as="font" type="font/woff2" crossorigin="anonymous" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

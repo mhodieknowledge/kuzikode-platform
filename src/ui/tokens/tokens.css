@@ -1,45 +1,52 @@
 /*
- * Design tokens: the "Directory" world (docs/redesign/DESIGN_DIRECTION.md).
- * Felt navy boards, concrete reading grounds, cobalt reserved for the lit / active / primary thing.
- * Components use these through the Tailwind theme names in global.css; no raw hex in components.
+ * Design tokens: the "Route" world (docs/redesign/DESIGN_DIRECTION.md §4, chosen at the R1.5 concept gate, prototype
+ * design/concepts/b). Sign green owns the first viewport, the recommended package and the footer; verge and paper carry
+ * reading; mint is spent only on lit / active things on green. No blue, indigo or violet anywhere (BRIEF B.0b; tested in
+ * tests/unit/ui-tokens.test.ts). Components use these through the Tailwind theme names in base.css; no raw hex in components.
  */
 :root {
-  /* Felt: the directory board (hero, directory, recommended package, CTA, footer, panel chrome). */
-  --felt-950: #060b16;
-  --felt-900: #0b1428;
-  --felt-800: #12203d;
-  --felt-700: #1b2c52;
-  --felt-600: #2a3d66;
-  /* Text on felt. */
-  --on-felt: #ffffff;
-  --on-felt-2: #c3cbdc;
-  --on-felt-3: #8b97b0;
+  /* Sign: the road-sign green (hero, gantry plates, recommended column, primary action, footer, panel chrome). */
+  --sign-950: #06301c;
+  --sign-900: #0b4a2d;
+  --sign-800: #0f5b38;
+  --sign-700: #1b6e47;
+  --sign-600: #2a8058;
+  /* Text on sign. */
+  --on-sign: #ffffff;
+  --on-sign-2: #b9f2cf;
+  --on-sign-3: #8fcfa9;
 
-  /* Concrete: reading grounds. */
-  --concrete-50: #f3f5f8;
-  --concrete-100: #e8ecf2;
-  --concrete-200: #dce2ea;
-  --concrete-300: #cbd3df;
+  /* Mint: the lit accent on sign; tints on light only with an inverted indicator. */
+  --mint-400: #7fe3a8;
+  --mint-200: #b9f2cf;
+  --mint-100: #d3f5e0;
+  --mint-50: #e3f6ea;
+
+  /* Verge: reading grounds. */
+  --verge-50: #f1f4f0;
+  --verge-100: #e2e8e2;
+  --verge-200: #cdd6ce;
+  --verge-300: #b4c0b6;
   --paper: #ffffff;
 
   /* Ink: text on light. */
-  --ink-900: #0b1428;
-  --ink-700: #2a3550;
-  --ink-600: #4a5670;
-  --ink-500: #5e6a82;
+  --ink-900: #0d1a12;
+  --ink-700: #3c4a41;
+  --ink-600: #4a584f;
+  --ink-500: #56655b;
 
-  /* Cobalt: the lit accent. */
-  --cobalt-700: #1835b8;
-  --cobalt-600: #1f44e0;
-  --cobalt-500: #2f57ff;
-  --cobalt-300: #93a8ff;
-  --cobalt-100: #dce3ff;
-  --cobalt-50: #edf1ff;
+  /* Semantic roles. */
+  --action: var(--sign-900); /* primary action fill on light */
+  --action-hover: var(--sign-700);
+  --action-strong: var(--sign-950);
+  --link: var(--sign-800); /* links and secondary actions on light */
+  --lit: var(--mint-400); /* the lit / active thing on sign; focus ring on sign */
+  --focus: var(--sign-800); /* focus ring on light */
 
-  /* Status (always with an icon or text, never colour alone). */
-  --ok-600: #12875a;
-  --ok-700: #0d6b47;
-  --ok-50: #e6f5ee;
+  /* Status (always with an icon and words, never colour alone). Info is neutral ink, never blue. */
+  --ok-600: #1e7d46;
+  --ok-700: #155f35;
+  --ok-50: #e4f3e9;
   --warn-600: #9c5b0a;
   --warn-700: #7d4808;
   --warn-50: #fbf1e3;
@@ -47,12 +54,13 @@
   --danger-700: #a42a21;
   --danger-50: #fcebe9;
 
-  /* Shape and depth. */
+  /* Shape and depth: a road sign's corner; plates use an inset ring instead of a drop shadow. */
   --radius-xs: 4px;
-  --radius-card: 10px;
-  --radius-inset: 16px;
-  --shadow-float: 0 12px 32px -8px rgb(6 11 22 / 0.28);
-  --shadow-raise: 0 2px 6px -2px rgb(6 11 22 / 0.12);
+  --radius-plate: 7px;
+  --radius-panel: 12px;
+  --ring-plate: inset 0 0 0 2px var(--plate-bg, var(--sign-900)), inset 0 0 0 3.5px var(--plate-ring, var(--on-sign));
+  --shadow-float: 0 16px 40px -12px rgb(6 48 28 / 0.32);
+  --shadow-raise: 0 2px 6px -2px rgb(6 48 28 / 0.14);
 
   /* Layers. */
   --z-sticky: 30;
@@ -66,57 +74,56 @@
   --dur-state: 180ms;
   --dur-enter: 240ms;
   --dur-move: 320ms;
-  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.6, 0, 0.2, 1);
   --ease-in: cubic-bezier(0.5, 0, 0.75, 0);
 
   /* Layout. */
-  --header-h: 60px;
+  --header-h: 64px;
   --gutter: 16px;
-  --section-y: 64px;
+  --section-y: 72px;
 
   /*
-   * Compatibility aliases: names used by modules not yet rebuilt (admin, portal), mapped onto the new world so they reskin at once.
-   * Removed in R8 when nothing references them.
+   * Compatibility aliases: names used by modules not yet rebuilt (admin, portal, documents), mapped onto the Route world so
+   * they follow it until they are rebuilt. Removed in R8 when nothing references them.
    */
   --ink-950: var(--ink-900);
   --ink-800: var(--ink-700);
-  --ink-400: #7d889e;
-  --line: var(--concrete-200);
+  --ink-400: #6f7d73;
+  --line: var(--verge-200);
   --surface: var(--paper);
-  --canvas: var(--concrete-50);
-  --brand-600: var(--cobalt-600);
-  --brand-500: var(--cobalt-500);
-  --brand-50: var(--cobalt-50);
-  --accent-500: var(--cobalt-500);
+  --canvas: var(--verge-50);
+  --brand-600: var(--sign-900);
+  --brand-500: var(--sign-700);
+  --brand-50: var(--mint-50);
+  --accent-500: var(--sign-700);
   --success-600: var(--ok-600);
   --success-700: var(--ok-700);
   --success-50: var(--ok-50);
   --warning-600: var(--warn-600);
   --warning-700: var(--warn-700);
   --warning-50: var(--warn-50);
-  --info-600: var(--cobalt-600);
-  --info-700: var(--cobalt-700);
-  --info-50: var(--cobalt-50);
-  --dark-line: var(--felt-700);
-  --dark-surface: var(--felt-900);
-  --dark-brand: var(--cobalt-300);
+  --info-600: var(--ink-700);
+  --info-700: var(--ink-900);
+  --info-50: var(--verge-100);
+  --dark-line: var(--sign-700);
+  --dark-surface: var(--sign-950);
+  --dark-brand: var(--mint-400);
   --shadow-1: var(--shadow-raise);
   --shadow-2: var(--shadow-float);
 }
 
 @media (min-width: 640px) {
   :root {
-    --gutter: 24px;
+    --gutter: 32px;
     --section-y: 96px;
-    --header-h: 64px;
   }
 }
 
 @media (min-width: 1024px) {
   :root {
-    --gutter: 40px;
-    --section-y: 128px;
+    --gutter: 32px;
+    --section-y: 112px;
     --header-h: 72px;
   }
 }

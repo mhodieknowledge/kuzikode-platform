@@ -9,7 +9,7 @@ import { chromium } from '@playwright/test';
 import { DIVISIONS } from '../seeds/content/services.ts';
 
 const font = (p) => `data:font/woff2;base64,${readFileSync(p).toString('base64')}`;
-const archivo = font('node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2');
+const overpass = font('node_modules/@fontsource-variable/overpass/files/overpass-latin-wght-normal.woff2');
 const logo = readFileSync('public/brand/logo-white.svg', 'utf8');
 // Owner-supplied abstract background (docs/13 §4 "bg-og"), processed by img:process.
 const bg = `data:image/jpeg;base64,${readFileSync('public/images/site/bg-og-1600.jpg').toString('base64')}`;
@@ -27,15 +27,15 @@ const cards = [
 ];
 
 const html = (c) => `<!doctype html><html><head><style>
-@font-face{font-family:Archivo;src:url(${archivo}) format('woff2');font-weight:100 900;font-stretch:62% 125%}
+@font-face{font-family:Overpass;src:url(${overpass}) format('woff2');font-weight:100 900}
 *{margin:0;box-sizing:border-box}
-body{width:1200px;height:630px;background:#0A0F1C url(${bg}) center/cover no-repeat;color:#fff;font-family:Archivo;position:relative;overflow:hidden}
-.shade{position:absolute;inset:0;background:linear-gradient(100deg,rgba(10,15,28,.7),rgba(10,15,28,.15) 75%)}
+body{width:1200px;height:630px;background:#0B4A2D url(${bg}) center/cover no-repeat;color:#fff;font-family:Overpass;position:relative;overflow:hidden}
+.shade{position:absolute;inset:0;background:#0B4A2D;opacity:.9}
 .wrap{position:absolute;inset:72px 80px;display:flex;flex-direction:column;justify-content:space-between}
 .logo svg{height:44px;width:auto}
-.eyebrow{font-size:24px;font-weight:600;color:#5B78FF;letter-spacing:.02em}
-h1{font-family:Archivo;font-weight:700;font-stretch:108%;font-size:${c.title.length > 48 ? 58 : 68}px;line-height:1.08;letter-spacing:-.02em;max-width:980px;margin-top:18px}
-.bar{height:6px;width:96px;background:#E8A33D;border-radius:3px}
+.eyebrow{font-size:24px;font-weight:600;color:#7FE3A8;letter-spacing:.02em}
+h1{font-family:Overpass;font-weight:800;font-size:${c.title.length > 48 ? 58 : 68}px;line-height:1.08;letter-spacing:-.03em;max-width:980px;margin-top:18px}
+.bar{height:6px;width:96px;background:#7FE3A8;border-radius:2px}
 </style></head><body><div class="shade"></div><div class="wrap">
 <div class="logo">${logo}</div>
 <div><div class="eyebrow">${c.eyebrow}</div><h1>${c.title.replace(/&/g, '&amp;')}</h1></div>

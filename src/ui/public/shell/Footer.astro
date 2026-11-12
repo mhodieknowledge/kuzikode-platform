@@ -20,16 +20,16 @@ const year = new Date().getFullYear();
 const c = footer.contact;
 ---
 
-<footer class="kz-footer on-felt" aria-labelledby="footer-heading">
+<footer class="kz-footer on-sign" aria-labelledby="footer-heading">
   <h2 id="footer-heading" class="sr-only">Footer</h2>
 
   {
     cta ? (
       <div class="container-wide pt-14 sm:pt-20">
-        <div class="grid gap-6 rounded-[var(--radius-inset)] border border-felt-700 bg-felt-900 p-6 sm:p-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+        <div class="grid gap-6 rounded-[var(--radius-panel)] border border-sign-700 bg-sign-900 p-6 sm:p-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div>
             <p class="display text-h2 text-white">Have a project in mind?</p>
-            <p class="mt-3 max-w-[52ch] text-on-felt-2">
+            <p class="mt-3 max-w-[52ch] text-on-sign-2">
               Tell us what you need. We reply with questions or a proposed next step, and confirm scope and price in writing.
             </p>
           </div>
@@ -53,7 +53,7 @@ const c = footer.contact;
   <div class="container-wide grid gap-12 pt-14 pb-10 sm:pt-16 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)] lg:gap-10">
     <div class="grid content-start gap-5">
       <Logo height={26} />
-      {footer.blurb ? <p class="max-w-[44ch] text-small text-on-felt-2">{footer.blurb}</p> : null}
+      {footer.blurb ? <p class="max-w-[44ch] text-small text-on-sign-2">{footer.blurb}</p> : null}
       <ul class="grid gap-2" aria-label="Contact" role="list">
         {
           c.whatsapp ? (
@@ -90,8 +90,8 @@ const c = footer.contact;
       </ul>
       {
         c.address || c.location ? (
-          <p class="flex items-start gap-2 text-small text-on-felt-2">
-            <Icon name="location" size={20} class="mt-0.5 text-cobalt-300" />
+          <p class="flex items-start gap-2 text-small text-on-sign-2">
+            <Icon name="location" size={20} class="mt-0.5 text-mint-400" />
             <span>{c.address ?? c.location}</span>
           </p>
         ) : null
@@ -100,7 +100,7 @@ const c = footer.contact;
 
     <div class="grid grid-cols-2 gap-8 lg:contents">
       <nav aria-labelledby="footer-services">
-        <h3 id="footer-services" class="caps text-micro text-on-felt-3">Services</h3>
+        <h3 id="footer-services" class="caps text-micro text-on-sign-3">Services</h3>
         <ul class="mt-3" role="list">
           {
             footer.services.map((l) => (
@@ -114,7 +114,7 @@ const c = footer.contact;
         </ul>
       </nav>
       <nav aria-labelledby="footer-company">
-        <h3 id="footer-company" class="caps text-micro text-on-felt-3">Company</h3>
+        <h3 id="footer-company" class="caps text-micro text-on-sign-3">Company</h3>
         <ul class="mt-3" role="list">
           {
             footer.company.map((l) => (
@@ -134,7 +134,7 @@ const c = footer.contact;
 
     <div>
       <section aria-labelledby="newsletter-heading">
-        <h3 id="newsletter-heading" class="caps text-micro text-on-felt-3">Newsletter</h3>
+        <h3 id="newsletter-heading" class="caps text-micro text-on-sign-3">Newsletter</h3>
         <Newsletter client:visible source="footer" />
       </section>
       {
@@ -156,7 +156,7 @@ const c = footer.contact;
   </div>
 
   <div class="container-wide">
-    <div class="flex flex-col gap-4 border-t border-felt-700 py-6 text-small text-on-felt-3 md:flex-row md:items-center md:justify-between">
+    <div class="flex flex-col gap-4 border-t border-sign-700 py-6 text-small text-on-sign-3 md:flex-row md:items-center md:justify-between">
       <p>© {year} {footer.companyName}{footer.registration ? ` · ${footer.registration}` : ''}</p>
       <ul class="flex flex-wrap gap-x-5" role="list" aria-label="Legal">
         {

@@ -26,8 +26,8 @@ interface Props {
   description?: string | undefined;
   canonicalPath?: string;
   noindex?: boolean;
-  /** `dark` (or `felt`): the page opens on a felt hero and the header joins it. */
-  headerTone?: 'light' | 'dark' | 'felt' | 'concrete';
+  /** `dark` (or `sign`): the page opens on a sign hero and the header joins it. */
+  headerTone?: 'light' | 'dark' | 'sign' | 'verge';
   ogImage?: string | undefined;
   ogType?: 'website' | 'article';
   /** Page-specific schema.org objects; Organization is always included, WebSite on the home page. */
@@ -73,7 +73,7 @@ const whatsappText =
   settingText(settings, 'contact.whatsapp_message') ??
   'Hi Kuzikode, I would like to talk about a project.';
 const ld = [org, ...(Astro.url.pathname === '/' ? [websiteLd(ctx)] : []), ...structuredData];
-const tone = headerTone === 'dark' || headerTone === 'felt' ? 'felt' : 'concrete';
+const tone = headerTone === 'dark' || headerTone === 'sign' ? 'sign' : 'verge';
 ---
 
 <Base
@@ -83,8 +83,8 @@ const tone = headerTone === 'dark' || headerTone === 'felt' ? 'felt' : 'concrete
   noindex={noindex}
   ogImage={ogImage}
   ogType={ogType}
-  themeColor={tone === 'felt' ? '#0B1428' : '#F3F5F8'}
-  bodyClass="flex min-h-screen flex-col bg-concrete-50 text-ink-700"
+  themeColor={tone === 'sign' ? '#0B4A2D' : '#F1F4F0'}
+  bodyClass="flex min-h-screen flex-col bg-verge-50 text-ink-700"
 >
   <Fragment slot="head">
     {noindex ? null : <JsonLd data={ld} />}

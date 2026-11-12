@@ -41,8 +41,8 @@
     "img:process": "node scripts/images/process.mjs"
   },
   "dependencies": {
-    "@fontsource-variable/archivo": "^5.3.0",
-    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/overpass": "^5.3.0",
+    "@fontsource-variable/overpass-mono": "^5.3.0",
     "@hono/zod-validator": "^0.9.1",
     "hono": "^4.13.16",
     "lucide-react": "^1.69.0",

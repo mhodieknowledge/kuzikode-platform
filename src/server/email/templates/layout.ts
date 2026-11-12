@@ -16,12 +16,12 @@ export function escapeHtml(value: unknown): string {
     .replace(/'/g, '&#39;');
 }
 
-const INK = '#0A0F1C';
-const BODY = '#1C2333';
-const MUTED = '#475066';
-const LINE = '#E4E7EE';
-const BRAND = '#2747E8';
-const CANVAS = '#F7F8FA';
+const INK = '#0D1A12';
+const BODY = '#24312A';
+const MUTED = '#4A584F';
+const LINE = '#DDE4DE';
+const BRAND = '#0B4A2D';
+const CANVAS = '#F4F6F3';
 
 export interface Block {
   kind: 'p' | 'button' | 'small' | 'kv' | 'h2' | 'note';

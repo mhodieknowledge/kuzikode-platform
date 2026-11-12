@@ -11,7 +11,7 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
 - [x] **R0.4 Reference sites.** Playwright at 390×844 and 1440×900 on webdev.co.zw (mobile UX focus) and vetech.co.zw (pricing/services focus), plus 3–5 sites from the research list. AC: findings and screenshots summarised in `REFERENCE_IMAGE_ANALYSIS.md` (sites section). Nothing copied.
 
 ## R1: Direction and plan
-- [ ] **R1.1 (REDO palette + direction via R1.5)** Design direction.** Compare candidate palettes (from the references) and pick ONE. Choose type pairing, grid, spacing scale, radius, elevation, icon family (one, consistent stroke), image art direction, motion principles. AC: `DESIGN_DIRECTION.md` with rationale and the skills used.
+- [ ] **R1.1 Design direction.** (REDO palette + direction via R1.5) Compare candidate palettes (from the references) and pick ONE. Choose type pairing, grid, spacing scale, radius, elevation, icon family (one, consistent stroke), image art direction, motion principles. AC: `DESIGN_DIRECTION.md` with rationale and the skills used.
 - [x] **R1.2 Specs.** `RESPONSIVE_DESIGN_SPEC.md` (per page: mobile composition first, then tablet and desktop; carousels, segmented controls and sticky CTAs where they help), `MOTION_AND_INTERACTION_SPEC.md` (durations, easings, choreography, reduced motion), `PANEL_DESIGN_SPEC.md` (Linux-inspired client workspace + admin, distinct but related), `UI_UX_RECONSTRUCTION_PLAN.md` + `IMPLEMENTATION_PLAN.md` (order, component inventory, what's reused vs rebuilt). AC: files exist and agree with each other.
 - [x] **R1.3 First image batch.** Write batch 1 of image prompts for the new direction in `IMAGE-REQUESTS.md` and notify the owner (B.4). AC: committed; notification sent or failure logged.
 
@@ -29,7 +29,7 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
   AC: 3 boards + the chosen-concept rationale committed; the chosen concept passes the anti-generic list.
 
 ## R2: Foundation
-- [ ] **R2.1 (REDO from the R1.5 concept; the first version was generic navy/blue pills)** Design tokens + base styles** (colour, type scale with fluid mobile→desktop sizing, spacing, radius, shadows, z-index, motion tokens, dark/light surfaces for panels). Replace the old token set.
+- [ ] **R2.1 Design tokens + base styles** (REDO from the R1.5 concept; the first version was generic navy/blue pills) (colour, type scale with fluid mobile→desktop sizing, spacing, radius, shadows, z-index, motion tokens, dark/light surfaces for panels). Replace the old token set.
 - [ ] **R2.2 Icon system** (single family, wrapper component, sizes, stroke, a11y labels) and an audit list of every place that needs an icon.
 - [ ] **R2.3 Core primitives rebuilt:** buttons, links, inputs/forms (mobile-friendly: 16 px+ inputs, correct keyboards, inline validation), segmented control, tabs, accordion, carousel/swipe track (scroll-snap + buttons + dots, fade/slide choreography, keyboard + reduced motion), sheet/drawer, dialog, toast, badge/status, table → mobile list pattern.
 - [ ] **R2.4 Dev UI gallery** page (dev-only) showing every primitive at 390 and 1440. AC: visual loop clean.
@@ -41,7 +41,7 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
   (≈200°–290°) left in tokens or components (grep + a token test); /dev/ui visual loop clean in light and dark; contrast checks pass.
 
 ## R3: Public site shell
-- [ ] **R3.1 (REDO on the new foundation)** Header + mobile navigation** (designed mobile menu/sheet, animated indicators, sticky behaviour, primary CTA always reachable).
+- [ ] **R3.1 Header + mobile navigation** (REDO on the new foundation) (designed mobile menu/sheet, animated indicators, sticky behaviour, primary CTA always reachable).
 - [ ] **R3.2 Footer** (distinct mobile composition, contact channels with icons, legal).
 - [ ] **R3.3 Page transitions / section reveal** framework per the motion spec.
 

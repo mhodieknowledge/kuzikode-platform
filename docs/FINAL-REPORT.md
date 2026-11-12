@@ -8,9 +8,9 @@ on `main`; **deployed** = running on Cloudflare; **verified** = checked against 
 
 | | Status |
 |---|---|
-| Code | All roadmap tasks done except P6.5 (`[!]`, needs the owner's Paynow login) and P8.2's final smoke check (see below) |
+| Code | All roadmap tasks done except P6.5 (`[!]`, needs the owner's Paynow login) |
 | CI on `main` | Green: verify job (typecheck, lint, placeholder check, unit, integration, build, migrations, payments package) and e2e job |
-| Staging | **Deployed**, not yet verified over HTTP: https://kuzikode-staging.mhodieknowledge.workers.dev. Database migrated and seeded, Worker secrets set, crons and queue bound. Every `*.mhodieknowledge.workers.dev` address currently answers Cloudflare **Error 1027** because another Worker on the account (`zimindex`) used up the Workers Free daily request limit (BLOCKERS) |
+| Staging | **Deployed and verified** 2026-11-12 00:08 UTC: https://kuzikode-staging.mhodieknowledge.workers.dev, smoke test 11/11 (health, home, services, pricing, contact with the real Turnstile key, legal, admin and portal sign-in with private/security headers, robots, sitemap, 404). Database migrated and seeded, Worker secrets set, crons and queue bound. No admin account yet (owner runs Bootstrap first admin). Caveat: another Worker on the account (`zimindex`) used up the Workers Free daily request limit on 2026-11-11, which takes every Worker on the account offline (Error 1027) until 00:00 UTC (BLOCKERS) |
 | Production | **Not deployed** (by design: the owner presses Deploy production). Resources exist, empty |
 | Payments | Paynow test integration verified live by the automated suite (EcoCash success/cancel/insufficient, card redirect). Faked Success (owner's Paynow login) and "Request to be Set Live" remain owner steps |
 | Email | Resend integrated and tested with the real API key in P6; domain not yet verified (sends only to the Resend account owner) |
@@ -87,7 +87,7 @@ Details: [04-DATABASE.md](04-DATABASE.md).
 | Typecheck / lint / placeholder check / migrations on empty D1 | clean |
 | Paynow live test suite (test mode, owner's integration) | passed (P6.5 automated part) |
 | Lighthouse (mobile, local build) | `/` P99 A100 BP100 · `/services/` P100 A100 BP100 · service page P98 A100 BP100 · `/contact` P99 A100 BP96; SEO 100 with production config |
-| Smoke test against staging | **not yet passed**: blocked by Cloudflare Error 1027 (section 10) |
+| Smoke test against staging | **11/11 passed** (2026-11-12 00:08 UTC; the 2026-11-11 run hit Cloudflare Error 1027, section 10) |
 | Backup → restore drill (staging) | 92 tables, 677 rows restored, checksums match, 26 s |
 
 ## 6. Security measures
@@ -143,9 +143,9 @@ Step by step in [PRODUCTION-CHECKLIST.md](PRODUCTION-CHECKLIST.md); operations i
 
 ## 10. Remaining limitations
 
-- **Staging not yet verified over HTTP** and production not deployed: the account-wide Workers Free daily limit is used up
-  by `zimindex` (Error 1027 on every workers.dev host; Cloudflare analytics: ≈160k requests, 132k errors today). The
-  staging deploy itself succeeded (CI run of Deploy staging: build, migrations, deploy ✅; smoke ✗ 1027).
+- **Account-wide Workers Free limit:** on 2026-11-11 `zimindex` (≈160k requests, 132k errors) used up the 100k/day limit and
+  every Worker on the account, Kuzikode staging included, answered Error 1027 until the 00:00 UTC reset. Until that's fixed (or
+  Workers Paid), it can recur daily and would take production offline the same way. Production is not deployed (owner's button).
 - Paynow manual Faked Success and go-live are owner steps; saved cards wait on Paynow tokenization approval.
 - Email reaches only the Resend account owner until a domain is verified.
 - Production smoke test needs the real Turnstile key on the production hostname (set) and the `production` environment

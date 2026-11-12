@@ -6,9 +6,8 @@ The **Next step** line must be specific enough that a fresh session can continue
 ## Current status
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
 - Last completed task: **P7.6 Link check + migration check** (2026-11-11). Phase 7 done. Phase 6 done except P6.5 `[!]` (owner's Faked Success). P6.5 is `[!]` (Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
-- **Next step (2026-11-11 23:05 UTC):** after 00:00 UTC (Cloudflare daily limit reset) re-run Actions → Deploy staging; if
-  the smoke test passes, tick P8.2, update FINAL-REPORT "Status at a glance" + §5/§10 (staging verified), tick P8.7, then DONE.
-  If Error 1027 returns, P8.2 stays blocked on the owner (BLOCKERS) and the report already says so: mark P8.2 `[!]`, tick P8.7.
+- **Status (2026-11-12 00:10 UTC): roadmap complete.** All tasks `[x]` except P6.5 `[!]` (owner's Paynow Faked Success). Staging
+  deployed and smoke-verified; production waits for the owner (docs/PRODUCTION-CHECKLIST.md). FINAL-REPORT written.
 - Previous next step (done): **Phase 8, P8.1 Remote
   resources** (docs/09; `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` exist in the build env): create only `kuzikode-*` resources
   (staging D1, R2, KV, Queue), put real IDs into wrangler.jsonc, record in PROGRESS. Then P8.2 staging deploy + smoke tests.
@@ -882,3 +881,8 @@ The **Next step** line must be specific enough that a fresh session can continue
   overview at 1440 and 375 px, from a local build with fictional demo data; reviewed. Figma rebuild not done (DECISIONS).
 - Fix found while reviewing: the admin invoice History card was blank when an invoice had no status rows (imported or seeded data); it now
   says "No status changes recorded."
+
+## 2026-11-12 00:10 UTC · P8.2 ✅ · P8.7 ✅ · roadmap complete
+- After the 00:00 UTC Cloudflare reset: `node scripts/smoke.mjs https://kuzikode-staging.mhodieknowledge.workers.dev` → 11/11 passed
+  from this container. Deploy staging run #6 (23:03 UTC, after CI) had failed on Error 1027 as expected; run #7 (dispatched 00:07) ✅ build, migrate, deploy, smoke.
+- FINAL-REPORT updated (staging verified; Error 1027 kept as an account-level risk). Roadmap: everything `[x]`, P6.5 `[!]` (owner).

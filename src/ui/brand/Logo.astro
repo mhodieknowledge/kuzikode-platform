@@ -1,0 +1,33 @@
+---
+/**
+ * Kuzikode wordmark as inline SVG so it takes the surface colour (`currentColor`); the K's upper arm is the one lit cobalt stroke.
+ * Source artwork: public/brand/logo.svg (unchanged).
+ */
+import raw from '../../../public/brand/logo.svg?raw';
+
+interface Props {
+  href?: string | null;
+  height?: number;
+  class?: string;
+}
+const { href = '/', height = 26, class: className } = Astro.props;
+const width = Math.round((height * 174.39) / 32);
+const svg = raw
+  .replace(/<title[^>]*>.*?<\/title>/, '')
+  .replace(
+    / role="img" aria-labelledby="t"/,
+    ` width="${width}" height="${height}" aria-hidden="true" focusable="false"`,
+  )
+  .replaceAll('fill="#0A0F1C"', 'fill="currentColor"')
+  .replaceAll('fill="#2747E8"', 'fill="var(--kz-logo-accent, var(--cobalt-500))"');
+---
+
+{href ? (
+  <a href={href} class:list={['kz-logo inline-flex items-center', className]} aria-label="Kuzikode Technologies, home">
+    <Fragment set:html={svg} />
+  </a>
+) : (
+  <span class:list={['kz-logo inline-flex items-center', className]} role="img" aria-label="Kuzikode Technologies">
+    <Fragment set:html={svg} />
+  </span>
+)}

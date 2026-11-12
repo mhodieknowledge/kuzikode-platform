@@ -1,0 +1,307 @@
+---
+/**
+ * Public header (docs/redesign/RESPONSIVE_DESIGN_SPEC.md §1).
+ * ≥ 1280 px: wordmark · main nav with a sliding indicator · Services = the directory mega-panel, About = a compact panel ·
+ * search · Client portal · Start a project. Below: wordmark · compact "Start a project" · menu button opening a full-height
+ * directory sheet. Behaviour: header.ts.
+ */
+import Logo from '../../brand/Logo.astro';
+import Icon from '../../icons/Icon.astro';
+import { divisionIcon } from '../../icons/registry';
+import type { SiteNavigation } from '../../../server/modules/cms';
+import type { FromPrice } from '../../../shared/directory';
+
+export interface DirectoryDivision {
+  slug: string;
+  name: string;
+  summary: string | null;
+  icon: string | null;
+  href: string;
+  services: { name: string }[];
+  from: FromPrice | null;
+}
+
+interface Props {
+  nav: SiteNavigation;
+  divisions: DirectoryDivision[];
+  tone?: 'felt' | 'concrete';
+}
+const { nav, divisions, tone = 'concrete' } = Astro.props;
+const path = Astro.url.pathname;
+const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
+const servicesActive = path.startsWith('/services') || path.startsWith('/industries');
+const aboutActive = ['/about', '/products', '/faq', '/how-we-work', ...(nav.careersInNav ? [] : ['/careers'])].some((p) =>
+  path.startsWith(p),
+);
+const top = [
+  { label: 'Pricing', href: '/pricing' },
+  { label: 'Our Work', href: '/work' },
+  { label: 'Insights', href: '/insights' },
+  ...(nav.careersInNav ? [{ label: 'Careers', href: '/careers' }] : []),
+  { label: 'Contact', href: '/contact' },
+];
+const floor = (i: number) => String(i + 1).padStart(2, '0');
+const contact = nav.footer.contact;
+const mobileLinks = [
+  { label: 'Pricing', href: '/pricing' },
+  { label: 'Our Work', href: '/work' },
+  { label: 'About Kuzikode', href: '/about' },
+  ...nav.servicesExtra.map((l) => ({ label: l.label, href: l.href })),
+  { label: 'Insights', href: '/insights' },
+  { label: 'Products', href: '/products' },
+  { label: 'Careers', href: '/careers' },
+  { label: 'FAQ', href: '/faq' },
+  { label: 'Contact', href: '/contact' },
+].filter((l, i, all) => all.findIndex((x) => x.href === l.href) === i);
+---
+
+<header
+  class:list={['kz-header', tone === 'felt' ? 'kz-header--felt on-felt' : 'kz-header--concrete']}
+  data-site-header
+  data-tone={tone}
+>
+  <div class="container-wide flex h-[var(--header-h)] items-center gap-4">
+    <Logo height={26} class="kz-header__logo mr-auto xl:mr-6" />
+
+    <nav aria-label="Main" class="kz-nav hidden xl:block" data-nav>
+      <ul class="flex items-center">
+        <li data-menu>
+          <button
+            type="button"
+            class="kz-nav__item"
+            aria-expanded="false"
+            aria-controls="menu-about"
+            aria-current={aboutActive ? 'true' : undefined}
+            data-menu-button
+          >
+            About <Icon name="chevron-down" size={16} class="kz-nav__chev" />
+          </button>
+        </li>
+        <li data-menu>
+          <button
+            type="button"
+            class="kz-nav__item"
+            aria-expanded="false"
+            aria-controls="menu-services"
+            aria-current={servicesActive ? 'true' : undefined}
+            data-menu-button
+          >
+            Services <Icon name="chevron-down" size={16} class="kz-nav__chev" />
+          </button>
+        </li>
+        {
+          top.map((l) => (
+            <li>
+              <a href={l.href} class="kz-nav__item" aria-current={isActive(l.href) ? 'page' : undefined}>
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <span class="kz-nav__bar" aria-hidden="true"></span>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <a href="/search" class="kz-btn kz-btn--quiet kz-btn--icon kz-header__icon hidden xl:inline-flex" aria-label="Search">
+        <Icon name="search" />
+      </a>
+      <a href="/portal/login" class="kz-btn kz-btn--secondary kz-btn--sm hidden xl:inline-flex">Client Portal</a>
+      <a href="/start-a-project" class="kz-btn kz-btn--primary kz-btn--sm kz-btn--knob kz-header__cta">
+        <span>Start a project</span>
+        <span class="kz-btn__knob max-[399px]:hidden"><Icon name="arrow-right" size={16} /></span>
+      </a>
+      <button
+        type="button"
+        class="kz-btn kz-btn--secondary kz-btn--icon kz-header__menu xl:hidden"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="site-menu"
+        data-kz-sheet-open="site-menu"
+      >
+        <Icon name="menu" />
+      </button>
+    </div>
+  </div>
+
+  <!-- Services: the directory board (desktop) -->
+  <div id="menu-services" class="kz-mega on-felt" hidden data-menu-panel>
+    <div class="container-wide grid grid-cols-[minmax(0,7fr)_minmax(0,5fr)] gap-10 py-8">
+      <div>
+        <ul class="kz-dir" role="list">
+          {
+            divisions.map((d, i) => (
+              <li>
+                <a href={d.href} class="kz-dir__row" data-lit-target={`lit-${d.slug}`}>
+                  <span class="kz-dir__floor">{floor(i)}</span>
+                  <span class="kz-dir__name">{d.name}</span>
+                  {d.from ? (
+                    <span class="kz-dir__from">
+                      from <span class="font-mono text-on-felt">{d.from.amount}</span>
+                      {d.from.suffix !== 'one-off' ? <span class="text-micro"> {d.from.suffix}</span> : null}
+                    </span>
+                  ) : null}
+                  <span class="kz-knob">
+                    <Icon name="arrow-right" size={16} />
+                  </span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        <ul class="mt-6 flex flex-wrap gap-x-8 gap-y-2" role="list">
+          {
+            nav.servicesExtra.map((l) => (
+              <li>
+                <a href={l.href} class="kz-link">
+                  {l.label} <Icon name="arrow-right" size={16} />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="kz-lit" aria-hidden="true">
+        {
+          divisions.map((d, i) => (
+            <div id={`lit-${d.slug}`} class="kz-lit__frame" data-lit hidden={i !== 0}>
+              <div class="flex items-center gap-3 text-cobalt-300">
+                <Icon name={divisionIcon(d.slug, d.icon)} size={24} />
+                <span class="caps text-micro">Floor {floor(i)}</span>
+              </div>
+              <p class="mt-4 text-h3 font-[640] text-on-felt">{d.name}</p>
+              {d.summary ? <p class="mt-2 text-small text-on-felt-2">{d.summary}</p> : null}
+              <ul class="mt-5 flex flex-wrap gap-2">
+                {d.services.slice(0, 6).map((s) => (
+                  <li class="kz-pill kz-pill--plain border border-felt-700">{s.name}</li>
+                ))}
+              </ul>
+              {d.from ? (
+                <p class="mt-6 text-small text-on-felt-3">
+                  Packages from <span class="font-mono text-on-felt">{d.from.amount}</span> {d.from.suffix}
+                </p>
+              ) : null}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- About (desktop) -->
+  <div id="menu-about" class="kz-pop" hidden data-menu-panel>
+    <ul role="list">
+      {
+        nav.about.map((l) => (
+          <li>
+            <a href={l.href} class="kz-pop__link" aria-current={isActive(l.href) ? 'page' : undefined}>
+              {l.label}
+              <Icon name="arrow-right" size={16} />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</header>
+
+<!-- Phones and tablets: the directory as a full-height sheet -->
+<dialog id="site-menu" class="kz-sheet kz-sheet--top kz-menu" aria-label="Menu">
+  <div class="kz-sheet__panel on-felt">
+    <div class="container-wide flex h-[var(--header-h)] flex-none items-center justify-between gap-4">
+      <Logo height={26} />
+      <button type="button" class="kz-btn kz-btn--secondary kz-btn--icon" data-kz-sheet-close aria-label="Close menu">
+        <Icon name="close" />
+      </button>
+    </div>
+    <div class="kz-sheet__body container-wide">
+      <form action="/search" method="get" role="search" class="relative">
+        <label for="mobile-search" class="sr-only">Search the site</label>
+        <Icon name="search" class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-on-felt-3" />
+        <input
+          id="mobile-search"
+          name="q"
+          type="search"
+          maxlength="100"
+          placeholder="Search services, packages, articles"
+          enterkeyhint="search"
+          class="kz-menu__search"
+        />
+      </form>
+
+      <p class="caps mt-8 text-micro text-on-felt-3" id="menu-dir-label">Services</p>
+      <ul class="kz-dir mt-2" role="list" aria-labelledby="menu-dir-label" data-reveal-group>
+        {
+          divisions.map((d, i) => (
+            <li>
+              <a href={d.href} class="kz-dir__row">
+                <span class="kz-dir__floor">{floor(i)}</span>
+                <span class="kz-dir__name">{d.name}</span>
+                <span class="kz-knob">
+                  <Icon name="arrow-right" size={16} />
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <ul class="mt-8 grid grid-cols-1 sm:grid-cols-2 sm:gap-x-8" role="list">
+        {
+          mobileLinks.map((l) => (
+            <li>
+              <a href={l.href} class="kz-menu__link" aria-current={isActive(l.href) ? 'page' : undefined}>
+                {l.label}
+                <Icon name="chevron-right" size={20} />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="mt-8 grid gap-3 sm:grid-cols-2">
+        <a href="/start-a-project" class="kz-btn kz-btn--primary kz-btn--lg kz-btn--knob kz-btn--block">
+          <span>Start a project</span>
+          <span class="kz-btn__knob"><Icon name="arrow-right" /></span>
+        </a>
+        <a href="/portal/login" class="kz-btn kz-btn--secondary kz-btn--lg kz-btn--block">
+          <Icon name="account" />
+          <span>Client Portal</span>
+        </a>
+      </div>
+
+      {
+        contact.whatsapp || contact.phone || contact.email ? (
+          <ul class="mt-8 grid gap-2 pb-4" role="list" aria-label="Contact">
+            {contact.whatsapp ? (
+              <li>
+                <a href={contact.whatsapp} class="kz-channel" target="_blank" rel="noopener noreferrer">
+                  <Icon name="whatsapp" /> WhatsApp<span class="sr-only"> (opens in a new tab)</span>
+                </a>
+              </li>
+            ) : null}
+            {contact.phone ? (
+              <li>
+                <a href={`tel:${contact.phone.replace(/\s+/g, '')}`} class="kz-channel">
+                  <Icon name="phone" /> {contact.phone}
+                </a>
+              </li>
+            ) : null}
+            {contact.email ? (
+              <li>
+                <a href={`mailto:${contact.email}`} class="kz-channel">
+                  <Icon name="email" /> {contact.email}
+                </a>
+              </li>
+            ) : null}
+          </ul>
+        ) : null
+      }
+    </div>
+  </div>
+</dialog>
+
+<script>
+  import { initHeader } from './header';
+  initHeader();
+</script>

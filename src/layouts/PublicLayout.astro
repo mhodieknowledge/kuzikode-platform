@@ -1,31 +1,41 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import AnnouncementBar from '../components/public/AnnouncementBar.astro';
-import SiteFooter from '../components/public/SiteFooter.astro';
-import SiteHeader from '../components/public/SiteHeader.astro';
+/**
+ * Public site layout (redesign R3): new header (directory mega-panel + mobile directory sheet), footer, WhatsApp button,
+ * announcement and preview strip, structured data. Data comes from the existing CMS services; nothing here computes business rules.
+ */
+import Base from './Base.astro';
 import JsonLd from '../components/JsonLd.astro';
-import WhatsAppButton from '../components/public/WhatsAppButton.astro';
+import Announcement from '../ui/public/shell/Announcement.astro';
+import Header, { type DirectoryDivision } from '../ui/public/shell/Header.astro';
+import Footer from '../ui/public/shell/Footer.astro';
+import WhatsApp from '../ui/public/shell/WhatsApp.astro';
 import {
   currentAnnouncement,
+  getPricingCatalogue,
+  getServiceCatalogue,
   getSettings,
   organizationLd,
   settingText,
   siteNavigation,
   websiteLd,
 } from '../server/modules/cms';
+import { divisionFromPrice } from '../shared/directory';
 
 interface Props {
   title: string;
-  description?: string;
+  description?: string | undefined;
   canonicalPath?: string;
   noindex?: boolean;
-  headerTone?: 'light' | 'dark';
-  ogImage?: string;
+  /** `dark` (or `felt`): the page opens on a felt hero and the header joins it. */
+  headerTone?: 'light' | 'dark' | 'felt' | 'concrete';
+  ogImage?: string | undefined;
   ogType?: 'website' | 'article';
   /** Page-specific schema.org objects; Organization is always included, WebSite on the home page. */
   structuredData?: Record<string, unknown>[];
-  /** Prefilled WhatsApp message for this page, e.g. "Hi Kuzikode, I'm interested in the Business Website plan." */
+  /** Prefilled WhatsApp message for this page. */
   whatsappMessage?: string;
+  /** Hide the footer's closing call to action on pages that are themselves the action (contact, wizard). */
+  footerCta?: boolean;
 }
 const {
   title,
@@ -37,51 +47,59 @@ const {
   ogType,
   structuredData = [],
   whatsappMessage,
+  footerCta = true,
 } = Astro.props;
 const { ctx } = Astro.locals;
-const [nav, announcement, org, settings] = await Promise.all([
+const [nav, announcement, org, settings, catalogue, pricing] = await Promise.all([
   siteNavigation(ctx),
   currentAnnouncement(ctx),
   organizationLd(ctx),
   getSettings(ctx),
+  getServiceCatalogue(ctx),
+  getPricingCatalogue(ctx),
 ]);
+const divisions: DirectoryDivision[] = catalogue.map((c) => ({
+  slug: c.slug,
+  name: c.name,
+  summary: c.summary,
+  icon: c.icon,
+  href: `/services/${c.slug}`,
+  services: c.services.map((s) => ({ name: s.name })),
+  from: pricing.showPrices ? divisionFromPrice(pricing.packages, c.slug) : null,
+}));
 const whatsappNumber = settingText(settings, 'contact.whatsapp_number');
 const whatsappText =
   whatsappMessage ??
   settingText(settings, 'contact.whatsapp_message') ??
   'Hi Kuzikode, I would like to talk about a project.';
 const ld = [org, ...(Astro.url.pathname === '/' ? [websiteLd(ctx)] : []), ...structuredData];
+const tone = headerTone === 'dark' || headerTone === 'felt' ? 'felt' : 'concrete';
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <BaseHead
-      title={title}
-      description={description}
-      canonicalPath={noindex ? undefined : canonicalPath}
-      noindex={noindex}
-      ogImage={ogImage}
-      ogType={ogType}
-    />
+<Base
+  title={title}
+  description={description}
+  canonicalPath={noindex ? undefined : canonicalPath}
+  noindex={noindex}
+  ogImage={ogImage}
+  ogType={ogType}
+  themeColor={tone === 'felt' ? '#0B1428' : '#F3F5F8'}
+  bodyClass="flex min-h-screen flex-col bg-concrete-50 text-ink-700"
+>
+  <Fragment slot="head">
     {noindex ? null : <JsonLd data={ld} />}
     <slot name="head" />
-  </head>
-  <body class="flex min-h-screen flex-col bg-surface">
-    <a class="skip-link" href="#main">
-      Skip to content
-    </a>
-    {Astro.locals.ctx.preview ? (
-      <p role="status" class="sticky top-0 z-50 bg-warning-700 px-4 py-2 text-center text-sm font-semibold text-white">
-        Preview of unpublished changes. Visitors still see the published version.
-      </p>
-    ) : null}
-    <AnnouncementBar announcement={announcement} />
-    <SiteHeader nav={nav} tone={headerTone} />
-    <main id="main" tabindex="-1" class="flex-1 focus:outline-none">
-      <slot />
-    </main>
-    <SiteFooter nav={nav} />
-    <WhatsAppButton number={whatsappNumber} message={whatsappText} />
-  </body>
-</html>
+  </Fragment>
+  {ctx.preview ? (
+    <p role="status" class="sticky top-0 z-[60] bg-warn-700 px-4 py-2 text-center text-small font-semibold text-white">
+      Preview of unpublished changes. Visitors still see the published version.
+    </p>
+  ) : null}
+  <Announcement announcement={announcement} />
+  <Header nav={nav} divisions={divisions} tone={tone} />
+  <main id="main" tabindex="-1" class="flex-1 focus:outline-none">
+    <slot />
+  </main>
+  <Footer nav={nav} cta={footerCta} />
+  <WhatsApp number={whatsappNumber} message={whatsappText} />
+</Base>

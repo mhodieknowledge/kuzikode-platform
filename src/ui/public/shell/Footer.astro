@@ -1,0 +1,177 @@
+---
+/**
+ * Public footer (RESPONSIVE_DESIGN_SPEC §1): a closing call to action, contact channels as tiles, two link directories,
+ * the newsletter, legal chips and the oversized condensed wordmark cropped at the bottom edge. Contact lines left blank in
+ * Settings are not rendered.
+ */
+import Logo from '../../brand/Logo.astro';
+import Icon from '../../icons/Icon.astro';
+import Newsletter from '../forms/Newsletter';
+import type { SiteNavigation } from '../../../server/modules/cms';
+
+interface Props {
+  nav: SiteNavigation;
+  /** Pages that end with their own call to action (contact, start a project) hide the footer's. */
+  cta?: boolean;
+}
+const { nav, cta = true } = Astro.props;
+const { footer } = nav;
+const year = new Date().getFullYear();
+const c = footer.contact;
+---
+
+<footer class="kz-footer on-felt" aria-labelledby="footer-heading">
+  <h2 id="footer-heading" class="sr-only">Footer</h2>
+
+  {
+    cta ? (
+      <div class="container-wide pt-14 sm:pt-20">
+        <div class="grid gap-6 rounded-[var(--radius-inset)] border border-felt-700 bg-felt-900 p-6 sm:p-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <div>
+            <p class="display text-h2 text-white">Have a project in mind?</p>
+            <p class="mt-3 max-w-[52ch] text-on-felt-2">
+              Tell us what you need. We reply with questions or a proposed next step, and confirm scope and price in writing.
+            </p>
+          </div>
+          <div class="grid gap-3 sm:flex">
+            <a href="/start-a-project" class="kz-btn kz-btn--primary kz-btn--lg kz-btn--knob">
+              <span>Start a project</span>
+              <span class="kz-btn__knob">
+                <Icon name="arrow-right" />
+              </span>
+            </a>
+            <a href="/consultation" class="kz-btn kz-btn--secondary kz-btn--lg">
+              <Icon name="calendar" />
+              <span>Book a consultation</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    ) : null
+  }
+
+  <div class="container-wide grid gap-12 pt-14 pb-10 sm:pt-16 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)] lg:gap-10">
+    <div class="grid content-start gap-5">
+      <Logo height={26} />
+      {footer.blurb ? <p class="max-w-[44ch] text-small text-on-felt-2">{footer.blurb}</p> : null}
+      <ul class="grid gap-2" aria-label="Contact" role="list">
+        {
+          c.whatsapp ? (
+            <li>
+              <a href={c.whatsapp} rel="noopener noreferrer" target="_blank" class="kz-channel">
+                <Icon name="whatsapp" /> WhatsApp<span class="sr-only"> (opens in a new tab)</span>
+              </a>
+            </li>
+          ) : null
+        }
+        {
+          c.phone ? (
+            <li>
+              <a href={`tel:${c.phone.replace(/[^\d+]/g, '')}`} class="kz-channel">
+                <Icon name="phone" /> {c.phone}
+              </a>
+            </li>
+          ) : null
+        }
+        {
+          c.email ? (
+            <li>
+              <a href={`mailto:${c.email}`} class="kz-channel">
+                <Icon name="email" /> {c.email}
+              </a>
+            </li>
+          ) : null
+        }
+        <li>
+          <a href="/contact" class="kz-channel">
+            <Icon name="send" /> {c.email || c.phone || c.whatsapp ? 'Contact form' : 'Send us a message'}
+          </a>
+        </li>
+      </ul>
+      {
+        c.address || c.location ? (
+          <p class="flex items-start gap-2 text-small text-on-felt-2">
+            <Icon name="location" size={20} class="mt-0.5 text-cobalt-300" />
+            <span>{c.address ?? c.location}</span>
+          </p>
+        ) : null
+      }
+    </div>
+
+    <div class="grid grid-cols-2 gap-8 lg:contents">
+      <nav aria-labelledby="footer-services">
+        <h3 id="footer-services" class="caps text-micro text-on-felt-3">Services</h3>
+        <ul class="mt-3" role="list">
+          {
+            footer.services.map((l) => (
+              <li>
+                <a href={l.href} class="kz-footer__link">
+                  {l.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+      <nav aria-labelledby="footer-company">
+        <h3 id="footer-company" class="caps text-micro text-on-felt-3">Company</h3>
+        <ul class="mt-3" role="list">
+          {
+            footer.company.map((l) => (
+              <li>
+                <a href={l.href} class="kz-footer__link">
+                  {l.label}
+                </a>
+              </li>
+            ))
+          }
+          <li>
+            <a href="/portal/login" class="kz-footer__link">Client Portal</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <div>
+      <section aria-labelledby="newsletter-heading">
+        <h3 id="newsletter-heading" class="caps text-micro text-on-felt-3">Newsletter</h3>
+        <Newsletter client:visible source="footer" />
+      </section>
+      {
+        footer.social.length > 0 ? (
+          <ul class="mt-6 flex flex-wrap gap-2" aria-label="Social media" role="list">
+            {footer.social.map((s) => (
+              <li>
+                <a href={s.href} rel="noopener noreferrer" target="_blank" class="kz-btn kz-btn--secondary kz-btn--sm">
+                  <span>{s.label}</span>
+                  <Icon name="arrow-up-right" size={16} />
+                  <span class="sr-only"> (opens in a new tab)</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : null
+      }
+    </div>
+  </div>
+
+  <div class="container-wide">
+    <div class="flex flex-col gap-4 border-t border-felt-700 py-6 text-small text-on-felt-3 md:flex-row md:items-center md:justify-between">
+      <p>© {year} {footer.companyName}{footer.registration ? ` · ${footer.registration}` : ''}</p>
+      <ul class="flex flex-wrap gap-x-5" role="list" aria-label="Legal">
+        {
+          footer.legal.map((l) => (
+            <li>
+              <a href={l.href} class="kz-footer__link">
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+  <div class="container-wide" aria-hidden="true">
+    <span class="kz-footer__mark" data-mark="Kuzikode"></span>
+  </div>
+</footer>

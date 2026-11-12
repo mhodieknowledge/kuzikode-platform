@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import './tokens.css';
 @import './components.css';
+@import './public.css';
 @import '@fontsource-variable/archivo/wdth.css';
 @import '@fontsource-variable/jetbrains-mono/wght.css';
 

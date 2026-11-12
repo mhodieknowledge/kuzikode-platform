@@ -1,0 +1,28 @@
+---
+/** Floating WhatsApp button (docs/12 §C.9). Hidden when no number is configured, when printing, and behind sticky action bars. */
+import Icon from '../../icons/Icon.astro';
+import { whatsappHref } from '../../../shared/service-display';
+
+interface Props {
+  number: string | undefined;
+  message: string;
+}
+const { number, message } = Astro.props;
+const href = whatsappHref(number, message);
+---
+
+{
+  href ? (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-whatsapp
+      class="kz-wa fixed right-[max(16px,env(safe-area-inset-right))] bottom-[max(16px,env(safe-area-inset-bottom))] z-[var(--z-sticky)] inline-flex h-14 items-center gap-2.5 rounded-full bg-[#0e7a43] pr-5 pl-4 font-semibold text-white shadow-[var(--shadow-float)] transition-transform duration-[var(--dur-state)] print:hidden max-sm:w-14 max-sm:justify-center max-sm:p-0"
+    >
+      <Icon name="whatsapp" size={24} />
+      <span class="max-sm:sr-only">WhatsApp us</span>
+      <span class="sr-only"> (opens in a new tab)</span>
+    </a>
+  ) : null
+}

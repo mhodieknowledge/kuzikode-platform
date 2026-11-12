@@ -946,3 +946,13 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Next step: R3.1 new PublicLayout + Header (desktop nav with sliding indicator + Services directory mega-panel + About panel;
   mobile full-height top sheet directory; sticky felt → concrete-glass) in `src/ui/public/shell/`, replacing SiteHeader/
   AnnouncementBar/WhatsAppButton/BaseHead/Logo/AppLayout per IMPLEMENTATION_PLAN §8. Run the full e2e suite (not run since R2.1).
+
+## 2026-11-12 11:45 UTC · Redesign R3.1 ✅ header · R3.2 ✅ footer
+- New `PublicLayout` on `Base.astro`; `src/ui/public/shell/`: Header (desktop nav + sliding indicator, Services directory mega-panel
+  with lit frame and real "from" prices, About panel, mobile full-height felt directory sheet with search, links, CTAs, channels),
+  header.ts (menus, hover intent, Escape, indicator, scrolled state), Footer (CTA card, channel tiles, link directories, newsletter,
+  legal, wordmark), Announcement, WhatsApp; Logo as inline SVG (`src/ui/brand`); `src/ui/tokens/public.css`.
+- `src/shared/directory.ts` divisionFromPrice (+4 unit tests). API client moved to `src/ui/lib/api.ts`; newsletter rebuilt with a hook.
+- Legacy deleted: SiteHeader, SiteFooter, AnnouncementBar, WhatsAppButton, NewsletterForm. verify green (unit 363, integration 308).
+- Next step: run the full e2e suite (server must not be restarted while it runs), then R3.3 (reveal already in controllers.ts:
+  add e2e for reduced motion + reveal) and R4.1 Home rebuild in `src/ui/public/home/`.

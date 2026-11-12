@@ -34,8 +34,8 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
   (≈200°–290°) left in tokens or components (grep + a token test); /dev/ui visual loop clean in light and dark; contrast checks pass.
 
 ## R3: Public site shell
-- [ ] **R3.1 Header + mobile navigation** (designed mobile menu/sheet, animated indicators, sticky behaviour, primary CTA always reachable).
-- [ ] **R3.2 Footer** (distinct mobile composition, contact channels with icons, legal).
+- [x] **R3.1 Header + mobile navigation** (designed mobile menu/sheet, animated indicators, sticky behaviour, primary CTA always reachable).
+- [x] **R3.2 Footer** (distinct mobile composition, contact channels with icons, legal).
 - [ ] **R3.3 Page transitions / section reveal** framework per the motion spec.
 
 ## R4: Public pages (mobile first, each with its own mobile composition)

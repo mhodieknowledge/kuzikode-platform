@@ -19,3 +19,11 @@ Harness: `playwright.visual.config.ts` (`SHOOT=… SHOOT_SET=all|core|quick SHOO
 - Tap targets: only the deliberate `sm` button (40 px, dense desktop/admin use) and the consent checkbox input (its label row is
   44 px tall) are under 44 px.
 - Note: `npm run build` alone does not refresh a running `wrangler dev`; always restart (`.shots/restart.sh`) before shooting.
+
+## 2026-11-12 · R3.1–R3.2 public shell
+- Viewports: 390, 768 (menu sheet open, scrolled to end), 1440 (mega-panel open with row 04 lit; About panel), footer at 390/1440.
+- Found and fixed: header CTA, icon buttons and the logo link were 40/26 px tall → 44 px; footer links 40 px → 44 px with padding;
+  directory "from $25"/"from $20" hid hourly/yearly units → non-one-off prices show their unit; lit-frame chips invisible on felt
+  → bordered; decorative footer wordmark failed axe contrast even when aria-hidden → generated content (`::before`).
+- e2e: public-layout (mega-menu, Escape returns focus, menu dialog at 1024/768/375, skip link, footer legal, no blank contacts),
+  site-content (header search + mobile search), careers (nav shows Careers while a role is open): 9 green.

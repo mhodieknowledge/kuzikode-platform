@@ -88,22 +88,25 @@ Ticked when the file is deleted (or, for the logic-only files marked *logic*, mo
 
 | Legacy file | Replaced by | Deleted in |
 |---|---|---|
-| layouts/PublicLayout.astro | new PublicLayout | [ ] R3.1 |
-| layouts/AppLayout.astro | new base layout | [ ] R3.1 |
+| layouts/PublicLayout.astro | new PublicLayout (rewritten on layouts/Base.astro) | [x] R3.1 |
+| layouts/AppLayout.astro | layouts/Base.astro (new) | [ ] R5.1 (still used by legacy portal/admin layouts) |
 | layouts/PortalLayout.astro | WorkspaceLayout | [ ] R5.1 |
 | layouts/AdminLayout.astro | new AdminLayout | [ ] R6.1 |
 | layouts/AuthLayout.astro | new AuthLayout | [ ] R5.4 |
 | layouts/DocumentLayout.astro | new DocumentLayout | [ ] R4.8 |
-| components/BaseHead.astro, JsonLd.astro (*logic*) | src/ui/public/head | [ ] R3.1 |
-| components/Logo.astro | src/ui/brand/Logo.astro (new) | [ ] R3.1 |
+| components/BaseHead.astro | ui/head/Head.astro (new) | [ ] R5.1 (still used by legacy layouts) |
+| components/JsonLd.astro (*logic*) | kept as is (pure structured-data output) | — |
+| components/Logo.astro | ui/brand/Logo.astro (new) | [ ] R5.1 (still used by legacy layouts) |
 | components/ResponsiveImage.astro | src/ui/primitives/Picture.astro (new) | [ ] R4.1 |
-| public/SiteHeader.astro, AnnouncementBar.astro, WhatsAppButton.astro, Icon.astro | public shell, icons | [ ] R3.1 |
-| public/SiteFooter.astro | Footer | [ ] R3.2 |
+| public/SiteHeader.astro, AnnouncementBar.astro, WhatsAppButton.astro | ui/public/shell Header, Announcement, WhatsApp | [x] R3.1 |
+| public/Icon.astro | ui/icons/Icon.astro | [ ] R4 (last legacy sections use it) |
+| public/SiteFooter.astro | ui/public/shell/Footer.astro | [x] R3.2 |
 | public/sections/Hero, ServicesGrid, Features, Process, PhotoPair, WorkGallery, ProductsGrid, TechnologiesStrip, CtaBand, SectionHeading, Statement, Values, Testimonials, ListSection, RichText, WorkGrid | new public sections | [ ] R4.1–R4.5 (each deleted with its last user) |
 | public/pricing/PackageCard.astro, ComparisonTable.astro | pricing components | [ ] R4.3 |
 | public/insights/InsightsListing, PostCard, PostCover | insights components | [ ] R4.7 |
 | forms/ContactForm, StartProjectWizard, ConsultationForm, Turnstile | new forms + hooks | [ ] R4.6 |
-| forms/InterestForm, NewsletterForm, ApplicationForm | new forms + hooks | [ ] R4.7 (newsletter with R3.2) |
+| forms/NewsletterForm | ui/public/forms/Newsletter.tsx + useNewsletter | [x] R3.2 |
+| forms/InterestForm, ApplicationForm | new forms + hooks | [ ] R4.7 |
 | forms/QuotationResponse, documents/QuotationDocument, InvoiceDocument | documents | [ ] R4.8 |
 | payments/CheckoutPage, CheckoutSummary, CardReturn | checkout | [ ] R4.8 |
 | portal/StatusPill, AttemptStatus, PortalAccount, ProjectMessageForm, SavedCards, SupportForms | workspace | [ ] R5.2–R5.4 |

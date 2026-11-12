@@ -1,0 +1,30 @@
+---
+/** Site-wide announcement strip (CMS). Only https or same-site links are rendered. */
+interface Props {
+  announcement: { message: string; linkUrl: string | null; linkLabel: string | null; level: 'info' | 'important' } | null;
+}
+const { announcement: a } = Astro.props;
+const safeLink =
+  a?.linkUrl && (/^https:\/\//.test(a.linkUrl) || (a.linkUrl.startsWith('/') && !a.linkUrl.startsWith('//')))
+    ? a.linkUrl
+    : null;
+---
+
+{
+  a ? (
+    <div
+      role="region"
+      aria-label="Announcement"
+      class:list={['text-small', a.level === 'important' ? 'bg-cobalt-600 text-white' : 'bg-felt-950 text-on-felt-2']}
+    >
+      <p class="container-content flex min-h-11 flex-wrap items-center justify-center gap-x-3 py-2 text-center">
+        <span>{a.message}</span>
+        {safeLink ? (
+          <a href={safeLink} class="font-semibold text-white underline underline-offset-4">
+            {a.linkLabel ?? 'Learn more'}
+          </a>
+        ) : null}
+      </p>
+    </div>
+  ) : null
+}

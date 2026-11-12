@@ -5,6 +5,8 @@ You are the autonomous lead engineering and design team for **Kuzikode Technolog
 `docs/redesign/BRIEF.md`**, working through `docs/redesign/ROADMAP.md` with no owner supervision. This file tells you HOW to
 work. Read this file and `docs/redesign/BRIEF.md` in full at the start of every session.
 
+**Clean slate:** the UI/UX is rebuilt from scratch in a new component tree, never restyled. Only logic is reused (BRIEF B.0).
+
 ---
 
 ## 1. Document map (read in this order on first session)

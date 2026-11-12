@@ -17,6 +17,10 @@ export default defineConfig(
       'src/worker-configuration.d.ts',
       'test-results/**',
       'playwright-report/**',
+      // Vendored design skills (docs/redesign/BRIEF.md B.3) and redesign working output: not project code.
+      '.claude/**',
+      '.impeccable/**',
+      '.shots/**',
     ],
   },
   js.configs.recommended,

@@ -1,0 +1,52 @@
+---
+/**
+ * Our Work, nothing published yet (R4.4; ships empty, BRIEF "No fabrication"). A designed night panel, not a sad box: the CMS
+ * empty-state copy and action on the left; on the right the "case files" drawing (IMG_5066 pinned cards: blank sheets, no invented
+ * projects). Below the copy, a short ruled list of what clients follow in their workspace while a project runs (real portal features).
+ * Phones: drawing first (cropped plate), then copy, list and the action at full width.
+ */
+import Icon from '../../icons/Icon.astro';
+import type { IconName } from '../../icons/registry';
+import SceneArt from '../../illustrations/SceneArt.astro';
+
+interface Props {
+  title: string;
+  body: string;
+  cta: { label: string; href: string };
+}
+const { title, body, cta } = Astro.props;
+const workspace: { icon: IconName; label: string }[] = [
+  { icon: 'projects', label: 'Milestones and progress updates' },
+  { icon: 'pages', label: 'Deliverables and shared documents' },
+  { icon: 'invoices', label: 'Quotations, invoices and receipts' },
+  { icon: 'support', label: 'Messages and support requests' },
+];
+---
+
+<section class="kz-wempty on-night" aria-labelledby="work-empty-title" data-ill-host>
+  <div class="kz-wempty__art">
+    <SceneArt kind="case-files" />
+  </div>
+  <div class="kz-wempty__copy">
+    <h2 id="work-empty-title" class="kz-wempty__title">{title}</h2>
+    <p class="kz-wempty__body">{body}</p>
+    <p class="kz-wempty__label">While we work together, you follow it in your client workspace:</p>
+    <ul class="kz-wempty__list" role="list">
+      {
+        workspace.map((w) => (
+          <li>
+            <Icon name={w.icon} size={16} />
+            {w.label}
+          </li>
+        ))
+      }
+    </ul>
+    <div class="kz-wempty__acts">
+      <a class="kz-btn kz-btn--primary kz-btn--lg" href={cta.href}>{cta.label}</a>
+      <a class="kz-link" href="/pricing">
+        See packages and prices
+        <Icon name="arrow-right" size={16} />
+      </a>
+    </div>
+  </div>
+</section>

@@ -72,3 +72,12 @@ Harness: `playwright.visual.config.ts` (`SHOOT=… SHOOT_SET=all|core|quick SHOO
   flat hero slip, three identical bands, accent doing two jobs) → all applied (email & domains is now a title-left flat ledger; slip has an
   offset sheet and a ruled foot).
 - e2e: `pricing.spec.ts` (updated: `li[data-package]`, "Recommended", request links), new `pricing-accuracy.spec.ts` (B.6, 390 + 1440).
+
+## R4.4 Our Work (2026-11-12)
+- Reference opened: IMG_5066 (pinned, tilted step cards with a dashed thread; portfolio rail). Viewports: 375, 390, 768, 1440 (empty), 390/1440 grid
+  and case study with throwaway local QA rows (inserted and deleted again in the local D1 only). No overflow; no main tap target < 44 px.
+- Board `docs/screenshots/redesign/boards/work-board.webp`. Reviewer (opus/medium): FAIL (grid: repeated names on plates, vertical stack of slabs,
+  dead space in the lead row; case study without a visual; drawing too small an echo of IMG_5066; five CTAs on the empty page) → all six fixes
+  applied and re-shot (monogram plates, phone rail from 3, step labels in the drawing, single action on the empty page, lead row aligned to the
+  plate foot, cover/monogram plate + technologies in the spec sheet + "More case studies"). Not re-reviewed (usage economy); verified by screenshots.
+- e2e: `work.spec.ts` (+ designed empty-state test); integration: gallery read (cms-admin).

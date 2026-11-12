@@ -1,0 +1,90 @@
+---
+/**
+ * Scene drawings (BRIEF B.4a): larger compositions in the same Route drawing system as DivisionArt (2 px ink strokes, round joins,
+ * paper surfaces, one accent + tint, gold for a single lit detail, the dashed road). Colour roles from illustrations.css.
+ * - `case-files` (Our Work empty state, IMG_5066 pinned step cards): three blank case-study sheets pinned on a board, tied by a
+ *   dashed thread; layouts only, no invented project names, logos or figures. The last sheet carries the lit pin (`.i-move`).
+ *   Step labels (01 Brief → 02 Build → 03 Launch) sit on the road under the sheets.
+ * Decorative by default (aria-hidden); pass `title` when the drawing carries meaning.
+ */
+interface Props {
+  kind: 'case-files';
+  title?: string;
+  class?: string;
+}
+const { kind, title, class: className } = Astro.props;
+---
+
+<svg
+  class={['kz-ill kz-ill--scene', className].filter(Boolean).join(' ')}
+  viewBox="0 0 360 240"
+  xmlns="http://www.w3.org/2000/svg"
+  role={title ? 'img' : undefined}
+  aria-hidden={title ? undefined : 'true'}
+  focusable="false"
+  data-ill={kind}
+>
+  {title ? <title>{title}</title> : null}
+  <rect class="i-ground" x="0" y="0" width="360" height="240" rx="10"></rect>
+  <path class="i-road" d="M20 222H340"></path>
+
+  {kind === 'case-files' && (
+    <g>
+      {/* Thread between the pins */}
+      <path class="i-line" d="M84 38C120 30 150 70 182 56C214 42 246 66 280 52" stroke-dasharray="6 6" fill="none" />
+
+      {/* Sheet 1: a website case study (browser frame, hero block, columns) */}
+      <g transform="rotate(-6 84 110)">
+        <rect class="i-paper" x="34" y="40" width="100" height="136" rx="6" />
+        <rect class="i-line" x="44" y="52" width="80" height="44" rx="4" />
+        <path class="i-line-s" d="M44 61H124" />
+        <rect class="i-tint-f" x="50" y="68" width="34" height="6" rx="2" />
+        <rect class="i-soft" x="50" y="79" width="24" height="4" rx="2" />
+        <rect class="i-soft" x="44" y="106" width="60" height="5" rx="2.5" />
+        <rect class="i-soft" x="44" y="116" width="72" height="4" rx="2" />
+        <rect class="i-soft" x="44" y="124" width="54" height="4" rx="2" />
+        <rect class="i-line" x="44" y="138" width="36" height="26" rx="3" />
+        <rect class="i-line" x="88" y="138" width="36" height="26" rx="3" />
+        <circle class="i-solid" cx="84" cy="38" r="5" />
+      </g>
+
+      {/* Sheet 2: a system case study (chart + table rows) */}
+      <g transform="rotate(4 182 116)">
+        <rect class="i-paper" x="132" y="56" width="100" height="136" rx="6" />
+        <rect class="i-soft" x="142" y="68" width="48" height="6" rx="3" />
+        <path class="i-ink" d="M144 120L160 104L174 112L192 90L220 98" fill="none" />
+        <path class="i-line-s" d="M142 128H222" />
+        <rect class="i-acc" x="196" y="86" width="8" height="8" rx="2" />
+        <path class="i-line-s" d="M142 142H222M142 154H222M142 166H222" />
+        <rect class="i-tint-f" x="142" y="146" width="30" height="5" rx="2" />
+        <rect class="i-soft" x="142" y="158" width="44" height="5" rx="2" />
+        <rect class="i-soft" x="142" y="170" width="24" height="5" rx="2" />
+        <circle class="i-solid" cx="182" cy="56" r="5" />
+      </g>
+
+      {/* Sheet 3: the next case study, still being written (empty lines, lit pin) */}
+      <g transform="rotate(-3 280 112)">
+        <rect class="i-paper" x="230" y="52" width="100" height="136" rx="6" />
+        <rect class="i-line" x="240" y="64" width="80" height="40" rx="4" stroke-dasharray="5 5" />
+        <path class="i-line-s" d="M240 118H320M240 130H306M240 142H312M240 154H290" stroke-dasharray="4 6" />
+        <path class="i-ink" d="M300 164L316 148L322 154L306 170L298 172Z" />
+        <circle class="i-lit i-move" cx="280" cy="52" r="6" />
+      </g>
+
+      {/* Step labels along the road (IMG_5066 numbered steps): how every case study comes about */}
+      <g class="i-label">
+        <text x="84" y="212" text-anchor="middle">
+          01 Brief
+        </text>
+        <text x="182" y="212" text-anchor="middle">
+          02 Build
+        </text>
+        <text x="280" y="212" text-anchor="middle">
+          03 Launch
+        </text>
+      </g>
+      <path class="i-ink" d="M118 208H140M216 208H238" />
+      <path class="i-ink" d="M135 204L140 208L135 212M233 204L238 208L233 212" fill="none" />
+    </g>
+  )}
+</svg>

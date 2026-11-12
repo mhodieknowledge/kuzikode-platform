@@ -291,6 +291,15 @@ export async function getPortfolioItem(ctx: RequestContext, slug: string): Promi
   return (await listPortfolio(ctx)).find((p) => p.slug === slug) ?? null;
 }
 
+/** Gallery images of a published case study (drafts too in preview), in the order the editor set. */
+export async function getPortfolioGallery(
+  ctx: RequestContext,
+  slug: string,
+): Promise<{ src: string; alt: string; width: number | null; height: number | null }[]> {
+  const rows = await repo.portfolioGallery(ctx.db, slug, !!ctx.preview);
+  return rows.map((r) => ({ src: `/media/${r.file_id}`, alt: r.alt_text ?? '', width: r.width, height: r.height }));
+}
+
 export function listProducts(ctx: RequestContext) {
   return cached(ctx, 'products', async () =>
     (await repo.publishedProducts(ctx.db)).map((p) => ({

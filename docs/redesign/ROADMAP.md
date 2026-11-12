@@ -63,7 +63,7 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
 - [x] **R4.1 Home.** (2026-11-12; its services band now uses the R2.5c division drawings.)
 - [x] **R4.2 Services index + division pages + service detail.** (Services are listed within their division page; there is no separate service-detail route.)
 - [x] **R4.3 Pricing / packages** (presentation only; desktop comparison + mobile swipe/selector; price-accuracy test from B.6).
-- [ ] **R4.4 Our Work / portfolio + case study** (image transitions, empty state that still looks designed).
+- [x] **R4.4 Our Work / portfolio + case study** (image transitions, empty state that still looks designed).
 - [ ] **R4.5 About, How we work, Industries, Technologies.**
 - [ ] **R4.6 Contact + consultation booking** (forms: mobile usability first). Contact form reads `?service=` / `?package=` to preselect.
 - [x] **R4.6b Remove the Start-a-project wizard (owner rule BRIEF B.0c).** Delete the page, component, nav and CTA links, search and sitemap

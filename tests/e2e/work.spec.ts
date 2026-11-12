@@ -15,3 +15,13 @@ test('unpublished or unknown case studies and private media are 404', async ({ r
   expect((await request.get('/work/anything')).status()).toBe(404);
   expect((await request.get('/media/fil_doesnotexist')).status()).toBe(404);
 });
+
+test('the empty state is a designed panel: drawing, workspace list and two ways forward (R4.4)', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/work');
+  const panel = page.locator('.kz-wempty');
+  await expect(panel.locator('svg[data-ill="case-files"]')).toBeVisible();
+  await expect(panel.getByRole('listitem')).toHaveCount(4);
+  await expect(panel.getByRole('link', { name: /See packages and prices/ })).toHaveAttribute('href', '/pricing');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+});

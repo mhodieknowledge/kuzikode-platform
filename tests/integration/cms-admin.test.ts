@@ -5,6 +5,7 @@ import {
   contentVersion,
   currentAnnouncement,
   getPage,
+  getPortfolioGallery,
   listPortfolio,
   resetCmsCache,
 } from '../../src/server/modules/cms';
@@ -96,14 +97,22 @@ describe('CMS editors (P4.15)', () => {
     expect([200, 404]).toContain(pub.status); // served by the Astro route in e2e; the worker stub has no pages
     expect((await C(s, `/media/${up.body.data.id}`, { altText: '  ' }, 'PUT')).status).toBe(422);
 
+    const bakery = `bakery-site-${Date.now()}`;
     const pf = await C(s, '/portfolio', {
-      slug: `bakery-site-${Date.now()}`,
+      slug: bakery,
       name: 'Bakery website',
       category: 'Websites',
       summary: 'A fast menu website for a local bakery.',
       coverMediaId: up.body.data.id,
+      galleryMediaIds: [up.body.data.id],
     });
     expect(pf.status, JSON.stringify(pf.body)).toBe(201);
+    // The case study page shows its gallery (draft: only in preview, never publicly).
+    const gallery = await getPortfolioGallery(previewCtx(), bakery);
+    expect(gallery).toEqual([
+      { src: `/media/${up.body.data.fileId}`, alt: 'Workshop table with laptops', width: 40, height: 30 },
+    ]);
+    expect(await getPortfolioGallery(publicCtx(), bakery)).toEqual([]);
     expect((await C(s, `/media/${up.body.data.id}`, undefined, 'DELETE')).status).toBe(409);
   });
 

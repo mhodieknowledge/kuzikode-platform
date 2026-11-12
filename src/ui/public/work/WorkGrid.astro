@@ -1,0 +1,74 @@
+---
+/**
+ * Published case studies (R4.4). Spec: phones → full-width cards in one column; desktop → a 2-column editorial grid whose first
+ * (featured or most recent) study spans the full width; below 1024 px, three or more studies become a swipe rail with dots. Each card: cover (16:10; without a cover, a night plate with the
+ * project monogram and category instead of an empty box), category, name, summary, "Read the case study". Hover: the cover eases in (scale
+ * 1.03, reduced-motion safe) and the arrow moves.
+ */
+import Icon from '../../icons/Icon.astro';
+import type { PublicPortfolioItem } from '../../../server/modules/cms';
+
+interface Props {
+  items: PublicPortfolioItem[];
+  label: (c: string) => string;
+  /** Let the first study span the full row on desktop (index page); off for "more case studies". */
+  lead?: boolean;
+}
+const { items, label, lead = true } = Astro.props;
+// Phones and tablets: three or more studies become a swipe rail (next card peeking) with a position count (BRIEF B.1a).
+const rail = items.length >= 3;
+/** Without a cover: a monogram of the project name on a night plate (the caption below carries the full name). */
+const monogram = (name: string) =>
+  name
+    .split(/\s+/)
+    .filter((w) => /^[\p{L}\p{N}]/u.test(w))
+    .slice(0, 2)
+    .map((w) => w.charAt(0).toUpperCase())
+    .join('');
+---
+
+<div class:list={['kz-works-wrap', rail && 'is-rail']}>
+<ul class:list={['kz-works', rail && 'kz-track']} role="list" data-kz-track={rail ? '' : undefined}>
+  {
+    items.map((p, i) => (
+      <li class:list={['kz-work', lead && i === 0 && items.length > 2 && 'is-lead']}>
+        <a class="kz-work__link" href={`/work/${p.slug}`}>
+          <span class="kz-work__media">
+            {p.cover ? (
+              <img
+                src={p.cover.src}
+                alt={p.cover.alt}
+                width={p.cover.width ?? 1200}
+                height={p.cover.height ?? 750}
+                loading={i < 2 ? 'eager' : 'lazy'}
+                decoding="async"
+              />
+            ) : (
+              <span class="kz-work__plate on-night" aria-hidden="true">
+                <b>{monogram(p.name)}</b>
+                <span>{label(p.category)}</span>
+              </span>
+            )}
+          </span>
+          <span class="kz-work__meta">{label(p.category)}</span>
+          <span class="kz-work__name">{p.name}</span>
+          <span class="kz-work__sum">{p.summary}</span>
+          <span class="kz-work__go">
+            Read the case study
+            <Icon name="arrow-right" size={16} />
+          </span>
+        </a>
+      </li>
+    ))
+  }
+</ul>
+{
+  rail ? (
+    <div class="kz-track__dots kz-works__dots" data-kz-track-dots aria-hidden="true">
+      {items.map((_, i) => (
+        <i class:list={[i === 0 && 'is-on']} />
+      ))}
+    </div>
+  ) : null
+}
+</div>

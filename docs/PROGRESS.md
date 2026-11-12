@@ -1086,3 +1086,11 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Tiers used (CLAUDE.md §2b): build + integration by the orchestrator; B.0d review subagent opus/medium.
 - Next step: R4.4 Our Work / portfolio + case study (`src/pages/work/*`, empty state that looks designed, drawings from
   `src/ui/illustrations/`), then R4.5 (About, How we work, Industries — removes the last PackageCard user —, Technologies), R4.6 contact/consultation, R4.7.
+
+## 2026-11-12 21:05 UTC · R4.4 ✅ Our Work
+- New `src/ui/public/work/` (WorkEmpty, WorkGrid), `src/ui/illustrations/SceneArt.astro` (`case-files`), `src/ui/tokens/work.css`; `/work` and
+  `/work/[slug]` rewritten; `getPortfolioGallery` (repo + service + integration test). Reviewer FAIL → 6 fixes applied (see QA_REPORT).
+- verify green (unit 453, integration 308); work/public/mobile-limits/sweep/links e2e green.
+- Tiers: orchestrator build; B.0d review opus/medium.
+- Next step: R4.5 About, How we work, Industries (replace legacy PackageCard with PlanDeck/ServiceRates or a compact package ledger, then
+  delete `src/components/public/pricing/PackageCard.astro`), Technologies. Then R4.6 contact + consultation (forms), R4.7, R4.8.

@@ -123,6 +123,22 @@ export const publishedPortfolio = (db: D1Database, includeDrafts = false) =>
      ORDER BY p.featured DESC, p.sort_order, p.completion_date DESC LIMIT 200`,
   );
 
+/** Public gallery images of a case study (portfolio_media order); only public files, only for visible case studies. */
+export const portfolioGallery = (db: D1Database, slug: string, includeDrafts = false) =>
+  db
+    .prepare(
+      `SELECT f.id AS file_id, m.alt_text, m.width, m.height
+       FROM portfolio_media pm
+       JOIN portfolio_projects p ON p.id = pm.portfolio_id
+       JOIN media_assets m ON m.id = pm.media_id
+       JOIN files f ON f.id = m.file_id AND f.visibility = 'public'
+       WHERE p.slug = ? AND ${includeDrafts ? "p.status IN ('draft','published')" : "p.status = 'published'"}
+       ORDER BY pm.position LIMIT 24`,
+    )
+    .bind(slug)
+    .all<{ file_id: string; alt_text: string | null; width: number | null; height: number | null }>()
+    .then((r) => r.results);
+
 export const publishedProducts = (db: D1Database) =>
   all<ProductRow>(
     db,

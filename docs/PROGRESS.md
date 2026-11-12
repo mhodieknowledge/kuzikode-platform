@@ -4,6 +4,7 @@ The agent appends a new entry at the top after every task, and always before a s
 The **Next step** line must be specific enough that a fresh session can continue without guessing.
 
 ## Current status
+- **Redesign mission (docs/redesign/ROADMAP.md) started 2026-11-12.** See the newest "Redesign" entries at the bottom for the next step.
 - Phases 1–5 complete except **P3.18 site imagery** (Workers AI daily quota; retry later). Phase 6 (payments & email) in progress.
 - Last completed task: **P7.6 Link check + migration check** (2026-11-11). Phase 7 done. Phase 6 done except P6.5 `[!]` (owner's Faked Success). P6.5 is `[!]` (Faked Success needs the owner, staging re-run in P8.2). Saved cards wait on Paynow approving tokenization (BLOCKERS).
 - **Status (2026-11-12 00:10 UTC): roadmap complete.** All tasks `[x]` except P6.5 `[!]` (owner's Paynow Faked Success). Staging
@@ -891,3 +892,17 @@ The **Next step** line must be specific enough that a fresh session can continue
 - After the 00:00 UTC Cloudflare reset: `node scripts/smoke.mjs https://kuzikode-staging.mhodieknowledge.workers.dev` → 11/11 passed
   from this container. Deploy staging run #6 (23:03 UTC, after CI) had failed on Error 1027 as expected; run #7 (dispatched 00:07) ✅ build, migrate, deploy, smoke.
 - FINAL-REPORT updated (staging verified; Error 1027 kept as an account-level risk). Roadmap: everything `[x]`, P6.5 `[!]` (owner).
+
+## 2026-11-12 11:40 UTC · Redesign R0.1–R0.4 ✅ · R1.1 ✅
+- Session start checks: Figma, Canva, Cloudflare connectors present; R2 `images/incoming/` empty; no `design/inbox/`; skills present.
+- R0.1: 22 skills load; `impeccable context` + init (PRODUCT.md written from PRD/brief, interview substituted per owner instruction).
+- R0.2: `docs/redesign/DESIGN_AUDIT.md` (weaknesses, pricing source of truth, image inventory); 29 screens × 390/1440 before-shots
+  in `docs/screenshots/redesign/before/`; `impeccable detect` findings recorded. New visual-loop harness:
+  `playwright.visual.config.ts` + `tests/visual/shoot.spec.ts` (`SHOOT=/a,/b SHOOT_SET=all|core|quick SHOOT_LABEL=x`), output `.shots/` (ignored).
+- R0.3: all 29 inspiration images analysed (`REFERENCE_IMAGE_ANALYSIS.md`, 29 entries) + `IMAGE_TRACEABILITY.md` (29 rows).
+- R0.4: webdev.co.zw, vetech.co.zw (+ website-development page), hoverstat.es, curated.design captured at 390/1440; findings in
+  REFERENCE_IMAGE_ANALYSIS.md. landing.love/siteinspire/awwwards refused automation.
+- R1.1: `DESIGN_DIRECTION.md`: "Directory" world (felt navy #0B1428 + concrete + cobalt, Archivo wdth + JetBrains Mono, Lucide),
+  via impeccable concept-seed (seed:658d80b5dbf5df50, assigned 7/7); surface brief `.impeccable/surfaces/src-pages-index-astro.md`.
+- Next step: R1.2 specs (RESPONSIVE_DESIGN_SPEC, MOTION_AND_INTERACTION_SPEC, PANEL_DESIGN_SPEC, UI_UX_RECONSTRUCTION_PLAN,
+  IMPLEMENTATION_PLAN), then R1.3 image batch 1.

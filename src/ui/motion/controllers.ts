@@ -111,6 +111,21 @@ function initSegmented(seg: HTMLElement) {
       { rootMargin: '-45% 0px -50% 0px' },
     );
     for (const t of targets) io.observe(t);
+    // Above the first section (back at the top of the page) the first option is the current one again.
+    let frame = 0;
+    const top = () => {
+      frame = 0;
+      const first = targets[0];
+      const opt = opts[0];
+      if (
+        first &&
+        opt &&
+        first.getBoundingClientRect().top > innerHeight * 0.5 &&
+        opt.getAttribute('aria-current') !== 'true'
+      )
+        select(opt, false, false);
+    };
+    addEventListener('scroll', () => (frame ||= requestAnimationFrame(top)), { passive: true });
   }
   new ResizeObserver(sync).observe(seg);
   seg.addEventListener('scroll', sync, { passive: true });

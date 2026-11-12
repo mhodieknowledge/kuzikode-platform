@@ -1,0 +1,84 @@
+---
+/**
+ * Pricing hero (R4.3). IMG_5060: calm, light, left-aligned header; the right side is a printed rate card (one ruled row per pricing
+ * category: numeral, name, package count, the lowest published price with its unit) that doubles as the page index. Phones: the
+ * headline and intro, then the rate card as compact rows directly under it, so the first screen already shows real prices.
+ * All figures come from the pricing catalogue via `packagePrice` (nothing is rounded or computed except picking the lowest).
+ */
+import Icon from '../../icons/Icon.astro';
+
+export interface RateRow {
+  key: string;
+  label: string;
+  count: number;
+  /** "$350" etc. from `packagePrice`, or null when prices are hidden / not published. */
+  from: { amount: string; suffix: string | null } | null;
+}
+interface Props {
+  title: string;
+  introHtml: string | null;
+  rows: RateRow[];
+  showPrices: boolean;
+}
+const { title, introHtml, rows, showPrices } = Astro.props;
+---
+
+<section class="kz-phero" aria-labelledby="pricing-title">
+  <div class="container-wide kz-phero__grid">
+    <div class="kz-phero__copy">
+      <h1 id="pricing-title" class="kz-phero__title" data-reveal>{title}</h1>
+      {introHtml ? <div class="kz-phero__intro prose-kz" set:html={introHtml} /> : null}
+      {
+        showPrices ? null : (
+          <p class="kz-phero__note" data-prices-hidden>
+            <Icon name="receipt" size={16} />
+            Prices are confirmed in a written quotation. Choose a package to request yours.
+          </p>
+        )
+      }
+    </div>
+    {
+      rows.length > 0 ? (
+        <nav class="kz-rate" aria-label="Pricing overview">
+          <p class="kz-rate__head" aria-hidden="true">
+            <span>Rate card</span>
+            <span>{showPrices ? 'From' : 'Packages'}</span>
+          </p>
+          <ol class="kz-rate__list" role="list">
+            {rows.map((r, i) => (
+              <li>
+                <a class="kz-rate__row" href={`#${r.key}`}>
+                  <span class="kz-rate__n" aria-hidden="true">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span class="kz-rate__name">
+                    {r.label}
+                    <small>
+                      {r.count} {r.count === 1 ? 'package' : 'packages'}
+                    </small>
+                  </span>
+                  {r.from ? (
+                    <span class="kz-rate__from">
+                      <span class="sr-only">from </span>
+                      <b>{r.from.amount}</b>
+                      {r.from.suffix && r.from.suffix !== 'one-off' ? <small>{r.from.suffix}</small> : null}
+                    </span>
+                  ) : (
+                    <span class="kz-rate__from">
+                      <small>On quotation</small>
+                    </span>
+                  )}
+                  <Icon name="arrow-right" size={16} />
+                </a>
+              </li>
+            ))}
+          </ol>
+          <p class="kz-rate__foot">
+            <Icon name="receipt" size={16} />
+            {showPrices ? 'Published prices · final amount confirmed in a written quotation' : 'Confirmed in a written quotation'}
+          </p>
+        </nav>
+      ) : null
+    }
+  </div>
+</section>

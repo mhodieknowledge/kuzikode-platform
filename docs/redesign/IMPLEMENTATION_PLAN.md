@@ -103,7 +103,8 @@ Ticked when the file is deleted (or, for the logic-only files marked *logic*, mo
 | public/SiteFooter.astro | ui/public/shell/Footer.astro | [x] R3.2 |
 | public/sections/ServicesGrid, WorkGallery, WorkGrid, ProductsGrid, Testimonials | ui/public/home (ServicesBand, WorkRail, CompanyBand, Voices) | [x] R4.1 (deleted) |
 | public/sections/Hero, Features, Process, PhotoPair, TechnologiesStrip, CtaBand, SectionHeading, Statement, Values, ListSection, RichText | new public sections | [ ] R4.2–R4.5 (each deleted with its last user) |
-| public/pricing/PackageCard.astro, ComparisonTable.astro | pricing components | [ ] R4.3 |
+| public/pricing/ComparisonTable.astro | ui/public/services/PackageCompare | [x] R4.3 (deleted) |
+| public/pricing/PackageCard.astro | ui/public/pricing/PlanDeck | [ ] R4.5 (last user: industries) |
 | public/insights/InsightsListing, PostCard, PostCover | insights components | [ ] R4.7 |
 | forms/StartProjectWizard | removed with the wizard (B.0c); /start-a-project 301 → /contact | [x] R4.6b (deleted) |
 | forms/ContactForm, ConsultationForm, Turnstile | new forms + hooks | [ ] R4.6 |

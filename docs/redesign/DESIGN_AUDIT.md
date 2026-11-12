@@ -75,6 +75,10 @@ items at 36 px; tables on phones become horizontally scrolled grids.
 - **Rule for the redesign:** presentation only. The new pricing UI must keep reading the same catalogue functions; no copy of any
   price, feature or condition may be hard-coded. A new e2e test (R4.3) loads the catalogue from the local D1 and asserts every
   rendered package name, price tag, unit, feature value and add-on equals the stored data, at phone and desktop widths.
+- **Price-accuracy test (done in R4.3):** `tests/e2e/pricing-accuracy.spec.ts` reads `service_packages`, `package_features`,
+  `package_addons` and `pricing.show_prices` from the local D1 with its own SQL and asserts, at 390 and 1440 px, every package's name,
+  tagline, price tag (`From` for starting-from, `Custom quote`), annual price, minimum quantity, delivery/revisions/support, every feature
+  label and text value, every add-on, and (desktop) the comparison-table prices.
 - Existing tests that pin pricing UI: `tests/e2e/pricing.spec.ts`, `packages.spec.ts` (selectors `[data-package]`, `[data-price]`,
   `[data-vat-note]`, "Pricing categories" navigation). The redesign keeps these hooks or updates the tests with a written reason.
 

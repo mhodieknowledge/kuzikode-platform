@@ -15,6 +15,8 @@ export interface SegItem {
   controls?: string;
   id?: string;
   icon?: IconName;
+  /** Shorter visible label for phones (< 640 px); the full label stays the accessible name. */
+  short?: string | undefined;
 }
 interface Props {
   items: SegItem[];
@@ -52,7 +54,16 @@ const cls = ['kz-seg', block && 'kz-seg--block', scroll && 'kz-seg--scroll', cla
     mode === 'links' ? (
       <a class="kz-seg__opt" href={it.href} aria-current={i === selected ? 'true' : undefined} data-value={it.value}>
         {it.icon ? <Icon name={it.icon} size={16} /> : null}
-        {it.label}
+        {it.short ? (
+          <Fragment>
+            <span class="kz-seg__long">{it.label}</span>
+            <span class="kz-seg__short" aria-hidden="true">
+              {it.short}
+            </span>
+          </Fragment>
+        ) : (
+          it.label
+        )}
       </a>
     ) : mode === 'tabs' ? (
       <button

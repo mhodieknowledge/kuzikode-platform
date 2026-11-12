@@ -11,13 +11,14 @@ test('pricing page: tabs, packages, comparison table, add-ons, VAT note and FAQ'
     await expect(nav.getByRole('link', { name: label, exact: true })).toBeVisible();
   }
   const websites = page.locator('#websites');
-  await expect(websites.locator('[data-package]')).toHaveCount(4);
-  const popular = websites.locator('[data-package="business-website"]');
-  await expect(popular.getByText('Most popular')).toBeVisible();
+  // Plates are list items; the desktop comparison table repeats the packages as column headers (R4.3).
+  await expect(websites.locator('li[data-package]')).toHaveCount(4);
+  const popular = websites.locator('li[data-package="business-website"]');
+  await expect(popular.getByText('Recommended')).toBeVisible();
   // Non-production shows prices (pricing.show_prices = true in nonprod seed).
-  await expect(websites.locator('[data-package="starter-website"] [data-price]')).toContainText('$350');
-  await expect(websites.locator('[data-package="custom-web-app"] [data-price]')).toContainText('Custom quote');
-  await expect(page.locator('[data-package="business-email"]')).toContainText('Minimum 3 mailboxes');
+  await expect(websites.locator('li[data-package="starter-website"] [data-price]')).toContainText('$350');
+  await expect(websites.locator('li[data-package="custom-web-app"] [data-price]')).toContainText('Custom quote');
+  await expect(page.locator('li[data-package="business-email"]')).toContainText('Minimum 3 mailboxes');
 
   const request = popular.getByRole('link', { name: /Request this package/ });
   await expect(request).toHaveAttribute('href', /^\/contact\?category=[a-z0-9-]+&package=business-website$/);
@@ -30,7 +31,7 @@ test('pricing page: tabs, packages, comparison table, add-ons, VAT note and FAQ'
   await page.setViewportSize({ width: 375, height: 800 });
   await expect(table).toBeHidden();
   await expect(
-    websites.locator('[data-package="starter-website"]').getByText('Mobile-responsive design'),
+    websites.locator('li[data-package="starter-website"]').getByText('Mobile-responsive design'),
   ).toBeVisible();
 
   await expect(page.getByRole('heading', { name: 'Add-ons' })).toBeVisible();

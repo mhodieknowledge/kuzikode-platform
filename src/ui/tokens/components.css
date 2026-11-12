@@ -410,6 +410,23 @@
   .kz-seg--block .kz-seg__opt {
     flex: 1;
   }
+  /* Optional short labels on phones (the full label remains the accessible name). */
+  .kz-seg__short {
+    display: none;
+  }
+  @media (max-width: 639px) {
+    .kz-seg__opt:has(.kz-seg__short) .kz-seg__long {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .kz-seg__short {
+      display: inline;
+    }
+  }
   /* Scrolling controls never widen their parents: inline-size containment zeroes their min-content contribution. */
   .kz-seg--scroll {
     display: flex;

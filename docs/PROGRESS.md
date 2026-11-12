@@ -1075,3 +1075,14 @@ The **Next step** line must be specific enough that a fresh session can continue
 - verify green (unit 445, integration 308); contact/pricing/industries/services-public e2e green (new redirect + preselect test).
 - Next step: R4.3 pricing rebuild in `src/ui/public/pricing/` (hero rate card, sticky category control, plan deck with phone
   selector + swipe track, PackageCompare on desktop, service-rates ledger for "Other services", add-ons ledger), price-accuracy e2e (B.6).
+
+## 2026-11-12 20:45 UTC · R4.3 ✅ pricing
+- New `src/ui/public/pricing/`: PricingHero (rate-card slip = page index, lowest real price per category), PlanDeck (phone/tablet selector +
+  scroll-snap track, recommended first via CSS order; ≥1200 plates in a row with a lifted night plate), ServiceRates (grouped-by-division night
+  ledger for "Other services"; flat title-left ledger for "Email & domains"). `src/ui/tokens/pricing.css`. Page rewritten; PackageCompare reused
+  (≥1200). SegmentedControl gained optional phone `short` labels. Footer never routes to the current page. Legacy ComparisonTable deleted.
+- B.6: `tests/e2e/pricing-accuracy.spec.ts` (independent SQL against local D1). DESIGN_AUDIT §3 updated.
+- Board + reviewer PASS, 8 fixes applied. verify green; pricing/accuracy/contact/mobile-limits/public-layout/services/ui-kit/home e2e green.
+- Tiers used (CLAUDE.md §2b): build + integration by the orchestrator; B.0d review subagent opus/medium.
+- Next step: R4.4 Our Work / portfolio + case study (`src/pages/work/*`, empty state that looks designed, drawings from
+  `src/ui/illustrations/`), then R4.5 (About, How we work, Industries — removes the last PackageCard user —, Technologies), R4.6 contact/consultation, R4.7.

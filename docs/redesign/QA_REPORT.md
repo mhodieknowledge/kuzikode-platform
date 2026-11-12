@@ -57,3 +57,18 @@ Harness: `playwright.visual.config.ts` (`SHOOT=… SHOOT_SET=all|core|quick SHOO
   action fix.
 - e2e: `services-public.spec.ts` (photo hero, atlas rows with drawings + units, phone accordion, comparison table, recommended column,
   package preselect links, phone package selector).
+
+## R4.3 Pricing (2026-11-12)
+- References opened: IMG_5060 (light left header, tinted plates, one filled featured plan), IMG_5070 (plans → compare table → FAQ),
+  IMG_5071 (comparison table, lifted recommended column), IMG_5058 (inverted recommended plan, ruled feature rows), IMG_5057 (selector above plans on phones).
+- Viewports shot: 360, 375, 390, 430, 768, 1024, 1280, 1440, 1920 (+ 390 reduced motion). No horizontal overflow; no main tap target < 44 px.
+- Interactions exercised: plan selector ↔ swipe track sync both ways (tap chip scrolls, swipe updates chip), "All features" disclosure,
+  sticky category control (scroll-spy; returns to "Websites" at the top; short labels on phones), ledger rows as whole-row links.
+- Found and fixed: track opened mid-scroll on phones (now the recommended plate is first via CSS order, no load-time scrolling); 4-up
+  plates + table too tight at 1024 (plates/table side by side from 1200 only); compare buttons overflowed at 1024–1279 (row-label column 26 %);
+  axe contrast on division numerals on night (numerals removed, hue kept in the rule); footer linked the page to itself.
+- Board `docs/screenshots/redesign/boards/pricing-board.webp`. Reviewer (impeccable-finish-reviewer, opus/medium): **PASS** on both
+  questions with 8 fixes (track start, hidden 4th category on phones, phone section gaps, clashing numbering, framed arrow buttons,
+  flat hero slip, three identical bands, accent doing two jobs) → all applied (email & domains is now a title-left flat ledger; slip has an
+  offset sheet and a ruled foot).
+- e2e: `pricing.spec.ts` (updated: `li[data-package]`, "Recommended", request links), new `pricing-accuracy.spec.ts` (B.6, 390 + 1440).

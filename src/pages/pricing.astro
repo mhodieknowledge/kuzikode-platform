@@ -1,31 +1,73 @@
 ---
+/**
+ * Pricing (R4.3, rebuilt from scratch). Order: rate-card hero → sticky category control → one section per pricing category
+ * (tiers: plan deck + comparison table on desktop; separate products: flat ledger; "Other services": division ledger) → add-ons → VAT note → questions →
+ * footer lead. Every figure comes from `getPricingCatalogue` (BRIEF B.6; the price-accuracy e2e test checks it against D1).
+ */
 import PublicLayout from '../layouts/PublicLayout.astro';
-import PackageCard from '../components/public/pricing/PackageCard.astro';
-import ComparisonTable from '../components/public/pricing/ComparisonTable.astro';
-import CtaBand from '../components/public/sections/CtaBand.astro';
+import PricingHero, { type RateRow } from '../ui/public/pricing/PricingHero.astro';
+import PlanDeck from '../ui/public/pricing/PlanDeck.astro';
+import ServiceRates from '../ui/public/pricing/ServiceRates.astro';
+import PackageCompare from '../ui/public/services/PackageCompare.astro';
+import SegmentedControl from '../ui/primitives/SegmentedControl.astro';
+import Accordion from '../ui/primitives/Accordion.astro';
+import AccordionItem from '../ui/primitives/AccordionItem.astro';
 import {
   PRICING_TABS,
   breadcrumbLd,
-  comparisonRows,
   faqLd,
   getPage,
   getPricingCatalogue,
+  getServiceCatalogue,
   listFaqs,
   sectionOf,
+  type PublicPackage,
 } from '../server/modules/cms';
-import { formatPriceTag } from '../shared/service-display';
+import { formatPriceTag, packagePrice } from '../shared/service-display';
 
 const { ctx } = Astro.locals;
-const [page, catalogue, faqs] = await Promise.all([
+const [page, catalogue, services, faqs] = await Promise.all([
   getPage(ctx, 'pricing'),
   getPricingCatalogue(ctx),
+  getServiceCatalogue(ctx),
   listFaqs(ctx, 'pricing'),
 ]);
 const intro = sectionOf(page, 'intro', 'rich_text');
 const cta = sectionOf(page, 'cta', 'cta');
+const divisions = services.map((c, i) => ({ slug: c.slug, name: c.name, n: i + 1 }));
+
+/** Short labels for the phone category control. */
+const SHORT: Record<string, string> = { websites: 'Websites', care: 'Care', email: 'Email', other: 'Other' };
+/** Packages without feature lists are single priced services: a ledger grouped by division (night band). */
+const isLedger = (pkgs: PublicPackage[]) => pkgs.every((p) => p.features.length === 0);
+/** The comparison table only helps when every package lists features and they share at least one row. */
+const comparable = (pkgs: PublicPackage[]) => {
+  if (pkgs.length < 2 || pkgs.some((p) => p.features.length === 0)) return false;
+  const [head, ...others] = pkgs;
+  return (head?.features ?? []).some((f) => others.every((o) => o.features.some((g) => g.label === f.label)));
+};
+/** Lowest published price in a category (same currency as the first priced package), shown with its own unit. */
+const lowest = (pkgs: PublicPackage[]): RateRow['from'] => {
+  if (!catalogue.showPrices) return null;
+  const priced = pkgs.filter((p) => p.priceType !== 'custom_quote' && p.priceMinor !== null && p.currency);
+  const currency = priced[0]?.currency;
+  const min = priced
+    .filter((p) => p.currency === currency)
+    .reduce<PublicPackage | null>((a, p) => (a === null || (p.priceMinor ?? 0) < (a.priceMinor ?? 0) ? p : a), null);
+  if (!min) return null;
+  const d = packagePrice(min);
+  return { amount: d.amount, suffix: d.suffix };
+};
+
 const tabs = PRICING_TABS.map((t) => ({ ...t, packages: catalogue.packages.filter((p) => p.tab === t.key) })).filter(
   (t) => t.packages.length > 0,
 );
+const rows: RateRow[] = tabs.map((t) => ({
+  key: t.key,
+  label: t.label,
+  count: t.packages.length,
+  from: lowest(t.packages),
+}));
 const unitLabel: Record<string, string> = {
   each: '',
   page: 'per page',
@@ -42,48 +84,38 @@ const ld = [breadcrumbLd(ctx, [{ name: 'Pricing', path: '/pricing' }]), ...(faqs
   title={page?.seoTitle ?? 'Pricing · Kuzikode Technologies'}
   description={page?.seoDescription ?? undefined}
   whatsappMessage="Hi Kuzikode, I have a question about your packages and pricing."
+  headerTone="bone"
+  footerLead={
+    cta ? { title: cta.content.title, body: cta.content.body ?? undefined } : { title: 'Not sure which package fits?' }
+  }
 >
-  <section class="bg-canvas py-14 md:py-20" aria-labelledby="pricing-title">
-    <div class="container-content">
-      <p class="text-[13px] font-semibold tracking-wide text-brand-600 uppercase">Pricing</p>
-      <h1 id="pricing-title" class="mt-3 max-w-3xl text-4xl font-bold tracking-display md:text-5xl">
-        {intro?.content.title ?? 'Pricing'}
-      </h1>
-      {intro ? <div class="prose-kz mt-4 max-w-2xl text-lg" set:html={intro.content.html} /> : null}
-      {catalogue.showPrices ? null : (
-        <p class="mt-4 max-w-2xl text-[15px] text-ink-600" data-prices-hidden>
-          Prices are confirmed in a written quotation. Choose a package to request yours.
-        </p>
-      )}
-    </div>
-  </section>
+  <PricingHero
+    title={intro?.content.title ?? 'Pricing'}
+    introHtml={intro?.content.html ?? null}
+    rows={rows}
+    showPrices={catalogue.showPrices}
+  />
 
   {tabs.length > 0 ? (
-    <nav
-      aria-label="Pricing categories"
-      class="sticky top-16 z-20 border-b border-line bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/85"
-    >
-      <ul class="container-content flex gap-1 relative overflow-x-auto py-2">
-        {tabs.map((t) => (
-          <li class="shrink-0">
-            <a
-              href={`#${t.key}`}
-              class="inline-flex h-10 items-center rounded-sm px-3.5 text-sm font-semibold text-ink-800 hover:bg-canvas hover:text-ink-950"
-            >
-              {t.label}
-            </a>
-          </li>
-        ))}
-      </ul>
+    <nav class="kz-pnav" aria-label="Pricing categories">
+      <div class="container-wide">
+        <SegmentedControl
+          mode="links"
+          scroll
+          block
+          label="Pricing categories"
+          items={tabs.map((t) => ({ label: t.label, short: SHORT[t.key], href: `#${t.key}`, value: t.key }))}
+        />
+      </div>
     </nav>
   ) : null}
 
   {tabs.length === 0 ? (
-    <section class="bg-surface py-14 md:py-20">
-      <div class="container-content">
-        <p class="text-ink-600">
+    <section class="kz-sec">
+      <div class="container-wide">
+        <p class="kz-lede">
           Our packages are being updated.{' '}
-          <a href="/contact" class="font-semibold text-brand-600 underline underline-offset-2">
+          <a class="kz-link" href="/contact">
             Contact us
           </a>{' '}
           for a quotation.
@@ -92,28 +124,46 @@ const ld = [breadcrumbLd(ctx, [{ name: 'Pricing', path: '/pricing' }]), ...(faqs
     </section>
   ) : (
     tabs.map((t, i) => {
-      const hasTable = comparisonRows(t.packages).length > 0 && t.packages.length > 1;
+      const ledger = isLedger(t.packages);
+      // Tiers of one product (comparable) are plates + table; separate products (email, domains) are a flat ledger.
+      const compare = !ledger && comparable(t.packages);
+      const flat = !ledger && !compare;
       return (
         <section
           id={t.key}
-          class:list={['scroll-mt-32 py-14 md:py-20', i % 2 === 0 ? 'bg-surface' : 'bg-canvas']}
+          class:list={[
+            'kz-ptab',
+            flat && 'kz-ptab--flat',
+            ledger ? 'kz-band on-night' : 'kz-sec',
+            !ledger && i % 2 === 1 && 'kz-sec--inset',
+          ]}
           aria-labelledby={`tab-${t.key}`}
         >
-          <div class="container-content">
-            <h2 id={`tab-${t.key}`} class="text-3xl font-bold tracking-display">
-              {t.label}
-            </h2>
-            <div
-              class:list={[
-                'mt-8 grid gap-6 sm:grid-cols-2',
-                t.packages.length >= 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3',
-              ]}
-            >
-              {t.packages.map((p) => (
-                <PackageCard pkg={p} featuresMobileOnly={hasTable} />
-              ))}
-            </div>
-            <ComparisonTable packages={t.packages} caption={`${t.label}: package comparison`} />
+          <div class="container-wide">
+            <header class="kz-ptab__head">
+              <span class="kz-ptab__n" aria-hidden="true">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <h2 id={`tab-${t.key}`} class="kz-h2">
+                {t.label}
+              </h2>
+              <p class="kz-ptab__count">
+                {t.packages.length} {t.packages.length === 1 ? 'package' : 'packages'}
+              </p>
+            </header>
+            {ledger ? (
+              <ServiceRates packages={t.packages} divisions={divisions} />
+            ) : flat ? (
+              <ServiceRates packages={t.packages} />
+            ) : (
+              <PlanDeck packages={t.packages} label={t.label} id={`plans-${t.key}`} />
+            )}
+            {compare ? (
+              <div class="kz-ptab__compare">
+                <h3 class="kz-ptab__sub">Compare {t.label.toLowerCase()} side by side</h3>
+                <PackageCompare packages={t.packages} caption={`${t.label}: package comparison`} id={`cmp-${t.key}`} />
+              </div>
+            ) : null}
           </div>
         </section>
       );
@@ -121,24 +171,24 @@ const ld = [breadcrumbLd(ctx, [{ name: 'Pricing', path: '/pricing' }]), ...(faqs
   )}
 
   {catalogue.addons.length > 0 ? (
-    <section class="bg-surface py-14 md:py-20" aria-labelledby="addons-title">
-      <div class="container-content">
-        <h2 id="addons-title" class="text-3xl font-bold tracking-display">
-          Add-ons
-        </h2>
-        <p class="mt-2 max-w-2xl text-[15px] text-ink-600">Add any of these to a package.</p>
-        <ul class="mt-8 grid gap-x-10 divide-y divide-line border-y border-line md:grid-cols-2 md:divide-y-0">
+    <section class="kz-sec" aria-labelledby="addons-title">
+      <div class="container-wide kz-addons">
+        <header>
+          <h2 id="addons-title" class="kz-h2">
+            Add-ons
+          </h2>
+          <p class="kz-lede">Add any of these to a package.</p>
+        </header>
+        <ul class="kz-addons__list" role="list">
           {catalogue.addons.map((a) => (
-            <li class="flex items-start justify-between gap-6 py-4 md:border-b md:border-line">
+            <li class="kz-addons__row" data-addon={a.id}>
               <div>
-                <p class="font-semibold text-ink-950">{a.name}</p>
-                {a.description ? <p class="mt-0.5 text-[14px] leading-6 text-ink-600">{a.description}</p> : null}
+                <p class="kz-addons__name">{a.name}</p>
+                {a.description ? <p class="kz-addons__desc">{a.description}</p> : null}
               </div>
-              <p class="tnum shrink-0 text-right text-[15px] font-semibold text-ink-950">
-                {a.priceMinor !== null ? formatPriceTag(a.priceMinor, a.currency) : 'On request'}
-                {a.priceMinor !== null && unitLabel[a.unit] ? (
-                  <span class="block text-[12px] font-normal text-ink-600">{unitLabel[a.unit]}</span>
-                ) : null}
+              <p class="kz-addons__price" data-price>
+                <b>{a.priceMinor !== null ? formatPriceTag(a.priceMinor, a.currency) : 'On request'}</b>
+                {a.priceMinor !== null && unitLabel[a.unit] ? <small>{unitLabel[a.unit]}</small> : null}
               </p>
             </li>
           ))}
@@ -147,39 +197,31 @@ const ld = [breadcrumbLd(ctx, [{ name: 'Pricing', path: '/pricing' }]), ...(faqs
     </section>
   ) : null}
 
-  <section class="bg-canvas py-10" aria-label="Pricing note">
-    <div class="container-content">
-      <p class="max-w-3xl text-[14px] leading-6 text-ink-600" data-vat-note>
-        {catalogue.vatNote}
-      </p>
+  <section
+    class="kz-sec kz-sec--inset kz-faq kz-pfaq"
+    aria-labelledby={faqs.length > 0 ? 'faq-title' : undefined}
+    aria-label={faqs.length > 0 ? undefined : 'Pricing note'}
+  >
+    <div class="container-wide kz-faq__grid">
+      <div>
+        {faqs.length > 0 ? (
+          <h2 id="faq-title" class="kz-h2">
+            Pricing questions
+          </h2>
+        ) : null}
+        <p class="kz-pnote" data-vat-note>
+          {catalogue.vatNote}
+        </p>
+      </div>
+      {faqs.length > 0 ? (
+        <Accordion>
+          {faqs.map((f, i) => (
+            <AccordionItem title={f.question} open={i === 0}>
+              <p>{f.answer}</p>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      ) : null}
     </div>
   </section>
-
-  {faqs.length > 0 ? (
-    <section class="bg-surface py-14 md:py-20" aria-labelledby="faq-title">
-      <div class="container-content max-w-3xl">
-        <h2 id="faq-title" class="text-3xl font-bold tracking-display">
-          Pricing questions
-        </h2>
-        <div class="mt-8 divide-y divide-line border-y border-line">
-          {faqs.map((f, i) => (
-            <details class="group py-5" open={i === 0}>
-              <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-ink-950">
-                {f.question}
-                <span
-                  aria-hidden="true"
-                  class="text-xl leading-none text-ink-600 transition-transform group-open:rotate-45"
-                >
-                  +
-                </span>
-              </summary>
-              <p class="mt-3 text-[15px] leading-7 text-ink-600">{f.answer}</p>
-            </details>
-          ))}
-        </div>
-      </div>
-    </section>
-  ) : null}
-
-  {cta ? <CtaBand content={cta.content} /> : null}
 </PublicLayout>

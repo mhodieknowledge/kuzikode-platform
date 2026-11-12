@@ -26,7 +26,7 @@ const routes = [
   { href: '/contact', title: 'Get a quote', body: 'Tell us what you need. We reply with questions or a written quotation.' },
   { href: '/consultation', title: 'Book a consultation', body: 'Pick a time to talk it through before you decide.' },
   { href: '/pricing', title: 'See all prices', body: 'Every published package, side by side.' },
-];
+].filter((r) => r.href !== Astro.url.pathname); // never link a page to itself
 ---
 
 <footer class="kz-footer on-night" aria-labelledby="footer-heading">

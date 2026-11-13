@@ -221,7 +221,7 @@ Everything else (divisions, services, features, process, industries, pricing, em
 - **file:** `about-hero.png`
 - **purpose:** Hero image at the top of About, under the headline on phones and beside it on desktop.
 - **aspect:** desktop 16:9 · mobile crop 4:5 (subject in the right two-thirds on desktop, centred on phones)
-- **status:** requested · batch 3 · 2026-11-12
+- **status:** delivered · 2026-11-13 · placed in About hero
 
 ```
 Early morning in Harare seen from a first-floor studio window: steel window frame in the foreground, a timber desk with a closed laptop and a notebook on the sill, msasa trees and low city rooftops beyond in soft haze, warm light, calm and established. Art direction: documentary photography in Harare, Zimbabwe, soft clear morning daylight, warm neutral grading (deep warm near-black shadows like #141412, bone-white highlights like #F2EEE6, natural skin and wood tones), restrained colour with at most one small earthy accent in the frame (saffron #C98A17, clay #B84F35, deep emerald #1E7A52 or teal #1F8478), 35 mm lens, crisp focus, calm and orderly, real-looking materials (timber, plaster, concrete, brick, textiles), identifiably Zimbabwean details where natural (msasa trees, Harare streets, local brick and steel windows), no readable text, no logos, no watermarks, no screens with readable UI, no glowing effects, no posed stock smiles, people only as hands or seen from behind or at a distance (never a recognisable face). Generate at the largest size available.
@@ -231,7 +231,7 @@ Early morning in Harare seen from a first-floor studio window: steel window fram
 - **file:** `services-hero.png`
 - **purpose:** Hero image for the services index, with the six division drawings presented below it.
 - **aspect:** desktop 21:9 · mobile crop 4:5 (keep a quiet left third for the headline on desktop)
-- **status:** requested · batch 3 · 2026-11-12
+- **status:** delivered · 2026-11-13 · placed in Services hero
 
 ```
 Top-down view of a long timber worktable in a Harare studio: a laptop, a phone, printed page wireframes, a small notebook with a pencil, a ceramic cup, cables neatly tied, morning window light raking across the table, orderly and premium, nobody in frame. Art direction: documentary photography in Harare, Zimbabwe, soft clear morning daylight, warm neutral grading (deep warm near-black shadows like #141412, bone-white highlights like #F2EEE6, natural skin and wood tones), restrained colour with at most one small earthy accent in the frame (saffron #C98A17, clay #B84F35, deep emerald #1E7A52 or teal #1F8478), 35 mm lens, crisp focus, calm and orderly, real-looking materials (timber, plaster, concrete, brick, textiles), identifiably Zimbabwean details where natural (msasa trees, Harare streets, local brick and steel windows), no readable text, no logos, no watermarks, no screens with readable UI, no glowing effects, no posed stock smiles, people only as hands or seen from behind or at a distance (never a recognisable face). Generate at the largest size available.
@@ -241,7 +241,7 @@ Top-down view of a long timber worktable in a Harare studio: a laptop, a phone, 
 - **file:** `home-band.png`
 - **purpose:** Full-bleed background band behind a short statement, with a dark overlay for legible text on phones and desktop.
 - **aspect:** desktop 21:9 · mobile crop 9:16 (subject low in the frame; the upper half stays calm for text)
-- **status:** requested · batch 3 · 2026-11-12
+- **status:** delivered · 2026-11-13 · processed; placement in R7.1
 
 ```
 A small Harare shop counter at opening time: a shopkeeper's hands holding a mid-range Android phone to confirm a mobile-money payment, a paper receipt and a few packaged goods on the wooden counter, a brick wall and shelving softly out of focus, warm low morning light, documentary and quiet. Art direction: documentary photography in Harare, Zimbabwe, soft clear morning daylight, warm neutral grading (deep warm near-black shadows like #141412, bone-white highlights like #F2EEE6, natural skin and wood tones), restrained colour with at most one small earthy accent in the frame (saffron #C98A17, clay #B84F35, deep emerald #1E7A52 or teal #1F8478), 35 mm lens, crisp focus, calm and orderly, real-looking materials (timber, plaster, concrete, brick, textiles), identifiably Zimbabwean details where natural (msasa trees, Harare streets, local brick and steel windows), no readable text, no logos, no watermarks, no screens with readable UI, no glowing effects, no posed stock smiles, people only as hands or seen from behind or at a distance (never a recognisable face). Generate at the largest size available.
@@ -251,7 +251,7 @@ A small Harare shop counter at opening time: a shopkeeper's hands holding a mid-
 - **file:** `how-we-work-editorial.png`
 - **purpose:** Editorial image beside the "Discover" and "Design" stops: planning before building.
 - **aspect:** desktop 3:2 · mobile crop 4:3
-- **status:** requested · batch 3 · 2026-11-12
+- **status:** delivered · 2026-11-13 · processed; placement in R7.1
 
 ```
 Hands arranging paper cards and sticky notes into columns on a plastered wall next to a printed project timeline, one hand holding a marker, seen from behind and the side so no face is visible, soft daylight from a steel-framed window. Art direction: documentary photography in Harare, Zimbabwe, soft clear morning daylight, warm neutral grading (deep warm near-black shadows like #141412, bone-white highlights like #F2EEE6, natural skin and wood tones), restrained colour with at most one small earthy accent in the frame (saffron #C98A17, clay #B84F35, deep emerald #1E7A52 or teal #1F8478), 35 mm lens, crisp focus, calm and orderly, real-looking materials (timber, plaster, concrete, brick, textiles), identifiably Zimbabwean details where natural (msasa trees, Harare streets, local brick and steel windows), no readable text, no logos, no watermarks, no screens with readable UI, no glowing effects, no posed stock smiles, people only as hands or seen from behind or at a distance (never a recognisable face). Generate at the largest size available.
@@ -261,7 +261,7 @@ Hands arranging paper cards and sticky notes into columns on a plastered wall ne
 - **file:** `how-we-work-band.png`
 - **purpose:** Full-bleed band before the "Launch" and "Support" stops, overlaid with a single line of text.
 - **aspect:** desktop 21:9 · mobile crop 9:16 (subject on the right on desktop, lower third on phones)
-- **status:** requested · batch 3 · 2026-11-12
+- **status:** delivered · 2026-11-13 · placed in How we work "What you can expect" band
 
 ```
 A quiet evening handover in a small Harare office: a laptop open on a desk showing an abstract, unreadable dashboard in bone and black, a printed checklist with ticks beside it, a desk lamp switched on, the city softly visible through the window at dusk, warm and calm. Art direction: documentary photography in Harare, Zimbabwe, soft clear morning daylight, warm neutral grading (deep warm near-black shadows like #141412, bone-white highlights like #F2EEE6, natural skin and wood tones), restrained colour with at most one small earthy accent in the frame (saffron #C98A17, clay #B84F35, deep emerald #1E7A52 or teal #1F8478), 35 mm lens, crisp focus, calm and orderly, real-looking materials (timber, plaster, concrete, brick, textiles), identifiably Zimbabwean details where natural (msasa trees, Harare streets, local brick and steel windows), no readable text, no logos, no watermarks, no screens with readable UI, no glowing effects, no posed stock smiles, people only as hands or seen from behind or at a distance (never a recognisable face). Generate at the largest size available.
@@ -271,7 +271,7 @@ A quiet evening handover in a small Harare office: a laptop open on a desk showi
 - **file:** `careers-culture.png`
 - **purpose:** Editorial image for the culture and how-we-learn section on Careers.
 - **aspect:** desktop 3:2 · mobile crop 4:5
-- **status:** requested · batch 3 · 2026-11-12
+- **status:** delivered · 2026-11-13 · processed; placement in R7.1
 
 ```
 Two people at a shared desk seen from behind, one explaining something on a laptop to the other who takes notes in a notebook, plants and a steel window with msasa trees outside, relaxed and focused, faces not visible. Art direction: documentary photography in Harare, Zimbabwe, soft clear morning daylight, warm neutral grading (deep warm near-black shadows like #141412, bone-white highlights like #F2EEE6, natural skin and wood tones), restrained colour with at most one small earthy accent in the frame (saffron #C98A17, clay #B84F35, deep emerald #1E7A52 or teal #1F8478), 35 mm lens, crisp focus, calm and orderly, real-looking materials (timber, plaster, concrete, brick, textiles), identifiably Zimbabwean details where natural (msasa trees, Harare streets, local brick and steel windows), no readable text, no logos, no watermarks, no screens with readable UI, no glowing effects, no posed stock smiles, people only as hands or seen from behind or at a distance (never a recognisable face). Generate at the largest size available.

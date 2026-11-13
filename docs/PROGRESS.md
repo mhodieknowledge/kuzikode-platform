@@ -1211,3 +1211,10 @@ The **Next step** line must be specific enough that a fresh session can continue
   clients, quotations) → Finance (invoices, payments, subscriptions, managed services, expenses, reports) → Delivery (projects, time, support) →
   Website (pages, services, packages, content, media, careers) → Administration (users, settings, audit, notifications). Islands in
   `src/components/admin/*Admin.tsx` hold the logic: extract into hooks under `src/ui/admin/<module>/`, new markup, delete old. Keep every admin e2e hook.
+
+## 2026-11-13 11:45 UTC · Image delivery (B.4): 6 owner photos from design/inbox
+- Identified by content: about-hero, services-hero, home-band, how-we-work-editorial, how-we-work-band, careers-culture (all 1448×1086,
+  quality OK: hands clean, no text artefacts; about-hero has a flag edge at far left, cropped off by the hero's object-position).
+- `scripts/images/process.mjs` now reads owner prompts from `docs/redesign/IMAGE-REQUESTS.md` (B.4). Processed into `public/images/site/`
+  + manifest; inbox emptied. About, Services and How-we-work band pick them up automatically (screens checked at 390/1440, no overflow).
+- Still to place in R7.1: home-band (Home "Why Kuzikode"), how-we-work-editorial, careers-culture. Still requested: about-studio, careers-desk.

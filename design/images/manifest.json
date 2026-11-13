@@ -343,6 +343,108 @@
       ],
       "placeholder": "data:image/webp;base64,UklGRmgAAABXRUJQVlA4IFwAAABwAwCdASoYAA0APu1krU6ppaSiMAgBMB2JbACdMoAEZw6RIYAA/vB1l7O/Mhj5kPpmuO+zeKS4lTz/qufQgzWI5GN2/6EzPMHWIYu+pTvgSZAs1OZbNLzejp6AAA==",
       "illustrative": false
+    },
+    "about-hero": {
+      "model": "owner: gemini-app",
+      "seed": null,
+      "category": "place",
+      "prompt": "Early morning in Harare seen from a first-floor studio window: steel window frame in the foreground, a timber desk with a closed laptop and a notebook on the sill, msasa trees and low city rooftops beyond in soft haze, warm light, calm and established. Art direction: documentary photography in Harare, Zimbabwe, soft clear morning daylight, warm neutral grading (deep warm near-black shadows like #141412, bone-white highlights like #F2EEE6, natural skin and wood tones), restrained colour with at most one small earthy accent in the frame (saffron #C98A17, clay #B84F35, deep emerald #1E7A52 or teal #1F8478), 35 mm lens, crisp focus, calm and orderly, real-looking materials (timber, plaster, concrete, brick, textiles), identifiably Zimbabwean details where natural (msasa trees, Harare streets, local brick and steel windows), no readable text, no logos, no watermarks, no screens with readable UI, no glowing effects, no posed stock smiles, people only as hands or seen from behind or at a distance (never a recognisable face). Generate at the largest size available.",
+      "chosen": "about-hero (owner upload)",
+      "alt": "A timber desk at a steel-framed studio window looking out over msasa trees and the Harare skyline in morning light",
+      "width": 1448,
+      "height": 1086,
+      "widths": [
+        640,
+        1024,
+        1448
+      ],
+      "placeholder": "data:image/webp;base64,UklGRo4AAABXRUJQVlA4IIIAAAAQBQCdASoYABIAPu1qrFEppaQiqAqpMB2JYwC7ABBf0Rz37c+0Vz4xoCJMVkRJYAWAAPVrWyiUK/7rdzWIKtn5ZLwSHjXxFekZhd2BExNRvHFIextoei4lWVk5ugJYjI/xcwmza/swADLivy+0DrRJG+wapILgzWsr0jkMHYPjXwAA",
+      "illustrative": false
+    },
+    "services-hero": {
+      "model": "owner: gemini-app",
+      "seed": null,
+      "category": "place",
+      "prompt": "Top-down view of a long timber worktable in a Harare studio: a laptop, a phone, printed page wireframes, a small notebook with a pencil, a ceramic cup, cables neatly tied, morning window light raking across the table, orderly and premium, nobody in frame. Art direction: documentary photography in Harare, Zimbabwe, soft clear morning daylight, warm neutral grading (deep warm near-black shadows like #141412, bone-white highlights like #F2EEE6, natural skin and wood tones), restrained colour with at most one small earthy accent in the frame (saffron #C98A17, clay #B84F35, deep emerald #1E7A52 or teal #1F8478), 35 mm lens, crisp focus, calm and orderly, real-looking materials (timber, plaster, concrete, brick, textiles), identifiably Zimbabwean details where natural (msasa trees, Harare streets, local brick and steel windows), no readable text, no logos, no watermarks, no screens with readable UI, no glowing effects, no posed stock smiles, people only as hands or seen from behind or at a distance (never a recognisable face). Generate at the largest size available.",
+      "chosen": "services-hero (owner upload)",
+      "alt": "A timber worktable from above with a closed laptop, a phone, printed page wireframes, a notebook and a cup of coffee in morning light",
+      "width": 1448,
+      "height": 1086,
+      "widths": [
+        640,
+        1024,
+        1448
+      ],
+      "placeholder": "data:image/webp;base64,UklGRooAAABXRUJQVlA4IH4AAAAQBQCdASoYABIAPu1urlKppiQiqAgBMB2JQBYj42brAq7Tex3hkpqQYenn/ljK88FwAP6Cfp4j2Kh7DoV334f/oxWDKg/9RLejvwNN4xKqo61UCsgmD679aq8B1gi9akSDNLkmdaTXbgmP08rlkQXDnKfo70aS2I82T1F4AAA=",
+      "illustrative": false
+    },
+    "home-band": {
+      "model": "owner: gemini-app",
+      "seed": null,
+      "category": "people",
+      "prompt": "A small Harare shop counter at opening time: a shopkeeper's hands holding a mid-range Android phone to confirm a mobile-money payment, a paper receipt and a few packaged goods on the wooden counter, a brick wall and shelving softly out of focus, warm low morning light, documentary and quiet. Art direction: documentary photography in Harare, Zimbabwe, soft clear morning daylight, warm neutral grading (deep warm near-black shadows like #141412, bone-white highlights like #F2EEE6, natural skin and wood tones), restrained colour with at most one small earthy accent in the frame (saffron #C98A17, clay #B84F35, deep emerald #1E7A52 or teal #1F8478), 35 mm lens, crisp focus, calm and orderly, real-looking materials (timber, plaster, concrete, brick, textiles), identifiably Zimbabwean details where natural (msasa trees, Harare streets, local brick and steel windows), no readable text, no logos, no watermarks, no screens with readable UI, no glowing effects, no posed stock smiles, people only as hands or seen from behind or at a distance (never a recognisable face). Generate at the largest size available.",
+      "chosen": "home-band (owner upload)",
+      "alt": "A shopkeeper's hands holding a phone over a wooden counter beside a printed receipt, bread and a basket of bananas",
+      "width": 1448,
+      "height": 1086,
+      "widths": [
+        640,
+        1024,
+        1448
+      ],
+      "placeholder": "data:image/webp;base64,UklGRpwAAABXRUJQVlA4IJAAAABQBQCdASoYABIAPu1eqk4ppKQiMBgMATAdiWYAnTMy+gAgaG7WijV0rkCAlIiMj5+QxOAA/KHYL66/E+6VqYLqK4h7gvMgQxf3fkmGqySshO+/b4e/tH59T+hos3rZbs8yLBRtlihQIOEIDbrvu8ZbtzTA6POOvHCpQmzziFRJKQTgjdu8YdIO2hjflYeAAAA=",
+      "illustrative": true
+    },
+    "how-we-work-editorial": {
+      "model": "owner: gemini-app",
+      "seed": null,
+      "category": "people",
+      "prompt": "Hands arranging paper cards and sticky notes into columns on a plastered wall next to a printed project timeline, one hand holding a marker, seen from behind and the side so no face is visible, soft daylight from a steel-framed window. Art direction: documentary photography in Harare, Zimbabwe, soft clear morning daylight, warm neutral grading (deep warm near-black shadows like #141412, bone-white highlights like #F2EEE6, natural skin and wood tones), restrained colour with at most one small earthy accent in the frame (saffron #C98A17, clay #B84F35, deep emerald #1E7A52 or teal #1F8478), 35 mm lens, crisp focus, calm and orderly, real-looking materials (timber, plaster, concrete, brick, textiles), identifiably Zimbabwean details where natural (msasa trees, Harare streets, local brick and steel windows), no readable text, no logos, no watermarks, no screens with readable UI, no glowing effects, no posed stock smiles, people only as hands or seen from behind or at a distance (never a recognisable face). Generate at the largest size available.",
+      "chosen": "how-we-work-editorial (owner upload)",
+      "alt": "Hands arranging paper cards and sticky notes into columns on a wall beside a printed project timeline",
+      "width": 1448,
+      "height": 1086,
+      "widths": [
+        640,
+        1024,
+        1448
+      ],
+      "placeholder": "data:image/webp;base64,UklGRo4AAABXRUJQVlA4IIIAAACQBQCdASoYABIAPu1srlEppaQiqAqpMB2JYgCdM2QBgYC40cYhRoZP7qtXR9sSzYZME9ybAAD+4W6W/hSvPzpF83Ma+YLOIss/+ulQJ/IE3wXn38M1vxzQM72pm/Yg854vv4f72Rk0VC4zth7SS9xOin8u5L9WZ89v5qbBKw4IAAAA",
+      "illustrative": true
+    },
+    "how-we-work-band": {
+      "model": "owner: gemini-app",
+      "seed": null,
+      "category": "people",
+      "prompt": "A quiet evening handover in a small Harare office: a laptop open on a desk showing an abstract, unreadable dashboard in bone and black, a printed checklist with ticks beside it, a desk lamp switched on, the city softly visible through the window at dusk, warm and calm. Art direction: documentary photography in Harare, Zimbabwe, soft clear morning daylight, warm neutral grading (deep warm near-black shadows like #141412, bone-white highlights like #F2EEE6, natural skin and wood tones), restrained colour with at most one small earthy accent in the frame (saffron #C98A17, clay #B84F35, deep emerald #1E7A52 or teal #1F8478), 35 mm lens, crisp focus, calm and orderly, real-looking materials (timber, plaster, concrete, brick, textiles), identifiably Zimbabwean details where natural (msasa trees, Harare streets, local brick and steel windows), no readable text, no logos, no watermarks, no screens with readable UI, no glowing effects, no posed stock smiles, people only as hands or seen from behind or at a distance (never a recognisable face). Generate at the largest size available.",
+      "chosen": "how-we-work-band (owner upload)",
+      "alt": "An evening handover at a desk: a hand points at charts on a laptop while another holds a ticked checklist, the city at dusk beyond the window",
+      "width": 1448,
+      "height": 1086,
+      "widths": [
+        640,
+        1024,
+        1448
+      ],
+      "placeholder": "data:image/webp;base64,UklGRpwAAABXRUJQVlA4IJAAAACwBQCdASoYABIAPu1ur1IppiQiqAgBMB2JQBYj8dgpI0Bg82HO7l4N09nFH+KUHxzbK0QOYAAA/r4KW1c7XMOVwJdUA5XGaaOPqYWtKp+4Q7HkWGHs0m7DMF3zmBj94r9GggDnK9EugvlNIZjB6xcNxXyokll5N4KRi+EFQlW12f080EqEE1sDWQuT4unAAAA=",
+      "illustrative": true
+    },
+    "careers-culture": {
+      "model": "owner: gemini-app",
+      "seed": null,
+      "category": "people",
+      "prompt": "Two people at a shared desk seen from behind, one explaining something on a laptop to the other who takes notes in a notebook, plants and a steel window with msasa trees outside, relaxed and focused, faces not visible. Art direction: documentary photography in Harare, Zimbabwe, soft clear morning daylight, warm neutral grading (deep warm near-black shadows like #141412, bone-white highlights like #F2EEE6, natural skin and wood tones), restrained colour with at most one small earthy accent in the frame (saffron #C98A17, clay #B84F35, deep emerald #1E7A52 or teal #1F8478), 35 mm lens, crisp focus, calm and orderly, real-looking materials (timber, plaster, concrete, brick, textiles), identifiably Zimbabwean details where natural (msasa trees, Harare streets, local brick and steel windows), no readable text, no logos, no watermarks, no screens with readable UI, no glowing effects, no posed stock smiles, people only as hands or seen from behind or at a distance (never a recognisable face). Generate at the largest size available.",
+      "chosen": "careers-culture (owner upload)",
+      "alt": "Two colleagues at a shared desk by a window, one pointing at a chart on a laptop while the other takes notes",
+      "width": 1448,
+      "height": 1086,
+      "widths": [
+        640,
+        1024,
+        1448
+      ],
+      "placeholder": "data:image/webp;base64,UklGRpIAAABXRUJQVlA4IIYAAADwBACdASoYABIAPu1iqE2ppaOiMAgBMB2JQBWFEAAvsZpz4JyLS7djAuDT+qz98wAA/joAcYqKZcbx4GEoxdvWd+6lrmVlEj7cd6CziCThkHRKQFXsGbAcA7+06u5O7H8gzzu3hyqrJsWHzAvavCe7q3jT+4DwKNyIU6lvWotVpqm+qNgAAA==",
+      "illustrative": true
     }
   }
 }

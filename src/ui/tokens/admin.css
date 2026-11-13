@@ -52,7 +52,12 @@
   .kz-aside__word {
     display: inline-flex;
     color: var(--on-night);
-    --kz-logo-accent: var(--lit);
+    --kz-logo-brace: #3da676;
+    --kz-logo-chevron: var(--lit);
+    --kz-logo-tag: var(--lit);
+  }
+  .kz-aside {
+    --kz-logo-brace: #3da676;
   }
   .kz-aside__mark {
     display: none;

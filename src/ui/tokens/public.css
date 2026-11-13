@@ -30,13 +30,15 @@
   }
   .kz-header--bone .kz-logo {
     color: var(--ink-900);
-    --kz-logo-accent: var(--action);
   }
+  /* R9.3: on night the brace lifts to a lighter emerald (logo only), the chevron and tagline to gold (--lit). */
   .kz-header--night .kz-logo,
   .kz-menu .kz-logo,
   .kz-footer .kz-logo {
     color: var(--on-night);
-    --kz-logo-accent: var(--lit);
+    --kz-logo-brace: #3da676;
+    --kz-logo-chevron: var(--lit);
+    --kz-logo-tag: var(--lit);
   }
 
   .kz-nav {

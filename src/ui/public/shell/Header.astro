@@ -1,6 +1,7 @@
 ---
 /**
  * Public header (docs/redesign/RESPONSIVE_DESIGN_SPEC.md §1).
+ * R9.3: the Kuzikode Intelligent Technologies lockup (mark + kuzikode on phones; + INTELLIGENT TECHNOLOGIES from 640 px).
  * R3.1 (Route structure, Zimbabwe earth palette). ≥ 1280 px: wordmark · main nav with a sliding indicator · Services = the
  * division index mega-panel (numerals in division hues, real "from" prices, a lit frame) · About = a compact panel · search ·
  * Client workspace · Get a quote. Below: wordmark · "Get a quote" (steps back while the hero's own is on screen) · menu button
@@ -61,7 +62,7 @@ const mobileLinks = [
   data-tone={tone}
 >
   <div class="container-wide flex h-[var(--header-h)] items-center gap-4">
-    <Logo height={26} class="kz-header__logo mr-auto xl:mr-6" />
+    <Logo variant="responsive" height={28} wideHeight={42} class="kz-header__logo mr-auto xl:mr-6" />
 
     <nav aria-label="Main" class="kz-nav hidden xl:block" data-nav>
       <ul class="flex items-center">

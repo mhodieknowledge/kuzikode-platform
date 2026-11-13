@@ -9,13 +9,14 @@ import { chromium } from '@playwright/test';
 import { DIVISIONS } from '../seeds/content/services.ts';
 
 const font = (p) => `data:font/woff2;base64,${readFileSync(p).toString('base64')}`;
-const overpass = font('node_modules/@fontsource-variable/overpass/files/overpass-latin-wght-normal.woff2');
+const poppins = (w) => font(`node_modules/@fontsource/poppins/files/poppins-latin-${w}-normal.woff2`);
 const logo = readFileSync('public/brand/logo-white.svg', 'utf8');
+// R9.3: the full Kuzikode Intelligent Technologies lockup in its night colours (built by design/brand/tools/build-brand.mjs).
 // Owner-supplied abstract background (docs/13 §4 "bg-og"), processed by img:process.
 const bg = `data:image/jpeg;base64,${readFileSync('public/images/site/bg-og-1600.jpg').toString('base64')}`;
 
 const cards = [
-  { file: 'default', eyebrow: 'Kuzikode Technologies', title: 'Building intelligent digital solutions.' },
+  { file: 'default', eyebrow: 'Kuzikode Intelligent Technologies', title: 'Building intelligent digital solutions.' },
   { file: 'about', eyebrow: 'About', title: 'A technology partner for organisations in Zimbabwe and Africa.' },
   { file: 'contact', eyebrow: 'Contact', title: 'Tell us what you need.' },
   { file: 'work', eyebrow: 'Our work', title: 'Projects we design, build and support.' },
@@ -31,14 +32,15 @@ const cards = [
 ];
 
 const html = (c) => `<!doctype html><html><head><style>
-@font-face{font-family:Overpass;src:url(${overpass}) format('woff2');font-weight:100 900}
+@font-face{font-family:Poppins;src:url(${poppins(600)}) format('woff2');font-weight:600}
+@font-face{font-family:Poppins;src:url(${poppins(700)}) format('woff2');font-weight:700}
 *{margin:0;box-sizing:border-box}
-body{width:1200px;height:630px;background:#141412 url(${bg}) center/cover no-repeat;color:#fff;font-family:Overpass;position:relative;overflow:hidden}
+body{width:1200px;height:630px;background:#141412 url(${bg}) center/cover no-repeat;color:#fff;font-family:Poppins;position:relative;overflow:hidden}
 .shade{position:absolute;inset:0;background:#141412;opacity:.88}
 .wrap{position:absolute;inset:72px 80px;display:flex;flex-direction:column;justify-content:space-between}
-.logo svg{height:44px;width:auto}
+.logo svg{height:56px;width:auto}
 .eyebrow{font-size:24px;font-weight:600;color:#E3B04B;letter-spacing:.02em}
-h1{font-family:Overpass;font-weight:800;font-size:${c.title.length > 48 ? 58 : 68}px;line-height:1.08;letter-spacing:-.03em;max-width:980px;margin-top:18px}
+h1{font-family:Poppins;font-weight:700;font-size:${c.title.length > 48 ? 54 : 64}px;line-height:1.12;letter-spacing:-.025em;max-width:980px;margin-top:18px}
 .bar{height:6px;width:96px;background:#1E7A52;border-radius:2px}
 </style></head><body><div class="shade"></div><div class="wrap">
 <div class="logo">${logo}</div>

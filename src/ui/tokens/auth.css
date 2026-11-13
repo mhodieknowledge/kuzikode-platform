@@ -35,7 +35,9 @@
       linear-gradient(to bottom, rgb(242 238 230 / 0.045) 1px, transparent 1px);
     background-size: 32px 32px;
     background-position: -1px -1px;
-    --kz-logo-accent: var(--gold-400);
+    --kz-logo-brace: #3da676;
+    --kz-logo-chevron: var(--gold-400);
+    --kz-logo-tag: var(--gold-400);
   }
   .kz-auth__brand {
     position: relative;

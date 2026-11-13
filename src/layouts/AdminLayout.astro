@@ -43,10 +43,15 @@ const aside = readAside(Astro.cookies.get(ASIDE_COOKIE)?.value);
           <span class="kz-aside__word">
             <Logo href={null} height={20} />
           </span>
-          <svg class="kz-aside__mark" viewBox="0 0 32 32" width="24" height="24" aria-hidden="true" focusable="false">
-            <rect x="5" y="4" width="6.5" height="24" rx="0.75" fill="currentColor"></rect>
-            <path d="M14 14.4 22.6 4H29.2L20.6 14.4Z" fill="var(--lit)"></path>
-            <path d="M14 17.6H20.6L29.2 28H22.6Z" fill="currentColor"></path>
+          <svg class="kz-aside__mark" viewBox="0 0 48 48" width="24" height="24" aria-hidden="true" focusable="false">
+            <path
+              d="M21 7h-3.5Q13 7 13 11.5V19q0 5-5 5 5 0 5 5v7.5q0 4.5 4.5 4.5H21"
+              fill="none"
+              stroke="var(--kz-logo-brace)"
+              stroke-width="6"
+              stroke-linejoin="round"
+            ></path>
+            <path d="M41 7.5 21.5 24 41 40.5" fill="none" stroke="var(--lit)" stroke-width="6.5"></path>
           </svg>
         </a>
         <span class="kz-aside__tag" aria-hidden="true">

@@ -1,33 +1,95 @@
 ---
 /**
- * Kuzikode wordmark as inline SVG so it takes the surface colour (`currentColor`); the K's upper arm is the one emerald stroke (gold on night).
- * Source artwork: public/brand/logo.svg (Route palette).
+ * Kuzikode Intelligent Technologies logo as inline SVG (R9.3, REFINEMENTS §9). The mark is a code brace as the K's stem with a
+ * chevron for its arms. Source artwork: public/brand/*.svg (built by design/brand/tools/build-brand.mjs, text outlined from Poppins).
+ * Colours follow the surface: wordmark = currentColor; brace, chevron and tagline read --kz-logo-brace / --kz-logo-chevron /
+ * --kz-logo-tag (emerald, saffron and saffron-ink on light; public.css and admin.css lift them on night). `mono` = one colour.
+ *
+ * Variants: `wordmark` (mark + "kuzikode", default), `full` (+ INTELLIGENT TECHNOLOGIES), `stacked`, `mark`, and `responsive`
+ * (wordmark below 640 px, full from 640 px: the public header). `height` is the rendered height of the lockup in px.
  */
-import raw from '../../../public/brand/logo.svg?raw';
+import full from '../../../public/brand/logo.svg?raw';
+import wordmark from '../../../public/brand/logo-wordmark.svg?raw';
+import stacked from '../../../public/brand/logo-stacked.svg?raw';
+import markOnly from '../../../public/brand/logo-mark.svg?raw';
 
+type Variant = 'wordmark' | 'full' | 'stacked' | 'mark' | 'responsive';
 interface Props {
   href?: string | null;
   height?: number;
+  variant?: Variant;
+  /** `responsive` only: the height of the full lockup from 640 px (defaults to `height`). */
+  wideHeight?: number;
+  mono?: boolean;
   class?: string;
 }
-const { href = '/', height = 26, class: className } = Astro.props;
-const width = Math.round((height * 174.39) / 32);
-const svg = raw
-  .replace(/<title[^>]*>.*?<\/title>/, '')
-  .replace(
-    / role="img" aria-labelledby="t"/,
-    ` width="${width}" height="${height}" aria-hidden="true" focusable="false"`,
-  )
-  .replaceAll('fill="#141412"', 'fill="currentColor"')
-  .replaceAll('fill="#1E7A52"', 'fill="var(--kz-logo-accent, var(--action))"');
+const {
+  href = '/',
+  height = 26,
+  wideHeight = height,
+  variant = 'wordmark',
+  mono = false,
+  class: className,
+} = Astro.props;
+
+const sources = { full, wordmark, stacked, mark: markOnly } as const;
+function render(src: string, h: number, extraClass: string): string {
+  const [, , , vw = '48', vh = '48'] = /viewBox="(\S+) (\S+) (\S+) (\S+)"/.exec(src) ?? [];
+  const w = Math.round((h * Number(vw)) / Number(vh));
+  const colour = (v: string, fallback: string) => (mono ? 'currentColor' : `var(${v}, ${fallback})`);
+  return src
+    .trim()
+    .replace(/<title[^>]*>.*?<\/title>/, '')
+    .replace(
+      / role="img" aria-labelledby="t"/,
+      ` width="${w}" height="${h}" class="${extraClass}" aria-hidden="true" focusable="false"`,
+    )
+    .replaceAll('"#141412"', '"currentColor"')
+    .replaceAll('"#1E7A52"', `"${colour('--kz-logo-brace', '#1E7A52')}"`)
+    .replaceAll('"#C98A17"', `"${colour('--kz-logo-chevron', '#C98A17')}"`)
+    .replaceAll('"#8A5C08"', `"${colour('--kz-logo-tag', '#8A5C08')}"`);
+}
+const svg =
+  variant === 'responsive'
+    ? render(wordmark, height, 'kz-logo__short') + render(full, wideHeight, 'kz-logo__long')
+    : render(sources[variant], height, 'kz-logo__svg');
+const label = 'Kuzikode Intelligent Technologies';
 ---
 
 {href ? (
-  <a href={href} class:list={['kz-logo inline-flex items-center', className]} aria-label="Kuzikode Technologies, home">
+  <a
+    href={href}
+    class:list={['kz-logo inline-flex items-center', className]}
+    aria-label={`${label}, home`}
+    data-logo-variant={variant}
+  >
     <Fragment set:html={svg} />
   </a>
 ) : (
-  <span class:list={['kz-logo inline-flex items-center', className]} role="img" aria-label="Kuzikode Technologies">
+  <span
+    class:list={['kz-logo inline-flex items-center', className]}
+    role="img"
+    aria-label={label}
+    data-logo-variant={variant}
+  >
     <Fragment set:html={svg} />
   </span>
 )}
+
+<style is:global>
+  .kz-logo svg {
+    display: block;
+    flex: none;
+  }
+  .kz-logo .kz-logo__long {
+    display: none;
+  }
+  @media (min-width: 640px) {
+    .kz-logo .kz-logo__short {
+      display: none;
+    }
+    .kz-logo .kz-logo__long {
+      display: block;
+    }
+  }
+</style>

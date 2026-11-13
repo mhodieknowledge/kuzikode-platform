@@ -89,12 +89,12 @@ Ticked when the file is deleted (or, for the logic-only files marked *logic*, mo
 | Legacy file | Replaced by | Deleted in |
 |---|---|---|
 | layouts/PublicLayout.astro | new PublicLayout (rewritten on layouts/Base.astro) | [x] R3.1 |
-| layouts/AppLayout.astro | layouts/Base.astro (new) | [ ] R5.1 (still used by legacy portal/admin layouts) |
+| layouts/AppLayout.astro | layouts/Base.astro (new) | [x] removed R6.1 |
 | layouts/PortalLayout.astro | rewritten from scratch as the workspace shell (Base + ui/workspace: nav, AccountMenu, MoreSheet, CommandPalette, Window) | [x] R5.1 |
 | layouts/AdminLayout.astro | new AdminLayout | [ ] R6.1 |
 | layouts/AuthLayout.astro | new AuthLayout | [ ] R5.4 |
 | layouts/DocumentLayout.astro | new DocumentLayout (rewritten on layouts/Base.astro) | [x] R4.8 |
-| components/BaseHead.astro | ui/head/Head.astro (new) | [ ] R5.1 (still used by legacy layouts) |
+| components/BaseHead.astro | ui/head/Head.astro (new) | [x] removed R6.1 |
 | components/JsonLd.astro (*logic*) | kept as is (pure structured-data output) | — |
 | components/Logo.astro | ui/brand/Logo.astro (new) | [ ] R5.1 (still used by legacy layouts) |
 | components/ResponsiveImage.astro | src/ui/primitives/Picture.astro (new) | [x] R4.7 (deleted; products page now uses a drawing) |

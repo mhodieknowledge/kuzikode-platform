@@ -1,14 +1,21 @@
 ---
 /**
- * Admin shell (P4.1): permission-filtered sidebar (drawer on small screens), top bar with ⌘K search, notifications bell
- * and account menu. Pages pass the result of `loadAdminPage` as `page`; the dev UI kit passes a static nav instead.
+ * Admin shell (R6.1, rebuilt from scratch on Base; PANEL_DESIGN_SPEC §3, BRIEF §11 "Linux-inspired", KDE-like density).
+ * A night sidebar of grouped modules (Overview · Sales · Finance · Delivery · Website · Administration; 40 px rows with icons, the
+ * current module lit in gold) beside a bone top bar (search / ⌘K, notifications, account) and the content area (max 1440 px,
+ * pages lay out panes). Desktop: 248 px sidebar, collapsible to a 64 px icon rail; the choice is remembered per device in the
+ * `kz_aside` cookie, read here so the first paint is already right. Tablet: the icon rail. Phones: the top bar carries a menu
+ * button and the sidebar becomes a left sheet. Light only.
+ * Props are unchanged so every admin page keeps working while its body is rebuilt (R6.2). The nav arrives already filtered by
+ * permission (`adminNavFor`); the shell only adds icons, never items.
  */
-import { Menu, X } from 'lucide-react';
-import AppLayout from './AppLayout.astro';
-import Logo from '../components/Logo.astro';
-import CommandPalette from '../components/admin/CommandPalette';
-import NotificationsBell from '../components/admin/NotificationsBell';
-import UserMenu from '../components/admin/UserMenu';
+import Base from './Base.astro';
+import Logo from '../ui/brand/Logo.astro';
+import Icon from '../ui/icons/Icon.astro';
+import { AdminNotifications } from '../ui/admin/AdminNotifications';
+import { AdminPalette } from '../ui/admin/AdminPalette';
+import { AdminUserMenu } from '../ui/admin/AdminUserMenu';
+import { ASIDE_COOKIE, adminShellNav, adminShortcuts, readAside } from '../ui/admin/nav';
 import type { AdminPage } from '../server/lib/admin-page';
 
 export interface NavGroup {
@@ -23,32 +30,39 @@ interface Props {
   userName?: string;
 }
 const { title, page, csrfToken = page?.csrfToken, userName } = Astro.props;
-const nav: NavGroup[] = page?.nav ?? Astro.props.nav ?? [];
-const shortcuts = nav.flatMap((g) => g.items.map((i) => ({ label: i.label, href: i.href })));
+const nav = adminShellNav(page?.nav ?? Astro.props.nav ?? []);
+const shortcuts = adminShortcuts(nav);
+const aside = readAside(Astro.cookies.get(ASIDE_COOKIE)?.value);
 ---
 
-<AppLayout title={`${title} · Kuzikode Admin`} csrfToken={csrfToken}>
-  <div class="flex min-h-screen">
-    <aside class="hidden w-60 shrink-0 border-r border-line bg-surface lg:flex lg:flex-col" aria-label="Admin">
-      <div class="flex h-16 items-center px-5">
-        <Logo href="/admin" height={24} />
+<Base title={`${title} · Kuzikode Admin`} noindex csrfToken={csrfToken} bodyClass="kz-admbody">
+  <div class="kz-adm" data-aside={aside}>
+    <aside class="kz-aside" aria-label="Admin">
+      <div class="kz-aside__head">
+        <a href="/admin" class="kz-aside__home" aria-label="Kuzikode admin, dashboard">
+          <span class="kz-aside__word">
+            <Logo href={null} height={20} />
+          </span>
+          <svg class="kz-aside__mark" viewBox="0 0 32 32" width="24" height="24" aria-hidden="true" focusable="false">
+            <rect x="5" y="4" width="6.5" height="24" rx="0.75" fill="currentColor"></rect>
+            <path d="M14 14.4 22.6 4H29.2L20.6 14.4Z" fill="var(--lit)"></path>
+            <path d="M14 17.6H20.6L29.2 28H22.6Z" fill="currentColor"></path>
+          </svg>
+        </a>
+        <span class="kz-aside__tag" aria-hidden="true">
+          admin
+        </span>
       </div>
-      <nav aria-label="Admin navigation" class="flex-1 overflow-y-auto px-3 pb-6" data-admin-nav>
+      <nav aria-label="Admin navigation" class="kz-anav" data-admin-nav>
         {nav.map((group) => (
-          <div class="mt-4">
-            <p class="px-2 pb-1 text-[11px] font-semibold tracking-wider text-ink-600 uppercase">{group.label}</p>
-            <ul>
+          <div class="kz-anav__g">
+            <p class="kz-anav__h">{group.label}</p>
+            <ul role="list">
               {group.items.map((item) => (
                 <li>
-                  <a
-                    href={item.href}
-                    aria-current={item.active ? 'page' : undefined}
-                    class:list={[
-                      'flex h-9 items-center rounded-sm px-2 text-sm',
-                      item.active ? 'bg-brand-50 font-semibold text-brand-600' : 'text-ink-800 hover:bg-ink-950/5',
-                    ]}
-                  >
-                    {item.label}
+                  <a href={item.href} aria-current={item.active ? 'page' : undefined}>
+                    <Icon name={item.icon} size={20} />
+                    <span class="kz-anav__l">{item.label}</span>
                   </a>
                 </li>
               ))}
@@ -56,83 +70,150 @@ const shortcuts = nav.flatMap((g) => g.items.map((i) => ({ label: i.label, href:
           </div>
         ))}
       </nav>
-    </aside>
-    <div class="flex min-w-0 flex-1 flex-col">
-      <header class="flex h-16 items-center gap-3 border-b border-line bg-surface px-4 lg:px-8">
+      <div class="kz-aside__foot">
         <button
           type="button"
-          class="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-line text-ink-950 lg:hidden"
+          class="kz-aside__toggle"
+          aria-label="Collapse sidebar"
+          aria-pressed={aside === 'collapsed' ? 'true' : 'false'}
+          data-aside-toggle
+        >
+          <Icon name="chevron-left" size={16} />
+          <span class="kz-aside__toggle-t" aria-hidden="true">
+            Collapse
+          </span>
+        </button>
+      </div>
+      <span class="kz-aside__tip" aria-hidden="true" data-aside-tip></span>
+    </aside>
+
+    <div class="kz-adm__col">
+      <header class="kz-abar">
+        <button
+          type="button"
+          class="kz-abtn kz-abar__menu"
           aria-label="Open navigation"
           aria-controls="admin-mobile-nav"
+          aria-haspopup="dialog"
           data-admin-nav-open
         >
-          <Menu size={20} aria-hidden="true" />
+          <Icon name="menu" size={20} />
         </button>
-        <div class="flex min-w-0 flex-1 items-center">
-          {page ? <CommandPalette client:idle shortcuts={shortcuts} /> : <slot name="topbar" />}
+        <a href="/admin" class="kz-abar__home" aria-label="Kuzikode admin, dashboard">
+          <svg viewBox="0 0 32 32" width="24" height="24" aria-hidden="true" focusable="false">
+            <rect x="5" y="4" width="6.5" height="24" rx="0.75" fill="currentColor"></rect>
+            <path d="M14 14.4 22.6 4H29.2L20.6 14.4Z" fill="var(--action)"></path>
+            <path d="M14 17.6H20.6L29.2 28H22.6Z" fill="currentColor"></path>
+          </svg>
+        </a>
+        <div class="kz-abar__find">
+          {page ? <AdminPalette client:idle shortcuts={shortcuts} /> : <slot name="topbar" />}
         </div>
         {page ? (
-          <div class="flex items-center gap-1">
-            <NotificationsBell client:idle initialUnread={page.unread} />
-            <UserMenu client:idle name={page.auth.user.name} email={page.auth.user.email} />
+          <div class="kz-abar__r">
+            <AdminNotifications client:load initialUnread={page.unread} />
+            <AdminUserMenu client:load name={page.auth.user.name} email={page.auth.user.email} />
           </div>
         ) : userName ? (
-          <span class="text-sm text-ink-600">{userName}</span>
+          <span class="kz-abar__who">{userName}</span>
         ) : null}
       </header>
-      <main id="main" tabindex="-1" class="min-w-0 flex-1 px-4 py-6 focus:outline-none lg:px-8">
-        <slot />
+      <main id="main" tabindex="-1" class="kz-amain">
+        <div class="kz-amain__in">
+          <slot />
+        </div>
       </main>
     </div>
   </div>
-  <dialog
-    id="admin-mobile-nav"
-    aria-label="Admin navigation"
-    class="m-0 h-full max-h-none w-72 max-w-[85vw] bg-surface p-0 backdrop:bg-ink-950/40"
-    data-admin-nav-dialog
-  >
-    <div class="flex h-16 items-center justify-between px-5">
-      <Logo href="/admin" height={22} />
-      <button
-        type="button"
-        class="inline-flex h-10 w-10 items-center justify-center rounded-sm text-ink-950"
-        aria-label="Close navigation"
-        data-admin-nav-close
-      >
-        <X size={20} aria-hidden="true" />
-      </button>
+
+  <dialog id="admin-mobile-nav" aria-label="Admin navigation" class="kz-anavsheet" data-admin-nav-dialog>
+    <div class="kz-anavsheet__panel">
+      <div class="kz-anavsheet__head">
+        <span class="kz-aside__word">
+          <Logo href="/admin" height={20} />
+        </span>
+        <button type="button" class="kz-abtn kz-abtn--night" aria-label="Close navigation" data-admin-nav-close>
+          <Icon name="close" size={20} />
+        </button>
+      </div>
+      <nav class="kz-anav kz-anav--sheet">
+        {nav.map((group) => (
+          <div class="kz-anav__g">
+            <p class="kz-anav__h">{group.label}</p>
+            <ul role="list">
+              {group.items.map((item) => (
+                <li>
+                  <a href={item.href} aria-current={item.active ? 'page' : undefined}>
+                    <Icon name={item.icon} size={20} />
+                    <span class="kz-anav__l">{item.label}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </nav>
     </div>
-    <nav class="px-3 pb-6">
-      {nav.map((group) => (
-        <div class="mt-4">
-          <p class="px-2 pb-1 text-[11px] font-semibold tracking-wider text-ink-600 uppercase">{group.label}</p>
-          <ul>
-            {group.items.map((item) => (
-              <li>
-                <a
-                  href={item.href}
-                  aria-current={item.active ? 'page' : undefined}
-                  class:list={[
-                    'flex h-11 items-center rounded-sm px-2 text-[15px]',
-                    item.active ? 'bg-brand-50 font-semibold text-brand-600' : 'text-ink-800',
-                  ]}
-                >
-                  {item.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </nav>
   </dialog>
-</AppLayout>
+</Base>
 
 <script>
+  import { ASIDE_COOKIE } from '../ui/admin/nav';
+
+  // Sidebar collapse (desktop): flip the state and remember it per device.
+  const shell = document.querySelector<HTMLElement>('.kz-adm');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-aside-toggle]');
+  const railOnly = () => matchMedia('(max-width: 1023px)').matches;
+  toggle?.addEventListener('click', () => {
+    if (!shell) return;
+    const next = shell.dataset.aside === 'collapsed' ? 'expanded' : 'collapsed';
+    shell.dataset.aside = next;
+    toggle.setAttribute('aria-pressed', String(next === 'collapsed'));
+    const secure = location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = `${ASIDE_COOKIE}=${next}; Path=/admin; Max-Age=31536000; SameSite=Lax${secure}`;
+    tip?.removeAttribute('data-on');
+  });
+
+  // Icon rail: one floating label beside the hovered / focused module (outside the scrolling list, so it is never clipped).
+  const tip = document.querySelector<HTMLElement>('[data-aside-tip]');
+  const asideEl = document.querySelector<HTMLElement>('.kz-aside');
+  const isRail = () => !!shell && (shell.dataset.aside === 'collapsed' || railOnly());
+  const show = (e: Event) => {
+    const a = (e.target as Element | null)?.closest?.('.kz-anav a');
+    if (!tip || !asideEl || !a || !isRail()) return;
+    const r = a.getBoundingClientRect();
+    tip.textContent = a.querySelector('.kz-anav__l')?.textContent ?? '';
+    tip.style.top = `${r.top + r.height / 2 - asideEl.getBoundingClientRect().top}px`;
+    tip.setAttribute('data-on', '');
+  };
+  const hide = () => tip?.removeAttribute('data-on');
+  const list = asideEl?.querySelector('[data-admin-nav]');
+  list?.addEventListener('pointerover', show);
+  list?.addEventListener('focusin', show);
+  list?.addEventListener('pointerleave', hide);
+  list?.addEventListener('focusout', hide);
+  list?.addEventListener('scroll', hide, { passive: true });
+
+  // Phones: the sidebar as a left sheet (modal <dialog>: focus trap, Escape, inert page).
   const dialog = document.querySelector<HTMLDialogElement>('[data-admin-nav-dialog]');
-  document.querySelector('[data-admin-nav-open]')?.addEventListener('click', () => dialog?.showModal());
-  document.querySelector('[data-admin-nav-close]')?.addEventListener('click', () => dialog?.close());
+  const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const open = () => {
+    if (!dialog || dialog.open) return;
+    dialog.showModal();
+    requestAnimationFrame(() => dialog.setAttribute('data-open', ''));
+  };
+  const close = () => {
+    if (!dialog?.open) return;
+    dialog.removeAttribute('data-open');
+    window.setTimeout(() => dialog.close(), reduce() ? 0 : 200);
+  };
+  document.querySelector('[data-admin-nav-open]')?.addEventListener('click', open);
+  document.querySelector('[data-admin-nav-close]')?.addEventListener('click', close);
+  dialog?.addEventListener('cancel', (e) => {
+    e.preventDefault();
+    close();
+  });
   dialog?.addEventListener('click', (e) => {
-    if (e.target === dialog) dialog.close();
+    if (e.target === dialog) close();
   });
 </script>

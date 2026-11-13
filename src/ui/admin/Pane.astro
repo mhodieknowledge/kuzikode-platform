@@ -1,0 +1,30 @@
+---
+/**
+ * Admin pane (R6.1, PANEL_DESIGN_SPEC §1): a section with a header row (title, optional mono meta, actions slot) over a groove,
+ * and a body. No window title bar: that chrome belongs to the client workspace. `flush` drops the body padding for tables.
+ */
+interface Props {
+  title: string;
+  meta?: string | undefined;
+  flush?: boolean;
+  headingLevel?: 2 | 3;
+  class?: string | undefined;
+}
+const { title, meta, flush = false, headingLevel = 2, class: className } = Astro.props;
+const H = `h${headingLevel}` as 'h2' | 'h3';
+---
+
+<section class:list={['kz-apane', className]}>
+  <div class="kz-apane__head">
+    <H class="kz-apane__title">{title}</H>
+    {meta ? <span class="kz-apane__meta">{meta}</span> : null}
+    {Astro.slots.has('actions') ? (
+      <div class="kz-apane__acts">
+        <slot name="actions" />
+      </div>
+    ) : null}
+  </div>
+  <div class:list={['kz-apane__body', flush && 'is-flush']}>
+    <slot />
+  </div>
+</section>

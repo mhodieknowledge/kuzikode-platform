@@ -1221,3 +1221,4 @@ The **Next step** line must be specific enough that a fresh session can continue
 
 ## 2026-11-13 11:55 UTC · R6.2 started (heartbeat)
 - Group 1 (shared admin table/list-row, filter sheet, save bar, KPI strip; dashboard, enquiries, leads, clients, quotations) delegated: opus/medium builder.
+- 12:17 UTC heartbeat: group 1 builder still running.

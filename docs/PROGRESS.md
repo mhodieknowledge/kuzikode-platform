@@ -1233,3 +1233,4 @@ The **Next step** line must be specific enough that a fresh session can continue
   subscriptions, managed services, expenses, reports; replace `components/admin/actions.tsx` with `ui/admin/action.ts`. Reuse group 1 APIs (see that subagent report summary in this entry).
   Known: quotation intro still uses legacy `components/ui/RichTextEditor` (rebuild in Website group).
 - 16:30 UTC: usage limit paused the group 2 (Finance) builder from ~13:00 to 16:30; resumed. Partial work in `src/ui/admin/{finance,invoices}/`.
+- 17:02 UTC heartbeat: group 2 builder still running.

@@ -1,6 +1,10 @@
 ---
+/** One website page (R6.2): publish actions in the head, section drafts as panes, page details and search beside them. */
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import { PageMetaForm, PublishBar, SectionEditor } from '../../../../components/admin/CmsAdmin';
+import PageHead from '../../../../ui/admin/PageHead.astro';
+import { PageMetaForm } from '../../../../ui/admin/cms/PageMetaForm';
+import { PublishBar } from '../../../../ui/admin/cms/PublishBar';
+import { SectionEditor } from '../../../../ui/admin/cms/SectionEditor';
 import { loadAdminPage } from '../../../../server/lib/admin-page';
 import { AppError } from '../../../../server/lib/errors';
 import { getPageAdmin, listMedia } from '../../../../server/modules/cms/admin';
@@ -20,28 +24,19 @@ try {
 const { page: p, sections } = data;
 const media = (await listMedia(ctx)).map((m) => ({ id: m.id, file_id: m.file_id, alt_text: m.alt_text }));
 const path = pagePath(p.key);
+const changed = sections.filter((s) => s.changed).length;
 ---
 
 <AdminLayout title={`Edit ${p.title}`} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/cms" class="hover:text-ink-950 hover:underline">
-      Website
-    </a>{' '}
-    / <span class="text-ink-950">{p.title}</span>
-  </nav>
-  <div class="mt-2 flex flex-wrap items-start justify-between gap-4">
-    <div>
-      <h1 class="text-2xl font-bold tracking-display">{p.title}</h1>
-      <p class="mt-1 text-sm text-ink-600">
-        <span class="font-mono">{path}</span> · {sections.filter((s) => s.changed).length} sections with unpublished
-        changes
-      </p>
-    </div>
-    <PublishBar client:load pageKey={p.key} previewHref={`${path}?preview=1`} liveHref={path} />
-  </div>
-  <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-    <div class="flex flex-col gap-6">
-      {sections.length === 0 ? <p class="text-sm text-ink-600">This page has no editable sections.</p> : null}
+  <PageHead title={p.title} crumbs={[{ label: 'Website', href: '/admin/cms' }, { label: p.title }]}>
+    <Fragment slot="meta">
+      <span class="kz-amono">{path}</span> · {changed} sections with unpublished changes
+    </Fragment>
+    <PublishBar slot="actions" client:load pageKey={p.key} previewHref={`${path}?preview=1`} liveHref={path} />
+  </PageHead>
+  <div class="kz-agrid kz-agrid--detail">
+    <div class="kz-astack">
+      {sections.length === 0 ? <p class="kz-anone">This page has no editable sections.</p> : null}
       {sections.map((s, i) => (
         <SectionEditor
           client:load
@@ -52,28 +47,23 @@ const path = pagePath(p.key);
           draft={s.draft}
           visible={s.visible}
           changed={s.changed}
-          first={i === 0}
-          last={i === sections.length - 1}
+          index={i}
+          count={sections.length}
         />
       ))}
     </div>
     <aside>
-      <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="meta-h">
-        <h2 id="meta-h" class="mb-3 font-sans text-base font-semibold">
-          Page details and search
-        </h2>
-        <PageMetaForm
-          client:load
-          pageKey={p.key}
-          initial={{
-            title: p.title,
-            seoTitle: p.seo_title,
-            seoDescription: p.seo_description,
-            ogImageId: p.og_image_id,
-          }}
-          media={media}
-        />
-      </section>
+      <PageMetaForm
+        client:load
+        pageKey={p.key}
+        initial={{
+          title: p.title,
+          seoTitle: p.seo_title,
+          seoDescription: p.seo_description,
+          ogImageId: p.og_image_id,
+        }}
+        media={media}
+      />
     </aside>
   </div>
 </AdminLayout>

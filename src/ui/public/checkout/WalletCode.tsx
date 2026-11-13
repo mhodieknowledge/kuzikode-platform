@@ -1,4 +1,4 @@
-import { QrCode } from '../../../components/ui/QrCode';
+import { QrCode } from '../../auth/QrCode';
 import { walletDeepLink } from '../../../shared/payment-methods';
 import { LinkButton } from '../../primitives';
 import { clock } from './parts';

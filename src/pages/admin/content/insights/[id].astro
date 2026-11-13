@@ -1,6 +1,9 @@
 ---
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import { PostEditor, type PostValues } from '../../../../components/admin/ContentAdmin';
+import PageHead from '../../../../ui/admin/PageHead.astro';
+import { PostEditor } from '../../../../ui/admin/content/PostEditor';
+import SavedNotice from '../../../../ui/admin/website/SavedNotice.astro';
+import type { PostValues } from '../../../../ui/admin/content/useContent';
 import { loadAdminPage } from '../../../../server/lib/admin-page';
 import { AppError } from '../../../../server/lib/errors';
 import { listMedia } from '../../../../server/modules/cms/admin';
@@ -41,34 +44,22 @@ const saved = Astro.url.searchParams.get('saved') === '1';
 ---
 
 <AdminLayout title={title} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/content/insights" class="hover:text-ink-950 hover:underline">
-      Insights
-    </a>{' '}
-    / <span class="text-ink-950">{title}</span>
-  </nav>
-  <h1 class="mt-2 mb-4 text-2xl font-bold tracking-display">{title}</h1>
-  {saved ? (
-    <p role="status" class="mb-4 rounded-sm bg-success-50 px-4 py-3 text-sm text-success-700">
-      Saved.
-    </p>
-  ) : null}
-  <div class="max-w-4xl">
-    {item ? (
-      <PostEditor
-        client:load
-        id={id}
-        initial={initial}
-        categories={categories}
-        media={media.map((m) => ({ id: m.id, file_id: m.file_id, alt_text: m.alt_text }))}
-      />
-    ) : (
-      <PostEditor
-        client:load
-        initial={initial}
-        categories={categories}
-        media={media.map((m) => ({ id: m.id, file_id: m.file_id, alt_text: m.alt_text }))}
-      />
-    )}
-  </div>
+  <PageHead title={title} crumbs={[{ label: 'Insights', href: '/admin/content/insights' }, { label: title }]} />
+  {saved ? <SavedNotice>Saved.</SavedNotice> : null}
+  {item ? (
+    <PostEditor
+      client:load
+      id={id}
+      initial={initial}
+      categories={categories}
+      media={media.map((m) => ({ id: m.id, file_id: m.file_id, alt_text: m.alt_text }))}
+    />
+  ) : (
+    <PostEditor
+      client:load
+      initial={initial}
+      categories={categories}
+      media={media.map((m) => ({ id: m.id, file_id: m.file_id, alt_text: m.alt_text }))}
+    />
+  )}
 </AdminLayout>

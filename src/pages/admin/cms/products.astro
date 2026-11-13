@@ -1,7 +1,9 @@
 ---
+/** Website products (R6.2): described honestly; nothing is sold or subscribed to from these pages. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import CmsTabs from '../../../components/admin/CmsTabs.astro';
-import { ProductsManager } from '../../../components/admin/CmsAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import CmsTabs from '../../../ui/admin/website/CmsTabs.astro';
+import { ProductsManager } from '../../../ui/admin/cms/ProductsManager';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { listProductsAdmin } from '../../../server/modules/cms/admin';
 
@@ -12,12 +14,12 @@ const products = (await listProductsAdmin(ctx)) as never[];
 ---
 
 <AdminLayout title="Products" page={page}>
-  <h1 class="text-2xl font-bold tracking-display">Website</h1>
-  <CmsTabs current="products" />
-  <p class="mt-4 mb-4 max-w-3xl text-sm text-ink-600">
-    Products are described honestly: nothing is sold or subscribed to from these pages.
-  </p>
-  <div class="max-w-3xl">
-    <ProductsManager client:load products={products} />
+  <PageHead
+    title="Website"
+    meta="Products are described honestly: nothing is sold or subscribed to from these pages."
+  />
+  <div class="kz-atools">
+    <CmsTabs current="products" />
   </div>
+  <ProductsManager client:load products={products} />
 </AdminLayout>

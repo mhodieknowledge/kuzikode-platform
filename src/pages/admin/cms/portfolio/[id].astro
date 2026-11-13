@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import { PortfolioForm } from '../../../../components/admin/CmsAdmin';
+import PageHead from '../../../../ui/admin/PageHead.astro';
+import { PortfolioForm } from '../../../../ui/admin/cms/PortfolioForm';
 import { loadAdminPage } from '../../../../server/lib/admin-page';
 import { AppError } from '../../../../server/lib/errors';
 import { getPortfolioAdmin, listMedia } from '../../../../server/modules/cms/admin';
@@ -54,25 +55,16 @@ const title = item ? String(item['name']) : 'New case study';
 ---
 
 <AdminLayout title={title} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/cms/portfolio" class="hover:text-ink-950 hover:underline">
-      Our work
-    </a>{' '}
-    / <span class="text-ink-950">{title}</span>
-  </nav>
-  <h1 class="mt-2 mb-1 text-2xl font-bold tracking-display">{title}</h1>
+  <PageHead
+    title={title}
+    meta={
+      item ? (item['status'] === 'published' ? 'Published' : 'Draft (not on the website)') : 'Saved as a draft first.'
+    }
+    crumbs={[{ label: 'Our work', href: '/admin/cms/portfolio' }, { label: title }]}
+  />
   {item ? (
-    <p class="mb-6 text-sm text-ink-600">
-      {item['status'] === 'published' ? 'Published' : 'Draft (not on the website)'}
-    </p>
+    <PortfolioForm client:load id={id} status={String(item['status'])} initial={initial} media={media} />
   ) : (
-    <p class="mb-6 text-sm text-ink-600">Saved as a draft first.</p>
+    <PortfolioForm client:load initial={initial} media={media} />
   )}
-  <div class="max-w-4xl">
-    {item ? (
-      <PortfolioForm client:load id={id} status={String(item['status'])} initial={initial} media={media} />
-    ) : (
-      <PortfolioForm client:load initial={initial} media={media} />
-    )}
-  </div>
 </AdminLayout>

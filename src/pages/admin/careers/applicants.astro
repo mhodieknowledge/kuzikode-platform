@@ -1,6 +1,10 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { ApplicantsPipeline } from '../../../components/admin/CareersAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Views from '../../../ui/admin/Views.astro';
+import Pager from '../../../ui/admin/Pager.astro';
+import { FilterBar, type FilterField } from '../../../ui/admin/FilterBar';
+import { ApplicantsPipeline } from '../../../ui/admin/careers/ApplicantsPipeline';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { listApplications, listPostingsAdmin } from '../../../server/modules/careers';
 import { APPLICATION_STATUS_LABELS, applicationListQuery } from '../../../shared/schemas/careers-admin';
@@ -16,7 +20,6 @@ const [result, { postings }] = await Promise.all([listApplications(ctx, filter),
 const posting = postings.find((p) => p.id === filter.postingId);
 const title =
   filter.postingId === 'general' ? 'General applications' : posting ? `Applicants: ${posting.title}` : 'All applicants';
-const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
 const href = (over: Record<string, string | null>) => {
   const q = new URLSearchParams(Astro.url.searchParams);
   for (const [k, v] of Object.entries(over)) {
@@ -37,132 +40,76 @@ const items = result.items.map((a) => ({
   createdAt: a.created_at,
   erased: !!a.anonymised_at,
 }));
+const fields: FilterField[] = [
+  { kind: 'search', name: 'q', label: 'Search', value: filter.q ?? '', placeholder: 'Name, email or reference' },
+  {
+    kind: 'select',
+    name: 'posting',
+    label: 'Posting',
+    value: filter.postingId ?? '',
+    options: [
+      { value: '', label: 'All' },
+      { value: 'general', label: 'General applications' },
+      ...postings.map((p) => ({ value: p.id, label: p.title })),
+    ],
+  },
+  {
+    kind: 'select',
+    name: 'status',
+    label: 'Stage',
+    value: !filter.status || filter.status === 'all' ? 'all' : filter.status,
+    options: [
+      { value: 'all', label: 'All' },
+      { value: 'active', label: 'In progress' },
+      ...Object.entries(APPLICATION_STATUS_LABELS).map(([k, v]) => ({ value: k, label: v })),
+    ],
+  },
+  {
+    kind: 'select',
+    name: 'assignee',
+    label: 'Reviewer',
+    value: filter.assignee ?? '',
+    options: [
+      { value: '', label: 'Anyone' },
+      { value: 'me', label: 'Me' },
+      { value: 'none', label: 'Nobody' },
+    ],
+  },
+  { kind: 'text', name: 'tag', label: 'Tag', value: filter.tag ?? '' },
+  {
+    kind: 'select',
+    name: 'minRating',
+    label: 'Rating at least',
+    value: filter.minRating ? String(filter.minRating) : '',
+    options: [{ value: '', label: 'Any' }, ...[1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: String(n) }))],
+  },
+];
+const pageHref = (n: number) => href({ page: String(n) });
 ---
 
 <AdminLayout title={title} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/careers" class="hover:text-ink-950 hover:underline">
-      Careers
-    </a>{' '}
-    / <span class="text-ink-950">Applicants</span>
-  </nav>
-  <div class="mt-2 flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold tracking-display">{title}</h1>
-      <p class="mt-1 text-sm text-ink-600">
-        {result.total} {result.total === 1 ? 'applicant' : 'applicants'}
-      </p>
-    </div>
-    <nav aria-label="Applicant view" class="inline-flex rounded-sm border border-line bg-surface p-0.5">
-      {(['list', 'board'] as const).map((v) => (
-        <a
-          href={href({ view: v === 'list' ? null : 'board' })}
-          aria-current={view === v ? 'page' : undefined}
-          class:list={[
-            'inline-flex h-9 items-center rounded-sm px-3 text-sm font-semibold',
-            view === v ? 'bg-ink-950 text-white' : 'text-ink-800',
-          ]}
-        >
-          {v === 'list' ? 'List' : 'Board'}
-        </a>
-      ))}
-    </nav>
+  <PageHead
+    title={title}
+    meta={`${result.total} ${result.total === 1 ? 'applicant' : 'applicants'}`}
+    crumbs={[{ label: 'Careers', href: '/admin/careers' }, { label: 'Applicants' }]}
+  />
+  <div class="kz-atools">
+    <Views
+      label="Applicant view"
+      current={view}
+      items={[
+        { key: 'list', label: 'List', href: href({ view: null, page: null }) },
+        { key: 'board', label: 'Board', href: href({ view: 'board', page: null }) },
+      ]}
+    />
+    <FilterBar
+      client:load
+      label="Filter applicants"
+      fields={fields}
+      hidden={view === 'board' ? { view: 'board' } : {}}
+      clearHref={view === 'board' ? '/admin/careers/applicants?view=board' : '/admin/careers/applicants'}
+    />
   </div>
-  <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter applicants">
-    <input type="hidden" name="view" value={view === 'board' ? 'board' : ''} />
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Search
-      <input
-        name="q"
-        type="search"
-        value={filter.q ?? ''}
-        maxlength="80"
-        class={field}
-        placeholder="Name, email or reference"
-      />
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Posting
-      <select name="posting" class={field}>
-        <option value="">All</option>
-        <option value="general" selected={filter.postingId === 'general'}>
-          General applications
-        </option>
-        {postings.map((p) => (
-          <option value={p.id} selected={filter.postingId === p.id}>
-            {p.title}
-          </option>
-        ))}
-      </select>
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Stage
-      <select name="status" class={field}>
-        <option value="all" selected={!filter.status || filter.status === 'all'}>
-          All
-        </option>
-        <option value="active" selected={filter.status === 'active'}>
-          In progress
-        </option>
-        {Object.entries(APPLICATION_STATUS_LABELS).map(([k, v]) => (
-          <option value={k} selected={filter.status === k}>
-            {v}
-          </option>
-        ))}
-      </select>
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Reviewer
-      <select name="assignee" class={field}>
-        <option value="">Anyone</option>
-        <option value="me" selected={filter.assignee === 'me'}>
-          Me
-        </option>
-        <option value="none" selected={filter.assignee === 'none'}>
-          Nobody
-        </option>
-      </select>
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Tag
-      <input name="tag" value={filter.tag ?? ''} maxlength="40" class={field} />
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Rating at least
-      <select name="minRating" class={field}>
-        <option value="">Any</option>
-        {[1, 2, 3, 4, 5].map((n) => (
-          <option value={n} selected={filter.minRating === n}>
-            {n}
-          </option>
-        ))}
-      </select>
-    </label>
-    <button
-      type="submit"
-      class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
-    >
-      Filter
-    </button>
-  </form>
-  <div class="mt-6">
-    <ApplicantsPipeline client:load items={items} view={view} canManage={page.auth.permissions.has('careers.manage')} />
-  </div>
-  {result.pages > 1 ? (
-    <nav aria-label="Pages" class="mt-4 flex items-center gap-3 text-sm">
-      {result.page > 1 ? (
-        <a href={href({ page: String(result.page - 1) })} class="font-semibold text-brand-600">
-          Previous
-        </a>
-      ) : null}
-      <span class="text-ink-600">
-        Page {result.page} of {result.pages}
-      </span>
-      {result.page < result.pages ? (
-        <a href={href({ page: String(result.page + 1) })} class="font-semibold text-brand-600">
-          Next
-        </a>
-      ) : null}
-    </nav>
-  ) : null}
+  <ApplicantsPipeline client:load items={items} view={view} canManage={page.auth.permissions.has('careers.manage')} />
+  <Pager page={result.page} pages={result.pages} href={pageHref} />
 </AdminLayout>

@@ -1,6 +1,9 @@
 ---
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import { IndustryEditor, type IndustryValues } from '../../../../components/admin/ContentAdmin';
+import PageHead from '../../../../ui/admin/PageHead.astro';
+import { IndustryEditor } from '../../../../ui/admin/content/IndustryEditor';
+import SavedNotice from '../../../../ui/admin/website/SavedNotice.astro';
+import type { IndustryValues } from '../../../../ui/admin/content/useContent';
 import { loadAdminPage } from '../../../../server/lib/admin-page';
 import { AppError } from '../../../../server/lib/errors';
 import { getIndustryAdmin, serviceOptions } from '../../../../server/modules/cms/content-admin';
@@ -40,23 +43,11 @@ const saved = Astro.url.searchParams.get('saved') === '1';
 ---
 
 <AdminLayout title={title} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/content/industries" class="hover:text-ink-950 hover:underline">
-      Industries
-    </a>{' '}
-    / <span class="text-ink-950">{title}</span>
-  </nav>
-  <h1 class="mt-2 mb-4 text-2xl font-bold tracking-display">{title}</h1>
-  {saved ? (
-    <p role="status" class="mb-4 rounded-sm bg-success-50 px-4 py-3 text-sm text-success-700">
-      Saved.
-    </p>
-  ) : null}
-  <div class="max-w-4xl">
-    {item ? (
-      <IndustryEditor client:load id={id} initial={initial} services={services} icons={CMS_ICONS} />
-    ) : (
-      <IndustryEditor client:load initial={initial} services={services} icons={CMS_ICONS} />
-    )}
-  </div>
+  <PageHead title={title} crumbs={[{ label: 'Industries', href: '/admin/content/industries' }, { label: title }]} />
+  {saved ? <SavedNotice>Saved.</SavedNotice> : null}
+  {item ? (
+    <IndustryEditor client:load id={id} initial={initial} services={services} icons={CMS_ICONS} />
+  ) : (
+    <IndustryEditor client:load initial={initial} services={services} icons={CMS_ICONS} />
+  )}
 </AdminLayout>

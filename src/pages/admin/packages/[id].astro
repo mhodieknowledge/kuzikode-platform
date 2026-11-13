@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { PackageForm } from '../../../components/admin/PackagesAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import { PackageForm } from '../../../ui/admin/packages/PackageForm';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { AppError } from '../../../server/lib/errors';
 import { can } from '../../../server/lib/policies';
@@ -47,21 +48,13 @@ const initial = {
 ---
 
 <AdminLayout title={p.name} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/packages" class="hover:text-ink-950 hover:underline">
-      Packages
-    </a>{' '}
-    / <span class="text-ink-950">{p.name}</span>
-  </nav>
-  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">{p.name}</h1>
-  <div class="max-w-4xl">
-    <PackageForm
-      client:load
-      initial={initial}
-      services={services}
-      currencies={currencies}
-      inUse={inUse}
-      canReview={can(ctx, 'packages.price_review')}
-    />
-  </div>
+  <PageHead title={p.name} crumbs={[{ label: 'Packages', href: '/admin/packages' }, { label: p.name }]} />
+  <PackageForm
+    client:load
+    initial={initial}
+    services={services}
+    currencies={currencies}
+    inUse={inUse}
+    canReview={can(ctx, 'packages.price_review')}
+  />
 </AdminLayout>

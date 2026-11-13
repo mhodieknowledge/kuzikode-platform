@@ -1,6 +1,15 @@
 ---
+/** Newsletter (R6.2): subscriber counts, filters, the list and the audited CSV export. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import ContentTabs from '../../../components/admin/ContentTabs.astro';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import ContentTabs from '../../../ui/admin/website/ContentTabs.astro';
+import KpiStrip from '../../../ui/admin/KpiStrip.astro';
+import DataTable from '../../../ui/admin/DataTable.astro';
+import Cell from '../../../ui/admin/Cell.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import EmptyState from '../../../ui/primitives/EmptyState.astro';
+import { FilterBar, type FilterField } from '../../../ui/admin/FilterBar';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { listSubscribers } from '../../../server/modules/cms/content-admin';
 import { newsletterFilterSchema } from '../../../shared/schemas/content-admin';
@@ -24,103 +33,96 @@ const qs = (over: Record<string, string | number | undefined>) => {
   return s ? `?${s}` : '';
 };
 const labels = { pending: 'Awaiting confirmation', confirmed: 'Confirmed', unsubscribed: 'Unsubscribed' } as const;
+const tones = { pending: 'warn', confirmed: 'ok', unsubscribed: 'neutral' } as const;
 const exportStatus = filter.status ?? 'confirmed';
-const field =
-  'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950 hover:border-ink-400 focus-visible:border-brand-500 focus-visible:outline-2 focus-visible:outline-brand-500';
+const statuses = ['confirmed', 'pending', 'unsubscribed'] as const;
+const fields: FilterField[] = [
+  {
+    kind: 'search',
+    name: 'q',
+    label: 'Email contains',
+    value: filter.q ?? '',
+    maxLength: 120,
+    placeholder: 'Email address',
+  },
+  {
+    kind: 'select',
+    name: 'status',
+    label: 'Status',
+    value: filter.status ?? '',
+    options: [{ value: '', label: 'All' }, ...statuses.map((s) => ({ value: s, label: labels[s] }))],
+  },
+];
 ---
 
 <AdminLayout title="Newsletter" page={page}>
-  <h1 class="text-2xl font-bold tracking-display">Content</h1>
-  <ContentTabs current="newsletter" permissions={page.auth.permissions} />
-  <dl class="mt-6 grid max-w-2xl grid-cols-3 gap-3">
-    {(['confirmed', 'pending', 'unsubscribed'] as const).map((s) => (
-      <div class="rounded-md border border-line bg-surface p-4">
-        <dt class="text-[12px] text-ink-600">{labels[s]}</dt>
-        <dd class="tnum mt-1 text-2xl font-bold">{data.counts[s] ?? 0}</dd>
-      </div>
-    ))}
-  </dl>
-  <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter subscribers">
-    <label class="flex flex-col gap-1 text-sm font-medium">
-      Status
-      <select name="status" class={field}>
-        <option value="">All</option>
-        {(['confirmed', 'pending', 'unsubscribed'] as const).map((s) => (
-          <option value={s} selected={filter.status === s}>
-            {labels[s]}
-          </option>
-        ))}
-      </select>
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium">
-      Email contains
-      <input name="q" value={filter.q ?? ''} maxlength="120" class={field} />
-    </label>
-    <button class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold hover:border-ink-400">
-      Filter
-    </button>
+  <PageHead
+    title="Content"
+    meta="Only confirmed subscribers agreed to receive email. Exports are recorded in the audit log."
+  >
     {canExport ? (
-      <a
+      <Button
+        slot="actions"
+        variant="secondary"
         href={`/api/v1/admin/content/newsletter/export.csv${qs({ status: exportStatus })}`}
-        class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
         download
+        lead="download"
       >
         Export {labels[exportStatus].toLowerCase()} (CSV)
-      </a>
+      </Button>
     ) : null}
-  </form>
-  <p class="mt-2 text-[13px] text-ink-600">
-    Only confirmed subscribers agreed to receive email. Exports are recorded in the audit log.
-  </p>
-  <div class="mt-4 relative overflow-x-auto rounded-lg border border-line bg-surface">
-    <table class="w-full min-w-[560px] text-sm">
-      <thead class="border-b border-line text-left text-[12px] text-ink-600">
-        <tr>
-          <th scope="col" class="px-4 py-2.5 font-semibold">
-            Email
-          </th>
-          <th scope="col" class="px-4 py-2.5 font-semibold">
-            Status
-          </th>
-          <th scope="col" class="px-4 py-2.5 font-semibold">
-            Source
-          </th>
-          <th scope="col" class="px-4 py-2.5 font-semibold">
-            Signed up (UTC)
-          </th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-line">
-        {data.items.length === 0 ? (
-          <tr>
-            <td colspan="4" class="px-4 py-8 text-center text-ink-600">
-              No subscribers match.
-            </td>
-          </tr>
-        ) : null}
-        {data.items.map((s) => (
-          <tr>
-            <td class="px-4 py-2.5 break-all text-ink-950">{s.email}</td>
-            <td class="px-4 py-2.5">{labels[s.status as keyof typeof labels] ?? s.status}</td>
-            <td class="px-4 py-2.5 text-ink-600">{s.source ?? ''}</td>
-            <td class="px-4 py-2.5 text-ink-600">{s.created_at.slice(0, 16).replace('T', ' ')}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+  </PageHead>
+  <div class="kz-atools">
+    <ContentTabs current="newsletter" permissions={page.auth.permissions} />
   </div>
+  <KpiStrip items={statuses.map((s) => ({ label: labels[s], values: [String(data.counts[s] ?? 0)] }))} />
+  <div class="kz-atools">
+    <FilterBar client:load label="Filter subscribers" fields={fields} clearHref="/admin/content/newsletter" />
+  </div>
+  <DataTable
+    caption="Subscribers"
+    count={data.items.length}
+    columns={[{ label: 'Email' }, { label: 'Status' }, { label: 'Source' }, { label: 'Signed up (UTC)' }]}
+  >
+    <EmptyState slot="empty" code="no matches" title="No subscribers match." />
+    {data.items.map((s) => (
+      <tr>
+        <Cell m="main" title={s.email} sub={s.source ?? ''} subText />
+        <Cell m="status">
+          <StatusPill tone={tones[s.status as keyof typeof tones] ?? 'neutral'}>
+            {labels[s.status as keyof typeof labels] ?? s.status}
+          </StatusPill>
+        </Cell>
+        <Cell tone="mute">{s.source ?? ''}</Cell>
+        <Cell m="meta" tone="mute">
+          <span class="kz-amono">{s.created_at.slice(0, 16).replace('T', ' ')}</span>
+        </Cell>
+      </tr>
+    ))}
+  </DataTable>
   {filter.page > 1 || data.hasMore ? (
-    <nav aria-label="Pages" class="mt-4 flex gap-3 text-sm">
+    <nav aria-label="Pages" class="kz-apager">
       {filter.page > 1 ? (
-        <a class="font-semibold text-brand-600 hover:underline" href={qs({ page: filter.page - 1 })}>
+        <Button
+          variant="secondary"
+          size="sm"
+          href={qs({ page: filter.page - 1 }) || '?'}
+          rel="prev"
+          lead="chevron-left"
+        >
           Previous
-        </a>
-      ) : null}
+        </Button>
+      ) : (
+        <span class="kz-apager__gap" />
+      )}
+      <span class="kz-apager__pos">page {filter.page}</span>
       {data.hasMore ? (
-        <a class="font-semibold text-brand-600 hover:underline" href={qs({ page: filter.page + 1 })}>
+        <Button variant="secondary" size="sm" href={qs({ page: filter.page + 1 })} rel="next" icon="chevron-right">
           Next
-        </a>
-      ) : null}
+        </Button>
+      ) : (
+        <span class="kz-apager__gap" />
+      )}
     </nav>
   ) : null}
 </AdminLayout>

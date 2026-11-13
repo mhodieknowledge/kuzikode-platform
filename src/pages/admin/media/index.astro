@@ -1,6 +1,8 @@
 ---
+/** Media library (R6.2): images for the website; every image needs alt text. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { MediaLibrary } from '../../../components/admin/CmsAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import { MediaLibrary } from '../../../ui/admin/cms/MediaLibrary';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { listMedia } from '../../../server/modules/cms/admin';
 
@@ -11,10 +13,9 @@ const media = await listMedia(ctx);
 ---
 
 <AdminLayout title="Media library" page={page}>
-  <h1 class="text-2xl font-bold tracking-display">Media library</h1>
-  <p class="mt-1 mb-6 max-w-3xl text-sm text-ink-600">
-    Images for the website. Every image needs alt text. Images used on the website can't be deleted until they are
-    replaced.
-  </p>
+  <PageHead
+    title="Media library"
+    meta="Images for the website. Every image needs alt text. Images used on the website can't be deleted until they are replaced."
+  />
   <MediaLibrary client:load media={media} canManage={true} />
 </AdminLayout>

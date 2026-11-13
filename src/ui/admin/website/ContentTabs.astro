@@ -1,0 +1,22 @@
+---
+/** Sub-navigation of Admin → Content (R6.2); tabs the signed-in user can't open are not shown. */
+import type { Permission } from '../../../shared/permissions';
+import Views from '../Views.astro';
+
+interface Props {
+  current: 'insights' | 'industries' | 'faq' | 'testimonials' | 'technologies' | 'newsletter';
+  permissions: Set<Permission>;
+}
+const { current, permissions } = Astro.props;
+const all = [
+  { key: 'insights', label: 'Insights', href: '/admin/content/insights', permission: 'content.manage' },
+  { key: 'industries', label: 'Industries', href: '/admin/content/industries', permission: 'content.manage' },
+  { key: 'faq', label: 'FAQ', href: '/admin/content/faq', permission: 'content.manage' },
+  { key: 'testimonials', label: 'Testimonials', href: '/admin/content/testimonials', permission: 'content.manage' },
+  { key: 'technologies', label: 'Technologies', href: '/admin/content/technologies', permission: 'content.manage' },
+  { key: 'newsletter', label: 'Newsletter', href: '/admin/content/newsletter', permission: 'newsletter.view' },
+] as const;
+const items = all.filter((t) => permissions.has(t.permission));
+---
+
+<Views label="Content" items={items} current={current} />

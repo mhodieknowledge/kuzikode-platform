@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { ServiceForm } from '../../../components/admin/ServicesAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import { ServiceForm } from '../../../ui/admin/services/ServiceForm';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { AppError } from '../../../server/lib/errors';
 import { getServiceAdmin, listCatalogue, serviceInUse } from '../../../server/modules/catalogue';
@@ -40,18 +41,10 @@ const initial = {
 ---
 
 <AdminLayout title={`Edit ${s.name}`} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/services" class="hover:text-ink-950 hover:underline">
-      Services
-    </a>{' '}
-    / <span class="text-ink-950">{s.name}</span>
-  </nav>
-  <h1 class="mt-2 mb-1 text-2xl font-bold tracking-display">{s.name}</h1>
-  <p class="mb-6 text-sm text-ink-600">
-    {s.packages} {s.packages === 1 ? 'package' : 'packages'}
-    {inUse ? ' · in use, so it can be hidden but not deleted' : ''}
-  </p>
-  <div class="max-w-3xl">
-    <ServiceForm client:load initial={initial} divisions={divisions} currencies={currencies} inUse={inUse} />
-  </div>
+  <PageHead
+    title={s.name}
+    meta={`${s.packages} ${s.packages === 1 ? 'package' : 'packages'}${inUse ? ' · in use, so it can be hidden but not deleted' : ''}`}
+    crumbs={[{ label: 'Services', href: '/admin/services' }, { label: s.name }]}
+  />
+  <ServiceForm client:load initial={initial} divisions={divisions} currencies={currencies} inUse={inUse} />
 </AdminLayout>

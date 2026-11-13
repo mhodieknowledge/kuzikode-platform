@@ -122,3 +122,15 @@ Harness: `playwright.visual.config.ts` (`SHOOT=… SHOOT_SET=all|core|quick SHOO
   to paper + hairline (no float shadow), status tag as a gold plate in words (not a mono code tag), room under the phone apply bar. Deferred to
   R7.2/R8.1: varying the footer "Where next" band per page, a pinned FAQ category road on phones, a "next article" close on articles.
 - Note: the sample role in careers screenshots is test data from `careers.spec.ts` (local D1 only).
+
+## R4.8 Public documents + checkout (2026-11-13)
+- References opened: IMG_5013 (bill strip above method choice), IMG_5014 (receipt ticket, perforated edge), IMG_5016 (phone number first, fee on
+  its own line), IMG_5018 (document/form left, sticky summary right; icon-over-label method tiles).
+- Viewports: documents 360/390/768/1440 (fixture invoice INV-E2E-P002; fixture quotation through a temporary local-only token, restored);
+  checkout 360/390/430/768/1440 in every state (choose, mobile money, waiting, wallet code, OTP, saved card, paid, failed, bank, return, nothing
+  to pay). No overflow; targets ≥ 44 px (consent checkbox row 44 px); phone H1 24–28 px.
+- Boards `documents-board.webp`, `checkout-board.webp`. Reviewer (opus/medium): both PASS. Applied: invoice number in the phone summary, stale
+  "Amount due now / Due now" swapped for a paid note after a successful payment (CSS `:has([data-co-paid])`, no reload), waiting-line copy.
+  Deferred to R8.1: distinct wallet marks on the method tiles, perforation placement on phones, status-plate contrast, part-paid notice wording.
+- e2e green (31 + 10 re-run): checkout, full-journey, public-documents, payment-gateways, reconciliation, quotations, invoices, subscriptions,
+  portal-auth, security, mobile-limits, sweep, links. No payment spec edited.

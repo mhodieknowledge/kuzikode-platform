@@ -70,7 +70,7 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
   entries; 301 `/start-a-project` → `/contact`; CTAs become "Get a quote" / "Request this package" → contact with preselection. AC: grep finds
   no "start-a-project"/"Start a project" in `src/` except the redirect; e2e covers the redirect and the package → contact preselect; tests green.
 - [x] **R4.7 Insights/blog, Careers, FAQ, Products (in-development item kept modest), legal, search, 404/500.**
-- [ ] **R4.8 Public document & checkout pages** (`/q/`, `/i/`, `/pay/…`, the custom checkout) in the new language. Payment flows still pass their e2e tests.
+- [x] **R4.8 Public document & checkout pages** (`/q/`, `/i/`, `/pay/…`, the custom checkout) in the new language. Payment flows still pass their e2e tests.
 
 ## R5: Client workspace (Linux-inspired)
 - [ ] **R5.1 Workspace shell:** side navigation, top status bar, window/panel pattern, command palette, mobile shell (bottom bar or sheet nav), light/dark surfaces.

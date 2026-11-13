@@ -1,0 +1,88 @@
+---
+/**
+ * Checkout summary (docs/06 §3b), server-rendered so it works without JavaScript; rebuilt for R4.8.
+ * Two parts that read as one receipt ticket (IMG_5014: perforated edge, the amount to pay in mono, no countdown):
+ *  - the bill strip (IMG_5013): invoice number (the page's h1), client, amount due now;
+ *  - the ticket: what is being paid for, line by line, then the totals.
+ * Phones place the strip above the payment form and the ticket below it (the wrapper is `display: contents` there); from
+ * 1024 px both sit together in the sticky right column beside the form (IMG_5018).
+ */
+import type { CheckoutView } from '../../../server/modules/payments';
+import { formatMoney } from '../../../shared/money';
+
+interface Props {
+  view: CheckoutView;
+}
+const { view } = Astro.props;
+const inv = view.invoice;
+const money = (m: number) => formatMoney(m, inv.currency, inv.minorDigits);
+---
+
+<div class="kz-cosum">
+  <section class="kz-cosum__strip" aria-labelledby="summary-h">
+    <h1 id="summary-h" class="kz-cosum__num">{inv.number}</h1>
+    {inv.clientName ? <p class="kz-cosum__client">{inv.clientName}</p> : null}
+    <p class="kz-cosum__due">
+      <span class="kz-cosum__due-k">Amount due now</span>
+      <span class="kz-cosum__due-v" data-testid="amount-due">{money(inv.amountDueMinor)}</span>
+    </p>
+    <p class="kz-cosum__paidnote">
+      Paid. Your invoice now shows the new balance.
+    </p>
+    <noscript>
+      {
+        view.bankTransfer ? (
+          <div class="kz-cosum__noscript">
+            <p class="kz-cosum__h">Pay by bank transfer</p>
+            <p>
+              Use <strong class="kz-mono">{view.bankTransfer.reference}</strong> as the reference:
+            </p>
+            <p class="kz-cobank__slip">{view.bankTransfer.details}</p>
+            <p class="kz-cometa">Mobile money and card payments need JavaScript turned on.</p>
+          </div>
+        ) : (
+          <p class="kz-cosum__noscript">Turn on JavaScript to pay online.</p>
+        )
+      }
+    </noscript>
+  </section>
+  <section class="kz-cosum__ticket" aria-labelledby="lines-h">
+    <h2 id="lines-h" class="kz-cosum__h">What you are paying for</h2>
+    <ul class="kz-cosum__lines">
+      {
+        inv.lines.map((l) => (
+          <li>
+            <span class="kz-cosum__desc">{l.description}</span>
+            <span class="kz-mono">{money(l.totalMinor)}</span>
+          </li>
+        ))
+      }
+      {
+        inv.moreLines ? (
+          <li class="kz-cosum__more">
+            and {inv.moreLines} more {inv.moreLines === 1 ? 'item' : 'items'}
+          </li>
+        ) : null
+      }
+    </ul>
+    <dl class="kz-cosum__totals">
+      <div>
+        <dt>Invoice total</dt>
+        <dd class="kz-mono">{money(inv.totalMinor)}</dd>
+      </div>
+      {
+        inv.paidMinor > 0 ? (
+          <div>
+            <dt>Already paid</dt>
+            <dd class="kz-mono">−{money(inv.paidMinor)}</dd>
+          </div>
+        ) : null
+      }
+      <div class="kz-cosum__total">
+        <dt>Due now</dt>
+        <dd class="kz-mono">{money(inv.amountDueMinor)}</dd>
+      </div>
+    </dl>
+    <p class="kz-cosum__cur">All amounts in {inv.currency}</p>
+  </section>
+</div>

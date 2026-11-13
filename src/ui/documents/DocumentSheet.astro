@@ -1,0 +1,284 @@
+---
+/**
+ * The paper document (R4.8, rebuilt from scratch): a quotation or an invoice as the client sees it, on the public link pages, in
+ * the client workspace and in the admin preview. Amounts come from stored lines (never recomputed here).
+ * Composition (IMG_5018 document + summary, IMG_5014 receipt rhythm, Route ledgers):
+ * - Head: the document kind and number (mono) over the title; the dates as a small ruled table on the right (below on phones).
+ * - Parties: From / For side by side, split by a hairline (stacked on phones).
+ * - Lines: numbered ledger rows on phones (description, quantity × price, the line amount right-aligned); a ruled table from
+ *   640 px with Discount / Tax columns only when a line uses them.
+ * - Totals: a right-hand ledger ending in a night plate for the amount that matters (Total, or Balance due once issued).
+ * - Terms, notes and payment terms as a two-column foot.
+ */
+import { formatBpAsPercent, formatMoney, formatQuantity } from '../../shared/money';
+import { formatLongDate } from '../../shared/service-display';
+import { sanitizeHtml } from '../../server/lib/html-sanitize';
+
+export interface DocParty {
+  name: string;
+  legalName?: string | null;
+  number?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  taxNumber?: string | null;
+  registrationNumber?: string | null;
+  address?: string | null;
+  contact?: { name: string; email: string | null } | null;
+}
+export interface DocItem {
+  description: string;
+  quantity_milli: number;
+  unit_price_minor: number;
+  discount_type: string;
+  discount_value: number;
+  tax_rate_bp: number;
+  tax_inclusive: number;
+  is_recurring?: number;
+  recurring_interval?: string | null;
+  line_discount_minor: number;
+  line_tax_minor: number;
+  line_total_minor: number;
+}
+interface Props {
+  kind: 'quotation' | 'invoice';
+  number: string | null;
+  /** Quotation title (the H1); invoices use the number as the H1. */
+  title?: string;
+  introHtml?: string | null;
+  currency: string;
+  minorDigits?: number;
+  issueDate: string | null;
+  /** Quotation: valid until. Invoice: due date. */
+  secondDate: string | null;
+  paymentTerms?: string | null;
+  notes: string | null;
+  terms: string | null;
+  totals: {
+    subtotal: number;
+    discount: number;
+    tax: number;
+    total: number;
+    paid?: number;
+    credited?: number;
+    balance?: number;
+  };
+  /** Invoice: payments, credits and the balance appear once issued. */
+  issued?: boolean;
+  items: DocItem[];
+  client: DocParty;
+  business: DocParty;
+}
+const p = Astro.props;
+const isQ = p.kind === 'quotation';
+const money = (m: number) => formatMoney(m, p.currency, p.minorDigits ?? 2);
+const intro = isQ ? sanitizeHtml(p.introHtml ?? null) : null;
+const hasDiscount = p.items.some((i) => i.line_discount_minor > 0);
+const hasTax = p.items.some((i) => i.line_tax_minor > 0);
+const recurring = p.items.filter((i) => i.is_recurring === 1);
+const label = isQ ? 'Quotation lines' : 'Invoice lines';
+const every = (i: DocItem) => (i.recurring_interval === 'year' ? 'yearly' : 'monthly');
+const no = (i: number) => String(i + 1).padStart(2, '0');
+const showBalance = !isQ && p.issued;
+const foot = [
+  isQ && p.paymentTerms ? { h: 'Payment terms', t: p.paymentTerms } : null,
+  p.notes ? { h: 'Notes', t: p.notes } : null,
+  p.terms ? { h: isQ ? 'Terms and conditions' : 'Terms', t: p.terms, wide: true } : null,
+].filter((x): x is { h: string; t: string; wide?: boolean } => x !== null);
+const party = (x: DocParty, isClient: boolean) => [
+  x.legalName && x.legalName !== x.name ? x.legalName : null,
+  isClient && x.contact ? `Attn: ${x.contact.name}` : null,
+  x.address ?? null,
+  x.email ?? null,
+  !isClient ? (x.phone ?? null) : null,
+  x.taxNumber ? `Tax number: ${x.taxNumber}` : null,
+];
+---
+
+<article class="kz-doc" aria-labelledby="doc-title">
+  <header class="kz-doc__head">
+    <div class="kz-doc__id">
+      {isQ ? (
+        <Fragment>
+          <p class="kz-doc__kind">
+            Quotation <span class="kz-doc__no">{p.number ?? 'Draft (not yet numbered)'}</span>
+          </p>
+          <h1 id="doc-title" class="kz-doc__title">
+            {p.title}
+          </h1>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <p class="kz-doc__kind">Invoice</p>
+          <h1 id="doc-title" class="kz-doc__title is-mono">
+            {p.number ?? 'Draft invoice'}
+          </h1>
+          {p.number ? null : <p class="kz-doc__draft">Not yet issued</p>}
+        </Fragment>
+      )}
+    </div>
+    <dl class="kz-doc__dates">
+      <div>
+        <dt>Date</dt>
+        <dd>{p.issueDate ? formatLongDate(p.issueDate) : '—'}</dd>
+      </div>
+      <div>
+        <dt>{isQ ? 'Valid until' : 'Due date'}</dt>
+        <dd>{p.secondDate ? formatLongDate(p.secondDate) : isQ ? 'Set when sent' : 'Set when issued'}</dd>
+      </div>
+    </dl>
+  </header>
+
+  <div class="kz-doc__parties">
+    {(
+      [
+        ['from', 'From', p.business, false],
+        ['to', 'For', p.client, true],
+      ] as const
+    ).map(([key, h, x, isClient]) => (
+      <section aria-labelledby={`${key}-h`}>
+        <h2 id={`${key}-h`} class="kz-doc__h">
+          {h}
+        </h2>
+        <p class="kz-doc__party">{x.name}</p>
+        {party(x, isClient)
+          .filter(Boolean)
+          .map((line) => (
+            <p class="kz-doc__line">{line}</p>
+          ))}
+      </section>
+    ))}
+  </div>
+
+  {intro ? <div class="kz-doc__intro kz-read" set:html={intro} /> : null}
+
+  <ol class="kz-doc__rows" aria-label={label} role="list">
+    {p.items.map((i, n) => (
+      <li class="tnum">
+        <span class="kz-doc__rowno" aria-hidden="true">
+          {no(n)}
+        </span>
+        <span class="kz-doc__desc">{i.description}</span>
+        <span class="kz-doc__calc">
+          {formatQuantity(i.quantity_milli)} × {money(i.unit_price_minor)}
+          {i.line_discount_minor ? `, −${money(i.line_discount_minor)}` : ''}
+          {i.tax_rate_bp ? `, ${formatBpAsPercent(i.tax_rate_bp)} tax${i.tax_inclusive ? ' incl.' : ''}` : ''}
+          {i.is_recurring === 1 ? `, billed ${every(i)}` : ''}
+        </span>
+        <span class="kz-doc__amt">{money(i.line_total_minor)}</span>
+      </li>
+    ))}
+  </ol>
+  <div class="kz-doc__table">
+    <table>
+      <caption class="sr-only">{label}</caption>
+      <thead>
+        <tr>
+          <th scope="col" class="is-no">
+            <span class="sr-only">Line</span>
+          </th>
+          <th scope="col">Description</th>
+          <th scope="col" class="is-num">
+            Qty
+          </th>
+          <th scope="col" class="is-num">
+            Unit price
+          </th>
+          {hasDiscount ? (
+            <th scope="col" class="is-num">
+              Discount
+            </th>
+          ) : null}
+          {hasTax ? (
+            <th scope="col" class="is-num">
+              Tax
+            </th>
+          ) : null}
+          <th scope="col" class="is-num">
+            Amount
+          </th>
+        </tr>
+      </thead>
+      <tbody class="tnum">
+        {p.items.map((i, n) => (
+          <tr>
+            <td class="is-no">{no(n)}</td>
+            <td class="is-desc">
+              {i.description}
+              {i.is_recurring === 1 ? <span class="kz-doc__every">Billed {every(i)}</span> : null}
+            </td>
+            <td class="is-num">{formatQuantity(i.quantity_milli)}</td>
+            <td class="is-num">{money(i.unit_price_minor)}</td>
+            {hasDiscount ? (
+              <td class="is-num">{i.line_discount_minor ? `−${money(i.line_discount_minor)}` : '—'}</td>
+            ) : null}
+            {hasTax ? (
+              <td class="is-num">
+                {i.tax_rate_bp ? `${formatBpAsPercent(i.tax_rate_bp)}${i.tax_inclusive ? ' incl.' : ''}` : '—'}
+              </td>
+            ) : null}
+            <td class="is-num is-amt">{money(i.line_total_minor)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="kz-doc__sum">
+    <dl class="kz-doc__totals tnum">
+      <div>
+        <dt>Subtotal</dt>
+        <dd>{money(p.totals.subtotal)}</dd>
+      </div>
+      {p.totals.discount ? (
+        <div>
+          <dt>Discounts</dt>
+          <dd>−{money(p.totals.discount)}</dd>
+        </div>
+      ) : null}
+      {p.totals.tax ? (
+        <div>
+          <dt>Tax</dt>
+          <dd>{money(p.totals.tax)}</dd>
+        </div>
+      ) : null}
+      <div class:list={['is-total', !showBalance && 'is-key']}>
+        <dt>Total</dt>
+        <dd>{money(p.totals.total)}</dd>
+      </div>
+      {showBalance && p.totals.paid ? (
+        <div>
+          <dt>Paid</dt>
+          <dd>−{money(p.totals.paid)}</dd>
+        </div>
+      ) : null}
+      {showBalance && p.totals.credited ? (
+        <div>
+          <dt>Credits</dt>
+          <dd>−{money(p.totals.credited)}</dd>
+        </div>
+      ) : null}
+      {showBalance ? (
+        <div class="is-key">
+          <dt>Balance due</dt>
+          <dd>{money(p.totals.balance ?? 0)}</dd>
+        </div>
+      ) : null}
+    </dl>
+    {isQ && recurring.length ? (
+      <p class="kz-doc__note">
+        The total includes the first period of recurring items; they then continue as shown on each line.
+      </p>
+    ) : null}
+  </div>
+
+  {foot.length ? (
+    <div class="kz-doc__foot">
+      {foot.map((f) => (
+        <section class:list={[f.wide && 'is-wide']}>
+          <h2 class="kz-doc__h">{f.h}</h2>
+          <p class="kz-doc__text">{f.t}</p>
+        </section>
+      ))}
+    </div>
+  ) : null}
+</article>

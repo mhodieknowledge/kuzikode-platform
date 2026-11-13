@@ -1,0 +1,25 @@
+---
+/** Quotation as the client sees it (public /q/:token, workspace, admin preview). Same props as before the rebuild. */
+import DocumentSheet, { type DocItem, type DocParty } from './DocumentSheet.astro';
+
+interface Props {
+  number: string | null;
+  title: string;
+  status: string;
+  introHtml: string | null;
+  currency: string;
+  minorDigits?: number;
+  issueDate: string | null;
+  validUntil: string | null;
+  paymentTerms: string | null;
+  notes: string | null;
+  terms: string | null;
+  totals: { subtotal: number; discount: number; tax: number; total: number };
+  items: DocItem[];
+  client: DocParty;
+  business: DocParty;
+}
+const { validUntil, status: _status, ...p } = Astro.props;
+---
+
+<DocumentSheet kind="quotation" secondDate={validUntil} {...p} />

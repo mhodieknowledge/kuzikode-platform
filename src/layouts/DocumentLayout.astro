@@ -1,7 +1,12 @@
 ---
-/** Public document pages (/q/:token, /i/:token): noindex, no site navigation into the portal (docs/07 §6). */
-import AppLayout from './AppLayout.astro';
-import Logo from '../components/Logo.astro';
+/**
+ * Public document and checkout shell (R4.8, rebuilt from scratch): /q/:token, /i/:token, /pay/…. noindex, no site navigation into
+ * the portal (docs/07 §6). A slim bone bar (wordmark, unlinked; a lock note "Private link") over a concrete-toned ground on which
+ * the paper document or the checkout sits (RESPONSIVE_DESIGN_SPEC "Public documents": paper card on concrete).
+ */
+import Base from './Base.astro';
+import Logo from '../ui/brand/Logo.astro';
+import Icon from '../ui/icons/Icon.astro';
 
 interface Props {
   title: string;
@@ -9,13 +14,19 @@ interface Props {
 const { title } = Astro.props;
 ---
 
-<AppLayout title={`${title} · Kuzikode`} bodyClass="bg-canvas">
-  <header class="border-b border-line bg-surface">
-    <div class="container-content flex h-16 items-center">
+<Base title={`${title} · Kuzikode`} noindex bodyClass="kz-docbody">
+  <header class="kz-docbar">
+    <div class="container-wide kz-docbar__in">
       <Logo href={null} height={24} />
+      <p class="kz-docbar__note">
+        <Icon name="lock" size={16} />
+        Private link
+      </p>
     </div>
   </header>
-  <main id="main" tabindex="-1" class="container-content py-8 focus:outline-none">
-    <slot />
+  <main id="main" tabindex="-1" class="kz-docmain">
+    <div class="container-wide">
+      <slot />
+    </div>
   </main>
-</AppLayout>
+</Base>

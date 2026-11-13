@@ -1,7 +1,14 @@
 ---
+/**
+ * Public quotation (R4.8, rebuilt from scratch). Spec (RESPONSIVE_DESIGN_SPEC "Public documents"; IMG_5018 document + summary):
+ * phones → the summary first (status, total, valid until, "Respond" and the PDF), then the paper document, then the response
+ * form; desktop → the document on the left, a sticky panel on the right (summary, actions, the response form below it).
+ * Token-only access, rate-limited, noindex (DocumentLayout + middleware).
+ */
 import DocumentLayout from '../../layouts/DocumentLayout.astro';
-import QuotationDocument from '../../components/documents/QuotationDocument.astro';
-import { QuotationResponse } from '../../components/forms/QuotationResponse';
+import QuotationSheet from '../../ui/documents/QuotationSheet.astro';
+import DocAside from '../../ui/documents/DocAside.astro';
+import { QuotationResponse } from '../../ui/documents/QuotationResponse';
 import { getPublicQuotation } from '../../server/modules/quotations';
 import { publicDocumentPageLimit } from '../../server/lib/rate-limit';
 import { formatMoney } from '../../shared/money';
@@ -15,6 +22,7 @@ const data = await getPublicQuotation(ctx, token);
 if (!data) return new Response(null, { status: 404, statusText: 'Not found' });
 const q = data.quotation;
 const total = formatMoney(q.total_minor, q.currency);
+const expired = q.status === 'expired' || (!data.open && !q.superseded_by_id && !!q.valid_until);
 const notice =
   q.status === 'accepted'
     ? `Accepted${q.accepted_by_name ? ` by ${q.accepted_by_name}` : ''}${q.accepted_at ? ` on ${formatLongDate(q.accepted_at)}` : ''}. Thank you.`
@@ -22,51 +30,51 @@ const notice =
       ? 'You declined this quotation. Reply to our email if you would like an updated one.'
       : q.status === 'void'
         ? 'This quotation has been withdrawn.'
-        : q.status === 'expired' || (!data.open && !q.superseded_by_id && q.valid_until)
+        : expired
           ? 'This quotation has expired. Contact us for an updated one.'
           : null;
+const state = data.open
+  ? { label: 'Awaiting your response', tone: 'now' as const }
+  : q.status === 'accepted'
+    ? { label: 'Accepted', tone: 'ok' as const }
+    : {
+        label: q.status === 'rejected' ? 'Declined' : q.status === 'void' ? 'Withdrawn' : 'Expired',
+        tone: 'off' as const,
+      };
 ---
 
 <DocumentLayout title={q.number ?? 'Quotation'}>
-  <div class="mx-auto flex max-w-4xl flex-col gap-6">
-    {data.newerVersionLink ? (
-      <p role="status" class="rounded-sm border border-info-700/30 bg-info-50 px-4 py-3 text-sm text-info-700">
-        There is a newer version of this quotation.{' '}
-        <a href={data.newerVersionLink} class="font-semibold underline">
-          View the latest version
-        </a>
-      </p>
-    ) : notice ? (
-      <p role="status" class="rounded-sm border border-line bg-surface px-4 py-3 text-sm text-ink-800">
-        {notice}
-      </p>
-    ) : null}
-    <QuotationDocument
+  <div class="kz-docpage">
+    <DocAside
+      kind="Quotation"
       number={q.number}
-      title={q.title}
-      status={q.status}
-      introHtml={q.intro_html}
-      currency={q.currency}
-      issueDate={q.issue_date}
-      validUntil={q.valid_until}
-      paymentTerms={q.payment_terms}
-      notes={q.notes}
-      terms={q.terms}
-      totals={{ subtotal: q.subtotal_minor, discount: q.discount_minor, tax: q.tax_minor, total: q.total_minor }}
-      items={data.items}
-      client={data.client}
-      business={data.business}
+      state={state}
+      amountLabel="Total"
+      amount={total}
+      facts={[{ k: 'Valid until', v: q.valid_until ? formatLongDate(q.valid_until) : '—' }]}
+      primary={data.open ? { label: 'Respond to this quotation', href: '#respond' } : undefined}
+      pdfHref={`/api/v1/public/quotations/${token}/pdf`}
+      newer={data.newerVersionLink ?? undefined}
+      notice={data.newerVersionLink ? undefined : (notice ?? undefined)}
     />
-    <p class="flex justify-end">
-      <a
-        href={`/api/v1/public/quotations/${token}/pdf`}
-        download
-        class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
-      >
-        Download PDF
-      </a>
-    </p>
-    {data.open ? <QuotationResponse client:load token={token} total={total} /> : null}
-    <p class="text-center text-[12px] text-ink-600">This page is private to you. Please don't share the link.</p>
+    <div class="kz-docpage__doc">
+      <QuotationSheet
+        number={q.number}
+        title={q.title}
+        status={q.status}
+        introHtml={q.intro_html}
+        currency={q.currency}
+        issueDate={q.issue_date}
+        validUntil={q.valid_until}
+        paymentTerms={q.payment_terms}
+        notes={q.notes}
+        terms={q.terms}
+        totals={{ subtotal: q.subtotal_minor, discount: q.discount_minor, tax: q.tax_minor, total: q.total_minor }}
+        items={data.items}
+        client={data.client}
+        business={data.business}
+      />
+      {data.open ? <QuotationResponse client:load token={token} total={total} /> : null}
+    </div>
   </div>
 </DocumentLayout>

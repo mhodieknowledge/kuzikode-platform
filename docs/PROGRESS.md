@@ -1133,3 +1133,15 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Next step: R4.8 public documents + checkout (`/q/`, `/i/`, `/pay/…`): `src/components/documents/*`, `src/components/payments/*`,
   `src/components/forms/QuotationResponse.tsx`, `layouts/DocumentLayout.astro` → new `src/ui/public/documents/` + `src/ui/public/checkout/`
   (extract `useCheckout`), payment e2e (`checkout`, `public-documents`, `full-journey`) must stay green. Refs IMG_5013, 5014, 5016, 5018.
+
+## 2026-11-13 05:20 UTC · R4.8 ✅ Public documents + checkout (R4 complete)
+- New: `src/layouts/DocumentLayout.astro` (rewritten on Base), `src/ui/documents/` (DocumentSheet + Quotation/InvoiceSheet, DocAside,
+  QuotationResponse + useQuotationResponse), `src/ui/public/checkout/` (useCheckout, useAttemptStatus, Checkout, parts, WalletCode, OtpBoxes,
+  BankPanel, AttemptResult, CardReturn, CheckoutSummary), tokens `documents.css`, `checkout.css`; icon `bank`. Admin + portal document views use
+  the new sheets. Deleted: `src/components/documents/*`, `src/components/payments/*`, `forms/QuotationResponse.tsx`.
+- verify green (unit 510, integration 308); e2e 31/31 + 10/10 re-run (payments, documents, portal, sweep). Reviewer 2/2 PASS.
+- Tiers: documents by the orchestrator; checkout subagent opus/high (payments); review opus/medium.
+- Housekeeping: remote branches `wip/r4.7` and `wip/r4.8` are stale checkpoints (the proxy refused branch deletion); safe to delete.
+- Next step: R5.1 workspace shell (`src/layouts/PortalLayout.astro` → new WorkspaceLayout in `src/ui/workspace/`; PANEL_DESIGN_SPEC.md; Linux-
+  inspired: side dock, status bar, window/panel pattern, command palette, mobile bottom dock + sheet, light/dark). Then R5.2–R5.4.
+  Portal still uses legacy `components/portal/*` (incl. AttemptStatus for `/portal/payments/attempts/[id]`).

@@ -6,7 +6,8 @@
  * COOP is `unsafe-none` here so the popup keeps its link to the checkout (see `openerPolicyFor`).
  */
 import DocumentLayout from '../../layouts/DocumentLayout.astro';
-import { CardReturn } from '../../components/payments/CardReturn';
+import Icon from '../../ui/icons/Icon.astro';
+import { CardReturn } from '../../ui/public/checkout/CardReturn';
 import { publicDocumentPageLimit } from '../../server/lib/rate-limit';
 import { getPublicAttempt } from '../../server/modules/payments';
 
@@ -20,13 +21,16 @@ if (!attempt) return new Response(null, { status: 404, statusText: 'Not found' }
 ---
 
 <DocumentLayout title="Card payment">
-  <div class="mx-auto flex max-w-xl flex-col gap-6">
+  <div class="kz-coreturn">
     <h1 class="sr-only">Card payment</h1>
-    <div class="rounded-lg border border-line bg-surface p-6 md:p-8">
+    <div class="kz-copanel">
       <CardReturn client:load initial={attempt} />
     </div>
-    <p class="text-center text-[12px] text-ink-600">
-      Payments are processed securely by our payment partner. Kuzikode never sees or stores your PIN or card number.
+    <p class="kz-cosafe">
+      <Icon name="lock" size={16} />
+      <span>
+        Payments are processed securely by our payment partner. Kuzikode never sees or stores your PIN or card number.
+      </span>
     </p>
   </div>
 </DocumentLayout>

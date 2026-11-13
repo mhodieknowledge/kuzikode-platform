@@ -1,8 +1,8 @@
 ---
-/** Portal checkout for one invoice (docs/06 §3b): the same CheckoutPage as /pay/[invoiceToken], within portal scope. */
+/** Portal checkout for one invoice (docs/06 §3b): the same Checkout as /pay/[invoiceToken], within portal scope. */
 import PortalLayout from '../../../../layouts/PortalLayout.astro';
-import CheckoutSummary from '../../../../components/payments/CheckoutSummary.astro';
-import { CheckoutPage } from '../../../../components/payments/CheckoutPage';
+import CheckoutSummary from '../../../../ui/public/checkout/CheckoutSummary.astro';
+import { Checkout } from '../../../../ui/public/checkout/Checkout';
 import { loadPortalPage } from '../../../../server/lib/portal-page';
 import { portalInvoiceId } from '../../../../server/modules/invoices';
 import { checkoutView } from '../../../../server/modules/payments';
@@ -28,27 +28,27 @@ const id = encodeURIComponent(invoiceId);
       Invoice {view.invoice.number}
     </a>
   </p>
-  <div class="mt-4 grid max-w-5xl gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start">
-    <div class="flex flex-col gap-4 lg:sticky lg:top-6">
-      <CheckoutSummary view={view} />
+  <div class="kz-co kz-co--portal">
+    <CheckoutSummary view={view} />
+    <div class="kz-co__pay">
+      <Checkout
+        client:load
+        mode="portal"
+        currency={view.invoice.currency}
+        minorDigits={view.invoice.minorDigits}
+        amountDueMinor={view.invoice.amountDueMinor}
+        invoiceNumber={view.invoice.number}
+        methods={view.methods}
+        bankTransfer={view.bankTransfer}
+        phone={view.phone}
+        cards={view.cards}
+        testMode={view.testMode}
+        endpoints={{
+          pay: `/api/v1/portal/invoices/${id}/pay`,
+          bankNotice: `/api/v1/portal/invoices/${id}/bank-transfer-notice`,
+        }}
+        backHref={`/portal/invoices/${id}`}
+      />
     </div>
-    <CheckoutPage
-      client:load
-      mode="portal"
-      currency={view.invoice.currency}
-      minorDigits={view.invoice.minorDigits}
-      amountDueMinor={view.invoice.amountDueMinor}
-      invoiceNumber={view.invoice.number}
-      methods={view.methods}
-      bankTransfer={view.bankTransfer}
-      phone={view.phone}
-      cards={view.cards}
-      testMode={view.testMode}
-      endpoints={{
-        pay: `/api/v1/portal/invoices/${id}/pay`,
-        bankNotice: `/api/v1/portal/invoices/${id}/bank-transfer-notice`,
-      }}
-      backHref={`/portal/invoices/${id}`}
-    />
   </div>
 </PortalLayout>

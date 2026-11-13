@@ -152,6 +152,7 @@ export const ICONS = {
   cash: Banknote,
   wallet: Wallet,
   receipt: Receipt,
+  bank: Landmark,
   // Workspace
   overview: LayoutDashboard,
   projects: FolderKanban,

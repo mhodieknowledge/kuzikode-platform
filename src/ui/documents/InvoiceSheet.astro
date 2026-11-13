@@ -1,0 +1,31 @@
+---
+/** Invoice as the client sees it (public /i/:token, workspace, admin preview). Same props as before the rebuild. */
+import DocumentSheet, { type DocItem, type DocParty } from './DocumentSheet.astro';
+
+interface Props {
+  number: string | null;
+  currency: string;
+  minorDigits?: number;
+  issueDate: string | null;
+  dueDate: string | null;
+  notes: string | null;
+  terms: string | null;
+  totals: {
+    subtotal: number;
+    discount: number;
+    tax: number;
+    total: number;
+    paid: number;
+    credited: number;
+    balance: number;
+  };
+  /** Payments and credits are shown once the invoice is issued. */
+  issued: boolean;
+  items: DocItem[];
+  client: DocParty;
+  business: DocParty;
+}
+const { dueDate, ...p } = Astro.props;
+---
+
+<DocumentSheet kind="invoice" secondDate={dueDate} {...p} />

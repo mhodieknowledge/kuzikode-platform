@@ -100,7 +100,6 @@ test('public pages', async ({ page }) => {
     '/services/',
     { list: '/services/', pattern: /^\/services\/[a-z0-9-]+$/ },
     '/pricing',
-    '/products',
     '/industries/',
     { list: '/industries/', pattern: /^\/industries\/[a-z0-9-]+$/ },
     '/work/',

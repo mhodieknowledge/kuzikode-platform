@@ -31,7 +31,7 @@ const { nav, divisions, tone = 'bone' } = Astro.props;
 const path = Astro.url.pathname;
 const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
 const servicesActive = path.startsWith('/services') || path.startsWith('/industries');
-const aboutActive = ['/about', '/products', '/faq', '/how-we-work', ...(nav.careersInNav ? [] : ['/careers'])].some((p) =>
+const aboutActive = ['/about', '/faq', '/how-we-work', ...(nav.careersInNav ? [] : ['/careers'])].some((p) =>
   path.startsWith(p),
 );
 const top = [
@@ -49,7 +49,6 @@ const mobileLinks = [
   { label: 'About Kuzikode', href: '/about' },
   ...nav.servicesExtra.map((l) => ({ label: l.label, href: l.href })),
   { label: 'Insights', href: '/insights' },
-  { label: 'Products', href: '/products' },
   { label: 'Careers', href: '/careers' },
   { label: 'FAQ', href: '/faq' },
   { label: 'Contact', href: '/contact' },

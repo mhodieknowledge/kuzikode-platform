@@ -21,7 +21,7 @@ const version = async () =>
   Number((await row("SELECT value FROM application_settings WHERE key = 'content_version'")).value);
 
 const pkg = (over: Record<string, unknown> = {}) => ({
-  serviceId: 'svc_web_development__business_websites',
+  serviceId: 'svc_websites__business_website',
   slug: 'landing-page',
   name: 'Landing Page',
   tagline: 'One page that converts.',
@@ -144,11 +144,15 @@ describe('packages & pricing admin (P4.19)', () => {
         billingType: 'one_off',
       })
     ).body.data.id as string;
+    // A global recurring add-on (the seeded catalogue has none since R9.1).
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO package_addons (id, name, price_minor, currency, unit, billing_type) VALUES ('pad_test_yearly', 'Yearly licence', 3000, 'USD', 'year', 'recurring')",
+    ).run();
     const lines = await P(admin, `/${id}/quote-lines`, {
       currency: 'USD',
       addons: [
         { id: addon, quantity: 2 },
-        { id: 'pad_extra_mailbox', quantity: 3 },
+        { id: 'pad_test_yearly', quantity: 3 },
       ],
     });
     expect(lines.status, JSON.stringify(lines.body)).toBe(200);

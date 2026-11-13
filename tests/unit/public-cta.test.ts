@@ -19,7 +19,7 @@ describe('public calls to action (BRIEF B.0c)', () => {
   });
 
   it('shortens known division names and falls back to the CMS name', () => {
-    expect(divisionShortName('web-development', 'Web Development & Digital Solutions')).toBe('Web development');
+    expect(divisionShortName('websites', 'Websites & Web Applications')).toBe('Websites & web apps');
     expect(divisionShortName('new-division', 'New Division')).toBe('New Division');
   });
 });

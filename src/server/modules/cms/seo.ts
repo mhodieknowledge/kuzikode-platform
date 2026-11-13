@@ -82,7 +82,7 @@ export function serviceLd(
 
 export function caseStudyLd(
   ctx: RequestContext,
-  p: { name: string; summary: string; slug: string; completionDate: string | null; technologies: string[] },
+  p: { name: string; summary: string; slug: string; completionDate: string | null },
 ) {
   return {
     '@context': 'https://schema.org',
@@ -92,7 +92,6 @@ export function caseStudyLd(
     url: abs(ctx, `/work/${p.slug}`),
     creator: { '@id': abs(ctx, '/#organization') },
     ...(p.completionDate ? { dateCreated: p.completionDate } : {}),
-    ...(p.technologies.length ? { keywords: p.technologies.join(', ') } : {}),
   };
 }
 

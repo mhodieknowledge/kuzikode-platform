@@ -8,8 +8,8 @@ import { createStaff } from '../helpers/factories';
 const valid = (over: Record<string, unknown> = {}) => ({
   name: 'Farai Example',
   email: 'Farai@Example.com',
-  category: 'web-development',
-  service: 'e-commerce',
+  category: 'websites',
+  service: 'ecommerce-website',
   budgetRange: '$1,500 – $5,000',
   message: 'We would like an online store for our hardware shop.',
   consent: true,
@@ -34,11 +34,11 @@ describe('public enquiries', () => {
       .first<any>();
     expect(row).toMatchObject({
       email: 'farai@example.com',
-      category: 'web-development',
+      category: 'websites',
       status: 'new',
       kind: 'contact',
     });
-    expect(row.service_id).toBe('svc_web_development__e_commerce');
+    expect(row.service_id).toBe('svc_websites__ecommerce_website');
     expect(row.ip_hash).not.toContain('10.0.0.2');
     const note = await env.DB.prepare("SELECT title FROM notifications WHERE user_id = ? AND type = 'enquiry.new'")
       .bind(support.id)
@@ -88,6 +88,15 @@ describe('public enquiries', () => {
 
   it('requires a Turnstile token and accepts product interest only for products with the form enabled', async () => {
     expect((await post(valid({ turnstileToken: undefined }), '10.0.0.11')).status).toBe(422);
+    const interest = valid({
+      kind: 'product_interest',
+      category: 'product_interest',
+      product: 'business-suite',
+      service: undefined,
+    });
+    // Products are unpublished since R9.1 (REFINEMENTS §1): no interest is accepted until the owner publishes one again.
+    expect((await post(interest, '10.0.0.12')).status).toBe(422);
+    await env.DB.prepare("UPDATE products SET published = 1 WHERE id = 'prd_business_suite'").run();
     const ok = await post(
       valid({ kind: 'product_interest', category: 'product_interest', product: 'business-suite', service: undefined }),
       '10.0.0.12',
@@ -100,5 +109,6 @@ describe('public enquiries', () => {
     expect(
       (await post(valid({ kind: 'product_interest', product: 'nope', service: undefined }), '10.0.0.12')).status,
     ).toBe(422);
+    await env.DB.prepare("UPDATE products SET published = 0 WHERE id = 'prd_business_suite'").run();
   });
 });

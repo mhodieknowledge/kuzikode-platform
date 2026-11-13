@@ -40,17 +40,21 @@ describe('base seed', () => {
     expect(sql).not.toMatch(/example\.com|mock/i);
   });
 
-  it('contains every permission and all six divisions with sub-services', () => {
+  it('contains every permission and exactly the 2026-11 catalogue divisions (REFINEMENTS §1)', () => {
     for (const p of ALL_PERMISSIONS) expect(sql).toContain(`'${p}'`);
     expect(DIVISIONS.map((d) => d.slug)).toEqual([
-      'web-development',
-      'mobile-desktop-apps',
+      'websites',
       'business-software',
+      'cross-platform-apps',
       'ai-data',
       'automation-integration',
-      'cloud-it',
+      'add-ons',
     ]);
-    for (const d of DIVISIONS) expect(d.services.length).toBeGreaterThanOrEqual(6);
+    expect(DIVISIONS.map((d) => d.services.length)).toEqual([4, 3, 1, 3, 4, 5]);
+    // Add-ons is priced but not a home widget.
+    expect(DIVISIONS.filter((d) => !d.featured).map((d) => d.slug)).toEqual(['add-ons']);
+    // Products and technologies stay in admin only.
+    expect(sql).not.toMatch(/INSERT OR IGNORE INTO (products|technologies) \([^)]*\) VALUES \([^;]*, 1\);/);
   });
 
   it('keeps prices hidden and VAT inactive by default', () => {

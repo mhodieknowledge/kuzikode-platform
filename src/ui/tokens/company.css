@@ -881,47 +881,6 @@
     }
   }
 
-  /* Tools */
-  .kz-tools__note {
-    max-width: 40ch;
-    font-size: 0.9375rem;
-    color: var(--ink-700);
-  }
-  .kz-tools__grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 24px 16px;
-    border-top: 2px solid var(--ink-900);
-    padding-top: 16px;
-  }
-  .kz-tools__cat {
-    font-family: var(--font-mono);
-    font-variant-ligatures: none;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--ink-500);
-  }
-  .kz-tools__group ul {
-    margin-top: 8px;
-    padding: 0;
-    list-style: none;
-  }
-  .kz-tools__group li {
-    padding: 4px 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--ink-900);
-  }
-  @media (min-width: 768px) {
-    .kz-tools__grid {
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 32px;
-    }
-    .kz-tools__group li {
-      font-size: 1.125rem;
-    }
-  }
-
   /* ================= Industries ================= */
   .kz-ihead,
   .kz-isec-head {

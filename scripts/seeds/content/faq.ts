@@ -77,7 +77,7 @@ export const FAQS: FaqSeed[] = [
     category: 'support',
     question: 'What happens after launch?',
     answer:
-      'Every project includes a support period. After that, you can choose a care plan, a support retainer or pay for help by the hour.',
+      'Every project includes a support period. After that, you can ask us for help by the hour or agree ongoing support in a quotation.',
   },
   {
     id: 'faq_support_request',
@@ -87,17 +87,10 @@ export const FAQS: FaqSeed[] = [
       'Clients can open a support request in the client portal and follow it there. You can also contact us by email or phone.',
   },
   {
-    id: 'faq_support_hosting',
-    category: 'support',
-    question: 'Do you host websites and applications?',
-    answer:
-      'Yes. Our care plans include hosting, SSL, backups and uptime monitoring. We can also deploy to your own cloud account if you prefer.',
-  },
-  {
     id: 'faq_support_backups',
     category: 'support',
     question: 'Is my data backed up?',
-    answer: 'Systems we host are backed up regularly, and we test that backups can be restored.',
+    answer: 'Systems we build that hold business data are set up with regular backups, and we test that backups can be restored.',
   },
   {
     id: 'faq_careers_open',
@@ -150,23 +143,16 @@ export const FAQS: FaqSeed[] = [
   {
     id: 'faq_pricing_third_party',
     category: 'pricing',
-    question: 'What about domains, mailboxes and other third-party costs?',
+    question: 'What about third-party costs?',
     answer:
-      'Where a package includes a domain or mailboxes for the first year, that cost is in the package price. Renewals and other third-party costs are passed on as stated in the quotation.',
-  },
-  {
-    id: 'faq_pricing_recurring',
-    category: 'pricing',
-    question: 'How do care plans and business email renew?',
-    answer:
-      'Recurring services are invoiced in advance for each month or year. Annual billing costs less than paying monthly. You can cancel before the next billing period starts.',
+      'Third-party costs, such as app store fees or payment gateway transaction fees, are paid by you and listed in the quotation before work starts.',
   },
   {
     id: 'faq_pricing_changes',
     category: 'pricing',
     question: 'What if I need something that is not in a package?',
     answer:
-      'Add-ons such as extra pages, extra mailboxes or copywriting can be added to any package. For anything else, describe what you need and we will quote it separately before we start.',
+      'Add-ons such as additional pages, logo design, copywriting, additional languages or a product catalogue upload can be added to any website package. For anything else, describe what you need and we will quote it separately before we start.',
   },
   {
     id: 'faq_pricing_vat',

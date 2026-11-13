@@ -1,0 +1,7 @@
+---
+/**
+ * Products were removed from the public site (R9.1, docs/redesign/REFINEMENTS.md §1). Old links and shared URLs
+ * (`/products`, `/products/…`) land on the services overview with a permanent redirect.
+ */
+return Astro.redirect('/services', 301);
+---

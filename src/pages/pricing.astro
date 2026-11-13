@@ -1,7 +1,8 @@
 ---
 /**
  * Pricing (R4.3, rebuilt from scratch). Order: rate-card hero → sticky category control → one section per pricing category
- * (tiers: plan deck + comparison table on desktop; separate products: flat ledger; "Other services": division ledger) → add-ons → VAT note → questions →
+ * (tiers: plan deck + comparison table on desktop; separate products: flat ledger; "Other services": division ledger, which
+ * includes the Add-ons division since R9.1) → VAT note → questions →
  * footer lead. Every figure comes from `getPricingCatalogue` (BRIEF B.6; the price-accuracy e2e test checks it against D1).
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
@@ -23,7 +24,7 @@ import {
   sectionOf,
   type PublicPackage,
 } from '../server/modules/cms';
-import { formatPriceTag, packagePrice } from '../shared/service-display';
+import { packagePrice } from '../shared/service-display';
 
 const { ctx } = Astro.locals;
 const [page, catalogue, services, faqs] = await Promise.all([
@@ -68,14 +69,6 @@ const rows: RateRow[] = tabs.map((t) => ({
   count: t.packages.length,
   from: lowest(t.packages),
 }));
-const unitLabel: Record<string, string> = {
-  each: '',
-  page: 'per page',
-  mailbox: 'per mailbox / year',
-  month: 'per month',
-  year: 'per year',
-  hour: 'per hour',
-};
 const ld = [breadcrumbLd(ctx, [{ name: 'Pricing', path: '/pricing' }]), ...(faqs.length ? [faqLd(faqs)] : [])];
 ---
 
@@ -169,33 +162,6 @@ const ld = [breadcrumbLd(ctx, [{ name: 'Pricing', path: '/pricing' }]), ...(faqs
       );
     })
   )}
-
-  {catalogue.addons.length > 0 ? (
-    <section class="kz-sec" aria-labelledby="addons-title">
-      <div class="container-wide kz-addons">
-        <header>
-          <h2 id="addons-title" class="kz-h2">
-            Add-ons
-          </h2>
-          <p class="kz-lede">Add any of these to a package.</p>
-        </header>
-        <ul class="kz-addons__list" role="list">
-          {catalogue.addons.map((a) => (
-            <li class="kz-addons__row" data-addon={a.id}>
-              <div>
-                <p class="kz-addons__name">{a.name}</p>
-                {a.description ? <p class="kz-addons__desc">{a.description}</p> : null}
-              </div>
-              <p class="kz-addons__price" data-price>
-                <b>{a.priceMinor !== null ? formatPriceTag(a.priceMinor, a.currency) : 'On request'}</b>
-                {a.priceMinor !== null && unitLabel[a.unit] ? <small>{unitLabel[a.unit]}</small> : null}
-              </p>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  ) : null}
 
   <section
     class="kz-sec kz-sec--inset kz-faq kz-pfaq"

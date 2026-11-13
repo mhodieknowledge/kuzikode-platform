@@ -68,6 +68,7 @@ import {
   Pencil,
   Phone,
   Plus,
+  Puzzle,
   Printer,
   Receipt,
   ReceiptText,
@@ -192,6 +193,7 @@ export const ICONS = {
   'div-ai': BrainCircuit,
   'div-automation': Workflow,
   'div-cloud': ServerCog,
+  'div-addons': Puzzle,
   // Industries
   'ind-retail': ShoppingBag,
   'ind-finance': Landmark,
@@ -223,11 +225,15 @@ export const ICON_SIZES = { 16: 2, 20: 2, 24: 1.75, 32: 1.75 } as const;
 export type IconSize = keyof typeof ICON_SIZES;
 
 const DIVISIONS: Record<string, IconName> = {
-  'web-development': 'div-web',
-  'mobile-desktop-apps': 'div-apps',
+  websites: 'div-web',
   'business-software': 'div-software',
+  'cross-platform-apps': 'div-apps',
   'ai-data': 'div-ai',
   'automation-integration': 'div-automation',
+  'add-ons': 'div-addons',
+  // Divisions retired in R9.1 (REFINEMENTS §1); kept so admin previews of old records still get their glyph.
+  'web-development': 'div-web',
+  'mobile-desktop-apps': 'div-apps',
   'cloud-it': 'div-cloud',
 };
 

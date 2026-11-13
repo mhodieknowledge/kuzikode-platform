@@ -4,7 +4,7 @@ import { expectAccessible, ownIp } from './helpers';
 test.use(ownIp('public-layout'));
 
 test.describe('public layout', () => {
-  test('desktop: mega-menu opens, lists all six divisions and closes with Escape', async ({ page }) => {
+  test('desktop: mega-menu opens, lists every division and closes with Escape', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/');
     const nav = page.getByRole('navigation', { name: 'Main' });
@@ -14,12 +14,12 @@ test.describe('public layout', () => {
     await expect(services).toHaveAttribute('aria-expanded', 'true');
     const panel = page.locator('#menu-services');
     for (const name of [
-      'Web development',
-      'Mobile & desktop apps',
+      'Websites & web apps',
       'Business software',
+      'Cross-platform apps',
       'AI, data & intelligence',
       'Automation & integration',
-      'Cloud & IT',
+      'Add-ons',
     ]) {
       await expect(
         panel.getByRole('link', { name: new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) }),
@@ -48,7 +48,7 @@ test.describe('public layout', () => {
       await page.getByRole('button', { name: 'Open menu' }).click();
       const dialog = page.getByRole('dialog', { name: 'Menu' });
       await expect(dialog).toBeVisible();
-      await expect(dialog.getByRole('link', { name: /^06 Cloud & IT/ })).toBeVisible();
+      await expect(dialog.getByRole('link', { name: /^06 Add-ons/ })).toBeVisible();
       await expect(dialog.getByRole('link', { name: 'Get a quote' })).toBeVisible();
       await expectAccessible(page);
       await page.keyboard.press('Escape');

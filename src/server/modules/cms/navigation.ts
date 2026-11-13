@@ -68,7 +68,6 @@ export async function siteNavigation(ctx: RequestContext): Promise<SiteNavigatio
     about: [
       { label: 'About Kuzikode', href: '/about' },
       { label: 'How we work', href: '/how-we-work' },
-      { label: 'Products', href: '/products' },
       { label: 'Careers', href: '/careers' },
       { label: 'FAQ', href: '/faq' },
     ],

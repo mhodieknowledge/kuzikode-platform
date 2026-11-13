@@ -1,24 +1,16 @@
 ---
 /**
- * Values, products and tools as one composed band (R4.1, revised after the B.0d board review: three sparse splits became one).
- * Desktop: the heading and the about link above a 3-column values ledger (each value under a hairline), then one closing row:
- * the product (modest, its real status, BRIEF B.7) on the left and the tools line on the right. Phones: heading, the three
- * values as rows, the product row, the tools line scrolling sideways. Products and tools hide when nothing is published.
+ * Values band (R4.1). Desktop: the heading and the about link above a 3-column values ledger (each value under a hairline).
+ * Phones: heading, then the values as rows. Products and the tools line were removed in R9.1 (REFINEMENTS §1, §4).
  */
 import Icon from '../../icons/Icon.astro';
 import type { SectionContent } from '../../../shared/schemas/cms';
-import type { Technology } from '../../../server/modules/cms';
 
 interface Props {
   values: SectionContent<'values'> | undefined;
   anchor: string;
-  productsContent: SectionContent<'products_grid'> | undefined;
-  products: { slug: string; name: string; tagline: string | null; status: string }[];
-  technologies: Technology[];
 }
-const { values: v, anchor, productsContent, products, technologies } = Astro.props;
-const STATUS: Record<string, string> = { in_development: 'In development', beta: 'Beta', available: 'Available' };
-const showProducts = !!productsContent && products.length > 0;
+const { values: v, anchor } = Astro.props;
 ---
 
 <section class="kz-sec kz-company" id={anchor} aria-labelledby={v ? `${anchor}-title` : undefined}>
@@ -49,46 +41,6 @@ const showProducts = !!productsContent && products.length > 0;
             ))}
           </dl>
         </>
-      ) : null
-    }
-    {
-      showProducts || technologies.length > 0 ? (
-        <div class="kz-company__foot">
-          {showProducts ? (
-            <div class="kz-company__products">
-              <h2 id="products-title" class="kz-company__label">
-                {productsContent!.title}
-              </h2>
-              <ul class="kz-company__plist" role="list">
-                {products.map((p) => (
-                  <li>
-                    <a class="kz-product" href={`/products#p-${p.slug}`}>
-                      <span class="kz-product__name">{p.name}</span>
-                      <span class="kz-product__status">
-                        <Icon name="status-pending" size={16} />
-                        {STATUS[p.status] ?? p.status.replace(/_/g, ' ')}
-                      </span>
-                      {p.tagline ? <span class="kz-product__tag">{p.tagline}</span> : null}
-                      <Icon name="arrow-right" size={16} class="kz-product__arrow" />
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-          {technologies.length > 0 ? (
-            <div class="kz-company__tech">
-              <h2 id="tech-title" class="kz-company__label">
-                Tools we build with
-              </h2>
-              <ul class="kz-tech__list" role="list" aria-labelledby="tech-title">
-                {technologies.map((t) => (
-                  <li>{t.name}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-        </div>
       ) : null
     }
   </div>

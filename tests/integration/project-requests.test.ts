@@ -7,10 +7,10 @@ import { createStaff } from '../helpers/factories';
 import { seedBase } from '../helpers/seed';
 
 const valid = (over: Record<string, unknown> = {}) => ({
-  category: 'web-development',
-  service: 'business-websites',
+  category: 'websites',
+  service: 'business-website',
   package: 'business-website',
-  addons: ['pad_logo_design', 'pad_extra_mailbox'],
+  addons: ['pad_logo_design', 'pad_copywriting'],
   features: ['online_payments', 'blog'],
   budgetRange: '$500 – $1,500',
   timeline: 'Within 1 month',
@@ -51,8 +51,8 @@ describe('Start-a-Project wizard submissions (docs/12 §C.2)', () => {
       .first<any>();
     expect(row).toMatchObject({
       kind: 'wizard',
-      category: 'web-development',
-      service_id: 'svc_web_development__business_websites',
+      category: 'websites',
+      service_id: 'svc_websites__business_website',
       package_id: 'pkg_business_website',
       budget_range: '$500 – $1,500',
       message: 'A new website for our transport company with a quote request form.',
@@ -60,18 +60,18 @@ describe('Start-a-Project wizard submissions (docs/12 §C.2)', () => {
     const brief = JSON.parse(row.brief);
     expect(brief).toMatchObject({
       version: 1,
-      division: { slug: 'web-development' },
+      division: { slug: 'websites' },
       package: { slug: 'business-website', name: 'Business Website' },
-      addons: [{ id: 'pad_logo_design' }, { id: 'pad_extra_mailbox' }],
+      addons: [{ id: 'pad_logo_design' }, { id: 'pad_copywriting' }],
       features: [{ value: 'online_payments' }, { value: 'blog' }],
       timeline: 'Within 1 month',
       websiteUrl: 'https://old.example.co.zw',
-      // $750 + $80 logo one-off; extra mailbox $30/year.
+      // $320 Business Website + $50 logo + $15 copywriting (each add-on counted once), all one-off.
       estimate: {
         currency: 'USD',
-        oneOffLowMinor: 83000,
-        oneOffHighMinor: 83000,
-        recurring: [{ interval: 'year', amountMinor: 3000 }],
+        oneOffLowMinor: 38500,
+        oneOffHighMinor: 38500,
+        recurring: [],
       },
     });
     const file = await env.DB.prepare('SELECT * FROM files WHERE id = ?').bind(row.attachment_file_id).first<any>();
@@ -103,7 +103,7 @@ describe('Start-a-Project wizard submissions (docs/12 §C.2)', () => {
 
   it('rejects unknown packages, packages from another division, unknown add-ons and bad fields', async () => {
     expect((await post(valid({ package: 'no-such' }))).body.error.fields.package).toBeDefined();
-    expect((await post(valid({ package: 'business-email' }))).body.error.fields.package).toBeDefined();
+    expect((await post(valid({ package: 'pos-inventory-system' }))).body.error.fields.package).toBeDefined();
     expect((await post(valid({ addons: ['pad_nope'] }))).body.error.fields.addons).toBeDefined();
     const bad = await post(valid({ timeline: 'tomorrow', websiteUrl: 'javascript:alert(1)', consent: false }));
     expect(bad.status).toBe(422);

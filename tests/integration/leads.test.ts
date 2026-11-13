@@ -24,8 +24,8 @@ async function submitEnquiry(email: string) {
       name: 'Tafadzwa Example',
       email,
       organisation: 'Vumba Lodge',
-      category: 'web-development',
-      service: 'business-websites',
+      category: 'websites',
+      service: 'business-website',
       budgetRange: '$500 – $1,500',
       message: 'We need a booking website for our lodge.',
       consent: true,
@@ -55,7 +55,7 @@ describe('enquiries & leads (P4.5)', () => {
       assigned_to: s.user.id,
     });
     expect(detail.body.data.lead.title).toContain('Vumba Lodge');
-    expect(detail.body.data.services.map((x: any) => x.id)).toEqual(['svc_web_development__business_websites']);
+    expect(detail.body.data.services.map((x: any) => x.id)).toEqual(['svc_websites__business_website']);
     expect(detail.body.data.activities[0].body).toMatch(/Created from enquiry ENQ-/);
     expect((await api(`/api/v1/admin/enquiries/${e.id}`, { cookie: s.cookie })).body.data).toMatchObject({
       status: 'triaged',

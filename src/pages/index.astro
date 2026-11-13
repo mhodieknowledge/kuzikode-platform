@@ -2,7 +2,7 @@
 /**
  * Home (R4.1, clean slate). Section order from the Route direction, content from the CMS `home` page:
  * hero (workspace window + route index) → services night band (route tabs) → road strip (how we work) → why (ledger + payment
- * slip) → selected work (only when published) → client words (only real, consented) → company band (values, product, tools);
+ * slip) → selected work (only when published) → client words (only real, consented) → company band (values);
  * the CMS closing call to action titles the footer's "Where next" routes.
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
@@ -20,23 +20,21 @@ import {
   getPricingCatalogue,
   getServiceCatalogue,
   listPortfolio,
-  listProducts,
-  listTechnologies,
   listTestimonials,
 } from '../server/modules/cms';
 import type { Section } from '../shared/schemas/cms';
 
 const { ctx } = Astro.locals;
-const [page, categories, pricing, portfolio, products, testimonials, technologies] = await Promise.all([
+const [page, catalogue, pricing, portfolio, testimonials] = await Promise.all([
   getPage(ctx, 'home'),
   getServiceCatalogue(ctx),
   getPricingCatalogue(ctx),
   listPortfolio(ctx),
-  listProducts(ctx),
   listTestimonials(ctx),
-  listTechnologies(ctx),
 ]);
 if (!page) return new Response('Not found', { status: 404 });
+// Home shows the featured divisions only (the Add-ons division is priced but is not a home widget, REFINEMENTS §1).
+const categories = catalogue.filter((c) => c.featured);
 const featured = portfolio.filter((p) => p.featured).length ? portfolio.filter((p) => p.featured) : portfolio;
 const sections = page.sections as Section[];
 const divisions = categories.map((c) => ({
@@ -53,7 +51,6 @@ const process = byType('process');
 const why = byType('features');
 const work = byType('work_grid');
 const values = byType('values');
-const productsSec = byType('products_grid');
 const closing = byType('cta')?.content as Section<'cta'>['content'] | undefined;
 ---
 
@@ -78,11 +75,5 @@ const closing = byType('cta')?.content as Section<'cta'>['content'] | undefined;
   <PhotoStrip image="home-band" />
   {work ? <WorkRail content={work.content as Section<'work_grid'>['content']} items={featured} /> : null}
   <Voices testimonials={testimonials} />
-  <CompanyBand
-    values={values?.content as Section<'values'>['content'] | undefined}
-    anchor={values?.key ?? 'values'}
-    productsContent={productsSec?.content as Section<'products_grid'>['content'] | undefined}
-    products={products}
-    technologies={technologies}
-  />
+  <CompanyBand values={values?.content as Section<'values'>['content'] | undefined} anchor={values?.key ?? 'values'} />
 </PublicLayout>

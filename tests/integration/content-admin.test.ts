@@ -132,7 +132,7 @@ describe('content admin (P4.22)', () => {
       icon: 'layers',
       status: 'draft',
       sortOrder: 5,
-      serviceIds: ['svc_web_development__business_websites'],
+      serviceIds: ['svc_websites__business_website'],
     };
     expect((await C(cm, '/industries', { ...body, serviceIds: ['svc_missing'] })).status).toBe(422);
     expect((await C(cm, '/industries', { ...body, icon: 'rocket' })).status).toBe(422);
@@ -143,9 +143,9 @@ describe('content admin (P4.22)', () => {
     await C(cm, `/industries/${id}`, { ...body, status: 'published' }, 'PUT');
     const live = await getIndustry(pub(), 'mining-services');
     expect(live?.challenges).toEqual(body.challenges);
-    expect(live?.serviceIds).toEqual(['svc_web_development__business_websites']);
+    expect(live?.serviceIds).toEqual(['svc_websites__business_website']);
     expect(live?.body).not.toContain('onerror');
-    expect((await C(cm, `/industries/${id}`)).body.data.serviceIds).toEqual(['svc_web_development__business_websites']);
+    expect((await C(cm, `/industries/${id}`)).body.data.serviceIds).toEqual(['svc_websites__business_website']);
     expect((await C(cm, `/industries/${id}`, undefined, 'DELETE')).status).toBe(200);
     expect(await row('SELECT 1 AS x FROM industry_services WHERE industry_id = ?', id)).toBeNull();
   });

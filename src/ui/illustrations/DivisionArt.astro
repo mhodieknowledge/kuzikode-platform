@@ -21,7 +21,10 @@ const known = [
   'automation-integration',
   'cloud-it',
 ];
-const kind = known.includes(slug) ? slug : 'web-development';
+/** Current division slugs (R9.1, REFINEMENTS §1) drawn with the matching route drawing. */
+const ALIAS: Record<string, string> = { websites: 'web-development', 'cross-platform-apps': 'mobile-desktop-apps' };
+const drawn = ALIAS[slug] ?? slug;
+const kind = known.includes(drawn) ? drawn : 'web-development';
 ---
 
 <svg

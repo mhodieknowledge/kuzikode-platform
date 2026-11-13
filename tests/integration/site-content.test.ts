@@ -40,6 +40,9 @@ describe('FAQ, technologies, testimonials and search (P3.16)', () => {
   });
 
   it('lists technologies, and only same-origin SVG logos', async () => {
+    // Seeded unpublished since R9.1 (no tech stack on public pages, REFINEMENTS §4): nothing is listed until published.
+    expect(await listTechnologies(ctx())).toEqual([]);
+    await fresh(env.DB.prepare('UPDATE technologies SET published = 1'));
     await fresh(
       env.DB.prepare("UPDATE technologies SET logo_svg_path = 'https://evil.example/x.svg' WHERE name = 'React'"),
     );
@@ -76,19 +79,29 @@ describe('FAQ, technologies, testimonials and search (P3.16)', () => {
     expect(searchTerms('a'.repeat(500)).join('').length).toBeLessThanOrEqual(100);
     expect(await searchSite(ctx(), '')).toEqual([]);
 
-    const email = await searchSite(ctx(), 'business email');
-    const kinds = new Set(email.map((r) => r.kind));
+    const payments = await searchSite(ctx(), 'payment');
+    const kinds = new Set(payments.map((r) => r.kind));
     for (const k of ['service', 'package', 'insight', 'faq'] as const) expect(kinds.has(k), k).toBe(true);
-    expect(email[0]!.title.toLowerCase()).toContain('email');
+    expect(payments[0]!.title.toLowerCase()).toContain('payment');
 
     const pos = await searchSite(ctx(), 'POS');
-    expect(pos[0]).toMatchObject({ kind: 'service', title: 'POS systems', href: '/services/business-software' });
+    expect(pos[0]).toMatchObject({
+      kind: 'service',
+      title: 'POS & Inventory Systems',
+      href: '/services/business-software',
+    });
+    // Removed offers are not found (REFINEMENTS §1).
+    for (const q of ['care plan', 'hosting', 'business suite'])
+      expect(
+        (await searchSite(ctx(), q)).filter((r) => r.kind === 'service' || r.kind === 'package'),
+        q,
+      ).toEqual([]);
     expect((await searchSite(ctx(), 'logistics'))[0]).toMatchObject({
       kind: 'industry',
       href: '/industries/logistics-transport',
     });
     expect(await searchSite(ctx(), 'zzzqqq')).toEqual([]);
     // Every result points at a site path.
-    for (const r of [...email, ...pos]) expect(r.href).toMatch(/^\/[a-z0-9#/_-]*$/);
+    for (const r of [...payments, ...pos]) expect(r.href).toMatch(/^\/[a-z0-9#/_-]*$/);
   });
 });

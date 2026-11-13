@@ -23,13 +23,18 @@ import {
   settingBool,
 } from '../../server/modules/cms';
 import { canRequestQuote, quotationHref } from '../../shared/service-display';
-import { divisionFromPrice, divisionShortName } from '../../shared/directory';
+import { RETIRED_DIVISIONS, divisionFromPrice, divisionShortName } from '../../shared/directory';
 
 const { ctx } = Astro.locals;
 const catalogue = await getServiceCatalogue(ctx);
 const index = catalogue.findIndex((c) => c.slug === (Astro.params.slug ?? ''));
 const cat = catalogue[index];
-if (!cat) return new Response(null, { status: 404, statusText: 'Not found' });
+if (!cat) {
+  // Divisions retired in R9.1 (REFINEMENTS §1): permanent redirect to the closest remaining page.
+  const moved = RETIRED_DIVISIONS[Astro.params.slug ?? ''];
+  if (moved) return Astro.redirect(moved, 301);
+  return new Response(null, { status: 404, statusText: 'Not found' });
+}
 const settings = await getSettings(ctx);
 const showPrices = settingBool(settings, 'pricing.show_prices');
 const { packages } = await packagesForCategory(ctx, cat.slug);
@@ -37,7 +42,13 @@ const quotable = canRequestQuote(cat.status);
 const n = index + 1;
 const hue = `kz-div-${((n - 1) % 6) + 1}`;
 const from = showPrices ? divisionFromPrice(packages, cat.slug) : null;
-const bandImage = `svc-${cat.slug}` in manifest.images ? `svc-${cat.slug}` : 'about-workspace';
+// R9.1 renamed two divisions; their photographs keep the original keys until the owner sends new ones.
+const IMAGE_ALIAS: Record<string, string> = {
+  websites: 'web-development',
+  'cross-platform-apps': 'mobile-desktop-apps',
+};
+const imageKey = `svc-${IMAGE_ALIAS[cat.slug] ?? cat.slug}`;
+const bandImage = imageKey in manifest.images ? imageKey : 'about-workspace';
 const ld = [
   serviceLd(ctx, cat),
   breadcrumbLd(ctx, [
@@ -87,7 +98,7 @@ const ld = [
     </section>
   ) : null}
 
-  {cat.services.length > 0 ? <ServiceLedger cat={cat} n={n} showPrices={showPrices} /> : null}
+  {cat.services.length > 0 ? <ServiceLedger cat={cat} n={n} showPrices={showPrices} packages={packages} /> : null}
 
   {cat.description ? (
     <PhotoBand image={bandImage} label="Overview">

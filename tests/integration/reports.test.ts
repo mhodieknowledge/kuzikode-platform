@@ -91,7 +91,7 @@ async function fixtures() {
     );
   const setStatus = (id: string, status: string) =>
     q('UPDATE invoices SET status = ?, number = ? WHERE id = ?', status, `INV-${id}`, id);
-  const web = 'svc_web_development__business_websites';
+  const web = 'svc_websites__business_website';
   await env.DB.batch([
     // Revenue: 15,000 USD from Acacia (one payment lands on 1 April in Harare), 2,000 refunded in April, one reversed payment.
     pay('pay_r1', a, 'USD', 10_000, '2031-03-01T10:00:00.000Z'),
@@ -205,9 +205,9 @@ describe('reports (P4.18)', () => {
 
   it('invoiced by service, ageing buckets, quotation conversion, expenses and indicative profit', async () => {
     expect((await invoicedByService(ctx(), R)).map((r) => [r.service, r.currency, r.amount])).toEqual([
-      ['Corporate & business websites', 'USD', 8_000],
+      ['Business Website', 'USD', 8_000],
       ['Other (custom lines)', 'USD', 2_000],
-      ['Corporate & business websites', 'ZWG', 300_000],
+      ['Business Website', 'ZWG', 300_000],
     ]);
 
     const aged = await ageing(ctx(), '2031-06-30');

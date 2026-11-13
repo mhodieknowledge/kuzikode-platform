@@ -1,0 +1,7 @@
+---
+/**
+ * There is no tech-stack page (R9.1, docs/redesign/REFINEMENTS.md §4). Old links (`/technologies`, `/technologies/…`)
+ * land on the services overview with a permanent redirect.
+ */
+return Astro.redirect('/services', 301);
+---

@@ -30,7 +30,10 @@ const statements = (sections.filter((s) => s.type === 'statement') as Section<'s
 }));
 const values = sections.find((s) => s.type === 'values') as Section<'values'> | undefined;
 const objectives = sections.find((s) => s.type === 'list') as Section<'list'> | undefined;
-const divisions = categories.map((c) => ({ slug: c.slug, short: divisionShortName(c.slug, c.name) }));
+// Areas of work: the featured divisions (Add-ons is priced but is not an area of work, REFINEMENTS §1).
+const divisions = categories
+  .filter((c) => c.featured)
+  .map((c) => ({ slug: c.slug, short: divisionShortName(c.slug, c.name) }));
 const bandImage = 'about-studio' in manifest.images ? 'about-studio' : 'home-developer';
 ---
 

@@ -156,7 +156,7 @@ export const POSTS: PostSeed[] = [
 <li>Remove access promptly when someone leaves.</li>
 <li>Renew your domain before it expires. An expired domain stops your email working.</li>
 </ul>
-<p>We set up business email on your domain, including SPF, DKIM and DMARC, and can migrate your existing mail. <a href="/pricing#email">See our email and domain packages</a>.</p>`,
+<p>Most email services walk you through these steps. If your website or systems send email for you, such as order confirmations, ask whoever builds them to add the same records so those messages arrive too.</p>`,
   },
   {
     slug: 'choosing-between-a-website-and-a-web-app',

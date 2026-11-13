@@ -19,7 +19,11 @@ const cards = [
   { file: 'about', eyebrow: 'About', title: 'A technology partner for organisations in Zimbabwe and Africa.' },
   { file: 'contact', eyebrow: 'Contact', title: 'Tell us what you need.' },
   { file: 'work', eyebrow: 'Our work', title: 'Projects we design, build and support.' },
-  { file: 'services', eyebrow: 'Services', title: 'Websites, apps, business software, data, integration and cloud.' },
+  {
+    file: 'services',
+    eyebrow: 'Services',
+    title: 'Websites, business software, cross-platform apps, AI and automation.',
+  },
   { file: 'pricing', eyebrow: 'Pricing', title: 'Clear packages. Scope confirmed in writing.' },
   { file: 'insights', eyebrow: 'Insights', title: 'Practical notes on technology for growing organisations.' },
   { file: 'careers', eyebrow: 'Careers', title: 'Work with Kuzikode.' },

@@ -60,7 +60,7 @@ const STATIC_PAGES: Doc[] = [
   {
     kind: 'page',
     title: 'Pricing',
-    summary: 'Website packages, care plans, business email and other services.',
+    summary: 'Website packages, add-ons and published prices for every service.',
     href: '/pricing',
     body: 'prices packages plans cost quote vat',
   },
@@ -139,7 +139,7 @@ async function documents(ctx: RequestContext): Promise<Doc[]> {
       title: w.name,
       summary: w.summary,
       href: `/work/${w.slug}`,
-      body: `${w.category} ${w.technologies.join(' ')}`,
+      body: w.category,
     })),
     ...STATIC_PAGES,
   ];

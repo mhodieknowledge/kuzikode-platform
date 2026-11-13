@@ -14,7 +14,7 @@ import { join } from 'node:path';
 const args = process.argv.slice(2);
 const skipSeo = args.includes('--no-seo');
 const base = (args.find((a) => !a.startsWith('--')) ?? 'http://localhost:8787').replace(/\/$/, '');
-const PAGES = ['/', '/services/', '/services/web-development', '/contact'];
+const PAGES = ['/', '/services/', '/services/websites', '/contact'];
 const TARGETS = { performance: 90, accessibility: 95, 'best-practices': 95, seo: 100 };
 const out = mkdtempSync(join(tmpdir(), 'lh-'));
 let failed = false;

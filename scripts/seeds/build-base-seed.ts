@@ -61,7 +61,7 @@ export function buildBaseSeed(): string {
         faq: JSON.stringify(d.faq),
         icon: d.icon,
         status: 'active',
-        featured: 1,
+        featured: d.featured ? 1 : 0,
         sort_order: (i + 1) * 10,
         seo_title: d.seoTitle,
         seo_description: d.seoDescription,
@@ -75,7 +75,9 @@ export function buildBaseSeed(): string {
           slug: s.slug,
           name: s.name,
           summary: s.summary,
-          pricing_model: 'custom_quote',
+          pricing_model: s.pricing.model,
+          price_minor: s.pricing.price,
+          currency: 'USD',
           status: 'active',
           sort_order: (j + 1) * 10,
         }),
@@ -83,7 +85,7 @@ export function buildBaseSeed(): string {
     );
   });
 
-  out.push('', '-- Packages & add-ons (docs/12 §A.2). Suggested prices: price_review_required = 1 until the owner confirms.');
+  out.push('', '-- Packages & add-ons: the 2026-11 catalogue (docs/redesign/REFINEMENTS.md §1). Owner-set prices: price_review_required = 0.');
   const serviceIds = new Set(
     DIVISIONS.flatMap((d) => d.services.map((s) => `${d.slug}/${s.slug}`)),
   );
@@ -112,7 +114,7 @@ export function buildBaseSeed(): string {
         most_popular: p.popular ? 1 : 0,
         pricing_tab: p.tab,
         status: 'active',
-        price_review_required: 1,
+        price_review_required: 0,
         cost_note: p.costNote ?? null,
         sort_order: (i + 1) * 10,
       }),
@@ -210,7 +212,7 @@ export function buildBaseSeed(): string {
     }
   }
 
-  out.push('', '-- Technologies (docs/12 §C.11)');
+  out.push('', '-- Technologies (docs/12 §C.11): admin reference only, unpublished (no tech stack on public pages, REFINEMENTS §4)');
   TECHNOLOGIES.forEach((t, i) =>
     out.push(
       ins('technologies', {
@@ -218,7 +220,7 @@ export function buildBaseSeed(): string {
         name: t.name,
         category: t.category,
         sort_order: (i + 1) * 10,
-        published: 1,
+        published: 0,
       }),
     ),
   );
@@ -260,7 +262,7 @@ export function buildBaseSeed(): string {
     );
   }
 
-  out.push('', '-- Products');
+  out.push('', '-- Products: admin reference only, unpublished (no products on public pages, REFINEMENTS §1)');
   PRODUCTS.forEach((p, i) =>
     out.push(
       ins('products', {
@@ -272,7 +274,7 @@ export function buildBaseSeed(): string {
         status: p.status,
         interest_form_enabled: p.interestFormEnabled,
         sort_order: (i + 1) * 10,
-        published: 1,
+        published: 0,
       }),
     ),
   );

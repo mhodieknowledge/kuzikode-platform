@@ -235,7 +235,7 @@ export default async function globalSetup() {
     // A fixed website enquiry for leads.spec, reset to untriaged on every run (avoids the public form's rate limit).
     `INSERT INTO enquiries (id, reference, kind, name, email, phone, organisation, category, service_id, budget_range, message, consent_at, status)
      VALUES ('enq_e2e_lead', 'ENQ-E2E-0001', 'contact', 'Tendai Moyo', 'tendai@harare-bakery.example', '+263 77 123 4567',
-       'Harare Bakery', 'web-development', (SELECT id FROM services WHERE slug = 'e-commerce'), '$1,500 – $5,000',
+       'Harare Bakery', 'websites', (SELECT id FROM services WHERE slug = 'ecommerce-website'), '$1,500 – $5,000',
        'We would like an online shop for our bakery with EcoCash payments and delivery booking.', ${q(now)}, 'new')
      ON CONFLICT(id) DO UPDATE SET status = 'new', lead_id = NULL, updated_at = ${q(now)};`,
   ].join('\n');

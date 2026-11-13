@@ -209,9 +209,7 @@ describe('schema constraints', () => {
         "INSERT INTO payments (id, receipt_number, client_id, provider_key, method, amount_minor, currency, received_at) VALUES ('pay_2','RCT-2026-00002','cli_1','manual','cash',0,'USD','2026-11-05T00:00:00Z')",
       ),
     ).rejects.toThrow(/CHECK/);
-    await run(
-      "INSERT INTO service_categories (id, slug, name, summary) VALUES ('scat_1','web-development','Web','Web')",
-    );
+    await run("INSERT INTO service_categories (id, slug, name, summary) VALUES ('scat_1','schema-web','Web','Web')");
     await expect(
       run(
         "INSERT INTO services (id, category_id, slug, name, summary, pricing_model) VALUES ('svc_1','scat_1','sites','Sites','x','fixed')",

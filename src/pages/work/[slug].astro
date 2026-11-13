@@ -1,7 +1,7 @@
 ---
 /**
  * Case study (R4.4, rebuilt from scratch). Header: crumbs, title, summary and a ruled spec sheet (client when shown, category,
- * completion, live site, technologies). Then a full-width visual (the cover, or the project's monogram plate when there is none),
+ * completion, live site). Then a full-width visual (the cover, or the project's monogram plate when there is none),
  * the story as numbered sections in a reading column, the gallery (swipe track on phones, 2-column grid on desktop), and "More
  * case studies" (the same cards as /work; a rail on phones from three). Content comes from the CMS only.
  */
@@ -112,18 +112,6 @@ const host = (() => {
                     <Icon name="external" size={16} />
                     <span class="sr-only">(opens in a new tab)</span>
                   </a>
-                </dd>
-              </div>
-            ) : null}
-            {item.technologies.length > 0 ? (
-              <div class="kz-case__tech">
-                <dt>Technologies</dt>
-                <dd>
-                  <ul role="list">
-                    {item.technologies.map((t) => (
-                      <li>{t}</li>
-                    ))}
-                  </ul>
                 </dd>
               </div>
             ) : null}

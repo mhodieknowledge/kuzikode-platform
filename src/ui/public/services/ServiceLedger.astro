@@ -5,15 +5,26 @@
  * desktop: two columns of ruled entries (IMG_5055 numbered rows, IMG_5067 title-left/link-right header).
  */
 import Icon from '../../icons/Icon.astro';
-import type { PublicCategory } from '../../../server/modules/cms';
-import { canRequestQuote, pricingLabel, quotationHref } from '../../../shared/service-display';
+import type { PublicCategory, PublicPackage } from '../../../server/modules/cms';
+import { canRequestQuote, packagePrice, pricingLabel, quotationHref } from '../../../shared/service-display';
 
 interface Props {
   cat: PublicCategory;
   n: number;
   showPrices: boolean;
+  /** The division's packages: a service with a priced package shows that package's price and unit ("$15 per page"). */
+  packages?: PublicPackage[];
 }
-const { cat, n, showPrices } = Astro.props;
+const { cat, n, showPrices, packages = [] } = Astro.props;
+/** Lowest priced package of a service, labelled with its unit; falls back to the service's own pricing label. */
+const priceOf = (s: PublicCategory['services'][number]) => {
+  const own = packages
+    .filter((p) => p.serviceSlug === s.slug && p.priceType !== 'custom_quote' && p.priceMinor !== null && p.currency)
+    .sort((a, b) => (a.priceMinor ?? 0) - (b.priceMinor ?? 0))[0];
+  if (!showPrices || !own) return pricingLabel(s.pricingModel, s.priceMinor, s.currency, showPrices);
+  const d = packagePrice(own);
+  return [d.prefix, d.amount, d.suffix].filter(Boolean).join(' ');
+};
 ---
 
 <section class="kz-sec kz-offer" aria-labelledby="offer-title">
@@ -31,7 +42,7 @@ const { cat, n, showPrices } = Astro.props;
             </span>
             <h3 class="kz-offer__name">{s.name}</h3>
             <p class="kz-offer__sum">{s.summary}</p>
-            <p class="kz-offer__price">{pricingLabel(s.pricingModel, s.priceMinor, s.currency, showPrices)}</p>
+            <p class="kz-offer__price">{priceOf(s)}</p>
             {s.status === 'coming_soon' ? (
               <p class="kz-offer__soon">
                 <Icon name="status-pending" size={16} /> Coming soon

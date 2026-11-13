@@ -4,10 +4,10 @@ import { expectAccessible, screenshots, ownIp } from './helpers';
 test.use(ownIp('contact'));
 
 test('visitor sends an enquiry and sees a reference; quotation links preselect the service', async ({ page }) => {
-  await page.goto('/contact?category=web-development&service=e-commerce');
+  await page.goto('/contact?category=websites&service=ecommerce-website');
   await expect(page.getByRole('heading', { level: 1, name: 'Contact us' })).toBeVisible();
-  await expect(page.getByLabel('What is this about?')).toHaveValue('web-development');
-  await expect(page.getByLabel('Service (optional)', { exact: true })).toHaveValue('e-commerce');
+  await expect(page.getByLabel('What is this about?')).toHaveValue('websites');
+  await expect(page.getByLabel('Service (optional)', { exact: true })).toHaveValue('ecommerce-website');
   await expectAccessible(page);
   await screenshots(page, 'contact');
 

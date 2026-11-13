@@ -40,7 +40,7 @@ export const PAGES: PageSeed[] = [
         type: 'services_grid',
         content: {
           title: 'What we do',
-          intro: 'Six areas of work, one team. Start with what you need now and add more as you grow.',
+          intro: 'Five areas of work, one team. Start with what you need now and add more as you grow.',
         },
       },
       {
@@ -68,7 +68,7 @@ export const PAGES: PageSeed[] = [
             {
               icon: 'life-buoy',
               title: 'Support after launch',
-              body: 'A support period on every project, with care plans for ongoing updates and monitoring.',
+              body: 'A support period on every project, and help with updates and fixes whenever you need it after that.',
             },
           ],
         },
@@ -107,11 +107,6 @@ export const PAGES: PageSeed[] = [
         },
       },
       {
-        key: 'products',
-        type: 'products_grid',
-        content: { title: 'Our products', intro: 'Software we are building for African businesses.' },
-      },
-      {
         key: 'cta',
         type: 'cta',
         content: {
@@ -135,7 +130,7 @@ export const PAGES: PageSeed[] = [
         type: 'rich_text',
         content: {
           title: 'About Kuzikode',
-          html: '<p>Kuzikode Technologies is a technology company based in Zimbabwe. We design, build and run digital solutions for businesses, organisations and individuals: websites, mobile and desktop apps, business software, data and AI tools, integrations and the cloud infrastructure behind them.</p><p>We work as a long-term technology partner rather than a one-off supplier. That means clear scope before we start, regular updates while we build, and support once the work is live.</p>',
+          html: '<p>Kuzikode Technologies is a technology company based in Zimbabwe. We design, build and run digital solutions for businesses, organisations and individuals: websites and web applications, business software, cross-platform apps, data and AI tools, and the automations and integrations that connect them.</p><p>We work as a long-term technology partner rather than a one-off supplier. That means clear scope before we start, regular updates while we build, and support once the work is live.</p>',
         },
       },
       {
@@ -220,14 +215,14 @@ export const PAGES: PageSeed[] = [
     title: 'Services',
     seoTitle: 'Services · Kuzikode Technologies',
     seoDescription:
-      'Web development, mobile apps, business software, AI and data, automation and integration, and cloud and IT services.',
+      'Websites and web applications, business software, cross-platform apps, AI and data, and automation and integration, with published prices.',
     sections: [
       {
         key: 'intro',
         type: 'rich_text',
         content: {
           title: 'Services',
-          html: '<p>From a first website to a full business platform, we design, build and support technology across six areas. Each one can stand alone or work together.</p>',
+          html: '<p>From a first website to a full business platform, we design, build and support technology across five areas. Each one can stand alone or work together.</p>',
         },
       },
     ],
@@ -255,27 +250,11 @@ export const PAGES: PageSeed[] = [
     ],
   },
   {
-    key: 'products',
-    title: 'Products',
-    seoTitle: 'Products · Kuzikode Technologies',
-    seoDescription: 'Software products in development at Kuzikode Technologies.',
-    sections: [
-      {
-        key: 'intro',
-        type: 'rich_text',
-        content: {
-          title: 'Products',
-          html: '<p>Alongside client work, we are building our own software for African businesses.</p>',
-        },
-      },
-    ],
-  },
-  {
     key: 'pricing',
     title: 'Pricing',
     seoTitle: 'Pricing · Kuzikode Technologies',
     seoDescription:
-      'Website packages, care plans, business email, domains and other services from Kuzikode Technologies, with what each one includes.',
+      'Website packages and published prices for business software, cross-platform apps, AI and data, automation and integration, and add-ons from Kuzikode Technologies.',
     sections: [
       {
         key: 'intro',
@@ -402,7 +381,7 @@ export const PAGES: PageSeed[] = [
             {
               icon: 'list-checks',
               title: 'Fixed-price package',
-              body: 'A defined package such as a business website or care plan, with a clear list of what is included.',
+              body: 'A defined package such as a business website or an online store, with a clear list of what is included.',
             },
             {
               icon: 'layers',

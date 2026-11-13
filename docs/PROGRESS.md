@@ -99,3 +99,9 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Screens checked 390/1440 (no overflow). verify green; e2e sweep + home/how/careers 105 passed. Still requested: about-studio, careers-desk (not blocking).
 - Tiers: orchestrator on sonnet only, no subagents.
 - Next step: R7.2 trimmed motion pass on public pages (fresh sonnet/medium subagent with review-animations + animation-performance; you review), then R8.1.
+
+## 2026-11-13 20:10 UTC · R9.1 ✅ Service catalogue + researched pricing
+- Migration `0013_catalogue_2026_11.sql` (retire old rows, insert 6 divisions/20 services/21 packages), seeds regenerated, products/technologies/Business Suite removed from public surfaces with 301s (/products*, /technologies*, retired divisions), tests rewritten (pricing-accuracy checks §1 exactly; removed-offers.spec).
+- verify green (unit 729, integration 308); targeted e2e green. Tier: opus/high subagent; orchestrator checked pricing page at 390.
+- Left: legal copy still mentions care/hosting (existing subscriptions); insights/email-preview/dev.sql use old slugs (harmless).
+- Next step: R9.2 pricing pages (carousel primary, tabs removed, comparison table with every package as a column, one CTA, no duplicate FAQ/process). Pages: src/pages/pricing.astro, services/[slug].astro and src/ui/public/pricing/*.

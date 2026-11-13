@@ -14,7 +14,7 @@ test('services index: photo hero, atlas with drawings and prices; the atlas is a
   const rows = page.locator('.kz-atlas__row');
   await expect(rows).toHaveCount(6);
   await expect(rows.locator('svg[data-ill]')).toHaveCount(6);
-  await expect(rows.filter({ hasText: 'Automation' })).toContainText('per hour');
+  await expect(rows.filter({ hasText: 'Automation' })).toContainText('per local method');
   await expectAccessible(page);
 
   await page.setViewportSize({ width: 390, height: 844 });
@@ -30,19 +30,19 @@ test('division page: comparison table, recommended column, package requests pres
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/services/web-development');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Web Development');
+  await page.goto('/services/websites');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Websites & Web Applications');
   await expect(page.locator('.kz-dhead svg[data-ill="web-development"]')).toBeVisible();
   await expect(page.locator('.kz-dhead').getByRole('link', { name: 'Get a quote' })).toHaveAttribute(
     'href',
-    '/contact?category=web-development',
+    '/contact?category=websites',
   );
   const table = page.getByRole('table', { name: /packages compared/ });
-  await expect(table.getByRole('columnheader', { name: /Starter Website/ })).toContainText('$350');
+  await expect(table.getByRole('columnheader', { name: /Starter Website/ })).toContainText('$150');
   await expect(table.getByRole('columnheader', { name: /Recommended/ })).toContainText('Business Website');
   await expect(table.getByRole('link', { name: /Request this package.*Business Website/ })).toHaveAttribute(
     'href',
-    '/contact?category=web-development&package=business-website',
+    '/contact?category=websites&package=business-website',
   );
   await expect(page.getByRole('heading', { name: 'Questions' })).toBeVisible();
   await expect(page.locator('a[href^="/start-a-project"]')).toHaveCount(0);

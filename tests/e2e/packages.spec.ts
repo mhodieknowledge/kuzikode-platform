@@ -74,14 +74,14 @@ test('quotation editor: "Add package" inserts the package and add-ons as priced 
   await page.getByRole('button', { name: 'Add package' }).click();
   const dialog = page.getByRole('dialog');
   await dialog.getByLabel('Package').selectOption('pkg_starter_website');
-  await dialog.getByRole('checkbox', { name: /^Extra page/ }).check();
+  await dialog.getByRole('checkbox', { name: /^Additional Website Pages/ }).check();
   await dialog.getByLabel('Quantity').fill('2');
   await expectAccessible(page);
   await dialog.getByRole('button', { name: 'Add to quotation' }).click();
   await expect(dialog).toHaveCount(0);
   await expect(page.getByLabel('Line 1 description')).toHaveValue(/^Starter Website\nIncludes: /);
-  await expect(page.getByLabel('Line 1 unit price')).toHaveValue('350.00');
-  await expect(page.getByLabel('Line 2 description')).toHaveValue(/^Extra page \(per page\)/);
+  await expect(page.getByLabel('Line 1 unit price')).toHaveValue('150.00');
+  await expect(page.getByLabel('Line 2 description')).toHaveValue(/^Additional Website Pages \(per page\)/);
   await expect(page.getByLabel('Line 2 quantity')).toHaveValue('2');
   await screenshots(page, 'admin-quotation-add-package');
 });

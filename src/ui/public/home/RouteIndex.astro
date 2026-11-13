@@ -11,7 +11,7 @@ interface Props {
   divisions: { slug: string; name: string; href: string; from: FromPrice | null }[];
   label?: string;
 }
-const { divisions, label = 'Our six areas of work' } = Astro.props;
+const { divisions, label = 'Our areas of work' } = Astro.props;
 ---
 
 <nav class="kz-routes" aria-label={label}>

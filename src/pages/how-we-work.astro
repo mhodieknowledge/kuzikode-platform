@@ -1,8 +1,8 @@
 ---
 /**
  * How we work (R4.5, rebuilt from scratch). Order: night hero with the scope-sheet composition → the process road → ways to work
- * with us → what you can expect (photo band) → quality and security (night checklist) → tools we build with → the footer's routes,
- * led by the CMS closing call to action. Data: the how-we-work page CMS sections and the published technologies.
+ * with us → what you can expect (photo band) → quality and security (night checklist) → the footer's routes,
+ * led by the CMS closing call to action. Data: the how-we-work page CMS sections (the tools section was removed in R9.1, REFINEMENTS §4).
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
 import HowHero from '../ui/public/how/HowHero.astro';
@@ -10,12 +10,11 @@ import ProcessRoad from '../ui/public/how/ProcessRoad.astro';
 import Models from '../ui/public/how/Models.astro';
 import Expect from '../ui/public/how/Expect.astro';
 import Quality from '../ui/public/how/Quality.astro';
-import Tools from '../ui/public/how/Tools.astro';
-import { breadcrumbLd, getPage, listTechnologies } from '../server/modules/cms';
+import { breadcrumbLd, getPage } from '../server/modules/cms';
 import type { Section } from '../shared/schemas/cms';
 
 const { ctx } = Astro.locals;
-const [page, technologies] = await Promise.all([getPage(ctx, 'how-we-work'), listTechnologies(ctx)]);
+const page = await getPage(ctx, 'how-we-work');
 if (!page) return new Response(null, { status: 404, statusText: 'Not found' });
 const sections = page.sections as Section[];
 const intro = sections.find((s) => s.type === 'rich_text') as Section<'rich_text'> | undefined;
@@ -42,5 +41,4 @@ const cta = sections.find((s) => s.type === 'cta') as Section<'cta'> | undefined
   {models ? <Models content={models.content} anchor={models.key} /> : null}
   {expect ? <Expect content={expect.content} anchor={expect.key} /> : null}
   {quality ? <Quality content={quality.content} anchor={quality.key} /> : null}
-  <Tools technologies={technologies} />
 </PublicLayout>

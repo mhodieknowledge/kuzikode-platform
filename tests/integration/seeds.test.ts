@@ -20,7 +20,7 @@ describe('seeds', () => {
       settings: await count('application_settings'),
     }).toEqual(before);
     expect(before.roles).toBe(7);
-    expect(before.services).toBe(37);
+    expect(before.services).toBe(20);
   });
 
   it('routes USD to the Paynow account and keeps the mock as a low-priority fallback', async () => {

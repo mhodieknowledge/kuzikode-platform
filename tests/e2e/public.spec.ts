@@ -3,16 +3,7 @@ import { ownIp } from './helpers';
 
 test.use(ownIp('public'));
 
-const PUBLIC = [
-  '/',
-  '/about',
-  '/services',
-  '/services/web-development',
-  '/work',
-  '/products',
-  '/contact',
-  '/legal/privacy',
-];
+const PUBLIC = ['/', '/about', '/services', '/services/websites', '/work', '/contact', '/legal/privacy'];
 
 test.describe('SEO', () => {
   test('every public page has a title, description, canonical, OG/Twitter tags and Organization JSON-LD', async ({
@@ -46,19 +37,18 @@ test.describe('SEO', () => {
     expect(
       JSON.parse((await page.locator('script[type="application/ld+json"]').textContent())!).map((d: any) => d['@type']),
     ).toContain('WebSite');
-    await page.goto('/services/cloud-it');
+    await page.goto('/services/ai-data');
     const types = JSON.parse((await page.locator('script[type="application/ld+json"]').textContent())!).map(
       (d: any) => d['@type'],
     );
     expect(types).toEqual(expect.arrayContaining(['Organization', 'Service', 'BreadcrumbList']));
-    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /services-cloud-it\.png$/);
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /services-ai-data\.png$/);
   });
 
   test('sitemap lists published pages and robots keeps private paths out', async ({ request }) => {
     const sitemap = await (await request.get('/sitemap.xml')).text();
     expect(sitemap).toContain('<urlset');
-    for (const p of ['/about</loc>', '/services/web-development</loc>', '/legal/privacy</loc>'])
-      expect(sitemap).toContain(p);
+    for (const p of ['/about</loc>', '/services/websites</loc>', '/legal/privacy</loc>']) expect(sitemap).toContain(p);
     expect(sitemap).not.toMatch(/\/admin|\/portal|\/api\//);
     const robots = await (await request.get('/robots.txt')).text();
     expect(robots).toContain('Sitemap: ');

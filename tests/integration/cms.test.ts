@@ -30,24 +30,15 @@ describe('CMS read layer', () => {
     expect(page!.seoTitle).toContain('Kuzikode');
     const hero = sectionOf(page, 'hero', 'hero');
     expect(hero!.content.title).toBe('Building intelligent digital solutions.');
-    expect(page!.sections.map((s) => s.key)).toEqual([
-      'hero',
-      'services',
-      'why',
-      'work',
-      'process',
-      'values',
-      'products',
-      'cta',
-    ]);
+    expect(page!.sections.map((s) => s.key)).toEqual(['hero', 'services', 'why', 'work', 'process', 'values', 'cta']);
   });
 
   it('serves cached content until content_version is bumped', async () => {
     const c = ctx();
-    expect((await getPage(c, 'home'))!.sections.length).toBe(8);
+    expect((await getPage(c, 'home'))!.sections.length).toBe(7);
     await env.DB.prepare("UPDATE website_sections SET visible = 0 WHERE id = 'sec_home__values'").run();
     resetCmsCache(); // simulate another isolate: KV still has the old version's entry
-    expect((await getPage(c, 'home'))!.sections.length).toBe(8);
+    expect((await getPage(c, 'home'))!.sections.length).toBe(7);
     const before = await contentVersion(c);
     await bumpContentVersionStmt(env.DB).run();
     resetCmsCache();
@@ -74,15 +65,15 @@ describe('CMS read layer', () => {
   it('hides inactive divisions/services and marks coming-soon ones', async () => {
     await env.DB.batch([
       env.DB.prepare("UPDATE service_categories SET status = 'inactive' WHERE slug = 'ai-data'"),
-      env.DB.prepare("UPDATE service_categories SET status = 'coming_soon' WHERE slug = 'cloud-it'"),
-      env.DB.prepare("UPDATE services SET status = 'inactive' WHERE slug = 'android'"),
+      env.DB.prepare("UPDATE service_categories SET status = 'coming_soon' WHERE slug = 'add-ons'"),
+      env.DB.prepare("UPDATE services SET status = 'inactive' WHERE slug = 'pos'"),
       bumpContentVersionStmt(env.DB),
     ]);
     resetCmsCache();
     const cats = await getServiceCatalogue(ctx());
     expect(cats.map((c) => c.slug)).not.toContain('ai-data');
-    expect(cats.find((c) => c.slug === 'cloud-it')!.status).toBe('coming_soon');
-    expect((await getCategory(ctx(), 'mobile-desktop-apps'))!.services.map((s) => s.slug)).not.toContain('android');
+    expect(cats.find((c) => c.slug === 'add-ons')!.status).toBe('coming_soon');
+    expect((await getCategory(ctx(), 'business-software'))!.services.map((s) => s.slug)).not.toContain('pos');
     expect(await getCategory(ctx(), 'ai-data')).toBeNull();
     await env.DB.batch([
       env.DB.prepare("UPDATE service_categories SET status = 'active'"),
@@ -111,7 +102,15 @@ describe('CMS read layer', () => {
     const s = await getSettings(ctx());
     expect(settingText(s, 'company.name')).toBe('Kuzikode Technologies');
     expect(settingText(s, 'contact.phone')).toBeUndefined();
+    // Products are seeded unpublished (no products on public pages, REFINEMENTS §1); a published one is listed.
+    expect(await listProducts(ctx())).toEqual([]);
+    await env.DB.batch([
+      env.DB.prepare("UPDATE products SET published = 1 WHERE id = 'prd_business_suite'"),
+      bumpContentVersionStmt(env.DB),
+    ]);
+    resetCmsCache();
     expect((await listProducts(ctx()))[0]).toMatchObject({ name: 'Kuzikode Business Suite', status: 'in_development' });
+    await env.DB.prepare("UPDATE products SET published = 0 WHERE id = 'prd_business_suite'").run();
     await env.DB.batch([
       env.DB.prepare(
         "INSERT INTO announcements (id, message, starts_at, ends_at) VALUES ('ann_1','Office closed on Friday','2026-11-01T00:00:00Z','2026-11-10T00:00:00Z')",

@@ -43,14 +43,24 @@ export function divisionFromPrice(packages: DirectoryPackage[], categorySlug: st
   return { amount: formatPriceTag(best.priceMinor!, currency), suffix: display.suffix ?? 'one-off' };
 }
 
+/**
+ * Division URLs retired with the 2026-11 catalogue (R9.1, REFINEMENTS §1) and the closest remaining page for their 301:
+ * renamed divisions go to their successor, removed ones to the services overview.
+ */
+export const RETIRED_DIVISIONS: Record<string, string> = {
+  'web-development': '/services/websites',
+  'mobile-desktop-apps': '/services/cross-platform-apps',
+  'cloud-it': '/services',
+};
+
 /** Short division names for compact navigation (route index, tabs); the full CMS name stays on the division page. */
 const SHORT_NAMES: Record<string, string> = {
-  'web-development': 'Web development',
-  'mobile-desktop-apps': 'Mobile & desktop apps',
+  websites: 'Websites & web apps',
   'business-software': 'Business software',
+  'cross-platform-apps': 'Cross-platform apps',
   'ai-data': 'AI, data & intelligence',
   'automation-integration': 'Automation & integration',
-  'cloud-it': 'Cloud & IT',
+  'add-ons': 'Add-ons',
 };
 
 export function divisionShortName(slug: string, name: string): string {

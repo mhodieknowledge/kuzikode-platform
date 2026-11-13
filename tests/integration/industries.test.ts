@@ -34,16 +34,16 @@ describe('industries (docs/12 §C.3)', () => {
 
   it('resolves services and packages for an industry, and hides inactive services', async () => {
     const retail = await getIndustry(ctx(), 'retail-wholesale');
-    expect(retail!.services.map((s) => s.slug)).toContain('e-commerce');
-    expect(retail!.packages.map((p) => p.slug)).toContain('ecommerce-store');
+    expect(retail!.services.map((s) => s.slug)).toContain('ecommerce-website');
+    expect(retail!.packages.map((p) => p.slug)).toContain('ecommerce-website');
     await env.DB.batch([
-      env.DB.prepare("UPDATE services SET status = 'inactive' WHERE slug = 'e-commerce'"),
+      env.DB.prepare("UPDATE services SET status = 'inactive' WHERE slug = 'ecommerce-website'"),
       bumpContentVersionStmt(env.DB),
     ]);
     resetCmsCache();
     const after = await getIndustry(ctx(), 'retail-wholesale');
-    expect(after!.services.map((s) => s.slug)).not.toContain('e-commerce');
-    expect(after!.packages.map((p) => p.slug)).not.toContain('ecommerce-store');
+    expect(after!.services.map((s) => s.slug)).not.toContain('ecommerce-website');
+    expect(after!.packages.map((p) => p.slug)).not.toContain('ecommerce-website');
   });
 
   it('drafts are not listed and do not resolve', async () => {

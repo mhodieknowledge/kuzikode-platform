@@ -31,7 +31,7 @@ test('FAQ page: 20+ questions in categories, FAQPage JSON-LD, live filter, deep 
   await expect(page.locator('#faq_support_backups')).toHaveAttribute('open', '');
 });
 
-test('How we work page renders process, engagement models, expectations, practices and technologies', async ({
+test('How we work page renders process, engagement models, expectations and practices, and no tech stack', async ({
   page,
 }) => {
   await page.goto('/how-we-work');
@@ -39,7 +39,9 @@ test('How we work page renders process, engagement models, expectations, practic
   for (const h of ['Our process', 'Ways to work with us', 'What you can expect', 'Quality and security practices']) {
     await expect(page.getByRole('heading', { level: 2, name: h })).toBeVisible();
   }
-  await expect(page.getByRole('heading', { name: 'Tools we build with' })).toBeVisible();
+  // No tech stack on public pages (REFINEMENTS §4).
+  await expect(page.getByRole('heading', { name: 'Tools we build with' })).toHaveCount(0);
+  await expect(page.locator('#technologies')).toHaveCount(0);
   // The process is one road with every stop shown in full, and the hero shows the same stops on the scope sheet.
   await expect(page.locator('.kz-proad__stop')).toHaveCount(5);
   await expect(page.locator('.kz-scope__ms li')).toHaveCount(5);
@@ -48,11 +50,11 @@ test('How we work page renders process, engagement models, expectations, practic
   await screenshots(page, 'how-we-work');
 });
 
-test('home hides the testimonials block when none are published and shows technologies', async ({ page }) => {
+test('home hides the testimonials block when none are published and shows no tech stack', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('[data-testimonials]')).toHaveCount(0);
   await expect(page.getByRole('heading', { name: "In our clients' words" })).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'Tools we build with' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Tools we build with' })).toHaveCount(0);
 });
 
 test('site search from the header finds services, packages and articles', async ({ page }) => {

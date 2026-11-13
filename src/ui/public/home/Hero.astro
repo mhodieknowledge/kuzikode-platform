@@ -18,7 +18,7 @@ const { content: c, divisions } = Astro.props;
 const primary = publicCta(c.primaryCta);
 const secondary = publicCta(c.secondaryCta);
 const quiet = secondary && secondary.href !== primary.href ? secondary : { label: 'See all prices', href: '/pricing' };
-const websites = divisions.find((d) => d.slug === 'web-development')?.from ?? null;
+const websites = divisions.find((d) => d.slug === 'websites')?.from ?? null;
 ---
 
 <section class="kz-hero" aria-labelledby="hero-title">

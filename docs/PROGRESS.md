@@ -1232,3 +1232,4 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Next step: R6.2 group 2 Finance: invoices (move to `ui/admin/documents/LineItemEditor`, delete `components/admin/LineItemEditor.tsx`), payments,
   subscriptions, managed services, expenses, reports; replace `components/admin/actions.tsx` with `ui/admin/action.ts`. Reuse group 1 APIs (see that subagent report summary in this entry).
   Known: quotation intro still uses legacy `components/ui/RichTextEditor` (rebuild in Website group).
+- 16:30 UTC: usage limit paused the group 2 (Finance) builder from ~13:00 to 16:30; resumed. Partial work in `src/ui/admin/{finance,invoices}/`.

@@ -1499,3 +1499,532 @@
     }
   }
 }
+
+/*
+ * Workspace finance (R5.3): list filter, finance rows (amount + state on the right, overdue in clay), the receipts ledger, saved
+ * cards, the document page (paper 8 + sticky summary 4), the summary window, bank details, services.
+ */
+@layer components {
+  /* List filter: page links in the segmented control */
+  .kz-wfilt {
+    margin-bottom: 16px;
+  }
+  .kz-wfilt .kz-seg {
+    margin: 0;
+    list-style: none;
+    background: var(--paper);
+    box-shadow: 0 0 0 1px var(--bone-200);
+  }
+  .kz-wfilt li {
+    display: flex;
+    flex: none;
+  }
+  .kz-wfilt .kz-seg__opt[aria-current='page'] {
+    background: var(--night-900);
+    color: #fff;
+  }
+
+  /* Amount + state at the end of a list row */
+  .kz-fend {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    text-align: right;
+  }
+  .kz-fend__of {
+    margin-top: -4px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-600);
+  }
+  /* Phones: amount top right, state under the meta, so the title keeps the width */
+  .kz-wrow--fin {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 8px 16px;
+  }
+  .kz-wrow--fin .kz-fend {
+    display: contents;
+  }
+  .kz-wrow--fin .kz-wrow__main {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .kz-wrow--fin .kz-wrow__fig {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: right;
+  }
+  .kz-wrow--fin .kz-fend__of {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0;
+    text-align: right;
+  }
+  .kz-wrow--fin .kz-pill {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+  }
+  @media (min-width: 640px) {
+    .kz-wrow--fin {
+      display: flex;
+    }
+    .kz-wrow--fin .kz-fend {
+      display: flex;
+    }
+    .kz-wrow--fin .kz-fend__of {
+      margin-top: -4px;
+    }
+  }
+  .kz-wrow.is-over {
+    box-shadow: inset 3px 0 0 var(--clay);
+  }
+
+  /* Rows with their own links (credit notes): no stretched link */
+  .kz-frow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 4px 16px;
+    padding: 14px 16px;
+  }
+  .kz-frow__main {
+    min-width: 0;
+  }
+  .kz-frow__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--ink-900);
+    overflow-wrap: anywhere;
+  }
+  .kz-frow__note {
+    margin-top: 4px;
+    font-size: 0.875rem;
+    color: var(--ink-700);
+  }
+  .kz-frow__side {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .kz-frow__ref {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--ink-900);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .kz-frow__dl {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding-inline: 10px;
+    margin-right: -10px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ink-900);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  @media (hover: hover) {
+    .kz-frow__dl:hover {
+      background: var(--bone-100);
+    }
+  }
+
+  /* Receipts ledger */
+  .kz-fpay {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'at end' 'main end' 'main dl';
+    gap: 2px 16px;
+    padding: 14px 16px 8px;
+  }
+  .kz-fpay__at {
+    grid-area: at;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-600);
+  }
+  .kz-fpay__main {
+    grid-area: main;
+    min-width: 0;
+  }
+  .kz-fpay__end {
+    grid-area: end;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+  .kz-fpay__dl {
+    grid-area: dl;
+    justify-self: end;
+  }
+
+  /* Saved cards */
+  .kz-fcards__intro {
+    padding: 14px 16px 4px;
+    font-size: 0.875rem;
+    color: var(--ink-600);
+  }
+  .kz-fcards__alert {
+    display: flex;
+    gap: 6px;
+    margin: 10px 16px 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--danger-700);
+  }
+  .kz-fcard {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    grid-template-areas: 'chip main' '. acts';
+    gap: 8px 12px;
+    padding: 14px 16px;
+  }
+  .kz-fcard__chip {
+    grid-area: chip;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+    background: var(--bone-100);
+    color: var(--ink-800);
+  }
+  .kz-fcard__main {
+    grid-area: main;
+    min-width: 0;
+  }
+  .kz-fcard__name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .kz-fcard__name .kz-wmono {
+    font-size: 0.9375rem;
+  }
+  .kz-fcard__meta {
+    margin-top: 2px;
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+  }
+  .kz-fcard__meta.is-expired {
+    font-weight: 600;
+    color: var(--danger-700);
+  }
+  .kz-fcard__acts {
+    grid-area: acts;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .kz-fcards .kz-wlist {
+    border-top: 1px solid var(--bone-200);
+    margin-top: 10px;
+  }
+
+  /* Document page: summary first on phones; paper 8 + sticky summary 4 from 1024 px */
+  .kz-fdoc__crumb {
+    margin-bottom: 6px;
+  }
+  .kz-fdoc,
+  .kz-fdoc__main {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+    align-content: start;
+  }
+
+  /* Summary window */
+  .kz-fsum {
+    display: grid;
+    gap: 16px;
+  }
+  .kz-fsum > .kz-pill {
+    justify-self: start;
+  }
+  .kz-fsum__label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-600);
+  }
+  .kz-fsum__fig {
+    margin-top: 4px;
+    font-family: var(--font-mono);
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-950);
+    overflow-wrap: anywhere;
+  }
+  .kz-fsum__fig span {
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--ink-600);
+  }
+  .kz-fsum__facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding-top: 14px;
+    border-top: 1px solid var(--bone-200);
+  }
+  .kz-fsum__facts dt {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-600);
+  }
+  .kz-fsum__facts dd {
+    margin-top: 2px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--ink-900);
+  }
+  .kz-fsum__note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--bone-100);
+    font-size: 0.875rem;
+    color: var(--ink-800);
+  }
+  .kz-fsum__note > svg {
+    flex: none;
+    margin-top: 2px;
+  }
+  .kz-fsum__note.is-over {
+    background: var(--danger-50);
+    font-weight: 600;
+    color: var(--danger-700);
+  }
+  .kz-fsum__note.is-ok {
+    background: var(--ok-50);
+    color: var(--ok-700);
+  }
+  .kz-fsum__note.is-lit {
+    background: var(--gold-100);
+    color: var(--ink-900);
+  }
+  .kz-fsum__note a,
+  .kz-fsum__help a {
+    font-weight: 600;
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .kz-fsum__help {
+    font-size: 0.875rem;
+    color: var(--ink-600);
+    overflow-wrap: anywhere;
+  }
+  .kz-fsum__help a {
+    color: var(--ink-900);
+  }
+  .kz-fsum__acts {
+    display: grid;
+    gap: 8px;
+  }
+  .kz-fbank {
+    padding-top: 14px;
+    border-top: 1px dashed var(--bone-300);
+  }
+  .kz-fbank__h {
+    font-size: 0.875rem;
+    color: var(--ink-800);
+  }
+  .kz-fbank__det {
+    margin-top: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--bone-100);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+    color: var(--ink-950);
+  }
+
+  /* At-a-glance window (lists) */
+  .kz-fglance {
+    display: none;
+  }
+  .kz-fstat {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--bone-200);
+  }
+  .kz-fstat div + div {
+    padding-left: 16px;
+    border-left: 1px solid var(--bone-200);
+  }
+  .kz-fstat dt {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-600);
+  }
+  .kz-fstat dd {
+    margin-top: 4px;
+    font-family: var(--font-mono);
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--ink-950);
+  }
+  .kz-fglance__hint {
+    margin-top: 14px;
+    font-size: 0.875rem;
+    color: var(--ink-600);
+  }
+
+  /* Services */
+  .kz-fsvc + .kz-fsvc {
+    margin-top: 28px;
+  }
+  .kz-fsvc__client {
+    margin-bottom: 12px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--ink-950);
+  }
+  .kz-fsub {
+    display: grid;
+    gap: 6px;
+    padding: 16px;
+  }
+  .kz-fsub__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .kz-fsub__acts {
+    display: grid;
+    justify-items: start;
+    gap: 10px;
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--bone-300);
+  }
+  /* The cancellation request island is rebuilt in R5.4; until then its trigger keeps a 44 px target here. */
+  .kz-fsub__acts button {
+    min-height: 44px;
+  }
+  .kz-fsub__req {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ink-800);
+  }
+  .kz-fsub__req a {
+    color: var(--ink-900);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .kz-fasset__when {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+    text-align: right;
+  }
+  .kz-fasset__when .kz-wmono {
+    color: var(--ink-900);
+  }
+  .kz-fauto {
+    display: grid;
+    gap: 6px;
+  }
+  .kz-fauto__card {
+    max-width: 20rem;
+  }
+  .kz-fauto__msg:empty {
+    display: none;
+  }
+  .kz-fauto__msg {
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+  }
+  .kz-fauto__err {
+    display: flex;
+    gap: 6px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--danger-700);
+  }
+
+  @media (min-width: 640px) {
+    .kz-fpay {
+      grid-template-columns: 8.5rem minmax(0, 1fr) auto auto;
+      grid-template-areas: 'at main end dl';
+      align-items: center;
+      padding-block: 12px;
+    }
+    .kz-fpay__dl {
+      margin-right: -10px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .kz-frow,
+    .kz-fpay,
+    .kz-fcard,
+    .kz-fsub {
+      padding-inline: 20px;
+    }
+    .kz-fcards__intro {
+      padding-inline: 20px;
+    }
+    .kz-fdoc {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 20px;
+      align-items: start;
+    }
+    .kz-fdoc__main {
+      grid-column: 1 / span 8;
+      grid-row: 1;
+      gap: 20px;
+    }
+    .kz-fdoc > .kz-fdoc__side {
+      grid-column: 9 / -1;
+      grid-row: 1;
+      position: sticky;
+      top: 72px;
+    }
+    .kz-fglance {
+      display: block;
+    }
+  }
+}

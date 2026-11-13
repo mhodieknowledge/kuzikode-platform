@@ -1,6 +1,6 @@
 ---
 import PortalLayout from '../../../layouts/PortalLayout.astro';
-import StatusPill from '../../../components/portal/StatusPill.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
 import { ResolveRequestButton, SupportReplyForm } from '../../../components/portal/SupportForms';
 import { loadPortalPage } from '../../../server/lib/portal-page';
 import { getPortalRequest } from '../../../server/modules/support/portal';
@@ -12,6 +12,7 @@ import { SUPPORT_STATUS_TONE, portalSupportStatus } from '../../../shared/suppor
 const { ctx } = Astro.locals;
 const page = await loadPortalPage(ctx, Astro.request, { area: 'support' });
 if (page instanceof Response) return page;
+const PILL_TONE = { info: 'info', warning: 'warn', success: 'ok', neutral: 'neutral' } as const;
 let data;
 try {
   data = await getPortalRequest(ctx, Astro.params.id ?? '');
@@ -33,7 +34,7 @@ const section = 'rounded-lg border border-line bg-surface p-5 md:p-6';
   </p>
   <div class="mt-2 flex flex-wrap items-start justify-between gap-3">
     <h1 class="min-w-0 text-2xl font-bold tracking-display md:text-3xl [overflow-wrap:anywhere]">{r.subject}</h1>
-    <StatusPill label={portalSupportStatus(r.status)} tone={SUPPORT_STATUS_TONE[r.status]} />
+    <StatusPill tone={PILL_TONE[SUPPORT_STATUS_TONE[r.status]]}>{portalSupportStatus(r.status)}</StatusPill>
   </div>
   <p class="mt-1 text-sm text-ink-600">
     <span class="font-mono">{r.reference}</span> · {r.category} · opened {formatLongDate(r.createdAt)}

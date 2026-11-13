@@ -1,0 +1,62 @@
+---
+/**
+ * Side window beside a paper document in the workspace (R5.3, PANEL_DESIGN_SPEC §2 "Quotations / Invoices / Payments"): the state
+ * pill, the amount that matters in large mono, the dates, notices, and the actions (the one primary action in emerald, the PDF).
+ * Desktop: the right 4 columns, sticky. Phones: first on the page; the primary action moves to the sticky bar above the dock.
+ */
+import Window from '../Window.astro';
+import Button from '../../primitives/Button.astro';
+import StatusPill from '../../primitives/StatusPill.astro';
+import type { IconName } from '../../icons/registry';
+
+interface Props {
+  title: string;
+  icon: IconName;
+  meta?: string | null | undefined;
+  state: { label: string; tone: 'neutral' | 'ok' | 'warn' | 'danger' | 'info' | 'lit' };
+  amountLabel: string;
+  amount: string;
+  /** Words set after the figure, inside the same line ("to pay"). */
+  amountSuffix?: string | undefined;
+  facts: { k: string; v: string }[];
+  primary?: { label: string; href: string; lead?: IconName } | undefined;
+  pdfHref: string;
+  [key: `data-${string}`]: string | undefined;
+}
+const { title, icon, meta, state, amountLabel, amount, amountSuffix, facts, primary, pdfHref, ...rest } = Astro.props;
+---
+
+<Window title={title} icon={icon} meta={meta ?? undefined} id="summary" class="kz-fdoc__side" {...rest}>
+  <div class="kz-fsum">
+    <StatusPill tone={state.tone}>{state.label}</StatusPill>
+    <div>
+      <p class="kz-fsum__label">{amountLabel}</p>
+      <p class="kz-fsum__fig">
+        {amount}
+        {amountSuffix ? <span>{` ${amountSuffix}`}</span> : null}
+      </p>
+    </div>
+    {facts.length ? (
+      <dl class="kz-fsum__facts">
+        {facts.map((f) => (
+          <div>
+            <dt>{f.k}</dt>
+            <dd>{f.v}</dd>
+          </div>
+        ))}
+      </dl>
+    ) : null}
+    <slot name="notice" />
+    <div class="kz-fsum__acts">
+      {primary ? (
+        <Button href={primary.href} lead={primary.lead} block class="kz-wfoot__pay">
+          {primary.label}
+        </Button>
+      ) : null}
+      <Button href={pdfHref} download variant="secondary" lead="download" block>
+        Download PDF
+      </Button>
+    </div>
+    <slot />
+  </div>
+</Window>

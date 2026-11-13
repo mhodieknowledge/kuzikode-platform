@@ -1,11 +1,21 @@
 ---
+/**
+ * Workspace quotation (R5.3, PANEL_DESIGN_SPEC §2). The paper quotation in the main column (8) with the accept/decline form below
+ * it; the summary window on the right (4, sticky from 1024 px): state, total, validity, notices and the PDF. Phones: the summary
+ * first, "Respond" in the sticky bar above the dock (jumps to the form).
+ */
 import PortalLayout from '../../../layouts/PortalLayout.astro';
 import QuotationDocument from '../../../ui/documents/QuotationSheet.astro';
 import { QuotationResponse } from '../../../ui/documents/QuotationResponse';
+import DocSummary from '../../../ui/workspace/finance/DocSummary.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import Icon from '../../../ui/icons/Icon.astro';
+import { pillTone } from '../../../ui/workspace/finance/tone';
 import { loadPortalPage } from '../../../server/lib/portal-page';
 import { getPortalQuotation } from '../../../server/modules/quotations';
 import { AppError } from '../../../server/lib/errors';
 import { formatMoney } from '../../../shared/money';
+import { portalQuotationStatus } from '../../../shared/portal';
 import { formatLongDate } from '../../../shared/service-display';
 
 const { ctx } = Astro.locals;
@@ -31,59 +41,90 @@ const notice =
         : !data.open && !q.superseded_by_id
           ? 'This quotation has expired. Contact us for an updated one.'
           : null;
+const st = portalQuotationStatus(q.status, data.open);
+const facts = [
+  ...(q.issue_date ? [{ k: 'Issued', v: formatLongDate(q.issue_date) }] : []),
+  ...(q.valid_until ? [{ k: 'Valid until', v: formatLongDate(q.valid_until) }] : []),
+];
 ---
 
 <PortalLayout title={q.number ?? 'Quotation'} page={page} active="quotations">
-  <p class="text-sm">
-    <a href="/portal/quotations" class="font-semibold text-brand-600 underline underline-offset-2">
+  <nav class="kz-fdoc__crumb" aria-label="Breadcrumb">
+    <a class="kz-wshead__back" href="/portal/quotations">
+      <Icon name="arrow-left" size={16} />
       Quotations
     </a>
-  </p>
-  <div class="mt-4 flex max-w-4xl flex-col gap-6">
-    {data.newerVersionId ? (
-      <p role="status" class="rounded-sm border border-info-700/30 bg-info-50 px-4 py-3 text-sm text-info-700">
-        There is a newer version of this quotation.{' '}
-        <a href={`/portal/quotations/${data.newerVersionId}`} class="font-semibold underline">
-          View the latest version
-        </a>
-      </p>
-    ) : notice ? (
-      <p role="status" class="rounded-sm border border-line bg-canvas px-4 py-3 text-sm text-ink-800">
-        {notice}
-      </p>
-    ) : null}
-    <QuotationDocument
-      number={q.number}
-      title={q.title}
-      status={q.status}
-      introHtml={q.intro_html}
-      currency={q.currency}
-      issueDate={q.issue_date}
-      validUntil={q.valid_until}
-      paymentTerms={q.payment_terms}
-      notes={q.notes}
-      terms={q.terms}
-      totals={{ subtotal: q.subtotal_minor, discount: q.discount_minor, tax: q.tax_minor, total: q.total_minor }}
-      items={data.items}
-      client={data.client}
-      business={data.business}
-    />
-    <p class="flex justify-end">
-      <a
-        href={`/api/v1/portal/quotations/${q.id}/pdf`}
-        download
-        class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
-      >
-        Download PDF
-      </a>
-    </p>
-    {data.open ? (
-      <QuotationResponse
-        client:load
-        endpoint={`/api/v1/portal/quotations/${q.id}/respond`}
-        total={total}
-        doneHref={`/portal/quotations/${q.id}`}
-      />
-    ) : null}
+  </nav>
+
+  <div class="kz-fdoc">
+    <DocSummary
+      title="Quotation"
+      icon="quotations"
+      meta={q.number}
+      state={{ label: st.label, tone: pillTone(st.tone) }}
+      amountLabel="Total"
+      amount={total}
+      facts={facts}
+      primary={data.open ? { label: 'Respond to this quotation', href: '#respond', lead: 'check' } : undefined}
+      pdfHref={`/api/v1/portal/quotations/${q.id}/pdf`}
+    >
+      {data.newerVersionId ? (
+        <p slot="notice" role="status" class="kz-fsum__note is-lit">
+          <Icon name="status-info" size={16} />
+          <span>
+            There is a newer version of this quotation.{' '}
+            <a href={`/portal/quotations/${data.newerVersionId}`}>View the latest version</a>
+          </span>
+        </p>
+      ) : notice ? (
+        <p slot="notice" role="status" class:list={['kz-fsum__note', q.status === 'accepted' && 'is-ok']}>
+          {q.status === 'accepted' ? <Icon name="status-ok" size={16} /> : null}
+          <span>{notice}</span>
+        </p>
+      ) : data.open ? (
+        <p slot="notice" class="kz-fsum__help">
+          Read it through, then accept it with your name or decline it below the document.
+        </p>
+      ) : null}
+    </DocSummary>
+
+    <div class="kz-fdoc__main">
+      <div class="kz-fdoc__paper">
+        <QuotationDocument
+          number={q.number}
+          title={q.title}
+          status={q.status}
+          introHtml={q.intro_html}
+          currency={q.currency}
+          issueDate={q.issue_date}
+          validUntil={q.valid_until}
+          paymentTerms={q.payment_terms}
+          notes={q.notes}
+          terms={q.terms}
+          totals={{ subtotal: q.subtotal_minor, discount: q.discount_minor, tax: q.tax_minor, total: q.total_minor }}
+          items={data.items}
+          client={data.client}
+          business={data.business}
+        />
+      </div>
+      {data.open ? (
+        <div class="kz-fdoc__respond">
+          <QuotationResponse
+            client:load
+            endpoint={`/api/v1/portal/quotations/${q.id}/respond`}
+            total={total}
+            doneHref={`/portal/quotations/${q.id}`}
+          />
+        </div>
+      ) : null}
+    </div>
   </div>
+
+  {data.open ? (
+    <div class="kz-wsact">
+      <Button href="#respond" lead="check" block>
+        Respond to this quotation
+      </Button>
+    </div>
+  ) : null}
 </PortalLayout>

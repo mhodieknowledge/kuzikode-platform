@@ -1,0 +1,25 @@
+---
+/**
+ * List filter for the finance windows (R5.3): page links styled as the segmented control (the current one filled in night).
+ * Real navigation (each filter is its own URL), so no scroll-spy controller is attached. Scrolls sideways inside itself on
+ * narrow phones instead of wrapping.
+ */
+interface Props {
+  label: string;
+  items: { key: string; label: string; href: string }[];
+  current: string;
+}
+const { label, items, current } = Astro.props;
+---
+
+<nav class="kz-wfilt" aria-label={label}>
+  <ul class="kz-seg">
+    {items.map((t) => (
+      <li>
+        <a class="kz-seg__opt" href={t.href} aria-current={t.key === current ? 'page' : undefined}>
+          {t.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>

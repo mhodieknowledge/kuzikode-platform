@@ -1,7 +1,17 @@
 ---
+/**
+ * Workspace invoice (R5.3, PANEL_DESIGN_SPEC §2). The paper invoice in the main column (8) with payments received and credit notes
+ * below it; the summary window on the right (4, sticky from 1024 px): state, amount to pay, due date, how to pay, "Pay now" and the
+ * PDF. Phones: the summary first, "Pay now" in the sticky bar above the dock.
+ */
 import PortalLayout from '../../../layouts/PortalLayout.astro';
 import InvoiceDocument from '../../../ui/documents/InvoiceSheet.astro';
-import StatusPill from '../../../components/portal/StatusPill.astro';
+import Window from '../../../ui/workspace/Window.astro';
+import DocSummary from '../../../ui/workspace/finance/DocSummary.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import Icon from '../../../ui/icons/Icon.astro';
+import { pillTone } from '../../../ui/workspace/finance/tone';
 import { loadPortalPage } from '../../../server/lib/portal-page';
 import { getPortalInvoice } from '../../../server/modules/invoices';
 import { invoicePaymentOptions } from '../../../server/modules/payments';
@@ -25,150 +35,151 @@ const money = (m: number) => formatMoney(m, inv.currency, data.minorDigits);
 const st = portalInvoiceStatus(inv.status, data.overdue);
 const pdfBase = `/api/v1/portal/invoices/${inv.id}/pdf`;
 const payable = data.payment ? (await invoicePaymentOptions(ctx, inv.id)).payable : false;
+const payHref = `/portal/invoices/${inv.id}/pay`;
+const paid = inv.status === 'paid';
+const facts = [
+  ...(inv.due_date && !paid ? [{ k: data.overdue ? 'Was due' : 'Due date', v: formatLongDate(inv.due_date) }] : []),
+  ...(inv.issue_date ? [{ k: 'Issued', v: formatLongDate(inv.issue_date) }] : []),
+  { k: 'Invoice total', v: money(inv.total_minor) },
+];
 ---
 
 <PortalLayout title={inv.number ?? 'Invoice'} page={page} active="invoices">
-  <p class="text-sm">
-    <a href="/portal/invoices" class="font-semibold text-brand-600 underline underline-offset-2">
+  <nav class="kz-fdoc__crumb" aria-label="Breadcrumb">
+    <a class="kz-wshead__back" href="/portal/invoices">
+      <Icon name="arrow-left" size={16} />
       Invoices
     </a>
-  </p>
-  <div class="mt-4 flex max-w-4xl flex-col gap-6">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <p class="flex flex-wrap items-center gap-2 text-sm text-ink-600">
-        Status <StatusPill {...st} />
-      </p>
-      <div class="flex flex-wrap gap-3">
-        {payable ? (
-          <a
-            href={`/portal/invoices/${inv.id}/pay`}
-            class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
-          >
-            Pay now
-          </a>
-        ) : null}
-        <a
-          href={pdfBase}
-          download
-          class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
-        >
-          Download PDF
-        </a>
-      </div>
-    </div>
+  </nav>
 
+  <div class="kz-fdoc">
     {data.payment ? (
-      <section
-        class:list={[
-          'rounded-lg border p-5 md:p-6',
-          data.overdue ? 'border-danger-600/30 bg-danger-50' : 'border-line bg-canvas',
-        ]}
-        aria-labelledby="pay-title"
+      <DocSummary
+        title="Payment"
+        icon="pay"
+        meta={inv.number}
+        state={{ label: st.label, tone: pillTone(st.tone) }}
+        amountLabel="Balance due"
+        amount={money(inv.balance_minor)}
+        amountSuffix="to pay"
+        facts={facts.filter((f) => f.k !== 'Due date' && f.k !== 'Was due')}
+        primary={payable ? { label: 'Pay now', href: payHref, lead: 'pay' } : undefined}
+        pdfHref={pdfBase}
         data-testid="portal-how-to-pay"
       >
-        <h2 id="pay-title" class="font-sans text-lg font-semibold">
-          {money(inv.balance_minor)} to pay
-          {inv.due_date ? (
-            <span class="font-normal text-ink-600">
-              {' '}
-              · {data.overdue ? 'was due' : 'due'} {formatLongDate(inv.due_date)}
+        {inv.due_date ? (
+          <p slot="notice" class:list={['kz-fsum__note', data.overdue && 'is-over']}>
+            {data.overdue ? <Icon name="status-warn" size={16} /> : null}
+            <span>
+              Payment {data.overdue ? 'was due' : 'due'} {formatLongDate(inv.due_date)}
             </span>
-          ) : null}
-        </h2>
-        {data.payment.bankDetails ? (
-          <>
-            <p class="mt-2 text-sm text-ink-800">
-              Pay by bank transfer and use <strong class="font-mono">{inv.number}</strong> as the reference:
-            </p>
-            <p class="mt-2 whitespace-pre-line rounded-sm bg-surface px-4 py-3 font-mono text-sm text-ink-950">
-              {data.payment.bankDetails}
-            </p>
-          </>
-        ) : null}
-        {data.payment.contactEmail ? (
-          <p class="mt-3 text-sm text-ink-800">
-            {data.payment.bankDetails ? 'Questions about paying? ' : 'To arrange payment, email '}
-            <a href={`mailto:${data.payment.contactEmail}`} class="font-semibold text-brand-600 underline">
-              {data.payment.contactEmail}
-            </a>
-            .
           </p>
         ) : null}
-      </section>
-    ) : null}
+        {data.payment.bankDetails ? (
+          <div class="kz-fbank">
+            <p class="kz-fbank__h">
+              Bank transfer: use <strong class="kz-wmono">{inv.number}</strong> as the reference
+            </p>
+            <p class="kz-fbank__det">{data.payment.bankDetails}</p>
+          </div>
+        ) : null}
+        {data.payment.contactEmail ? (
+          <p class="kz-fsum__help">
+            {data.payment.bankDetails ? 'Questions about paying? ' : 'To arrange payment, email '}
+            <a href={`mailto:${data.payment.contactEmail}`}>{data.payment.contactEmail}</a>.
+          </p>
+        ) : null}
+      </DocSummary>
+    ) : (
+      <DocSummary
+        title="Summary"
+        icon="invoices"
+        meta={inv.number}
+        state={{ label: st.label, tone: pillTone(st.tone) }}
+        amountLabel={paid ? 'Total paid' : 'Invoice total'}
+        amount={money(inv.total_minor)}
+        facts={facts.filter((f) => f.k !== 'Invoice total')}
+        pdfHref={pdfBase}
+      />
+    )}
 
-    <InvoiceDocument
-      number={inv.number}
-      currency={inv.currency}
-      minorDigits={data.minorDigits}
-      issueDate={inv.issue_date}
-      dueDate={inv.due_date}
-      notes={inv.notes}
-      terms={inv.terms}
-      issued={true}
-      totals={{
-        subtotal: inv.subtotal_minor,
-        discount: inv.discount_minor,
-        tax: inv.tax_minor,
-        total: inv.total_minor,
-        paid: inv.amount_paid_minor,
-        credited: inv.amount_credited_minor,
-        balance: inv.balance_minor,
-      }}
-      items={data.items}
-      client={data.client}
-      business={data.business}
-    />
+    <div class="kz-fdoc__main">
+      <div class="kz-fdoc__paper">
+        <InvoiceDocument
+          number={inv.number}
+          currency={inv.currency}
+          minorDigits={data.minorDigits}
+          issueDate={inv.issue_date}
+          dueDate={inv.due_date}
+          notes={inv.notes}
+          terms={inv.terms}
+          issued={true}
+          totals={{
+            subtotal: inv.subtotal_minor,
+            discount: inv.discount_minor,
+            tax: inv.tax_minor,
+            total: inv.total_minor,
+            paid: inv.amount_paid_minor,
+            credited: inv.amount_credited_minor,
+            balance: inv.balance_minor,
+          }}
+          items={data.items}
+          client={data.client}
+          business={data.business}
+        />
+      </div>
 
-    {data.payments.length ? (
-      <section class="rounded-lg border border-line bg-surface p-5 md:p-6" aria-labelledby="paid-title">
-        <h2 id="paid-title" class="font-sans text-base font-semibold">
-          Payments received
-        </h2>
-        <ul class="mt-3 divide-y divide-line text-sm">
-          {data.payments.map((p) => (
-            <li class="flex justify-between gap-3 py-2 tabular-nums">
-              <span>
-                {formatLongDate(p.receivedAt)} · <span class="font-mono">{p.receiptNumber}</span>
-              </span>
-              <span class="font-medium">{money(p.appliedMinor)}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-    ) : null}
+      {data.payments.length ? (
+        <Window title="Payments received" icon="receipt" id="paid" meta={String(data.payments.length)} flush>
+          <ul class="kz-wlist" aria-label="Payments received">
+            {data.payments.map((p) => (
+              <li class="kz-wrow">
+                <div class="kz-wrow__main">
+                  <p class="kz-wrow__title kz-wmono">{p.receiptNumber}</p>
+                  <p class="kz-wrow__meta">{formatLongDate(p.receivedAt)}</p>
+                </div>
+                <p class="kz-wrow__fig">{money(p.appliedMinor)}</p>
+              </li>
+            ))}
+          </ul>
+        </Window>
+      ) : null}
 
-    {data.creditNotes.length ? (
-      <section class="rounded-lg border border-line bg-surface p-5 md:p-6" aria-labelledby="credit-title">
-        <h2 id="credit-title" class="font-sans text-base font-semibold">
-          Credit notes
-        </h2>
-        <ul class="mt-3 divide-y divide-line text-sm">
-          {data.creditNotes.map((c) => (
-            <li class="flex flex-wrap items-start justify-between gap-3 py-3">
-              <div class="min-w-0">
-                <p class="font-medium text-ink-950">
-                  <span class="font-mono">{c.number}</span> · {formatLongDate(c.issuedAt)}
-                  {c.status === 'void' ? ' (cancelled)' : ''}
-                </p>
-                <p class="text-ink-600">
-                  {c.reason} · {CREDIT_APPLIED_LABEL[c.appliedTo]}
-                </p>
-              </div>
-              <div class="flex items-center gap-4">
-                <span class="font-medium tabular-nums">{money(c.totalMinor)}</span>
-                <a
-                  href={`/api/v1/portal/credit-notes/${c.id}/pdf`}
-                  download
-                  class="font-semibold text-brand-600 underline underline-offset-2"
-                >
-                  PDF<span class="sr-only"> of credit note {c.number}</span>
-                </a>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-    ) : null}
+      {data.creditNotes.length ? (
+        <Window title="Credit notes" icon="receipt" id="credits" meta={String(data.creditNotes.length)} flush>
+          <ul class="kz-wlist" aria-label="Credit notes">
+            {data.creditNotes.map((c) => (
+              <li class="kz-frow">
+                <div class="kz-frow__main">
+                  <p class="kz-frow__title">
+                    <span class="kz-wmono">{c.number}</span>
+                    {c.status === 'void' ? <StatusPill>Cancelled</StatusPill> : null}
+                  </p>
+                  <p class="kz-wrow__meta">
+                    {formatLongDate(c.issuedAt)} · {CREDIT_APPLIED_LABEL[c.appliedTo]}
+                  </p>
+                  <p class="kz-frow__note">{c.reason}</p>
+                </div>
+                <div class="kz-frow__side">
+                  <p class="kz-wrow__fig">{money(c.totalMinor)}</p>
+                  <a class="kz-frow__dl" href={`/api/v1/portal/credit-notes/${c.id}/pdf`} download>
+                    <Icon name="download" size={16} />
+                    PDF<span class="sr-only"> of credit note {c.number}</span>
+                  </a>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Window>
+      ) : null}
+    </div>
   </div>
+
+  {payable ? (
+    <div class="kz-wsact">
+      <Button href={payHref} lead="pay" block>
+        Pay now
+      </Button>
+    </div>
+  ) : null}
 </PortalLayout>

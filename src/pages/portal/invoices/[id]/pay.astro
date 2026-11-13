@@ -1,8 +1,12 @@
 ---
-/** Portal checkout for one invoice (docs/06 §3b): the same Checkout as /pay/[invoiceToken], within portal scope. */
+/**
+ * Portal checkout for one invoice (docs/06 §3b): the same Checkout as /pay/[invoiceToken], within portal scope. R5.3: the workspace
+ * back link above it; the checkout itself is the rebuilt R4.8 one.
+ */
 import PortalLayout from '../../../../layouts/PortalLayout.astro';
 import CheckoutSummary from '../../../../ui/public/checkout/CheckoutSummary.astro';
 import { Checkout } from '../../../../ui/public/checkout/Checkout';
+import Icon from '../../../../ui/icons/Icon.astro';
 import { loadPortalPage } from '../../../../server/lib/portal-page';
 import { portalInvoiceId } from '../../../../server/modules/invoices';
 import { checkoutView } from '../../../../server/modules/payments';
@@ -23,11 +27,12 @@ const id = encodeURIComponent(invoiceId);
 ---
 
 <PortalLayout title={`Pay ${view.invoice.number}`} page={page} active="invoices">
-  <p class="text-sm">
-    <a href={`/portal/invoices/${id}`} class="font-semibold text-brand-600 underline underline-offset-2">
+  <nav class="kz-fdoc__crumb" aria-label="Breadcrumb">
+    <a class="kz-wshead__back" href={`/portal/invoices/${id}`}>
+      <Icon name="arrow-left" size={16} />
       Invoice {view.invoice.number}
     </a>
-  </p>
+  </nav>
   <div class="kz-co kz-co--portal">
     <CheckoutSummary view={view} />
     <div class="kz-co__pay">

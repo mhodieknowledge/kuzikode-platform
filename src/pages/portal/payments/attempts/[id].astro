@@ -1,6 +1,13 @@
 ---
+/**
+ * Workspace payment attempt (R5.3): the live status of one online payment inside a window, the same AttemptResult as the public
+ * return pages (polling in useAttemptStatus): the road strip while waiting, then the outcome, the receipt slip, the receipt
+ * download and the way back to the invoice.
+ */
 import PortalLayout from '../../../../layouts/PortalLayout.astro';
-import { AttemptStatus } from '../../../../components/portal/AttemptStatus';
+import PageHead from '../../../../ui/workspace/PageHead.astro';
+import Window from '../../../../ui/workspace/Window.astro';
+import { AttemptResult } from '../../../../ui/public/checkout/AttemptResult';
 import { loadPortalPage } from '../../../../server/lib/portal-page';
 import { getPortalAttempt } from '../../../../server/modules/payments';
 import { AppError } from '../../../../server/lib/errors';
@@ -18,8 +25,10 @@ try {
 ---
 
 <PortalLayout title="Payment status" page={page} active="payments">
-  <h1 class="sr-only">Payment status</h1>
-  <div class="mx-auto max-w-xl rounded-lg border border-line bg-surface p-6 md:p-8">
-    <AttemptStatus client:load initial={attempt} />
+  <PageHead title="Payment status" back={{ href: '/portal/payments', label: 'Payments' }} />
+  <div class="kz-wgrid">
+    <Window title="Online payment" icon="pay" span={7} id="attempt" meta={attempt.invoice.number}>
+      <AttemptResult client:load initial={attempt} />
+    </Window>
   </div>
 </PortalLayout>

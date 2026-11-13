@@ -1,10 +1,18 @@
 ---
+/**
+ * Workspace services (R5.3, PANEL_DESIGN_SPEC §2 "Services"): per client, a "Subscriptions" window (each plan with its amount in
+ * mono, state, next bill, the automatic-payment consent and the cancellation request) and a "Domains, hosting and accounts" window
+ * (each with its renewal date). Side by side from 1024 px (7/5), stacked below.
+ */
 import PortalLayout from '../../layouts/PortalLayout.astro';
+import PageHead from '../../ui/workspace/PageHead.astro';
+import Window from '../../ui/workspace/Window.astro';
+import StatusPill from '../../ui/primitives/StatusPill.astro';
 import { CancellationRequest } from '../../components/portal/SupportForms';
+import { AutoCharge } from '../../ui/workspace/finance/AutoCharge';
 import { loadPortalPage } from '../../server/lib/portal-page';
 import { listPortalServices } from '../../server/modules/subscriptions/portal';
 import { portalAutoChargeOptions } from '../../server/modules/payments';
-import { AutoCharge } from '../../components/portal/SavedCards';
 import { formatMoney } from '../../shared/money';
 import { formatLongDate } from '../../shared/service-display';
 
@@ -18,100 +26,119 @@ const autoCharge = await portalAutoChargeOptions(
   groups.flatMap((g) => g.subscriptions.map((s) => s.id)),
 );
 const empty = groups.every((g) => g.subscriptions.length === 0 && g.assets.length === 0);
-const section = 'rounded-lg border border-line bg-surface p-5 md:p-6';
+const level = multiClient ? 'h3' : 'h2';
 ---
 
 <PortalLayout title="Your services" page={page} active="services">
-  <h1 class="text-2xl font-bold tracking-display md:text-3xl">Your services</h1>
-  <p class="mt-1 max-w-2xl text-ink-600">
-    Ongoing services you have with Kuzikode, and the domains and hosting we look after for you.
-  </p>
+  <PageHead
+    title="Your services"
+    sub="Ongoing services you have with Kuzikode, and the domains and hosting we look after for you."
+  />
   {empty ? (
-    <p class="mt-6 max-w-2xl rounded-lg border border-line bg-surface p-6 text-ink-600">
-      You have no ongoing services with us at the moment.
-    </p>
+    <div class="kz-wgrid">
+      <Window title="Services" icon="services" span={8} id="none">
+        <div class="kz-wnote">
+          <p class="kz-wnote__code">no services yet</p>
+          <p>You have no ongoing services with us at the moment.</p>
+        </div>
+      </Window>
+    </div>
   ) : (
-    groups.map((g) => (
-      <div class="mt-6 flex flex-col gap-6">
-        {multiClient ? <h2 class="text-xl font-semibold">{g.client.name}</h2> : null}
-        <section class={section} aria-label={`Subscriptions${multiClient ? ` for ${g.client.name}` : ''}`}>
-          <h3 class="font-sans text-lg font-semibold">Subscriptions</h3>
-          {g.subscriptions.length === 0 ? (
-            <p class="mt-2 text-sm text-ink-600">No subscriptions.</p>
-          ) : (
-            <ul class="mt-3 divide-y divide-line" data-testid="subscriptions">
-              {g.subscriptions.map((s) => (
-                <li class="flex flex-col gap-3 py-4 md:flex-row md:items-start md:justify-between">
-                  <div class="min-w-0">
-                    <p class="font-medium text-ink-950 [overflow-wrap:anywhere]">{s.description}</p>
-                    <p class="text-sm text-ink-600">
-                      <span class="font-mono tabular-nums">{formatMoney(s.amountMinor, s.currency)}</span> per{' '}
-                      {s.interval}
+    groups.map((g, gi) => (
+      <section class="kz-fsvc" aria-label={multiClient ? g.client.name : undefined}>
+        {multiClient ? <h2 class="kz-fsvc__client">{g.client.name}</h2> : null}
+        <div class="kz-wgrid">
+          <Window
+            title="Subscriptions"
+            icon="subscriptions"
+            level={level}
+            span={g.assets.length ? 7 : 12}
+            id={`subs-${gi}`}
+            meta={g.subscriptions.length ? String(g.subscriptions.length) : undefined}
+            flush={g.subscriptions.length > 0}
+          >
+            {g.subscriptions.length === 0 ? (
+              <div class="kz-wnote">
+                <p class="kz-wnote__code">no subscriptions</p>
+                <p>No subscriptions.</p>
+              </div>
+            ) : (
+              <ul class="kz-wlist" data-testid="subscriptions">
+                {g.subscriptions.map((s) => (
+                  <li class="kz-fsub">
+                    <div class="kz-fsub__head">
+                      <p class="kz-wrow__title">{s.description}</p>
+                      <StatusPill tone={s.paused ? 'warn' : 'lit'}>{s.paused ? 'Paused' : 'Active'}</StatusPill>
+                    </div>
+                    <p class="kz-wrow__meta">
+                      <span class="kz-wmono">{formatMoney(s.amountMinor, s.currency)}</span> per {s.interval}
                       {s.quantity !== '1' ? ` · quantity ${s.quantity}` : ''}
-                      {' · '}
-                      {s.paused ? 'Paused' : s.nextBillingDate ? `Next bill ${formatLongDate(s.nextBillingDate)}` : ''}
+                      {!s.paused && s.nextBillingDate ? ` · next bill ${formatLongDate(s.nextBillingDate)}` : ''}
                     </p>
-                  </div>
-                  <div class="flex flex-col gap-3 md:max-w-sm md:items-end md:text-right">
-                    {autoCharge[s.id]?.cards.length ? (
-                      <AutoCharge
-                        client:visible
-                        subscriptionId={s.id}
-                        description={s.description}
-                        cards={autoCharge[s.id]!.cards}
-                        current={autoCharge[s.id]!.current}
-                      />
-                    ) : null}
-                    {s.cancellationRequested ? (
-                      <p class="text-sm font-medium text-ink-800">
-                        Cancellation requested.{' '}
-                        <a
-                          href="/portal/support?show=open"
-                          class="font-semibold text-brand-600 underline underline-offset-2"
-                        >
-                          See your requests
-                        </a>
+                    <div class="kz-fsub__acts">
+                      {autoCharge[s.id]?.cards.length ? (
+                        <AutoCharge
+                          client:visible
+                          subscriptionId={s.id}
+                          description={s.description}
+                          cards={autoCharge[s.id]!.cards}
+                          current={autoCharge[s.id]!.current}
+                        />
+                      ) : null}
+                      {s.cancellationRequested ? (
+                        <p class="kz-fsub__req">
+                          Cancellation requested. <a href="/portal/support?show=open">See your requests</a>
+                        </p>
+                      ) : (
+                        <CancellationRequest client:visible subscriptionId={s.id} description={s.description} />
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Window>
+
+          {g.assets.length ? (
+            <Window
+              title="Domains, hosting and accounts"
+              icon="managed-services"
+              level={level}
+              span={5}
+              id={`assets-${gi}`}
+              meta={String(g.assets.length)}
+              flush
+            >
+              <ul class="kz-wlist" data-testid="assets">
+                {g.assets.map((a) => (
+                  <li class="kz-wrow">
+                    <div class="kz-wrow__main">
+                      <p class="kz-wrow__title">{a.name}</p>
+                      <p class="kz-wrow__meta">
+                        {a.typeLabel}
+                        {a.provider ? ` · ${a.provider}` : ''}
                       </p>
-                    ) : (
-                      <CancellationRequest client:visible subscriptionId={s.id} description={s.description} />
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-        {g.assets.length ? (
-          <section class={section} aria-label={`Domains and hosting${multiClient ? ` for ${g.client.name}` : ''}`}>
-            <h3 class="font-sans text-lg font-semibold">Domains, hosting and accounts</h3>
-            <ul class="mt-3 divide-y divide-line" data-testid="assets">
-              {g.assets.map((a) => (
-                <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3">
-                  <div class="min-w-0">
-                    <p class="font-medium text-ink-950 [overflow-wrap:anywhere]">{a.name}</p>
-                    <p class="text-sm text-ink-600">
-                      {a.typeLabel}
-                      {a.provider ? ` · ${a.provider}` : ''}
+                    </div>
+                    <p class="kz-fasset__when">
+                      {a.renewalDate ? (
+                        <Fragment>
+                          <span>{a.autoRenew ? 'Renews' : 'Expires'}</span>
+                          <span class="kz-wmono">{formatLongDate(a.renewalDate)}</span>
+                        </Fragment>
+                      ) : (
+                        'No renewal date'
+                      )}
                     </p>
-                  </div>
-                  <p class="text-sm text-ink-600">
-                    {a.renewalDate
-                      ? `${a.autoRenew ? 'Renews' : 'Expires'} ${formatLongDate(a.renewalDate)}`
-                      : 'No renewal date'}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
-      </div>
+                  </li>
+                ))}
+              </ul>
+            </Window>
+          ) : null}
+        </div>
+      </section>
     ))
   )}
-  <p class="mt-6 text-sm text-ink-600">
-    Questions about a service?{' '}
-    <a href="/portal/support/new" class="font-semibold text-brand-600 underline underline-offset-2">
-      Ask our team
-    </a>
-    .
+  <p class="kz-wsfoot">
+    Questions about a service? <a href="/portal/support/new">Ask our team</a>.
   </p>
 </PortalLayout>

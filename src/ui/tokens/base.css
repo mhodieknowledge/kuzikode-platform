@@ -19,6 +19,18 @@
 @import '@fontsource-variable/overpass/wght.css';
 @import '@fontsource-variable/overpass-mono/wght.css';
 
+/* Overpass draws the middle dot (U+00B7) off-centre, so " · " separators read as "·due". Serve that one character from Overpass
+   Mono, where it sits centred in its cell. Declared after the Overpass faces so it wins for its unicode-range. */
+@font-face {
+  font-family: 'Overpass Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('../../../node_modules/@fontsource-variable/overpass-mono/files/overpass-mono-latin-wght-normal.woff2')
+    format('woff2-variations');
+  unicode-range: U+00B7;
+}
+
 @theme {
   /* Route structure, Zimbabwe earth palette (tokens.css). */
   --color-night-950: var(--night-950);

@@ -1,6 +1,14 @@
 ---
+/**
+ * Workspace quotations (R5.3, PANEL_DESIGN_SPEC §2): the filter (all / waiting for your answer), then the list window (8) of
+ * quotation rows (title, mono number and dates, total in mono, state) and, from 1024 px, a small "At a glance" window (4).
+ */
 import PortalLayout from '../../../layouts/PortalLayout.astro';
-import StatusPill from '../../../components/portal/StatusPill.astro';
+import PageHead from '../../../ui/workspace/PageHead.astro';
+import Window from '../../../ui/workspace/Window.astro';
+import FilterNav from '../../../ui/workspace/finance/FilterNav.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import { pillTone } from '../../../ui/workspace/finance/tone';
 import { loadPortalPage } from '../../../server/lib/portal-page';
 import { listPortalQuotations } from '../../../server/modules/quotations';
 import { formatMoney } from '../../../shared/money';
@@ -13,69 +21,86 @@ if (page instanceof Response) return page;
 const show = Astro.url.searchParams.get('show') === 'open' ? 'open' : 'all';
 const items = await listPortalQuotations(ctx, { show });
 const multiClient = page.clients.length > 1;
-const tab = (key: 'all' | 'open', label: string) => ({
-  key,
-  label,
-  href: key === 'all' ? '/portal/quotations' : '/portal/quotations?show=open',
-});
-const tabs = [tab('all', 'All'), tab('open', 'Waiting for your answer')];
+const tabs = [
+  { key: 'all', label: 'All', href: '/portal/quotations' },
+  { key: 'open', label: 'Waiting for your answer', href: '/portal/quotations?show=open' },
+];
+const waiting = items.filter((q) => q.open).length;
+const accepted = items.filter((q) => q.status === 'accepted').length;
 ---
 
 <PortalLayout title="Quotations" page={page} active="quotations">
-  <h1 class="text-2xl font-bold tracking-display md:text-3xl">Quotations</h1>
-  <nav aria-label="Filter quotations" class="mt-4">
-    <ul class="flex flex-wrap gap-2">
-      {tabs.map((t) => (
-        <li>
-          <a
-            href={t.href}
-            aria-current={show === t.key ? 'page' : undefined}
-            class:list={[
-              'inline-flex h-9 items-center rounded-full border px-4 text-sm font-semibold',
-              show === t.key
-                ? 'border-brand-600 bg-brand-600 text-white'
-                : 'border-line bg-surface text-ink-800 hover:border-ink-400',
-            ]}
-          >
-            {t.label}
-          </a>
-        </li>
-      ))}
-    </ul>
-  </nav>
-  {items.length === 0 ? (
-    <p class="mt-6 max-w-2xl rounded-lg border border-line bg-surface p-6 text-ink-600">
-      {show === 'open'
-        ? 'No quotations are waiting for your answer.'
-        : 'There are no quotations yet. When we send you one, it appears here.'}
-    </p>
-  ) : (
-    <ul class="mt-6 divide-y divide-line rounded-lg border border-line bg-surface" aria-label="Quotations">
-      {items.map((q) => {
-        const st = portalQuotationStatus(q.status, q.open);
-        return (
-          <li class="relative flex flex-wrap items-start justify-between gap-x-6 gap-y-2 px-5 py-4 hover:bg-canvas">
-            <div class="min-w-0">
-              <a
-                href={`/portal/quotations/${q.id}`}
-                class="font-semibold text-ink-950 after:absolute after:inset-0 hover:underline"
-              >
-                {q.title}
-              </a>
-              <p class="mt-0.5 text-sm text-ink-600">
-                <span class="font-mono">{q.number}</span>
-                {q.issueDate ? ` · ${formatLongDate(q.issueDate)}` : ''}
-                {q.open && q.validUntil ? ` · valid until ${formatLongDate(q.validUntil)}` : ''}
-                {multiClient ? ` · ${q.clientName}` : ''}
-              </p>
+  <PageHead
+    title="Quotations"
+    sub={items.length ? 'Read each quotation, download it, and accept or decline it here.' : undefined}
+  />
+  <FilterNav label="Filter quotations" items={tabs} current={show} />
+
+  <div class="kz-wgrid">
+    <Window
+      title={show === 'open' ? 'Waiting for your answer' : 'All quotations'}
+      icon="quotations"
+      span={items.length ? 8 : 12}
+      id="list"
+      meta={items.length ? String(items.length) : undefined}
+      flush={items.length > 0}
+    >
+      {items.length === 0 ? (
+        <div class="kz-wnote">
+          <p class="kz-wnote__code">{show === 'open' ? 'nothing to answer' : 'no quotations yet'}</p>
+          <p>
+            {show === 'open'
+              ? 'No quotations are waiting for your answer.'
+              : 'There are no quotations yet. When we send you one, it appears here.'}
+          </p>
+        </div>
+      ) : (
+        <ul class="kz-wlist" aria-label="Quotations">
+          {items.map((q) => {
+            const st = portalQuotationStatus(q.status, q.open);
+            return (
+              <li class="kz-wrow kz-wrow--fin">
+                <div class="kz-wrow__main">
+                  <a class="kz-wrow__title kz-wrow__link" href={`/portal/quotations/${q.id}`}>
+                    {q.title}
+                  </a>
+                  <p class="kz-wrow__meta">
+                    <span class="kz-wmono">{q.number}</span>
+                    {q.issueDate ? ` · ${formatLongDate(q.issueDate)}` : ''}
+                    {q.open && q.validUntil ? ` · valid until ${formatLongDate(q.validUntil)}` : ''}
+                    {multiClient ? ` · ${q.clientName}` : ''}
+                  </p>
+                </div>
+                <div class="kz-fend">
+                  <p class="kz-wrow__fig">{formatMoney(q.totalMinor, q.currency)}</p>
+                  <StatusPill tone={pillTone(st.tone)}>{st.label}</StatusPill>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </Window>
+
+    {items.length ? (
+      <Window title="At a glance" icon="gauge" span={4} id="glance" class="kz-fglance">
+        <dl class="kz-fstat">
+          <div>
+            <dt>Waiting for you</dt>
+            <dd>{waiting}</dd>
+          </div>
+          {show === 'all' ? (
+            <div>
+              <dt>Accepted</dt>
+              <dd>{accepted}</dd>
             </div>
-            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 sm:flex-col sm:items-end">
-              <p class="font-mono font-semibold tabular-nums text-ink-950">{formatMoney(q.totalMinor, q.currency)}</p>
-              <StatusPill {...st} />
-            </div>
-          </li>
-        );
-      })}
-    </ul>
-  )}
+          ) : null}
+        </dl>
+        <p class="kz-fglance__hint">
+          Accepting asks for your full name and records the time as confirmation. Each quotation can be downloaded as a
+          PDF.
+        </p>
+      </Window>
+    ) : null}
+  </div>
 </PortalLayout>

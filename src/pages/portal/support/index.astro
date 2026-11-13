@@ -1,6 +1,6 @@
 ---
 import PortalLayout from '../../../layouts/PortalLayout.astro';
-import StatusPill from '../../../components/portal/StatusPill.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
 import { loadPortalPage } from '../../../server/lib/portal-page';
 import { listPortalRequests } from '../../../server/modules/support/portal';
 import { harareDateTime } from '../../../shared/devices';
@@ -9,6 +9,7 @@ import { SUPPORT_STATUS_TONE, portalSupportStatus } from '../../../shared/suppor
 const { ctx } = Astro.locals;
 const page = await loadPortalPage(ctx, Astro.request, { area: 'support' });
 if (page instanceof Response) return page;
+const PILL_TONE = { info: 'info', warning: 'warn', success: 'ok', neutral: 'neutral' } as const;
 const show = Astro.url.searchParams.get('show') === 'open' ? 'open' : 'all';
 const requests = await listPortalRequests(ctx, { show });
 const multiClient = page.clients.length > 1;
@@ -69,7 +70,7 @@ const tab = (on: boolean) =>
                 {r.teamReplied && r.status === 'awaiting_client' ? ' · Kuzikode replied' : ''}
               </p>
             </div>
-            <StatusPill label={st} tone={SUPPORT_STATUS_TONE[r.status]} />
+            <StatusPill tone={PILL_TONE[SUPPORT_STATUS_TONE[r.status]]}>{st}</StatusPill>
           </li>
         );
       })}

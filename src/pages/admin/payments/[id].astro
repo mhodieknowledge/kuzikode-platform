@@ -1,10 +1,16 @@
 ---
+/** One payment (R6.2): head with receipt / refund actions; details, applied-to, refunds and the gateway timeline in panes. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { RefundAction } from '../../../components/admin/PaymentsAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Pane from '../../../ui/admin/Pane.astro';
+import DetailList from '../../../ui/admin/DetailList.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import { RefundAction } from '../../../ui/admin/payments/RefundAction';
+import { PAYMENT_METHOD, PAYMENT_STATUS, formatWhen } from '../../../ui/admin/finance/labels';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { AppError } from '../../../server/lib/errors';
 import { getPayment } from '../../../server/modules/payments';
-import { MANUAL_PAYMENT_METHODS } from '../../../shared/invoices';
 import { formatMoney } from '../../../shared/money';
 import { formatLongDate } from '../../../shared/service-display';
 
@@ -28,170 +34,130 @@ const digits =
       .first<{ minor_digits: number }>()
   )?.minor_digits ?? 2;
 const money = (m: number) => formatMoney(m, p.currency, digits);
-const when = (iso: string) =>
-  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
-    new Date(iso),
-  );
-const METHOD: Record<string, string> = Object.fromEntries(
-  MANUAL_PAYMENT_METHODS.map((m) => [m.value, m.label.replace(' (manual)', '')]),
-);
-const STATUS: Record<string, string> = {
-  completed: 'Completed',
-  partially_refunded: 'Part refunded',
-  refunded: 'Refunded',
-  reversed: 'Reversed',
-};
 const allocated = allocations.reduce((s, a) => s + a.amount_minor, 0);
 const canRefund = page.auth.permissions.has('payments.refund') && data.refundable > 0 && p.status !== 'reversed';
-const rows: [string, string][] = [
-  ['Amount', money(p.amount_minor)],
-  ['Received', when(p.received_at)],
-  ['Method', METHOD[p.method] ?? p.method],
-  [
-    'Provider',
-    p.provider_key === 'manual'
-      ? 'Recorded manually'
-      : `${account?.label ?? p.provider_key}${account?.mode === 'test' ? ' (test mode)' : ''}`,
-  ],
-  ...(p.reference ? ([['Reference', p.reference]] as [string, string][]) : []),
-  ...(p.provider_reference ? ([['Gateway reference', p.provider_reference]] as [string, string][]) : []),
-  ...(data.recordedBy ? ([['Recorded by', data.recordedBy]] as [string, string][]) : []),
+const status = PAYMENT_STATUS[p.status] ?? { label: p.status, tone: 'neutral' as const };
+const details = [
+  { label: 'Amount', value: money(p.amount_minor), mono: true },
+  { label: 'Received', value: formatWhen(p.received_at) },
+  { label: 'Method', value: PAYMENT_METHOD[p.method] ?? p.method },
+  {
+    label: 'Provider',
+    value:
+      p.provider_key === 'manual'
+        ? 'Recorded manually'
+        : `${account?.label ?? p.provider_key}${account?.mode === 'test' ? ' (test mode)' : ''}`,
+  },
+  ...(p.reference ? [{ label: 'Reference', value: p.reference, mono: true }] : []),
+  ...(p.provider_reference ? [{ label: 'Gateway reference', value: p.provider_reference, mono: true }] : []),
+  ...(data.recordedBy ? [{ label: 'Recorded by', value: data.recordedBy }] : []),
 ];
 ---
 
 <AdminLayout title={p.receipt_number} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/payments" class="hover:text-ink-950 hover:underline">
-      Payments
-    </a>{' '}
-    /<span class="text-ink-950">{p.receipt_number}</span>
-  </nav>
-  <div class="mt-2 flex flex-wrap items-start justify-between gap-4">
-    <div>
-      <h1 class="font-mono text-2xl font-bold tracking-display">{p.receipt_number}</h1>
-      <p class="mt-1 text-sm text-ink-600">
-        {STATUS[p.status] ?? p.status} ·{' '}
-        <a href={`/admin/clients/${p.client_id}`} class="text-brand-600 underline">
-          {client?.display_name}
-        </a>
-      </p>
+  <PageHead
+    title={p.receipt_number}
+    crumbs={[{ label: 'Payments', href: '/admin/payments' }, { label: p.receipt_number }]}
+  >
+    <Fragment slot="meta">
+      <StatusPill tone={status.tone}>{status.label}</StatusPill> ·{' '}
+      <a href={`/admin/clients/${p.client_id}`}>{client?.display_name}</a>
+    </Fragment>
+    <div slot="actions" class="kz-aacts">
+      <div class="kz-ahead__acts">
+        <Button variant="secondary" lead="download" href={`/api/v1/admin/documents/receipts/${p.id}/pdf`} download>
+          Download receipt
+        </Button>
+        {canRefund ? (
+          <RefundAction
+            client:load
+            paymentId={p.id}
+            receiptNumber={p.receipt_number}
+            currency={p.currency}
+            minorDigits={digits}
+            refundableMinor={data.refundable}
+            accountCreditMinor={data.refundSources.accountCredit}
+            creditNotes={data.refundSources.creditNotes}
+          />
+        ) : null}
+      </div>
     </div>
-    <div class="flex flex-wrap gap-2">
-      <a
-        href={`/api/v1/admin/documents/receipts/${p.id}/pdf`}
-        download
-        class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
-      >
-        Download receipt
-      </a>
-      {canRefund ? (
-        <RefundAction
-          client:load
-          paymentId={p.id}
-          receiptNumber={p.receipt_number}
-          currency={p.currency}
-          minorDigits={digits}
-          refundableMinor={data.refundable}
-          accountCreditMinor={data.refundSources.accountCredit}
-          creditNotes={data.refundSources.creditNotes}
-        />
-      ) : null}
-    </div>
-  </div>
-
-  <div class="mt-6 grid gap-6 xl:grid-cols-2">
-    <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="d-h">
-      <h2 id="d-h" class="font-sans text-base font-semibold">
-        Details
-      </h2>
-      <dl class="mt-3 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
-        {rows.map(([k, v]) => (
-          <>
-            <dt class="text-ink-600">{k}</dt>
-            <dd class="text-ink-950">{v}</dd>
-          </>
-        ))}
-      </dl>
-      {p.notes ? (
-        <p class="mt-3 border-t border-line pt-3 text-sm text-ink-800 whitespace-pre-line">{p.notes}</p>
-      ) : null}
-    </section>
-
-    <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="a-h">
-      <h2 id="a-h" class="font-sans text-base font-semibold">
-        Applied to
-      </h2>
-      <ul class="mt-3 flex flex-col gap-2 text-sm">
+  </PageHead>
+  <div class="kz-agrid kz-agrid--2">
+    <Pane title="Details" id="d-h">
+      <DetailList items={details} rows />
+      {p.notes ? <p class="kz-aprose">{p.notes}</p> : null}
+    </Pane>
+    <Pane title="Applied to" id="a-h" flush>
+      <ul class="kz-alist" role="list">
         {allocations.map((a) => (
-          <li class="tnum flex justify-between gap-3">
-            <a href={`/admin/invoices/${a.invoice_id}`} class="font-mono font-semibold text-brand-600 hover:underline">
-              {a.number}
-            </a>
-            <span>{money(a.amount_minor)}</span>
+          <li>
+            <div class="kz-alist__main">
+              <a href={`/admin/invoices/${a.invoice_id}`} class="kz-alist__t kz-amono">
+                {a.number}
+              </a>
+            </div>
+            <span class="kz-alist__r">{money(a.amount_minor)}</span>
           </li>
         ))}
         {p.amount_minor > allocated ? (
-          <li class="tnum flex justify-between gap-3 text-ink-800">
-            <span>Kept as account credit</span>
-            <span>{money(p.amount_minor - allocated)}</span>
+          <li>
+            <div class="kz-alist__main">
+              <span class="kz-alist__t">Kept as account credit</span>
+            </div>
+            <span class="kz-alist__r">{money(p.amount_minor - allocated)}</span>
           </li>
         ) : null}
       </ul>
-    </section>
-
-    <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="r-h">
-      <h2 id="r-h" class="font-sans text-base font-semibold">
-        Refunds
-      </h2>
+    </Pane>
+    <Pane title="Refunds" id="r-h" flush>
       {refunds.length === 0 ? (
-        <p class="mt-2 text-sm text-ink-600">No refunds.</p>
+        <p class="kz-anone">
+          <span class="kz-anone__code">0 refunds</span>No refunds.
+        </p>
       ) : (
-        <ul class="mt-3 flex flex-col gap-3 text-sm">
+        <ul class="kz-alist" role="list">
           {refunds.map((r) => (
             <li>
-              <p class="tnum flex justify-between gap-3 font-medium text-ink-950">
-                <span>{r.reason}</span>
-                <span>{money(r.amount_minor)}</span>
-              </p>
-              <p class="text-[12px] text-ink-600">
-                {when(r.created_at)}
-                {r.recorded_by ? ` · ${r.recorded_by}` : ''}
-                {r.credit_note_number ? ` · ${r.credit_note_number}` : ' · from account credit'}
-                {r.provider_reference ? ` · ${r.provider_reference}` : ''}
-              </p>
+              <div class="kz-alist__main">
+                <span class="kz-alist__t">{r.reason}</span>
+                <span class="kz-alist__m">
+                  {formatWhen(r.created_at)}
+                  {r.recorded_by ? ` · ${r.recorded_by}` : ''}
+                  {r.credit_note_number ? ` · ${r.credit_note_number}` : ' · from account credit'}
+                  {r.provider_reference ? ` · ${r.provider_reference}` : ''}
+                </span>
+              </div>
+              <span class="kz-alist__r">{money(r.amount_minor)}</span>
             </li>
           ))}
         </ul>
       )}
-    </section>
-
+    </Pane>
     {attempt ? (
-      <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="t-h">
-        <h2 id="t-h" class="font-sans text-base font-semibold">
-          Gateway timeline
-        </h2>
-        <p class="mt-1 text-[12px] text-ink-600">
-          Attempt {String(attempt['merchant_reference'])} · {String(attempt['status'])}
+      <Pane title="Gateway timeline" id="t-h" flush>
+        <p class="kz-apad kz-afeed__t">
+          Attempt <span class="kz-amono">{String(attempt['merchant_reference'])}</span> · {String(attempt['status'])}
           {attempt['failure_reason'] ? ` · ${String(attempt['failure_reason'])}` : ''}
         </p>
-        <ol class="mt-3 flex flex-col gap-3 text-sm">
+        <ol class="kz-afeed">
           {events.map((e) => (
             <li>
-              <p class="font-medium text-ink-950">{e.event_type.replace(/_/g, ' ')}</p>
-              <p class="text-[12px] text-ink-600">{when(e.received_at)}</p>
+              <p class="kz-afeed__k">{e.event_type.replace(/_/g, ' ')}</p>
+              <p class="kz-afeed__t">{formatWhen(e.received_at)}</p>
               {e.payload_redacted ? (
-                <details class="mt-1">
-                  <summary class="cursor-pointer text-[12px] text-brand-600">Payload (redacted)</summary>
-                  <pre class="mt-1 max-h-40 overflow-auto rounded-sm bg-canvas p-2 text-[12px] whitespace-pre-wrap">{e.payload_redacted}</pre>
+                <details>
+                  <summary class="kz-afeed__t">Payload (redacted)</summary>
+                  <pre class="kz-apre">{e.payload_redacted}</pre>
                 </details>
               ) : null}
             </li>
           ))}
         </ol>
-      </section>
+      </Pane>
     ) : null}
   </div>
-  <p class="mt-6 text-[12px] text-ink-600">
+  <p class="kz-afeed__t kz-agap">
     Received {formatLongDate(p.received_at)}. Payments are never deleted; corrections are refunds or credit notes.
   </p>
 </AdminLayout>

@@ -2876,3 +2876,314 @@
     align-items: start;
   }
 }
+@layer components {
+  /* ---------- Finance group (R6.2 group 2) ---------- */
+  .kz-aperiod {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+  }
+  .kz-aperiod .kz-field {
+    flex: 1 1 140px;
+    min-width: 0;
+    max-width: 200px;
+  }
+  .kz-aperiod .kz-btn {
+    flex: none;
+  }
+  @media (max-width: 479px) {
+    .kz-aperiod .kz-field {
+      max-width: none;
+    }
+    .kz-aperiod .kz-btn {
+      flex: 1 1 100%;
+    }
+  }
+  /* Report tables inside panes. */
+  .kz-rscroll {
+    overflow-x: auto;
+  }
+  .kz-rscroll.is-tall {
+    max-height: 384px;
+    overflow-y: auto;
+  }
+  .kz-rt {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+  .kz-rt th,
+  .kz-rt td {
+    padding: 10px 16px;
+    text-align: left;
+    border-top: 1px solid var(--bone-200);
+    vertical-align: top;
+  }
+  .kz-rt thead th {
+    border-top: 0;
+    font-size: 0.75rem;
+    font-weight: 650;
+    color: var(--ink-600);
+    white-space: nowrap;
+  }
+  .kz-rt tbody th,
+  .kz-rt tfoot th {
+    font-weight: 600;
+  }
+  .kz-rt tfoot th,
+  .kz-rt tfoot td {
+    border-top: 2px solid var(--bone-300, var(--bone-200));
+    font-weight: 650;
+  }
+  .kz-rt .is-num {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .kz-rt .is-strong {
+    font-weight: 650;
+  }
+  .kz-rt .is-none {
+    text-align: center;
+    color: var(--ink-600);
+    padding: 24px 16px;
+  }
+  .kz-rt__sub {
+    display: block;
+    font-family: var(--font-body, inherit);
+    font-size: 0.75rem;
+    color: var(--ink-600);
+  }
+  .kz-rt a {
+    color: inherit;
+    text-underline-offset: 0.2em;
+  }
+  .kz-rnote {
+    margin: 0 0 12px;
+    font-size: 0.875rem;
+    color: var(--ink-600);
+  }
+  .kz-rnote.kz-apad {
+    padding-bottom: 12px;
+    margin: 0;
+  }
+  .kz-apre {
+    margin: 6px 0 0;
+    max-height: 160px;
+    overflow: auto;
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: var(--bone-100);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .kz-cal__m {
+    min-width: 0;
+  }
+  .kz-cal__h {
+    margin: 0 0 4px;
+    font-size: 0.875rem;
+    font-weight: 650;
+    color: var(--ink-900);
+  }
+  .kz-dt__nowrap {
+    white-space: nowrap;
+  }
+  .kz-dt__per {
+    color: var(--ink-600);
+    font-size: 0.8125rem;
+  }
+  /* Credit-note sheet. */
+  .kz-acn {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+  .kz-acn__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 7rem;
+    gap: 12px;
+    align-items: end;
+  }
+  .kz-acn__t {
+    margin: 0;
+    font-size: 0.9375rem;
+  }
+  .kz-acn__m {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--ink-600);
+  }
+  .kz-acn__total {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    font-weight: 650;
+  }
+  .kz-acn__total.is-over {
+    color: var(--danger-700);
+  }
+  /* Online payment attempts. */
+  .kz-attempts {
+    display: grid;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .kz-attempt {
+    display: grid;
+    gap: 4px;
+    font-size: 0.9375rem;
+  }
+  .kz-attempt p {
+    margin: 0;
+  }
+  .kz-attempt__top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+    font-weight: 600;
+  }
+  .kz-attempt__tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .kz-attempt__tags a {
+    font-size: 0.8125rem;
+  }
+  .kz-attempt__mute {
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--ink-600);
+  }
+  .kz-attempt__msg {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+  .kz-attempt__msg:empty {
+    display: none;
+  }
+  /* Payment gateways. */
+  .kz-gw {
+    display: grid;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 1024px) {
+    .kz-gw {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .kz-gw__card {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--bone-200);
+    border-radius: 8px;
+  }
+  .kz-gw__head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .kz-gw__title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 650;
+  }
+  .kz-gw__sub {
+    margin: 2px 0 0;
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+    overflow-wrap: anywhere;
+  }
+  .kz-gw__secrets {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.8125rem;
+    overflow-wrap: anywhere;
+  }
+  .kz-gw__ok {
+    color: var(--ok-700, #1d6b44);
+  }
+  .kz-gw__bad {
+    color: var(--warn-700, #8a5a00);
+  }
+  .kz-dt__acts .kz-arow-acts {
+    justify-content: flex-end;
+  }
+  @media (max-width: 767px) {
+    .kz-dt__td[data-m='acts'] {
+      display: block;
+      grid-area: acts;
+    }
+    .kz-dt__t tbody tr:has([data-m='acts']) {
+      grid-template-areas:
+        'main amount'
+        'meta status'
+        'acts acts';
+    }
+    .kz-dt__t tbody tr:has([data-m='acts']) .kz-arow-acts {
+      margin-top: 8px;
+      justify-content: flex-start;
+    }
+  }
+}
+@layer components {
+  /* A strip with a single figure fills the row on phones instead of leaving an empty cell. */
+  @media (max-width: 767px) {
+    .kz-kpi__list:has(.kz-kpi__item:only-child) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}
+@layer components {
+  /* Filter bars with many fields (payments, expenses) wrap instead of squeezing; reference columns keep one line. */
+  @media (min-width: 768px) {
+    .kz-atools .kz-afilter:has(.kz-afilter__field:nth-of-type(4)) {
+      flex-wrap: wrap;
+    }
+    .kz-atools .kz-afilter:has(.kz-afilter__field:nth-of-type(4)) .kz-afilter__search {
+      flex: 1 1 220px;
+    }
+    .kz-atools .kz-afilter:has(.kz-afilter__field:nth-of-type(4)) .kz-afilter__field {
+      flex: 0 1 150px;
+    }
+    .kz-dt__nowrap .kz-dt__a,
+    .kz-dt__nowrap .kz-dt__sub {
+      white-space: nowrap;
+    }
+  }
+}
+@layer components {
+  .kz-dt__nw {
+    white-space: nowrap;
+  }
+  .kz-dt__ref {
+    display: block;
+    max-width: 16ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

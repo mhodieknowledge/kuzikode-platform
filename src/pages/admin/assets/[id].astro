@@ -1,6 +1,8 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { AssetForm } from '../../../components/admin/SubscriptionsAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Pane from '../../../ui/admin/Pane.astro';
+import { AssetForm } from '../../../ui/admin/subscriptions/AssetForm';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { AppError } from '../../../server/lib/errors';
 import { formOptions, getAsset } from '../../../server/modules/subscriptions';
@@ -39,36 +41,26 @@ const KIND: Record<string, string> = { '30d': '30 days before', '14d': '14 days 
 ---
 
 <AdminLayout title={a.name} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/assets" class="hover:text-ink-950 hover:underline">
-      Managed services
-    </a>{' '}
-    / <span class="text-ink-950">{a.name}</span>
-  </nav>
-  <h1 class="mt-2 text-2xl font-bold tracking-display">{a.name}</h1>
-  <p class="mt-1 mb-6 text-sm text-ink-600">
-    <a href={`/admin/clients/${a.client_id}`} class="font-semibold text-ink-950 hover:underline">
-      {a.client_name}
-    </a>
-  </p>
-  <div class="grid max-w-5xl items-start gap-6 lg:grid-cols-[2fr_1fr]">
-    <AssetForm client:load initial={initial} clients={opts.clients} subscriptions={opts.subscriptions} />
-    <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="rem-title">
-      <h2 id="rem-title" class="font-sans text-base font-semibold">
-        Reminders sent
-      </h2>
-      {data.reminders.length === 0 ? (
-        <p class="mt-3 text-sm text-ink-600">None yet.</p>
-      ) : (
-        <ul class="mt-3 flex flex-col gap-2 text-sm">
-          {data.reminders.map((r) => (
-            <li>
-              <span class="text-ink-950">{KIND[r.kind] ?? r.kind}</span>
-              <span class="block text-[12px] text-ink-600">for the {formatLongDate(r.renewal_date)} renewal</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
-  </div>
+  <PageHead title={a.name} crumbs={[{ label: 'Managed services', href: '/admin/assets' }, { label: a.name }]}>
+    <Fragment slot="meta">
+      <a href={`/admin/clients/${a.client_id}`}>{a.client_name}</a>
+    </Fragment>
+  </PageHead>
+  <AssetForm client:load initial={initial} clients={opts.clients} subscriptions={opts.subscriptions} />
+  <Pane title="Reminders sent" id="rem-title" flush class="kz-agap">
+    {data.reminders.length === 0 ? (
+      <p class="kz-anone">
+        <span class="kz-anone__code">0 reminders</span>None yet.
+      </p>
+    ) : (
+      <ol class="kz-afeed">
+        {data.reminders.map((r) => (
+          <li>
+            <p class="kz-afeed__k">{KIND[r.kind] ?? r.kind}</p>
+            <p class="kz-afeed__t">for the {formatLongDate(r.renewal_date)} renewal</p>
+          </li>
+        ))}
+      </ol>
+    )}
+  </Pane>
 </AdminLayout>

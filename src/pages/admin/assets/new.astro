@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { AssetForm } from '../../../components/admin/SubscriptionsAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import { AssetForm } from '../../../ui/admin/subscriptions/AssetForm';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { formOptions } from '../../../server/modules/subscriptions';
 
@@ -25,14 +26,9 @@ const initial = {
 ---
 
 <AdminLayout title="Add to register" page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/assets" class="hover:text-ink-950 hover:underline">
-      Managed services
-    </a>{' '}
-    / <span class="text-ink-950">Add</span>
-  </nav>
-  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">Add to the register</h1>
-  <div class="max-w-3xl">
-    <AssetForm client:load initial={initial} clients={opts.clients} subscriptions={opts.subscriptions} />
-  </div>
+  <PageHead
+    title="Add to the register"
+    crumbs={[{ label: 'Managed services', href: '/admin/assets' }, { label: 'Add' }]}
+  />
+  <AssetForm client:load initial={initial} clients={opts.clients} subscriptions={opts.subscriptions} />
 </AdminLayout>

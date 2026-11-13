@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { ExpenseForm } from '../../../components/admin/ExpensesAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import { ExpenseForm } from '../../../ui/admin/expenses/ExpenseForm';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { businessDate } from '../../../server/lib/dates';
 import { formOptions } from '../../../server/modules/expenses';
@@ -26,14 +27,6 @@ const initial = {
 ---
 
 <AdminLayout title="Record expense" page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/expenses" class="hover:text-ink-950 hover:underline">
-      Expenses
-    </a>{' '}
-    / <span class="text-ink-950">New</span>
-  </nav>
-  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">Record expense</h1>
-  <div class="max-w-3xl">
-    <ExpenseForm client:load initial={initial} hasReceipt={false} {...opts} />
-  </div>
+  <PageHead title="Record expense" crumbs={[{ label: 'Expenses', href: '/admin/expenses' }, { label: 'New' }]} />
+  <ExpenseForm client:load initial={initial} hasReceipt={false} {...opts} />
 </AdminLayout>

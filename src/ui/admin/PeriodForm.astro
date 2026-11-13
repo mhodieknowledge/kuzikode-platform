@@ -1,0 +1,32 @@
+---
+/**
+ * Date-range form for reports (R6.2): a plain GET form, From / To side by side with a "Show" button; extra links (CSV
+ * export) go in the default slot. Works before hydration; no client JS.
+ */
+interface Props {
+  label: string;
+  from: string;
+  to: string;
+  submitLabel?: string;
+}
+const { label, from, to, submitLabel = 'Show' } = Astro.props;
+---
+
+<form method="get" class="kz-aperiod" aria-label={label}>
+  <div class="kz-field">
+    <label class="kz-label" for="period-from">
+      From
+    </label>
+    <input id="period-from" class="kz-input" type="date" name="from" value={from} />
+  </div>
+  <div class="kz-field">
+    <label class="kz-label" for="period-to">
+      To
+    </label>
+    <input id="period-to" class="kz-input" type="date" name="to" value={to} />
+  </div>
+  <button type="submit" class="kz-btn kz-btn--secondary">
+    <span>{submitLabel}</span>
+  </button>
+  <slot />
+</form>

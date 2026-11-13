@@ -1,5 +1,16 @@
 ---
+/** Invoices (R6.2): outstanding strip, filters (sheet on phones), dense table → list rows (number, client + balance, total, status). */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import DataTable from '../../../ui/admin/DataTable.astro';
+import Cell from '../../../ui/admin/Cell.astro';
+import Pager from '../../../ui/admin/Pager.astro';
+import KpiStrip, { type Kpi } from '../../../ui/admin/KpiStrip.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import EmptyState from '../../../ui/primitives/EmptyState.astro';
+import { FilterBar } from '../../../ui/admin/FilterBar';
+import { INVOICE_STATUS_TONE, OPEN_BALANCE_STATUSES } from '../../../ui/admin/finance/labels';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { listInvoices } from '../../../server/modules/invoices';
 import { invoiceListQuery } from '../../../shared/schemas/invoices';
@@ -14,169 +25,113 @@ const parsed = invoiceListQuery.safeParse(Object.fromEntries(Astro.url.searchPar
 const filter = parsed.success ? parsed.data : invoiceListQuery.parse({});
 const result = await listInvoices(ctx, filter);
 const canCreate = page.auth.permissions.has('invoices.create');
-const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
-const STATUS_CLASS: Record<string, string> = {
-  draft: 'bg-ink-950/5 text-ink-800',
-  issued: 'bg-info-50 text-info-700',
-  partially_paid: 'bg-warning-50 text-warning-700',
-  paid: 'bg-success-50 text-success-700',
-  overdue: 'bg-danger-50 text-danger-700',
-  void: 'bg-ink-950/5 text-ink-800 line-through',
-};
 const pageHref = (n: number) => {
   const q = new URLSearchParams(Astro.url.searchParams);
   q.set('page', String(n));
   return `/admin/invoices?${q.toString()}`;
 };
+const filtered = !!(filter.q || filter.status);
+const tiles: Kpi[] = result.outstanding.length
+  ? [
+      {
+        label: 'Outstanding',
+        values: result.outstanding.map((o) => formatMoney(o.balance, o.currency)),
+      },
+      ...(result.outstanding.some((o) => o.overdue > 0)
+        ? [
+            {
+              label: 'Overdue',
+              values: result.outstanding.filter((o) => o.overdue > 0).map((o) => formatMoney(o.overdue, o.currency)),
+            },
+          ]
+        : []),
+    ]
+  : [];
 ---
 
 <AdminLayout title="Invoices" page={page}>
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold tracking-display">Invoices</h1>
-      <p class="mt-1 text-sm text-ink-600">
-        {result.total} {result.total === 1 ? 'invoice' : 'invoices'}
-      </p>
-    </div>
+  <PageHead title="Invoices" meta={`${result.total} ${result.total === 1 ? 'invoice' : 'invoices'}`}>
     {canCreate ? (
-      <a
-        href="/admin/invoices/new"
-        class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
-      >
+      <Button slot="actions" href="/admin/invoices/new" lead="add">
         New invoice
-      </a>
+      </Button>
     ) : null}
+  </PageHead>
+  {tiles.length ? <KpiStrip items={tiles} testId="invoice-kpis" /> : null}
+  <div class="kz-atools kz-agap">
+    <FilterBar
+      client:load
+      label="Filter invoices"
+      hidden={filter.clientId ? { clientId: filter.clientId } : {}}
+      clearHref="/admin/invoices"
+      fields={[
+        { kind: 'search', name: 'q', label: 'Search', value: filter.q ?? '', placeholder: 'Number or client' },
+        {
+          kind: 'select',
+          name: 'status',
+          label: 'Status',
+          value: filter.status ?? 'open',
+          options: [
+            { value: 'open', label: 'Open (draft, issued, part paid, overdue)' },
+            ...Object.entries(INVOICE_STATUS_LABEL).map(([value, label]) => ({ value, label })),
+            { value: 'all', label: 'All' },
+          ],
+        },
+      ]}
+    />
   </div>
-  {result.outstanding.length ? (
-    <dl class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      {result.outstanding.map((o) => (
-        <div class="rounded-lg border border-line bg-surface p-4">
-          <dt class="text-[13px] font-semibold text-ink-600">Outstanding ({o.currency})</dt>
-          <dd class="tnum mt-1 text-xl font-bold text-ink-950">{formatMoney(o.balance, o.currency)}</dd>
-          {o.overdue > 0 ? (
-            <dd class="tnum mt-1 text-[13px] font-medium text-danger-700">
-              {formatMoney(o.overdue, o.currency)} overdue
-            </dd>
-          ) : null}
-        </div>
-      ))}
-    </dl>
-  ) : null}
-  <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter invoices">
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Search
-      <input
-        name="q"
-        type="search"
-        value={filter.q ?? ''}
-        maxlength="80"
-        class={field}
-        placeholder="Number or client"
-      />
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Status
-      <select name="status" class={field}>
-        <option value="open" selected={!filter.status || filter.status === 'open'}>
-          Open (draft, issued, part paid, overdue)
-        </option>
-        {Object.entries(INVOICE_STATUS_LABEL).map(([k, l]) => (
-          <option value={k} selected={filter.status === k}>
-            {l}
-          </option>
-        ))}
-        <option value="all" selected={filter.status === 'all'}>
-          All
-        </option>
-      </select>
-    </label>
-    {filter.clientId ? <input type="hidden" name="clientId" value={filter.clientId} /> : null}
-    <button
-      type="submit"
-      class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+  <DataTable
+    caption="Invoices"
+    count={result.items.length}
+    columns={[
+      { label: 'Invoice' },
+      { label: 'Client' },
+      { label: 'Status' },
+      { label: 'Due' },
+      { label: 'Total', num: true },
+      { label: 'Balance', num: true },
+    ]}
+  >
+    <EmptyState
+      slot="empty"
+      code={filtered ? 'no matches' : '0 open'}
+      title={filtered ? 'No invoices match these filters.' : 'No open invoices.'}
     >
-      Filter
-    </button>
-  </form>
-  <div class="mt-6 relative overflow-x-auto rounded-lg border border-line bg-surface">
-    <table class="w-full text-left text-sm">
-      <caption class="sr-only">Invoices</caption>
-      <thead class="bg-canvas text-[13px] text-ink-600">
-        <tr>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Invoice
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Client
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Status
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Due
-          </th>
-          <th scope="col" class="px-4 py-3 text-right font-semibold">
-            Total
-          </th>
-          <th scope="col" class="px-4 py-3 text-right font-semibold">
-            Balance
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {result.items.length === 0 ? (
-          <tr>
-            <td colspan="6" class="px-4 py-10 text-center text-ink-600">
-              {filter.q || filter.status ? 'No invoices match these filters.' : 'No open invoices.'}
-            </td>
-          </tr>
-        ) : (
-          result.items.map((q) => (
-            <tr class="border-t border-line">
-              <td class="px-4 py-3">
-                <a href={`/admin/invoices/${q.id}`} class="font-mono font-semibold text-ink-950 hover:underline">
-                  {q.number ?? 'Draft invoice'}
-                </a>
-                <span class="block text-[12px] text-ink-600">
-                  {q.issue_date ? `Issued ${formatLongDate(q.issue_date)}` : 'Not issued'}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-ink-800">{q.client_name}</td>
-              <td class="px-4 py-3">
-                <span class={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${STATUS_CLASS[q.status]}`}>
-                  {INVOICE_STATUS_LABEL[q.status]}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-ink-800">{q.due_date ? formatLongDate(q.due_date) : '—'}</td>
-              <td class="tnum px-4 py-3 text-right text-ink-800">{formatMoney(q.total_minor, q.currency)}</td>
-              <td class="tnum px-4 py-3 text-right font-medium text-ink-950">
-                {q.status === 'draft' || q.status === 'void' ? '—' : formatMoney(q.balance_minor, q.currency)}
-              </td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-  </div>
-  {result.pages > 1 ? (
-    <nav aria-label="Pagination" class="mt-4 flex items-center justify-between text-sm font-semibold">
-      {result.page > 1 ? (
-        <a href={pageHref(result.page - 1)} rel="prev" class="text-brand-600">
-          Previous
-        </a>
-      ) : (
-        <span />
-      )}
-      <span class="text-ink-600">
-        Page {result.page} of {result.pages}
-      </span>
-      {result.page < result.pages ? (
-        <a href={pageHref(result.page + 1)} rel="next" class="text-brand-600">
-          Next
-        </a>
-      ) : (
-        <span />
-      )}
-    </nav>
-  ) : null}
+      Drafts and unpaid invoices appear here. Change the status filter to see the rest.
+    </EmptyState>
+    {result.items.map((q) => (
+      <tr>
+        <Cell
+          m="main"
+          class="kz-dt__nowrap"
+          href={`/admin/invoices/${q.id}`}
+          title={q.number ?? 'Draft invoice'}
+          sub={q.issue_date ? `Issued ${formatLongDate(q.issue_date)}` : 'Not issued'}
+        />
+        <Cell m="meta" tone="mute">
+          <span>{q.client_name}</span>
+          {OPEN_BALANCE_STATUSES.includes(q.status) && q.balance_minor > 0 ? (
+            <span class="kz-dt__ph"> · {formatMoney(q.balance_minor, q.currency)} due</span>
+          ) : null}
+        </Cell>
+        <Cell m="status">
+          <StatusPill tone={INVOICE_STATUS_TONE[q.status]} class={q.status === 'void' ? 'kz-pill--void' : undefined}>
+            {INVOICE_STATUS_LABEL[q.status]}
+          </StatusPill>
+        </Cell>
+        <Cell tone="mute">{q.due_date ? formatLongDate(q.due_date) : '—'}</Cell>
+        <Cell m="amount" num>
+          {formatMoney(q.total_minor, q.currency)}
+        </Cell>
+        <Cell num>
+          {q.status === 'draft' || q.status === 'void' ? (
+            <span class="kz-dt__dash">—</span>
+          ) : (
+            formatMoney(q.balance_minor, q.currency)
+          )}
+        </Cell>
+      </tr>
+    ))}
+  </DataTable>
+  <Pager page={result.page} pages={result.pages} href={pageHref} />
 </AdminLayout>

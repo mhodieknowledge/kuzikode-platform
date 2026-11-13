@@ -1,11 +1,20 @@
 ---
+/**
+ * One client (R6.2): head with number / type / status, tags and document actions; sections as a view switch (overview,
+ * contacts, notes, services, portal access), each a set of panes.
+ */
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import PageHead from '../../../../ui/admin/PageHead.astro';
+import Pane from '../../../../ui/admin/Pane.astro';
+import Views from '../../../../ui/admin/Views.astro';
+import DetailList from '../../../../ui/admin/DetailList.astro';
+import Button from '../../../../ui/primitives/Button.astro';
 import {
   ClientStatusActions,
   ContactsPanel,
   NoteForm,
   PortalAccessPanel,
-} from '../../../../components/admin/ClientsAdmin';
+} from '../../../../ui/admin/clients/ClientPanels';
 import { loadAdminPage } from '../../../../server/lib/admin-page';
 import { AppError } from '../../../../server/lib/errors';
 import { getClient } from '../../../../server/modules/clients';
@@ -26,20 +35,21 @@ try {
 }
 const { client: c, contacts, notes, credits, access, related } = data;
 const tabs = [
-  ['overview', 'Overview'],
-  ['contacts', `Contacts (${contacts.length})`],
-  ['notes', `Notes (${notes.length})`],
-  ['services', 'Services'],
-  ['portal', 'Portal access'],
-] as const;
-const tab = tabs.some(([k]) => k === Astro.url.searchParams.get('tab'))
+  { key: 'overview', label: 'Overview' },
+  { key: 'contacts', label: 'Contacts', count: contacts.length },
+  { key: 'notes', label: 'Notes', count: notes.length },
+  { key: 'services', label: 'Services' },
+  { key: 'portal', label: 'Portal access' },
+].map((t) => ({ ...t, href: `/admin/clients/${c.id}${t.key === 'overview' ? '' : `?tab=${t.key}`}` }));
+const tab = tabs.some((t) => t.key === Astro.url.searchParams.get('tab'))
   ? Astro.url.searchParams.get('tab')!
   : 'overview';
-const canEdit = page.auth.permissions.has('clients.update') && c.status === 'active';
-const canSubs = page.auth.permissions.has('subscriptions.view');
-const canAssets = page.auth.permissions.has('client_assets.manage');
+const perms = page.auth.permissions;
+const canEdit = perms.has('clients.update') && c.status === 'active';
+const canSubs = perms.has('subscriptions.view');
+const canAssets = perms.has('client_assets.manage');
 const services = tab === 'services' ? await clientServices(ctx, c.id) : null;
-const canArchive = page.auth.permissions.has('clients.archive');
+const canArchive = perms.has('clients.archive');
 const unused = !(
   related.quotations ||
   related.invoices ||
@@ -67,282 +77,207 @@ const address = c.billingAddress
 ---
 
 <AdminLayout title={c.displayName} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/clients" class="hover:text-ink-950 hover:underline">
-      Clients
-    </a>{' '}
-    / <span class="text-ink-950">{c.displayName}</span>
-  </nav>
-  <div class="mt-2 flex flex-wrap items-start justify-between gap-4">
-    <div>
-      <h1 class="text-2xl font-bold tracking-display">{c.displayName}</h1>
-      <p class="mt-1 text-sm text-ink-600">
-        <span class="font-mono">{c.number}</span> · {c.type === 'business' ? 'Business' : 'Individual'}
-        {c.status === 'archived' ? ' · Archived' : ''}
-      </p>
-      {c.tags.length ? (
-        <p class="mt-2">
-          {c.tags.map((t) => (
-            <span class="mr-1 inline-flex rounded-full bg-ink-950/5 px-2 py-0.5 text-[12px] text-ink-800">{t}</span>
-          ))}
-        </p>
-      ) : null}
-    </div>
-    <div class="flex flex-wrap gap-2">
-      {page.auth.permissions.has('quotations.create') && c.status === 'active' ? (
-        <a
-          href={`/admin/quotations/new?clientId=${c.id}`}
-          class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
-        >
+  <PageHead title={c.displayName} crumbs={[{ label: 'Clients', href: '/admin/clients' }, { label: c.displayName }]}>
+    <Fragment slot="meta">
+      <span class="kz-amono">{c.number}</span> · {c.type === 'business' ? 'Business' : 'Individual'}
+      {c.status === 'archived' ? ' · Archived' : ''}
+    </Fragment>
+    <Fragment slot="actions">
+      {perms.has('quotations.create') && c.status === 'active' ? (
+        <Button href={`/admin/quotations/new?clientId=${c.id}`} variant="secondary" lead="quotations">
           New quotation
-        </a>
+        </Button>
       ) : null}
-      {page.auth.permissions.has('invoices.create') && c.status === 'active' ? (
-        <a
-          href={`/admin/invoices/new?clientId=${c.id}`}
-          class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
-        >
+      {perms.has('invoices.create') && c.status === 'active' ? (
+        <Button href={`/admin/invoices/new?clientId=${c.id}`} variant="secondary" lead="invoices">
           New invoice
-        </a>
+        </Button>
       ) : null}
       {canEdit ? (
-        <a
-          href={`/admin/clients/${c.id}/edit`}
-          class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
-        >
+        <Button href={`/admin/clients/${c.id}/edit`} variant="secondary" lead="edit">
           Edit
-        </a>
+        </Button>
       ) : null}
       {canArchive ? <ClientStatusActions client:visible clientId={c.id} status={c.status} canDelete={unused} /> : null}
-    </div>
+    </Fragment>
+    {c.tags.length ? (
+      <p class="kz-dt__tags">
+        {c.tags.map((t) => (
+          <span class="kz-tag">{t}</span>
+        ))}
+      </p>
+    ) : null}
+  </PageHead>
+  <div class="kz-atools">
+    <Views label="Client sections" items={tabs} current={tab} />
   </div>
-  <nav aria-label="Client sections" class="mt-6 relative overflow-x-auto border-b border-line">
-    <ul class="flex gap-1">
-      {tabs.map(([k, label]) => (
-        <li class="shrink-0">
-          <a
-            href={`/admin/clients/${c.id}${k === 'overview' ? '' : `?tab=${k}`}`}
-            aria-current={tab === k ? 'page' : undefined}
-            class:list={[
-              'inline-flex h-10 items-center border-b-2 px-3 text-sm font-semibold',
-              tab === k ? 'border-brand-600 text-brand-600' : 'border-transparent text-ink-600 hover:text-ink-950',
-            ]}
-          >
-            {label}
-          </a>
-        </li>
-      ))}
-    </ul>
-  </nav>
-  <div class="mt-6 max-w-5xl">
-    {tab === 'overview' ? (
-      <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="d-title">
-          <h2 id="d-title" class="font-sans text-base font-semibold">
-            Details
-          </h2>
-          <dl class="mt-4 grid gap-4 text-sm sm:grid-cols-2">
-            <div>
-              <dt class="text-ink-600">Registered name</dt>
-              <dd class="font-medium text-ink-950">{c.legalName ?? '—'}</dd>
-            </div>
-            <div>
-              <dt class="text-ink-600">Email</dt>
-              <dd class="font-medium text-ink-950">{c.email ?? '—'}</dd>
-            </div>
-            <div>
-              <dt class="text-ink-600">Phone</dt>
-              <dd class="font-medium text-ink-950">{c.phone ?? '—'}</dd>
-            </div>
-            <div>
-              <dt class="text-ink-600">Website</dt>
-              <dd class="font-medium text-ink-950 break-all">{c.website ?? '—'}</dd>
-            </div>
-            <div>
-              <dt class="text-ink-600">Tax / VAT number</dt>
-              <dd class="font-medium text-ink-950">{c.taxNumber ?? '—'}</dd>
-            </div>
-            <div>
-              <dt class="text-ink-600">Billing address</dt>
-              <dd class="font-medium text-ink-950">{address ?? '—'}</dd>
-            </div>
-            <div>
-              <dt class="text-ink-600">Default currency</dt>
-              <dd class="font-medium text-ink-950">{c.defaultCurrency}</dd>
-            </div>
-            <div>
-              <dt class="text-ink-600">Payment terms</dt>
-              <dd class="font-medium text-ink-950">{c.paymentTermsDays} days</dd>
-            </div>
-          </dl>
-          {c.notes ? (
-            <div class="mt-6">
-              <h3 class="text-sm font-semibold text-ink-950">Internal notes</h3>
-              <p class="mt-1 text-sm whitespace-pre-line text-ink-800">{c.notes}</p>
-            </div>
-          ) : null}
-        </section>
-        <aside class="flex flex-col gap-6">
-          <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="cr-title">
-            <h2 id="cr-title" class="font-sans text-base font-semibold">
-              Credit balance
-            </h2>
-            {credits.length === 0 ? (
-              <p class="mt-2 text-sm text-ink-600">No credit.</p>
-            ) : (
-              <ul class="mt-2 flex flex-col gap-1">
-                {credits.map((x) => (
-                  <li class="tnum text-lg font-semibold text-ink-950">{formatMoney(x.balance, x.currency)}</li>
-                ))}
-              </ul>
-            )}
-          </section>
-          <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="rel-title">
-            <h2 id="rel-title" class="font-sans text-base font-semibold">
-              Activity
-            </h2>
-            <dl class="mt-3 grid gap-2 text-sm">
-              <div class="flex justify-between">
-                <dt class="text-ink-600">Quotations</dt>
-                <dd class="font-medium">{related.quotations}</dd>
-              </div>
-              <div class="flex justify-between">
-                <dt class="text-ink-600">Invoices</dt>
-                <dd class="font-medium">{related.invoices}</dd>
-              </div>
-              <div class="flex justify-between">
-                <dt class="text-ink-600">Projects</dt>
-                <dd class="font-medium">{related.projects}</dd>
-              </div>
-              <div class="flex justify-between">
-                <dt class="text-ink-600">Subscriptions</dt>
-                <dd class="font-medium">{related.subscriptions}</dd>
-              </div>
-              <div class="flex justify-between">
-                <dt class="text-ink-600">Created</dt>
-                <dd class="font-medium">{fmt(c.createdAt)}</dd>
-              </div>
-            </dl>
-          </section>
-        </aside>
-      </div>
-    ) : tab === 'contacts' ? (
-      <ContactsPanel client:load clientId={c.id} contacts={contacts} canEdit={canEdit} />
-    ) : tab === 'notes' ? (
-      <div class="flex flex-col gap-6">
-        {canEdit ? (
-          <div class="rounded-lg border border-line bg-surface p-6">
-            <NoteForm client:load clientId={c.id} />
+  {tab === 'overview' ? (
+    <div class="kz-agrid kz-agrid--detail">
+      <Pane title="Details" id="d-title">
+        <DetailList
+          cols={2}
+          items={[
+            { label: 'Registered name', value: c.legalName },
+            { label: 'Email', value: c.email, href: c.email ? `mailto:${c.email}` : undefined },
+            { label: 'Phone', value: c.phone },
+            { label: 'Website', value: c.website },
+            { label: 'Tax / VAT number', value: c.taxNumber, mono: true },
+            { label: 'Billing address', value: address },
+            { label: 'Default currency', value: c.defaultCurrency, mono: true },
+            { label: 'Payment terms', value: `${c.paymentTermsDays} days` },
+          ]}
+        />
+        {c.notes ? (
+          <div class="kz-asub">
+            <h3 class="kz-asub__t">Internal notes</h3>
+            <p class="kz-aprose">{c.notes}</p>
           </div>
         ) : null}
+      </Pane>
+      <aside class="kz-astack" aria-label="Client summary">
+        <Pane title="Credit balance" id="cr-title">
+          {credits.length === 0 ? (
+            <p class="kz-anone">
+              <span class="kz-anone__code">0.00</span>No credit.
+            </p>
+          ) : (
+            <ul class="kz-alist kz-alist--bare" role="list">
+              {credits.map((x) => (
+                <li>
+                  <span class="kz-alist__r kz-alist__big">{formatMoney(x.balance, x.currency)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Pane>
+        <Pane title="Activity" id="rel-title">
+          <DetailList
+            rows
+            items={[
+              { label: 'Quotations', value: related.quotations, mono: true },
+              { label: 'Invoices', value: related.invoices, mono: true },
+              { label: 'Projects', value: related.projects, mono: true },
+              { label: 'Subscriptions', value: related.subscriptions, mono: true },
+              { label: 'Created', value: fmt(c.createdAt), mono: true },
+            ]}
+          />
+        </Pane>
+      </aside>
+    </div>
+  ) : tab === 'contacts' ? (
+    <ContactsPanel client:load clientId={c.id} contacts={contacts} canEdit={canEdit} />
+  ) : tab === 'notes' ? (
+    <div class="kz-agrid kz-agrid--detail">
+      <Pane title="Notes" id="notes-title" flush meta={String(notes.length)}>
         {notes.length === 0 ? (
-          <p class="text-sm text-ink-600">No notes yet.</p>
+          <p class="kz-anone">
+            <span class="kz-anone__code">0 notes</span>No notes yet.
+          </p>
         ) : (
-          <ol class="flex flex-col gap-3">
+          <ol class="kz-afeed">
             {notes.map((n) => (
-              <li class="rounded-lg border border-line bg-surface p-5">
-                <p class="text-sm whitespace-pre-line text-ink-950">{n.body}</p>
-                <p class="mt-2 text-[12px] text-ink-600">
+              <li>
+                <p class="kz-afeed__b">{n.body}</p>
+                <p class="kz-afeed__t">
                   {n.author} · {fmt(n.created_at)}
                 </p>
               </li>
             ))}
           </ol>
         )}
-      </div>
-    ) : tab === 'services' && services ? (
-      <div class="grid items-start gap-6 lg:grid-cols-2">
-        <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="subs-title">
-          <div class="flex items-center justify-between gap-3">
-            <h2 id="subs-title" class="font-sans text-base font-semibold">
-              Subscriptions
-            </h2>
-            {page.auth.permissions.has('subscriptions.manage') && c.status === 'active' ? (
-              <a href={`/admin/subscriptions/new?client=${c.id}`} class="text-sm font-semibold text-brand-600">
-                New subscription
-              </a>
-            ) : null}
-          </div>
-          {services.subscriptions.length === 0 ? (
-            <p class="mt-3 text-sm text-ink-600">No active subscriptions.</p>
-          ) : (
-            <ul class="mt-3 divide-y divide-line">
-              {services.subscriptions.map((s) => (
-                <li class="flex flex-wrap items-start justify-between gap-3 py-3 text-sm">
-                  <div>
-                    {canSubs ? (
-                      <a href={`/admin/subscriptions/${s.id}`} class="font-semibold text-ink-950 hover:underline">
-                        {s.description}
-                      </a>
-                    ) : (
-                      <span class="font-semibold text-ink-950">{s.description}</span>
-                    )}
-                    <span class="block text-[12px] text-ink-600">
-                      {s.paused ? 'Paused' : `Next invoice ${formatLongDate(s.nextBillingDate!)}`}
-                    </span>
-                  </div>
-                  <span class="tnum text-ink-950">
-                    {formatMoney(s.amountMinor, s.currency)} / {s.interval === 'month' ? 'month' : 'year'}
+      </Pane>
+      {canEdit ? (
+        <Pane title="New note" id="note-new">
+          <NoteForm client:load clientId={c.id} />
+        </Pane>
+      ) : null}
+    </div>
+  ) : tab === 'services' && services ? (
+    <div class="kz-agrid kz-agrid--2">
+      <Pane title="Subscriptions" id="subs-title" flush>
+        {perms.has('subscriptions.manage') && c.status === 'active' ? (
+          <a slot="actions" href={`/admin/subscriptions/new?client=${c.id}`} class="kz-apane__link">
+            New subscription
+          </a>
+        ) : null}
+        {services.subscriptions.length === 0 ? (
+          <p class="kz-anone">
+            <span class="kz-anone__code">0 active</span>No active subscriptions.
+          </p>
+        ) : (
+          <ul class="kz-alist" role="list">
+            {services.subscriptions.map((s) => (
+              <li>
+                <div class="kz-alist__main">
+                  {canSubs ? (
+                    <a href={`/admin/subscriptions/${s.id}`} class="kz-alist__t">
+                      {s.description}
+                    </a>
+                  ) : (
+                    <span class="kz-alist__t">{s.description}</span>
+                  )}
+                  <span class="kz-alist__m">
+                    {s.paused ? 'Paused' : `Next invoice ${formatLongDate(s.nextBillingDate!)}`}
                   </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-        <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="assets-title">
-          <div class="flex items-center justify-between gap-3">
-            <h2 id="assets-title" class="font-sans text-base font-semibold">
-              Managed services
-            </h2>
-            {canAssets ? (
-              <a href={`/admin/assets/new?client=${c.id}`} class="text-sm font-semibold text-brand-600">
-                Add to register
-              </a>
-            ) : null}
-          </div>
-          {services.assets.length === 0 ? (
-            <p class="mt-3 text-sm text-ink-600">Nothing in the register for this client.</p>
-          ) : (
-            <ul class="mt-3 divide-y divide-line">
-              {services.assets.map((a) => (
-                <li class="flex flex-wrap items-start justify-between gap-3 py-3 text-sm">
-                  <div>
-                    {canAssets ? (
-                      <a href={`/admin/assets/${a.id}`} class="font-semibold text-ink-950 hover:underline">
-                        {a.name}
-                      </a>
-                    ) : (
-                      <span class="font-semibold text-ink-950">{a.name}</span>
-                    )}
-                    <span class="block text-[12px] text-ink-600">
-                      {ASSET_TYPE_LABELS[a.type] ?? a.type}
-                      {a.provider ? ` · ${a.provider}` : ''}
-                    </span>
-                  </div>
-                  <span class="text-ink-800">
-                    {a.renewalDate ? `Renews ${formatLongDate(a.renewalDate)}` : 'No renewal date'}
+                </div>
+                <span class="kz-alist__r">
+                  {formatMoney(s.amountMinor, s.currency)} / {s.interval === 'month' ? 'month' : 'year'}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Pane>
+      <Pane title="Managed services" id="assets-title" flush>
+        {canAssets ? (
+          <a slot="actions" href={`/admin/assets/new?client=${c.id}`} class="kz-apane__link">
+            Add to register
+          </a>
+        ) : null}
+        {services.assets.length === 0 ? (
+          <p class="kz-anone">
+            <span class="kz-anone__code">0 items</span>Nothing in the register for this client.
+          </p>
+        ) : (
+          <ul class="kz-alist" role="list">
+            {services.assets.map((a) => (
+              <li>
+                <div class="kz-alist__main">
+                  {canAssets ? (
+                    <a href={`/admin/assets/${a.id}`} class="kz-alist__t">
+                      {a.name}
+                    </a>
+                  ) : (
+                    <span class="kz-alist__t">{a.name}</span>
+                  )}
+                  <span class="kz-alist__m">
+                    {ASSET_TYPE_LABELS[a.type] ?? a.type}
+                    {a.provider ? ` · ${a.provider}` : ''}
                   </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
-    ) : (
-      <PortalAccessPanel
-        client:load
-        clientId={c.id}
-        access={access.map((x) => ({
-          id: x.id,
-          role: x.role,
-          status: x.status,
-          name: x.name,
-          email: x.email,
-          userStatus: x.user_status,
-        }))}
-        contacts={contacts.map((x) => ({ id: x.id, name: x.name, email: x.email }))}
-        canEdit={canEdit}
-      />
-    )}
-  </div>
+                </div>
+                <span class="kz-alist__r is-date">
+                  {a.renewalDate ? `Renews ${formatLongDate(a.renewalDate)}` : 'No renewal date'}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Pane>
+    </div>
+  ) : (
+    <PortalAccessPanel
+      client:load
+      clientId={c.id}
+      access={access.map((x) => ({
+        id: x.id,
+        role: x.role,
+        status: x.status,
+        name: x.name,
+        email: x.email,
+        userStatus: x.user_status,
+      }))}
+      contacts={contacts.map((x) => ({ id: x.id, name: x.name, email: x.email }))}
+      canEdit={canEdit}
+    />
+  )}
 </AdminLayout>

@@ -1,0 +1,47 @@
+---
+/**
+ * Dashboard KPI strip (R6.2, PANEL_DESIGN_SPEC §3): one grooved band of mono figures instead of a wall of cards. Cells share
+ * hairline grooves; the band wraps into equal columns (2 on phones). Money stays per currency (never added across currencies):
+ * a cell can carry several values. A cell with `href` is a link to the list behind the figure.
+ */
+import Icon from '../icons/Icon.astro';
+
+export interface Kpi {
+  label: string;
+  values: string[];
+  note?: string | undefined;
+  href?: string | undefined;
+}
+interface Props {
+  items: Kpi[];
+  testId?: string;
+}
+const { items, testId } = Astro.props;
+---
+
+<section class="kz-kpi" aria-labelledby="kpi-title">
+  <h2 id="kpi-title" class="sr-only">
+    Key figures
+  </h2>
+  <ul class="kz-kpi__list" data-testid={testId} role="list">
+    {items.map((t) => {
+      const Tag = t.href ? 'a' : 'div';
+      return (
+        <li class="kz-kpi__item" data-tile={t.label}>
+          <Tag class="kz-kpi__cell" href={t.href}>
+            <span class="kz-kpi__label">
+              {t.label}
+              {t.href ? <Icon name="chevron-right" size={16} /> : null}
+            </span>
+            {t.values.length === 0 ? (
+              <span class="kz-kpi__v is-none">None</span>
+            ) : (
+              t.values.map((v) => <span class="kz-kpi__v">{v}</span>)
+            )}
+            {t.note ? <span class="kz-kpi__note">{t.note}</span> : null}
+          </Tag>
+        </li>
+      );
+    })}
+  </ul>
+</section>

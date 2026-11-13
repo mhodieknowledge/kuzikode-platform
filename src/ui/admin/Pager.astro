@@ -1,0 +1,32 @@
+---
+/** Previous / next pagination under a list, with the position in mono. Renders nothing for a single page. */
+interface Props {
+  page: number;
+  pages: number;
+  href: (n: number) => string;
+}
+const { page, pages, href } = Astro.props;
+import Button from '../primitives/Button.astro';
+---
+
+{pages > 1 ? (
+  <nav aria-label="Pagination" class="kz-apager">
+    {page > 1 ? (
+      <Button variant="secondary" size="sm" href={href(page - 1)} rel="prev" lead="chevron-left">
+        Previous
+      </Button>
+    ) : (
+      <span class="kz-apager__gap" />
+    )}
+    <span class="kz-apager__pos">
+      page {page} / {pages}
+    </span>
+    {page < pages ? (
+      <Button variant="secondary" size="sm" href={href(page + 1)} rel="next" icon="chevron-right">
+        Next
+      </Button>
+    ) : (
+      <span class="kz-apager__gap" />
+    )}
+  </nav>
+) : null}

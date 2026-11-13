@@ -1,6 +1,13 @@
 ---
+/** One enquiry (R6.2): message and brief panes beside the contact, attachment and lead panes; triage actions in the head. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { EnquiryActions } from '../../../components/admin/LeadsAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Pane from '../../../ui/admin/Pane.astro';
+import DetailList from '../../../ui/admin/DetailList.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import { EnquiryActions } from '../../../ui/admin/enquiries/EnquiryActions';
+import { ENQUIRY_STATUS_LABEL, ENQUIRY_STATUS_TONE } from '../../../ui/admin/enquiries/labels';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { AppError } from '../../../server/lib/errors';
 import { getEnquiry, leadFormOptions, LEAD_STATUS_LABEL } from '../../../server/modules/leads';
@@ -27,7 +34,6 @@ const KIND_LABEL = {
   consultation: 'Consultation request',
   product_interest: 'Product interest',
 } as const;
-const STATUS_LABEL = { new: 'New', triaged: 'Lead created', spam: 'Spam', closed: 'Closed' } as const;
 const fmt = (iso: string) =>
   new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
     new Date(iso),
@@ -37,184 +43,111 @@ const brief = e.brief && 'version' in e.brief ? e.brief : null;
 const preferredTimes = e.brief && 'preferredTimes' in e.brief ? (e.brief.preferredTimes ?? []) : [];
 const requested = e.package_name ?? e.service_name ?? e.product_name ?? e.category_name ?? null;
 const estimate = brief?.estimate ?? null;
+const estimateText =
+  estimate && estimate.oneOffLowMinor > 0
+    ? `${
+        estimate.oneOffLowMinor === estimate.oneOffHighMinor
+          ? formatMoney(estimate.oneOffLowMinor, estimate.currency)
+          : `${formatMoney(estimate.oneOffLowMinor, estimate.currency)} – ${formatMoney(estimate.oneOffHighMinor, estimate.currency)}`
+      }${estimate.recurring.map((r) => ` + ${formatMoney(r.amountMinor, estimate.currency)} / ${r.interval}`).join('')}`
+    : null;
 ---
 
 <AdminLayout title={`Enquiry ${e.reference}`} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/enquiries" class="hover:text-ink-950 hover:underline">
-      Enquiries
-    </a>{' '}
-    / <span class="font-mono text-ink-950">{e.reference}</span>
-  </nav>
-  <div class="mt-2 flex flex-wrap items-start justify-between gap-4">
-    <div>
-      <h1 class="text-2xl font-bold tracking-display">{e.name}</h1>
-      <p class="mt-1 text-sm text-ink-600">
-        {KIND_LABEL[e.kind]} · <span class="font-mono">{e.reference}</span> · {fmt(e.created_at)} ·{' '}
-        {STATUS_LABEL[e.status]}
-      </p>
-    </div>
-    {canManage ? (
-      <EnquiryActions
-        client:load
-        enquiryId={e.id}
-        status={e.status}
-        leadId={e.lead_id}
-        canTriage={canTriage}
-        staff={staff}
-        meId={page.auth.user.id}
-      />
-    ) : e.lead_id && perms.has('leads.view') ? (
-      <a href={`/admin/leads/${e.lead_id}`} class="text-sm font-semibold text-brand-600 hover:underline">
-        Open lead
-      </a>
-    ) : null}
-  </div>
-  <div class="mt-6 grid max-w-5xl gap-6 lg:grid-cols-[1fr_320px]">
-    <div class="flex flex-col gap-6">
-      <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="m-title">
-        <h2 id="m-title" class="font-sans text-base font-semibold">
-          Message
-        </h2>
-        <p class="mt-3 text-sm whitespace-pre-line text-ink-950">{e.message}</p>
-      </section>
+  <PageHead title={e.name} crumbs={[{ label: 'Enquiries', href: '/admin/enquiries' }, { label: e.reference }]}>
+    <Fragment slot="meta">
+      {KIND_LABEL[e.kind]} · <span class="kz-amono">{e.reference}</span> · {fmt(e.created_at)} ·{' '}
+      {ENQUIRY_STATUS_LABEL[e.status]}
+    </Fragment>
+    <Fragment slot="actions">
+      {canManage ? (
+        <EnquiryActions
+          client:load
+          enquiryId={e.id}
+          status={e.status}
+          leadId={e.lead_id}
+          canTriage={canTriage}
+          staff={staff}
+          meId={page.auth.user.id}
+        />
+      ) : e.lead_id && perms.has('leads.view') ? (
+        <Button href={`/admin/leads/${e.lead_id}`} variant="secondary" arrow>
+          Open lead
+        </Button>
+      ) : null}
+    </Fragment>
+  </PageHead>
+  <div class="kz-agrid kz-agrid--detail">
+    <div class="kz-astack">
+      <Pane title="Message" id="m-title">
+        <StatusPill slot="actions" tone={ENQUIRY_STATUS_TONE[e.status]}>
+          {ENQUIRY_STATUS_LABEL[e.status]}
+        </StatusPill>
+        <p class="kz-aprose">{e.message}</p>
+      </Pane>
       {brief ? (
-        <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="b-title">
-          <h2 id="b-title" class="font-sans text-base font-semibold">
-            Project brief
-          </h2>
-          <dl class="mt-4 grid gap-4 text-sm sm:grid-cols-2">
-            <div>
-              <dt class="text-ink-600">Division</dt>
-              <dd class="font-medium text-ink-950">{brief.division.name}</dd>
-            </div>
-            <div>
-              <dt class="text-ink-600">Service</dt>
-              <dd class="font-medium text-ink-950">{brief.service?.name ?? 'Not sure yet'}</dd>
-            </div>
-            <div>
-              <dt class="text-ink-600">Package</dt>
-              <dd class="font-medium text-ink-950">{brief.package?.name ?? 'None chosen'}</dd>
-            </div>
-            <div>
-              <dt class="text-ink-600">Timeline</dt>
-              <dd class="font-medium text-ink-950">{brief.timeline}</dd>
-            </div>
-            <div>
-              <dt class="text-ink-600">Budget</dt>
-              <dd class="font-medium text-ink-950">{brief.budgetRange}</dd>
-            </div>
-            <div>
-              <dt class="text-ink-600">Current website</dt>
-              <dd class="font-medium break-all text-ink-950">{brief.websiteUrl ?? '—'}</dd>
-            </div>
-            {brief.addons.length ? (
-              <div class="sm:col-span-2">
-                <dt class="text-ink-600">Add-ons</dt>
-                <dd class="font-medium text-ink-950">{brief.addons.map((x) => x.name).join(', ')}</dd>
-              </div>
-            ) : null}
-            {brief.features.length ? (
-              <div class="sm:col-span-2">
-                <dt class="text-ink-600">Features</dt>
-                <dd class="font-medium text-ink-950">{brief.features.map((x) => x.label).join(', ')}</dd>
-              </div>
-            ) : null}
-            {estimate && estimate.oneOffLowMinor > 0 ? (
-              <div class="sm:col-span-2">
-                <dt class="text-ink-600">Indicative estimate shown to the visitor</dt>
-                <dd class="tnum font-medium text-ink-950">
-                  {estimate.oneOffLowMinor === estimate.oneOffHighMinor
-                    ? formatMoney(estimate.oneOffLowMinor, estimate.currency)
-                    : `${formatMoney(estimate.oneOffLowMinor, estimate.currency)} – ${formatMoney(estimate.oneOffHighMinor, estimate.currency)}`}
-                  {estimate.recurring.map((r) => ` + ${formatMoney(r.amountMinor, estimate.currency)} / ${r.interval}`)}
-                </dd>
-              </div>
-            ) : null}
-          </dl>
-        </section>
+        <Pane title="Project brief" id="b-title">
+          <DetailList
+            cols={2}
+            items={[
+              { label: 'Division', value: brief.division.name },
+              { label: 'Service', value: brief.service?.name ?? 'Not sure yet' },
+              { label: 'Package', value: brief.package?.name ?? 'None chosen' },
+              { label: 'Timeline', value: brief.timeline },
+              { label: 'Budget', value: brief.budgetRange },
+              { label: 'Current website', value: brief.websiteUrl },
+              ...(brief.addons.length
+                ? [{ label: 'Add-ons', value: brief.addons.map((x) => x.name).join(', '), wide: true }]
+                : []),
+              ...(brief.features.length
+                ? [{ label: 'Features', value: brief.features.map((x) => x.label).join(', '), wide: true }]
+                : []),
+              ...(estimateText
+                ? [{ label: 'Indicative estimate shown to the visitor', value: estimateText, mono: true, wide: true }]
+                : []),
+            ]}
+          />
+        </Pane>
       ) : null}
       {preferredTimes.length ? (
-        <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="t-title">
-          <h2 id="t-title" class="font-sans text-base font-semibold">
-            Preferred times
-          </h2>
-          <ul class="mt-3 list-disc pl-5 text-sm text-ink-950">
+        <Pane title="Preferred times" id="t-title" flush>
+          <ul class="kz-alist" role="list">
             {preferredTimes.map((t) => (
-              <li>{t}</li>
+              <li>
+                <span class="kz-alist__main">{t}</span>
+              </li>
             ))}
           </ul>
-        </section>
+        </Pane>
       ) : null}
     </div>
-    <aside class="flex flex-col gap-6">
-      <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="c-title">
-        <h2 id="c-title" class="font-sans text-base font-semibold">
-          Contact
-        </h2>
-        <dl class="mt-3 grid gap-3 text-sm">
-          <div>
-            <dt class="text-ink-600">Email</dt>
-            <dd class="font-medium break-all">
-              <a href={`mailto:${e.email}`} class="text-brand-600 hover:underline">
-                {e.email}
-              </a>
-            </dd>
-          </div>
-          <div>
-            <dt class="text-ink-600">Phone</dt>
-            <dd class="font-medium">
-              {e.phone ? (
-                <a href={`tel:${e.phone.replace(/[^\d+]/g, '')}`} class="text-brand-600 hover:underline">
-                  {e.phone}
-                </a>
-              ) : (
-                '—'
-              )}
-            </dd>
-          </div>
-          <div>
-            <dt class="text-ink-600">Organisation</dt>
-            <dd class="font-medium">{e.organisation ?? '—'}</dd>
-          </div>
-          {requested ? (
-            <div>
-              <dt class="text-ink-600">Interested in</dt>
-              <dd class="font-medium">{requested}</dd>
-            </div>
-          ) : null}
-          {e.budget_range && !brief ? (
-            <div>
-              <dt class="text-ink-600">Budget</dt>
-              <dd class="font-medium">{e.budget_range}</dd>
-            </div>
-          ) : null}
-        </dl>
-      </section>
+    <aside class="kz-astack" aria-label="Enquiry details">
+      <Pane title="Contact" id="c-title">
+        <DetailList
+          items={[
+            { label: 'Email', value: e.email, href: `mailto:${e.email}` },
+            { label: 'Phone', value: e.phone, href: e.phone ? `tel:${e.phone.replace(/[^\d+]/g, '')}` : undefined },
+            { label: 'Organisation', value: e.organisation },
+            ...(requested ? [{ label: 'Interested in', value: requested }] : []),
+            ...(e.budget_range && !brief ? [{ label: 'Budget', value: e.budget_range }] : []),
+          ]}
+        />
+      </Pane>
       {e.attachment_file_id ? (
-        <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="a-title">
-          <h2 id="a-title" class="font-sans text-base font-semibold">
-            Attachment
-          </h2>
-          <a
-            href={`/api/v1/admin/files/${e.attachment_file_id}`}
-            class="mt-2 block text-sm font-semibold break-all text-brand-600 hover:underline"
-          >
+        <Pane title="Attachment" id="a-title">
+          <a href={`/api/v1/admin/files/${e.attachment_file_id}`} class="kz-afile">
             {e.attachment_name ?? 'Download file'}
           </a>
-          {e.attachment_size ? <p class="text-[12px] text-ink-600">{kb(e.attachment_size)}</p> : null}
-        </section>
+          {e.attachment_size ? <p class="kz-afeed__t">{kb(e.attachment_size)}</p> : null}
+        </Pane>
       ) : null}
       {e.lead_id && e.lead_title ? (
-        <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="l-title">
-          <h2 id="l-title" class="font-sans text-base font-semibold">
-            Lead
-          </h2>
-          <a href={`/admin/leads/${e.lead_id}`} class="mt-2 block text-sm font-semibold text-brand-600 hover:underline">
+        <Pane title="Lead" id="l-title">
+          <a href={`/admin/leads/${e.lead_id}`} class="kz-afile">
             {e.lead_title}
           </a>
-          {e.lead_status ? <p class="text-[12px] text-ink-600">{LEAD_STATUS_LABEL[e.lead_status]}</p> : null}
-        </section>
+          {e.lead_status ? <p class="kz-afeed__t">{LEAD_STATUS_LABEL[e.lead_status]}</p> : null}
+        </Pane>
       ) : null}
     </aside>
   </div>

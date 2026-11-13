@@ -1,6 +1,10 @@
 ---
+/** Self-registered portal accounts waiting to be linked to a client (R6.2). Rows stay list items (e2e contract). */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { PortalSignupActions } from '../../../components/admin/ClientsAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Pane from '../../../ui/admin/Pane.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import { PortalSignupActions } from '../../../ui/admin/clients/PortalSignupActions';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { listPortalSignups } from '../../../server/modules/clients';
 import { portalRegistrationEnabled } from '../../../server/modules/auth/service';
@@ -23,38 +27,38 @@ const clients = canEdit
 ---
 
 <AdminLayout title="Portal sign-ups" page={page}>
-  <p class="text-sm">
-    <a href="/admin/clients" class="font-semibold text-brand-600 underline underline-offset-2">
-      Clients
-    </a>
-  </p>
-  <h1 class="mt-2 text-2xl font-bold tracking-display">Portal sign-ups</h1>
-  <p class="mt-1 max-w-2xl text-sm text-ink-600">
-    People who created a portal account themselves. They see nothing until you link them to a client. Accounts are never
-    linked automatically, even when the email matches a contact.
-    {enabled ? ' Self-registration is on.' : ' Self-registration is off (Settings → General → Client portal).'}
-  </p>
-  {signups.length === 0 ? (
-    <p class="mt-6 rounded-lg border border-line bg-surface px-5 py-10 text-center text-ink-600">
-      No sign-ups are waiting.
-    </p>
-  ) : (
-    <ul class="mt-6 divide-y divide-line rounded-lg border border-line bg-surface" aria-label="Portal sign-ups">
-      {signups.map((s) => (
-        <li class="flex flex-wrap items-start justify-between gap-4 px-5 py-4">
-          <div class="min-w-0 text-sm">
-            <p class="font-semibold text-ink-950">{s.name}</p>
-            <p class="text-ink-800">
-              {s.email}
-              {s.phone ? ` · ${s.phone}` : ''}
-            </p>
-            <p class="text-[13px] text-ink-600">
-              {s.company ? `Says they are from ${s.company} · ` : ''}Signed up {harareDateTime(s.registeredAt)}
-            </p>
-          </div>
-          {canEdit ? <PortalSignupActions client:visible userId={s.userId} name={s.name} clients={clients} /> : null}
-        </li>
-      ))}
-    </ul>
-  )}
+  <PageHead
+    title="Portal sign-ups"
+    crumbs={[{ label: 'Clients', href: '/admin/clients' }, { label: 'Portal sign-ups' }]}
+    meta="People who created a portal account themselves. They see nothing until you link them to a client. Accounts are never linked automatically, even when the email matches a contact."
+  />
+  <Pane title="Waiting" meta={String(signups.length)} flush>
+    <StatusPill slot="actions" tone={enabled ? 'ok' : 'neutral'}>
+      {enabled ? 'Self-registration is on' : 'Self-registration is off'}
+    </StatusPill>
+    {!enabled ? <p class="kz-apad kz-adlg__desc">Turn it on under Settings → General → Client portal.</p> : null}
+    {signups.length === 0 ? (
+      <p class="kz-anone">
+        <span class="kz-anone__code">0 waiting</span>No sign-ups are waiting.
+      </p>
+    ) : (
+      <ul class="kz-alist" aria-label="Portal sign-ups">
+        {signups.map((s) => (
+          <li>
+            <div class="kz-alist__main">
+              <p class="kz-alist__t">{s.name}</p>
+              <p class="kz-alist__m">
+                <span class="kz-amono">{s.email}</span>
+                {s.phone ? ` · ${s.phone}` : ''}
+              </p>
+              <p class="kz-alist__m">
+                {s.company ? `Says they are from ${s.company} · ` : ''}Signed up {harareDateTime(s.registeredAt)}
+              </p>
+            </div>
+            {canEdit ? <PortalSignupActions client:visible userId={s.userId} name={s.name} clients={clients} /> : null}
+          </li>
+        ))}
+      </ul>
+    )}
+  </Pane>
 </AdminLayout>

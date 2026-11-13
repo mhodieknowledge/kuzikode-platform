@@ -1,5 +1,19 @@
 ---
+/**
+ * Lead pipeline (R6.2): list view (dense table → list rows on phones) or board view (one column per stage; a swipe track on
+ * phones), filters in a bottom sheet on phones.
+ */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Views from '../../../ui/admin/Views.astro';
+import DataTable from '../../../ui/admin/DataTable.astro';
+import Cell from '../../../ui/admin/Cell.astro';
+import Pager from '../../../ui/admin/Pager.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import EmptyState from '../../../ui/primitives/EmptyState.astro';
+import { FilterBar, type FilterField } from '../../../ui/admin/FilterBar';
+import { LEAD_STATUS_TONE } from '../../../ui/admin/leads/labels';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { businessDate } from '../../../server/lib/dates';
 import { LEAD_STATUSES, LEAD_STATUS_LABEL, listLeads } from '../../../server/modules/leads';
@@ -20,15 +34,6 @@ const result = await listLeads(ctx, {
 });
 const canCreate = page.auth.permissions.has('leads.manage');
 const today = businessDate(ctx.now());
-const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
-const STATUS_CLASS: Record<string, string> = {
-  new: 'bg-brand-50 text-brand-600',
-  contacted: 'bg-info-50 text-info-700',
-  qualified: 'bg-info-50 text-info-700',
-  proposal_sent: 'bg-warning-50 text-warning-700',
-  won: 'bg-success-50 text-success-700',
-  lost: 'bg-ink-950/5 text-ink-800',
-};
 const shortDate = (d: string) =>
   new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(`${d}T00:00:00Z`));
 const href = (patch: Record<string, string | null>) => {
@@ -41,142 +46,89 @@ const href = (patch: Record<string, string | null>) => {
   return `/admin/leads${s ? `?${s}` : ''}`;
 };
 const columns = LEAD_STATUSES.map((s) => ({ status: s, items: result.items.filter((l) => l.status === s) }));
+const money = (l: { estimated_value_minor: number | null; currency: string | null }) =>
+  l.estimated_value_minor != null && l.currency ? formatMoney(l.estimated_value_minor, l.currency) : null;
+const fields: FilterField[] = [
+  { kind: 'search', name: 'q', label: 'Search', value: filter.q ?? '', placeholder: 'Title, contact or email' },
+  ...(view === 'list'
+    ? [
+        {
+          kind: 'select' as const,
+          name: 'status',
+          label: 'Stage',
+          value: filter.status ?? 'open',
+          options: [
+            { value: 'open', label: 'Open' },
+            ...LEAD_STATUSES.map((s) => ({ value: s, label: LEAD_STATUS_LABEL[s] })),
+            { value: 'all', label: 'All' },
+          ],
+        },
+      ]
+    : []),
+  {
+    kind: 'select',
+    name: 'assigned',
+    label: 'Assigned',
+    value: filter.assigned ?? 'any',
+    options: [
+      { value: 'any', label: 'Anyone' },
+      { value: 'me', label: 'Me' },
+      { value: 'none', label: 'Nobody' },
+    ],
+  },
+  { kind: 'check', name: 'due', label: 'Follow-up due', checked: filter.due === '1' },
+];
+const filtered = !!(filter.q || filter.assigned || filter.due);
+const late = (l: { next_follow_up_on: string | null; status: string }) =>
+  !!l.next_follow_up_on && l.next_follow_up_on <= today && l.status !== 'won' && l.status !== 'lost';
 ---
 
 <AdminLayout title="Leads" page={page}>
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold tracking-display">Leads</h1>
-      <p class="mt-1 text-sm text-ink-600">
-        {result.total} {result.total === 1 ? 'lead' : 'leads'}
-      </p>
-    </div>
-    <div class="flex flex-wrap gap-2">
-      <nav aria-label="Lead view" class="inline-flex rounded-sm border border-line bg-surface p-0.5">
-        <a
-          href={href({ view: null, page: null })}
-          aria-current={view === 'list' ? 'page' : undefined}
-          class:list={[
-            'inline-flex h-9 items-center rounded-sm px-3 text-sm font-semibold',
-            view === 'list' ? 'bg-ink-950 text-white' : 'text-ink-800',
-          ]}
-        >
-          List
-        </a>
-        <a
-          href={href({ view: 'board', page: null, status: null })}
-          aria-current={view === 'board' ? 'page' : undefined}
-          class:list={[
-            'inline-flex h-9 items-center rounded-sm px-3 text-sm font-semibold',
-            view === 'board' ? 'bg-ink-950 text-white' : 'text-ink-800',
-          ]}
-        >
-          Board
-        </a>
-      </nav>
-      {canCreate ? (
-        <a
-          href="/admin/leads/new"
-          class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
-        >
-          New lead
-        </a>
-      ) : null}
-    </div>
-  </div>
-  <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter leads">
-    {view === 'board' ? <input type="hidden" name="view" value="board" /> : null}
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Search
-      <input
-        name="q"
-        type="search"
-        value={filter.q ?? ''}
-        maxlength="80"
-        class={field}
-        placeholder="Title, contact or email"
-      />
-    </label>
-    {view === 'list' ? (
-      <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-        Stage
-        <select name="status" class={field}>
-          <option value="open" selected={!filter.status || filter.status === 'open'}>
-            Open
-          </option>
-          {LEAD_STATUSES.map((s) => (
-            <option value={s} selected={filter.status === s}>
-              {LEAD_STATUS_LABEL[s]}
-            </option>
-          ))}
-          <option value="all" selected={filter.status === 'all'}>
-            All
-          </option>
-        </select>
-      </label>
+  <PageHead title="Leads" meta={`${result.total} ${result.total === 1 ? 'lead' : 'leads'}`}>
+    {canCreate ? (
+      <Button slot="actions" href="/admin/leads/new" lead="add">
+        New lead
+      </Button>
     ) : null}
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Assigned
-      <select name="assigned" class={field}>
-        <option value="any">Anyone</option>
-        <option value="me" selected={filter.assigned === 'me'}>
-          Me
-        </option>
-        <option value="none" selected={filter.assigned === 'none'}>
-          Nobody
-        </option>
-      </select>
-    </label>
-    <label class="flex h-10 items-center gap-2 text-sm font-medium text-ink-950">
-      <input type="checkbox" name="due" value="1" checked={filter.due === '1'} class="h-4 w-4 accent-brand-600" />
-      Follow-up due
-    </label>
-    <button
-      type="submit"
-      class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
-    >
-      Filter
-    </button>
-  </form>
+  </PageHead>
+  <div class="kz-atools">
+    <Views
+      label="Lead view"
+      current={view}
+      items={[
+        { key: 'list', label: 'List', href: href({ view: null, page: null }) },
+        { key: 'board', label: 'Board', href: href({ view: 'board', page: null, status: null }) },
+      ]}
+    />
+    <FilterBar
+      client:load
+      label="Filter leads"
+      fields={fields}
+      hidden={view === 'board' ? { view: 'board' } : {}}
+      clearHref={view === 'board' ? '/admin/leads?view=board' : '/admin/leads'}
+    />
+  </div>
   {view === 'board' ? (
-    <div class="mt-6 grid gap-4 relative overflow-x-auto pb-2 md:grid-cols-3 xl:grid-cols-6">
+    <div class="kz-aboard" aria-label="Pipeline by stage" role="group">
       {columns.map((col) => (
-        <section
-          class="flex min-w-0 flex-col rounded-lg border border-line bg-canvas"
-          aria-labelledby={`col-${col.status}`}
-        >
-          <h2
-            id={`col-${col.status}`}
-            class="flex items-center justify-between px-4 py-3 font-sans text-sm font-semibold"
-          >
+        <section class="kz-aboard__col" aria-labelledby={`col-${col.status}`} data-stage={col.status}>
+          <h2 id={`col-${col.status}`} class="kz-aboard__h">
             {LEAD_STATUS_LABEL[col.status]}
-            <span class="text-ink-600">{col.items.length}</span>
+            <span class="kz-aboard__n">{col.items.length}</span>
           </h2>
           {col.items.length === 0 ? (
-            <p class="px-4 pb-4 text-[13px] text-ink-600">None</p>
+            <p class="kz-aboard__none">none</p>
           ) : (
-            <ul class="flex flex-col gap-2 px-2 pb-2">
+            <ul class="kz-aboard__list" role="list">
               {col.items.map((l) => (
-                <li class="relative rounded-md border border-line bg-surface p-3 hover:border-ink-400">
-                  <a
-                    href={`/admin/leads/${l.id}`}
-                    class="text-sm font-semibold text-ink-950 after:absolute after:inset-0"
-                  >
+                <li class="kz-aboard__card">
+                  <a href={`/admin/leads/${l.id}`} class="kz-aboard__t">
                     {l.title}
                   </a>
-                  <p class="mt-1 text-[12px] text-ink-600">{l.assigned_name ?? 'Unassigned'}</p>
-                  {l.estimated_value_minor != null && l.currency ? (
-                    <p class="tnum mt-1 text-[13px] font-medium text-ink-950">
-                      {formatMoney(l.estimated_value_minor, l.currency)}
-                    </p>
-                  ) : null}
+                  <p class="kz-aboard__m">{l.assigned_name ?? 'Unassigned'}</p>
+                  {money(l) ? <p class="kz-aboard__v">{money(l)}</p> : null}
                   {l.next_follow_up_on ? (
-                    <p
-                      class:list={[
-                        'mt-1 text-[12px] font-semibold',
-                        l.next_follow_up_on <= today ? 'text-danger-700' : 'text-ink-600',
-                      ]}
-                    >
+                    <p class:list={['kz-afu__due', l.next_follow_up_on <= today && 'is-late']}>
                       Follow up {shortDate(l.next_follow_up_on)}
                     </p>
                   ) : null}
@@ -188,93 +140,55 @@ const columns = LEAD_STATUSES.map((s) => ({ status: s, items: result.items.filte
       ))}
     </div>
   ) : (
-    <div class="mt-6 relative overflow-x-auto rounded-lg border border-line bg-surface">
-      <table class="w-full text-left text-sm">
-        <caption class="sr-only">Leads</caption>
-        <thead class="bg-canvas text-[13px] text-ink-600">
-          <tr>
-            <th scope="col" class="px-4 py-3 font-semibold">
-              Lead
-            </th>
-            <th scope="col" class="px-4 py-3 font-semibold">
-              Stage
-            </th>
-            <th scope="col" class="px-4 py-3 font-semibold">
-              Assigned
-            </th>
-            <th scope="col" class="px-4 py-3 font-semibold">
-              Next follow-up
-            </th>
-            <th scope="col" class="px-4 py-3 text-right font-semibold">
-              Value
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {result.items.length === 0 ? (
-            <tr>
-              <td colspan="5" class="px-4 py-10 text-center text-ink-600">
-                {filter.q || filter.assigned || filter.due ? 'No leads match these filters.' : 'No leads yet.'}
-              </td>
-            </tr>
-          ) : (
-            result.items.map((l) => (
-              <tr class="border-t border-line">
-                <td class="px-4 py-3">
-                  <a href={`/admin/leads/${l.id}`} class="font-semibold text-ink-950 hover:underline">
-                    {l.title}
-                  </a>
-                  <span class="block text-[12px] text-ink-600">
-                    {[l.contact_name, l.organisation].filter(Boolean).join(' · ') || '—'}
-                  </span>
-                </td>
-                <td class="px-4 py-3">
-                  <span class={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${STATUS_CLASS[l.status]}`}>
-                    {LEAD_STATUS_LABEL[l.status]}
-                  </span>
-                </td>
-                <td class="px-4 py-3 text-ink-800">{l.assigned_name ?? '—'}</td>
-                <td
-                  class:list={[
-                    'px-4 py-3',
-                    l.next_follow_up_on && l.next_follow_up_on <= today && l.status !== 'won' && l.status !== 'lost'
-                      ? 'font-semibold text-danger-700'
-                      : 'text-ink-800',
-                  ]}
-                >
-                  {l.next_follow_up_on ? shortDate(l.next_follow_up_on) : '—'}
-                </td>
-                <td class="tnum px-4 py-3 text-right text-ink-950">
-                  {l.estimated_value_minor != null && l.currency
-                    ? formatMoney(l.estimated_value_minor, l.currency)
-                    : '—'}
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
+    <DataTable
+      caption="Leads"
+      count={result.items.length}
+      columns={[
+        { label: 'Lead' },
+        { label: 'Stage' },
+        { label: 'Assigned' },
+        { label: 'Next follow-up' },
+        { label: 'Value', num: true },
+      ]}
+    >
+      <EmptyState
+        slot="empty"
+        code={filtered ? 'no matches' : '0 leads'}
+        title={filtered ? 'No leads match these filters.' : 'No leads yet.'}
+      >
+        Leads are created from enquiries or added by hand.
+      </EmptyState>
+      {result.items.map((l) => (
+        <tr>
+          <Cell
+            m="main"
+            href={`/admin/leads/${l.id}`}
+            title={l.title}
+            sub={[l.contact_name, l.organisation].filter(Boolean).join(' · ') || '—'}
+            subText
+          />
+          <Cell m="status">
+            <StatusPill tone={LEAD_STATUS_TONE[l.status]}>{LEAD_STATUS_LABEL[l.status]}</StatusPill>
+          </Cell>
+          <Cell tone="mute">{l.assigned_name ?? '—'}</Cell>
+          <Cell m="meta" tone={late(l) ? 'alert' : undefined}>
+            {l.next_follow_up_on ? (
+              <span>
+                <span class="kz-dt__ph" aria-hidden="true">
+                  Follow up{' '}
+                </span>
+                {shortDate(l.next_follow_up_on)}
+              </span>
+            ) : (
+              <span>—</span>
+            )}
+          </Cell>
+          <Cell m="amount" num>
+            {money(l) ?? '—'}
+          </Cell>
+        </tr>
+      ))}
+    </DataTable>
   )}
-  {result.pages > 1 ? (
-    <nav aria-label="Pagination" class="mt-4 flex items-center justify-between text-sm font-semibold">
-      {result.page > 1 ? (
-        <a href={href({ page: String(result.page - 1) })} rel="prev" class="text-brand-600">
-          Previous
-        </a>
-      ) : (
-        <span />
-      )}
-      <span class="text-ink-600">
-        Page {result.page} of {result.pages}
-      </span>
-      {result.page < result.pages ? (
-        <a href={href({ page: String(result.page + 1) })} rel="next" class="text-brand-600">
-          Next
-        </a>
-      ) : (
-        <span />
-      )}
-    </nav>
-  ) : null}
+  <Pager page={result.page} pages={result.pages} href={(n) => href({ page: String(n) })} />
 </AdminLayout>

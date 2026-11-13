@@ -1,6 +1,16 @@
 ---
+/**
+ * One lead (R6.2): the activity composer, open follow-ups and the activity log (mono timestamps) beside the details,
+ * conversion and enquiry panes. Page actions: edit, new quotation (once converted) and convert to client.
+ */
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import { ActivityForm, CompleteFollowUp, ConvertLead } from '../../../../components/admin/LeadsAdmin';
+import PageHead from '../../../../ui/admin/PageHead.astro';
+import Pane from '../../../../ui/admin/Pane.astro';
+import DetailList from '../../../../ui/admin/DetailList.astro';
+import Button from '../../../../ui/primitives/Button.astro';
+import StatusPill from '../../../../ui/primitives/StatusPill.astro';
+import { ActivityForm, CompleteFollowUp, ConvertLead } from '../../../../ui/admin/leads/LeadActivity';
+import { LEAD_SOURCE_LABEL, LEAD_STATUS_TONE } from '../../../../ui/admin/leads/labels';
 import { loadAdminPage } from '../../../../server/lib/admin-page';
 import { businessDate } from '../../../../server/lib/dates';
 import { AppError } from '../../../../server/lib/errors';
@@ -23,13 +33,6 @@ const perms = page.auth.permissions;
 const canManage = perms.has('leads.manage');
 const canConvert = canManage && perms.has('clients.create') && !l.client_id && l.status !== 'lost';
 const today = businessDate(ctx.now());
-const SOURCE_LABEL = {
-  website: 'Website',
-  referral: 'Referral',
-  manual: 'Added by staff',
-  social: 'Social media',
-  other: 'Other',
-} as const;
 const TYPE_LABEL = {
   note: 'Note',
   call: 'Call',
@@ -50,65 +53,40 @@ const openFollowUps = activities
 ---
 
 <AdminLayout title={l.title} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/leads" class="hover:text-ink-950 hover:underline">
-      Leads
-    </a>{' '}
-    / <span class="text-ink-950">{l.title}</span>
-  </nav>
-  <div class="mt-2 flex flex-wrap items-start justify-between gap-4">
-    <div>
-      <h1 class="text-2xl font-bold tracking-display">{l.title}</h1>
-      <p class="mt-1 text-sm text-ink-600">
-        {LEAD_STATUS_LABEL[l.status]} · {SOURCE_LABEL[l.source]} · {l.assigned_name ?? 'Unassigned'}
-      </p>
-    </div>
-    <div class="flex flex-wrap items-start gap-2">
+  <PageHead
+    title={l.title}
+    crumbs={[{ label: 'Leads', href: '/admin/leads' }, { label: l.title }]}
+    meta={`${LEAD_STATUS_LABEL[l.status]} · ${LEAD_SOURCE_LABEL[l.source]} · ${l.assigned_name ?? 'Unassigned'}`}
+  >
+    <Fragment slot="actions">
       {canManage ? (
-        <a
-          href={`/admin/leads/${l.id}/edit`}
-          class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
-        >
+        <Button href={`/admin/leads/${l.id}/edit`} variant="secondary" lead="edit">
           Edit
-        </a>
+        </Button>
       ) : null}
       {client && perms.has('quotations.create') ? (
-        <a
-          href={`/admin/quotations/new?clientId=${client.id}&leadId=${l.id}`}
-          class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
-        >
+        <Button href={`/admin/quotations/new?clientId=${client.id}&leadId=${l.id}`} variant="secondary" lead="add">
           New quotation
-        </a>
+        </Button>
       ) : null}
       {canConvert ? <ConvertLead client:load leadId={l.id} name={l.organisation ?? l.contact_name ?? l.title} /> : null}
-    </div>
-  </div>
-  <div class="mt-6 grid max-w-5xl gap-6 lg:grid-cols-[1fr_320px]">
-    <div class="flex flex-col gap-6">
+    </Fragment>
+  </PageHead>
+  <div class="kz-agrid kz-agrid--detail">
+    <div class="kz-astack">
       {canManage ? (
-        <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="act-form">
-          <h2 id="act-form" class="mb-4 font-sans text-base font-semibold">
-            Log activity
-          </h2>
+        <Pane title="Log activity" id="act-form">
           <ActivityForm client:load leadId={l.id} />
-        </section>
+        </Pane>
       ) : null}
       {openFollowUps.length ? (
-        <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="fu-title">
-          <h2 id="fu-title" class="font-sans text-base font-semibold">
-            Open follow-ups
-          </h2>
-          <ul class="mt-3 divide-y divide-line">
+        <Pane title="Open follow-ups" id="fu-title" flush meta={String(openFollowUps.length)}>
+          <ul class="kz-alist" role="list">
             {openFollowUps.map((a) => (
-              <li class="flex flex-wrap items-center justify-between gap-3 py-3">
-                <div>
-                  <p class="text-sm text-ink-950">{a.body}</p>
-                  <p
-                    class:list={[
-                      'text-[12px] font-semibold',
-                      a.due_on && a.due_on <= today ? 'text-danger-700' : 'text-ink-600',
-                    ]}
-                  >
+              <li>
+                <div class="kz-alist__main">
+                  <p class="kz-aprose">{a.body}</p>
+                  <p class:list={['kz-afu__due', a.due_on && a.due_on <= today && 'is-late']}>
                     {a.due_on ? `${a.due_on < today ? 'Overdue since' : 'Due'} ${shortDate(a.due_on)}` : ''}
                   </p>
                 </div>
@@ -116,136 +94,89 @@ const openFollowUps = activities
               </li>
             ))}
           </ul>
-        </section>
+        </Pane>
       ) : null}
-      <section aria-labelledby="log-title">
-        <h2 id="log-title" class="font-sans text-base font-semibold">
-          Activity
-        </h2>
+      <Pane title="Activity" id="log-title" flush meta={activities.length ? String(activities.length) : undefined}>
         {activities.length === 0 ? (
-          <p class="mt-2 text-sm text-ink-600">Nothing logged yet.</p>
+          <p class="kz-anone">
+            <span class="kz-anone__code">0 entries</span>Nothing logged yet.
+          </p>
         ) : (
-          <ol class="mt-3 flex flex-col gap-3">
+          <ol class="kz-afeed">
             {activities.map((a) => (
-              <li class="rounded-lg border border-line bg-surface p-4">
-                <p class="text-[12px] font-semibold text-ink-600">
+              <li data-kind={a.type}>
+                <p class="kz-afeed__k">
                   {TYPE_LABEL[a.type]}
                   {a.type === 'follow_up' && a.due_on ? ` for ${shortDate(a.due_on)}` : ''}
                   {a.type === 'follow_up' && a.completed_at ? ' · done' : ''}
                 </p>
-                {a.body ? <p class="mt-1 text-sm whitespace-pre-line text-ink-950">{a.body}</p> : null}
-                <p class="mt-2 text-[12px] text-ink-600">
+                {a.body ? <p class="kz-afeed__b">{a.body}</p> : null}
+                <p class="kz-afeed__t">
                   {a.user_name ?? 'System'} · {fmt(a.created_at)}
                 </p>
               </li>
             ))}
           </ol>
         )}
-      </section>
+      </Pane>
     </div>
-    <aside class="flex flex-col gap-6">
+    <aside class="kz-astack" aria-label="Lead details">
       {client ? (
-        <section class="rounded-lg border border-success-700/30 bg-success-50 p-6" aria-labelledby="cl-title">
-          <h2 id="cl-title" class="font-sans text-base font-semibold text-success-700">
-            Converted
-          </h2>
-          <a href={`/admin/clients/${client.id}`} class="mt-2 block text-sm font-semibold text-ink-950 hover:underline">
-            {client.display_name}
-          </a>
-          <p class="font-mono text-[12px] text-ink-600">{client.client_number}</p>
-        </section>
+        <div class="kz-anotice kz-anotice--ok">
+          <p>
+            <strong>Converted</strong> to <a href={`/admin/clients/${client.id}`}>{client.display_name}</a>{' '}
+            <span class="kz-amono">{client.client_number}</span>
+          </p>
+        </div>
       ) : null}
-      <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="ld-title">
-        <h2 id="ld-title" class="font-sans text-base font-semibold">
-          Details
-        </h2>
-        <dl class="mt-3 grid gap-3 text-sm">
-          <div>
-            <dt class="text-ink-600">Contact</dt>
-            <dd class="font-medium">{l.contact_name ?? '—'}</dd>
-          </div>
-          <div>
-            <dt class="text-ink-600">Organisation</dt>
-            <dd class="font-medium">{l.organisation ?? '—'}</dd>
-          </div>
-          <div>
-            <dt class="text-ink-600">Email</dt>
-            <dd class="font-medium break-all">
-              {l.email ? (
-                <a href={`mailto:${l.email}`} class="text-brand-600 hover:underline">
-                  {l.email}
-                </a>
-              ) : (
-                '—'
-              )}
-            </dd>
-          </div>
-          <div>
-            <dt class="text-ink-600">Phone</dt>
-            <dd class="font-medium">
-              {l.phone ? (
-                <a href={`tel:${l.phone.replace(/[^\d+]/g, '')}`} class="text-brand-600 hover:underline">
-                  {l.phone}
-                </a>
-              ) : (
-                '—'
-              )}
-            </dd>
-          </div>
-          <div>
-            <dt class="text-ink-600">Estimated value</dt>
-            <dd class="tnum font-medium">
-              {l.estimated_value_minor != null && l.currency ? formatMoney(l.estimated_value_minor, l.currency) : '—'}
-            </dd>
-          </div>
-          <div>
-            <dt class="text-ink-600">Next follow-up</dt>
-            <dd class="font-medium">{l.next_follow_up_on ? shortDate(l.next_follow_up_on) : '—'}</dd>
-          </div>
-          {services.length ? (
-            <div>
-              <dt class="text-ink-600">Services</dt>
-              <dd class="font-medium">{services.map((s) => s.name).join(', ')}</dd>
-            </div>
-          ) : null}
-          {l.status === 'lost' && l.lost_reason ? (
-            <div>
-              <dt class="text-ink-600">Lost because</dt>
-              <dd class="font-medium">{l.lost_reason}</dd>
-            </div>
-          ) : null}
-          <div>
-            <dt class="text-ink-600">Created</dt>
-            <dd class="font-medium">{fmt(l.created_at)}</dd>
-          </div>
-        </dl>
+      <Pane title="Details" id="ld-title">
+        <StatusPill slot="actions" tone={LEAD_STATUS_TONE[l.status]}>
+          {LEAD_STATUS_LABEL[l.status]}
+        </StatusPill>
+        <DetailList
+          items={[
+            { label: 'Contact', value: l.contact_name },
+            { label: 'Organisation', value: l.organisation },
+            { label: 'Email', value: l.email, href: l.email ? `mailto:${l.email}` : undefined },
+            { label: 'Phone', value: l.phone, href: l.phone ? `tel:${l.phone.replace(/[^\d+]/g, '')}` : undefined },
+            {
+              label: 'Estimated value',
+              value:
+                l.estimated_value_minor != null && l.currency ? formatMoney(l.estimated_value_minor, l.currency) : null,
+              mono: true,
+            },
+            { label: 'Next follow-up', value: l.next_follow_up_on ? shortDate(l.next_follow_up_on) : null },
+            ...(services.length ? [{ label: 'Services', value: services.map((s) => s.name).join(', ') }] : []),
+            ...(l.status === 'lost' && l.lost_reason ? [{ label: 'Lost because', value: l.lost_reason }] : []),
+            { label: 'Created', value: fmt(l.created_at) },
+          ]}
+        />
         {l.notes ? (
-          <div class="mt-4">
-            <h3 class="text-sm font-semibold text-ink-950">Notes</h3>
-            <p class="mt-1 text-sm whitespace-pre-line text-ink-800">{l.notes}</p>
+          <div class="kz-asub">
+            <h3 class="kz-asub__t">Notes</h3>
+            <p class="kz-aprose">{l.notes}</p>
           </div>
         ) : null}
-      </section>
+      </Pane>
       {enquiries.length ? (
-        <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="enq-title">
-          <h2 id="enq-title" class="font-sans text-base font-semibold">
-            Enquiries
-          </h2>
-          <ul class="mt-2 flex flex-col gap-1 text-sm">
+        <Pane title="Enquiries" id="enq-title" flush>
+          <ul class="kz-alist" role="list">
             {enquiries.map((e) => (
               <li>
-                {perms.has('enquiries.view') ? (
-                  <a href={`/admin/enquiries/${e.id}`} class="font-mono font-semibold text-brand-600 hover:underline">
-                    {e.reference}
-                  </a>
-                ) : (
-                  <span class="font-mono">{e.reference}</span>
-                )}
-                <span class="text-[12px] text-ink-600"> · {fmt(e.created_at)}</span>
+                <div class="kz-alist__main">
+                  {perms.has('enquiries.view') ? (
+                    <a href={`/admin/enquiries/${e.id}`} class="kz-alist__t kz-amono">
+                      {e.reference}
+                    </a>
+                  ) : (
+                    <span class="kz-alist__t kz-amono">{e.reference}</span>
+                  )}
+                  <span class="kz-alist__m">{fmt(e.created_at)}</span>
+                </div>
               </li>
             ))}
           </ul>
-        </section>
+        </Pane>
       ) : null}
     </aside>
   </div>

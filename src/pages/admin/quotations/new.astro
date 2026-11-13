@@ -1,6 +1,9 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { QuotationEditor } from '../../../components/admin/QuotationsAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Pane from '../../../ui/admin/Pane.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import { QuotationEditor } from '../../../ui/admin/quotations/QuotationEditor';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { getSettings, settingText } from '../../../server/modules/cms';
 import { editorProps } from '../../../server/modules/quotations';
@@ -32,24 +35,15 @@ const initial = {
 ---
 
 <AdminLayout title="New quotation" page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/quotations" class="hover:text-ink-950 hover:underline">
-      Quotations
-    </a>{' '}
-    / <span class="text-ink-950">New</span>
-  </nav>
-  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">New quotation</h1>
+  <PageHead title="New quotation" crumbs={[{ label: 'Quotations', href: '/admin/quotations' }, { label: 'New' }]} />
   {props.clients.length === 0 ? (
-    <div class="max-w-xl rounded-lg border border-line bg-surface p-6">
-      <p class="font-semibold">Add a client first</p>
-      <p class="mt-1 text-sm text-ink-600">Quotations are made for a client record.</p>
-      <a href="/admin/clients/new" class="mt-4 inline-flex text-sm font-semibold text-brand-600 hover:underline">
+    <Pane title="Add a client first" class="kz-anarrow">
+      <p class="kz-adlg__desc">Quotations are made for a client record.</p>
+      <Button slot="actions" href="/admin/clients/new" size="sm" lead="add">
         New client
-      </a>
-    </div>
+      </Button>
+    </Pane>
   ) : (
-    <div class="max-w-4xl">
-      <QuotationEditor client:load initial={initial} {...props} />
-    </div>
+    <QuotationEditor client:load initial={initial} {...props} />
   )}
 </AdminLayout>

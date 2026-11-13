@@ -1,5 +1,13 @@
 ---
+/** Client directory (R6.2): filters (sheet on phones), dense table → list rows, portal sign-ups waiting as a head action. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import DataTable from '../../../ui/admin/DataTable.astro';
+import Cell from '../../../ui/admin/Cell.astro';
+import Pager from '../../../ui/admin/Pager.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import EmptyState from '../../../ui/primitives/EmptyState.astro';
+import { FilterBar, type FilterField } from '../../../ui/admin/FilterBar';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { allTags, listClients, listPortalSignups } from '../../../server/modules/clients';
 import { clientListQuery } from '../../../shared/schemas/clients';
@@ -11,165 +19,101 @@ const parsed = clientListQuery.safeParse(Object.fromEntries(Astro.url.searchPara
 const filter = parsed.success ? parsed.data : clientListQuery.parse({});
 const [result, tags, signups] = await Promise.all([listClients(ctx, filter), allTags(ctx), listPortalSignups(ctx)]);
 const canCreate = page.auth.permissions.has('clients.create');
-const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
 const pageHref = (n: number) => {
   const q = new URLSearchParams(Astro.url.searchParams);
   q.set('page', String(n));
   return `/admin/clients?${q.toString()}`;
 };
+const fields: FilterField[] = [
+  { kind: 'search', name: 'q', label: 'Search', value: filter.q ?? '', placeholder: 'Name, number or email' },
+  {
+    kind: 'select',
+    name: 'status',
+    label: 'Status',
+    value: filter.status ?? 'active',
+    options: [
+      { value: 'active', label: 'Active' },
+      { value: 'archived', label: 'Archived' },
+      { value: 'all', label: 'All' },
+    ],
+  },
+  ...(tags.length > 0
+    ? [
+        {
+          kind: 'select' as const,
+          name: 'tag',
+          label: 'Tag',
+          value: filter.tag ?? '',
+          options: [{ value: '', label: 'Any' }, ...tags.map((t) => ({ value: t, label: t }))],
+        },
+      ]
+    : []),
+];
+const filtered = !!(filter.q || filter.tag || filter.status !== 'active');
 ---
 
 <AdminLayout title="Clients" page={page}>
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold tracking-display">Clients</h1>
-      <p class="mt-1 text-sm text-ink-600">
-        {result.total} {result.total === 1 ? 'client' : 'clients'}
-      </p>
-    </div>
-    <div class="flex flex-wrap items-center gap-3">
+  <PageHead title="Clients" meta={`${result.total} ${result.total === 1 ? 'client' : 'clients'}`}>
+    <Fragment slot="actions">
       {signups.length > 0 ? (
-        <a
-          href="/admin/clients/portal-signups"
-          class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
-        >
+        <Button href="/admin/clients/portal-signups" variant="secondary">
           Portal sign-ups ({signups.length})
-        </a>
+        </Button>
       ) : null}
       {canCreate ? (
-        <a
-          href="/admin/clients/new"
-          class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
-        >
+        <Button href="/admin/clients/new" lead="add">
           New client
-        </a>
+        </Button>
       ) : null}
-    </div>
+    </Fragment>
+  </PageHead>
+  <div class="kz-atools">
+    <FilterBar client:load label="Filter clients" fields={fields} clearHref="/admin/clients" />
   </div>
-  <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter clients">
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Search
-      <input
-        name="q"
-        type="search"
-        value={filter.q ?? ''}
-        maxlength="80"
-        class={field}
-        placeholder="Name, number or email"
-      />
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Status
-      <select name="status" class={field}>
-        <option value="active" selected={filter.status === 'active'}>
-          Active
-        </option>
-        <option value="archived" selected={filter.status === 'archived'}>
-          Archived
-        </option>
-        <option value="all" selected={filter.status === 'all'}>
-          All
-        </option>
-      </select>
-    </label>
-    {tags.length > 0 ? (
-      <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-        Tag
-        <select name="tag" class={field}>
-          <option value="">Any</option>
-          {tags.map((t) => (
-            <option value={t} selected={filter.tag === t}>
-              {t}
-            </option>
-          ))}
-        </select>
-      </label>
-    ) : null}
-    <button
-      type="submit"
-      class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+  <DataTable
+    caption="Clients"
+    count={result.items.length}
+    columns={[
+      { label: 'Client' },
+      { label: 'Main contact' },
+      { label: 'Email' },
+      { label: 'Tags' },
+      { label: 'Currency' },
+    ]}
+  >
+    <EmptyState
+      slot="empty"
+      code={filtered ? 'no matches' : '0 clients'}
+      title={filtered ? 'No clients match these filters.' : 'No clients yet.'}
     >
-      Filter
-    </button>
-  </form>
-  <div class="mt-6 relative overflow-x-auto rounded-lg border border-line bg-surface">
-    <table class="w-full text-left text-sm">
-      <caption class="sr-only">Clients</caption>
-      <thead class="bg-canvas text-[13px] text-ink-600">
-        <tr>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Client
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Main contact
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Email
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Tags
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Currency
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {result.items.length === 0 ? (
-          <tr>
-            <td colspan="5" class="px-4 py-10 text-center text-ink-600">
-              {filter.q || filter.tag || filter.status !== 'active'
-                ? 'No clients match these filters.'
-                : 'No clients yet.'}
-            </td>
-          </tr>
-        ) : (
-          result.items.map((c) => (
-            <tr class="border-t border-line">
-              <td class="px-4 py-3">
-                <a href={`/admin/clients/${c.id}`} class="font-semibold text-ink-950 hover:underline">
-                  {c.displayName}
-                </a>
-                <span class="block font-mono text-[12px] text-ink-600">
-                  {c.number}
-                  {c.status === 'archived' ? ' · archived' : ''}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-ink-800">{c.primaryContact ?? '—'}</td>
-              <td class="px-4 py-3 text-ink-800">{c.email ?? '—'}</td>
-              <td class="px-4 py-3">
-                {c.tags.map((t) => (
-                  <span class="mr-1 inline-flex rounded-full bg-ink-950/5 px-2 py-0.5 text-[12px] text-ink-800">
-                    {t}
-                  </span>
-                ))}
-              </td>
-              <td class="px-4 py-3 text-ink-800">{c.defaultCurrency}</td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-  </div>
-  {result.pages > 1 ? (
-    <nav aria-label="Pagination" class="mt-4 flex items-center justify-between text-sm font-semibold">
-      {result.page > 1 ? (
-        <a href={pageHref(result.page - 1)} rel="prev" class="text-brand-600">
-          Previous
-        </a>
-      ) : (
-        <span />
-      )}
-      <span class="text-ink-600">
-        Page {result.page} of {result.pages}
-      </span>
-      {result.page < result.pages ? (
-        <a href={pageHref(result.page + 1)} rel="next" class="text-brand-600">
-          Next
-        </a>
-      ) : (
-        <span />
-      )}
-    </nav>
-  ) : null}
+      Clients are added here or created from a won lead.
+    </EmptyState>
+    {result.items.map((c) => (
+      <tr>
+        <Cell
+          m="main"
+          href={`/admin/clients/${c.id}`}
+          title={c.displayName}
+          sub={c.status === 'archived' ? `${c.number} · archived` : c.number}
+        />
+        <Cell m="meta" tone="mute">
+          <span>{c.primaryContact ?? '—'}</span>
+        </Cell>
+        <Cell tone="mute">{c.email ?? '—'}</Cell>
+        <Cell>
+          {c.tags.length ? (
+            <span class="kz-dt__tags">
+              {c.tags.map((t) => (
+                <span class="kz-tag">{t}</span>
+              ))}
+            </span>
+          ) : null}
+        </Cell>
+        <Cell m="amount" num>
+          {c.defaultCurrency}
+        </Cell>
+      </tr>
+    ))}
+  </DataTable>
+  <Pager page={result.page} pages={result.pages} href={pageHref} />
 </AdminLayout>

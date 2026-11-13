@@ -1,7 +1,15 @@
 ---
+/**
+ * One quotation (R6.2): the head carries the number (the sheet below holds the H1 title), status, version and client, and
+ * every action; banners for replaced / converted / project; the paper sheet beside the history and versions panes.
+ */
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
 import QuotationDocument from '../../../../ui/documents/QuotationSheet.astro';
-import { QuotationActions } from '../../../../components/admin/QuotationsAdmin';
+import PageHead from '../../../../ui/admin/PageHead.astro';
+import Pane from '../../../../ui/admin/Pane.astro';
+import StatusPill from '../../../../ui/primitives/StatusPill.astro';
+import { QuotationActions } from '../../../../ui/admin/quotations/QuotationActions';
+import { QUOTATION_STATUS_TONE } from '../../../../ui/admin/quotations/labels';
 import { loadAdminPage } from '../../../../server/lib/admin-page';
 import { businessDate } from '../../../../server/lib/dates';
 import { AppError } from '../../../../server/lib/errors';
@@ -91,53 +99,49 @@ const title = q.number ?? `Draft: ${q.title}`;
 ---
 
 <AdminLayout title={title} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/quotations" class="hover:text-ink-950 hover:underline">
-      Quotations
-    </a>{' '}
-    / <span class="text-ink-950">{q.number ?? 'Draft'}</span>
-  </nav>
-  <div class="mt-2 flex flex-wrap items-start justify-between gap-4">
-    <div>
-      <p class="text-2xl font-bold tracking-display">{q.number ?? 'Draft quotation'}</p>
-      <p class="mt-1 text-sm text-ink-600">
-        {QUOTATION_STATUS_LABEL[q.status]}
-        {q.version > 1 ? ` · version ${q.version}` : ''} ·
-        <a href={`/admin/clients/${q.client_id}`} class="text-brand-600 hover:underline">
-          {client?.display_name}
-        </a>
-      </p>
+  <PageHead
+    as="p"
+    title={q.number ?? 'Draft quotation'}
+    crumbs={[{ label: 'Quotations', href: '/admin/quotations' }, { label: q.number ?? 'Draft' }]}
+  >
+    <Fragment slot="meta">
+      <StatusPill tone={QUOTATION_STATUS_TONE[q.status]}>{QUOTATION_STATUS_LABEL[q.status]}</StatusPill>
+      {q.version > 1 ? ` · version ${q.version}` : ''} ·{' '}
+      <a href={`/admin/clients/${q.client_id}`}>{client?.display_name}</a>
+    </Fragment>
+    <QuotationActions
+      slot="actions"
+      client:load
+      id={q.id}
+      number={q.number}
+      status={q.status}
+      publicLink={link}
+      can={can}
+    />
+  </PageHead>
+  {q.superseded_by_id || invoice || project ? (
+    <div class="kz-anotices">
+      {q.superseded_by_id ? (
+        <p role="status" class="kz-anotice kz-anotice--info">
+          <span>A newer version replaces this quotation.</span>
+          <a href={`/admin/quotations/${q.superseded_by_id}`}>Open the newer version</a>
+        </p>
+      ) : null}
+      {invoice ? (
+        <p role="status" class="kz-anotice kz-anotice--ok">
+          <span>Converted to {invoice.number ? `invoice ${invoice.number}` : 'a draft invoice'}.</span>
+          <a href={`/admin/invoices/${invoice.id}`}>Open the invoice</a>
+        </p>
+      ) : null}
+      {project ? (
+        <p role="status" class="kz-anotice kz-anotice--info">
+          <span>Project {project.reference} was created from this quotation.</span>
+          <a href={`/admin/projects/${project.id}`}>Open the project</a>
+        </p>
+      ) : null}
     </div>
-    <QuotationActions client:load id={q.id} number={q.number} status={q.status} publicLink={link} can={can} />
-  </div>
-  {q.superseded_by_id ? (
-    <p role="status" class="mt-4 rounded-sm border border-info-700/30 bg-info-50 px-4 py-3 text-sm text-info-700">
-      A newer version replaces this quotation.{' '}
-      <a href={`/admin/quotations/${q.superseded_by_id}`} class="font-semibold underline">
-        Open the newer version
-      </a>
-    </p>
   ) : null}
-  {invoice ? (
-    <p
-      role="status"
-      class="mt-4 rounded-sm border border-success-700/30 bg-success-50 px-4 py-3 text-sm text-success-700"
-    >
-      Converted to {invoice.number ? `invoice ${invoice.number}` : 'a draft invoice'}.{' '}
-      <a href={`/admin/invoices/${invoice.id}`} class="font-semibold underline">
-        Open the invoice
-      </a>
-    </p>
-  ) : null}
-  {project ? (
-    <p role="status" class="mt-4 rounded-sm border border-line bg-surface px-4 py-3 text-sm text-ink-800">
-      Project {project.reference} was created from this quotation.{' '}
-      <a href={`/admin/projects/${project.id}`} class="font-semibold text-brand-600 underline">
-        Open the project
-      </a>
-    </p>
-  ) : null}
-  <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
+  <div class="kz-agrid kz-agrid--doc">
     <QuotationDocument
       number={q.number}
       title={q.title}
@@ -154,16 +158,13 @@ const title = q.number ?? `Draft: ${q.title}`;
       client={clientParty}
       business={business}
     />
-    <aside class="flex flex-col gap-6">
-      <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="tl-title">
-        <h2 id="tl-title" class="font-sans text-base font-semibold">
-          History
-        </h2>
-        <ol class="mt-3 flex flex-col gap-3 text-sm">
+    <aside class="kz-astack" aria-label="Quotation history">
+      <Pane title="History" id="tl-title" flush>
+        <ol class="kz-afeed">
           {timeline.map(([what, at, extra]) => (
-            <li>
-              <p class="font-medium text-ink-950">{what}</p>
-              <p class="text-[12px] text-ink-600">
+            <li data-kind={what === 'Accepted' ? 'lit' : undefined}>
+              <p class="kz-afeed__k">{what}</p>
+              <p class="kz-afeed__t">
                 {at}
                 {extra ? ` · ${extra}` : ''}
               </p>
@@ -171,29 +172,28 @@ const title = q.number ?? `Draft: ${q.title}`;
           ))}
         </ol>
         {q.valid_until && q.status !== 'draft' ? (
-          <p class="mt-3 text-[12px] text-ink-600">Valid until {formatLongDate(q.valid_until)}</p>
+          <p class="kz-apad kz-afeed__t kz-apad--b">Valid until {formatLongDate(q.valid_until)}</p>
         ) : null}
-      </section>
+      </Pane>
       {versions.length > 1 ? (
-        <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="v-title">
-          <h2 id="v-title" class="font-sans text-base font-semibold">
-            Versions
-          </h2>
-          <ol class="mt-3 flex flex-col gap-2 text-sm">
+        <Pane title="Versions" id="v-title" flush>
+          <ol class="kz-alist">
             {versions.map((v) => (
               <li>
-                {v.id === q.id ? (
-                  <span class="font-semibold">Version {v.version} (this one)</span>
-                ) : (
-                  <a href={`/admin/quotations/${v.id}`} class="font-semibold text-brand-600 hover:underline">
-                    Version {v.version}
-                  </a>
-                )}
-                <span class="text-[12px] text-ink-600"> · {QUOTATION_STATUS_LABEL[v.status]}</span>
+                <div class="kz-alist__main">
+                  {v.id === q.id ? (
+                    <span class="kz-alist__t">Version {v.version} (this one)</span>
+                  ) : (
+                    <a href={`/admin/quotations/${v.id}`} class="kz-alist__t">
+                      Version {v.version}
+                    </a>
+                  )}
+                  <span class="kz-alist__m">{QUOTATION_STATUS_LABEL[v.status]}</span>
+                </div>
               </li>
             ))}
           </ol>
-        </section>
+        </Pane>
       ) : null}
     </aside>
   </div>

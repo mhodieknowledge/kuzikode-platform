@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { ClientForm } from '../../../components/admin/ClientsAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import { ClientForm } from '../../../ui/admin/clients/ClientForm';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { getSettings, settingNumber, settingText } from '../../../server/modules/cms';
 
@@ -28,14 +29,6 @@ const initial = {
 ---
 
 <AdminLayout title="New client" page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/clients" class="hover:text-ink-950 hover:underline">
-      Clients
-    </a>{' '}
-    / <span class="text-ink-950">New</span>
-  </nav>
-  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">New client</h1>
-  <div class="max-w-3xl">
-    <ClientForm client:load initial={initial} currencies={results.map((r) => r.code)} />
-  </div>
+  <PageHead title="New client" crumbs={[{ label: 'Clients', href: '/admin/clients' }, { label: 'New' }]} />
+  <ClientForm client:load initial={initial} currencies={results.map((r) => r.code)} />
 </AdminLayout>

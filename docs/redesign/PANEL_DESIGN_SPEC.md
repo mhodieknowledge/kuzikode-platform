@@ -3,7 +3,8 @@
 BRIEF §11: a refined, Linux-desktop-inspired panel language: clean window and workspace layouts, organised side navigation,
 terminal-flavoured type where it helps, subtle system-status indicators, functional density, consistent window / panel / navigation
 patterns, light and dark surfaces. **Not** an OS clone, a terminal cosplay, a hacker theme or retro. Same tokens as the public site
-(DESIGN_DIRECTION.md): felt navy, concrete, cobalt, Archivo, JetBrains Mono, Lucide.
+(DESIGN_DIRECTION.md, Route world). **Token mapping (2026-11-13):** where this spec says felt → night (`--night-*`), concrete → bone
+(`--bone-*`), cobalt → emerald for the primary action and gold (`--lit`) for the current/lit item; type Overpass + Overpass Mono; Lucide icons.
 
 The two panels are **related but distinct**:
 

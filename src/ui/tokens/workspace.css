@@ -1,0 +1,599 @@
+/*
+ * Client workspace (R5.1): shell (status bar, side dock, desk, phone bottom dock, "More" sheet), window primitive, account menu,
+ * command palette and the shared dropdown menu. Linux-desktop clarity without costume: night chrome, bone desk, paper windows,
+ * gold for the current/lit thing, emerald only for the primary action, mono only for references and keys.
+ */
+@layer components {
+  .kz-wsbody {
+    min-height: 100vh;
+    background: var(--bone-100);
+    color: var(--ink-700);
+  }
+  .kz-ws {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas: 'bar' 'desk';
+  }
+
+  /* ---------- Status bar ---------- */
+  .kz-wsbar {
+    grid-area: bar;
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header, 40);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 52px;
+    padding: 0 12px 0 16px;
+    background: var(--night-900);
+    color: var(--on-night-2);
+    border-bottom: 1px solid var(--night-700);
+  }
+  .kz-wsbar__l,
+  .kz-wsbar__r {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+  .kz-wsbar__logo {
+    display: inline-flex;
+    color: var(--on-night);
+  }
+  .kz-wsbar__logo .kz-logo,
+  .kz-wsbar__logo a {
+    color: var(--on-night);
+  }
+  .kz-wsbar__where {
+    display: none;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+    padding-left: 12px;
+    border-left: 1px solid var(--night-700);
+    font-size: 0.8125rem;
+  }
+  .kz-wsbar__where b {
+    font-weight: 700;
+    color: var(--on-night);
+  }
+  .kz-wsbar__where span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 28ch;
+  }
+  .kz-wsbar__online {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+  .kz-wsbar__online > span:first-child {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--ok-500, #3f9d6b);
+  }
+  .kz-wsbar__online[data-off] > span:first-child {
+    background: var(--on-night-3);
+  }
+  .kz-wsbar__find {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 7px;
+    background: var(--night-800);
+    color: var(--on-night-2);
+    font: inherit;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: background-color var(--dur-state) var(--ease-out);
+  }
+  .kz-wsbar__find-t,
+  .kz-wsbar__find kbd {
+    display: none;
+  }
+  .kz-wsbar__find kbd {
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--night-700);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--on-night-2);
+  }
+  @media (hover: hover) {
+    .kz-wsbar__find:hover {
+      background: var(--night-700);
+      color: var(--on-night);
+    }
+  }
+
+  /* Account menu trigger */
+  .kz-wsacct {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    max-width: 16rem;
+    padding: 0 6px 0 4px;
+    border: 0;
+    border-radius: 7px;
+    background: none;
+    color: var(--on-night-2);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .kz-wsacct__plate {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+    background: var(--on-night);
+    color: var(--night-900);
+    font-size: 0.8125rem;
+    font-weight: 800;
+  }
+  .kz-wsacct__text {
+    display: none;
+    min-width: 0;
+  }
+  .kz-wsacct__name,
+  .kz-wsacct__mail {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .kz-wsacct__name {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--on-night);
+  }
+  .kz-wsacct__mail {
+    font-size: 0.75rem;
+  }
+  @media (hover: hover) {
+    .kz-wsacct:hover {
+      background: var(--night-800);
+    }
+  }
+  .kz-wsacct[data-state='open'] {
+    background: var(--night-800);
+  }
+
+  /* ---------- Side dock (tablet / desktop) ---------- */
+  .kz-dock {
+    display: none;
+  }
+
+  /* ---------- Desk ---------- */
+  .kz-desk {
+    grid-area: desk;
+    min-width: 0;
+    padding: 20px 16px calc(88px + env(safe-area-inset-bottom));
+  }
+  .kz-desk:focus {
+    outline: none;
+  }
+
+  /* ---------- Phone bottom dock ---------- */
+  .kz-bdock {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: var(--z-header, 40);
+    padding: 0 6px env(safe-area-inset-bottom);
+    background: var(--night-900);
+    border-top: 1px solid var(--night-700);
+  }
+  .kz-bdock ul {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .kz-bdock__item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    width: 100%;
+    min-height: 60px;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--on-night-3);
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .kz-bdock__item[aria-current='page'],
+  .kz-bdock__item[data-on] {
+    color: var(--on-night);
+  }
+  .kz-bdock__item[aria-current='page']::before,
+  .kz-bdock__item[data-on]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 24px;
+    height: 3px;
+    border-radius: 0 0 2px 2px;
+    background: var(--lit);
+  }
+
+  /* "More" sheet rows */
+  .kz-more {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .kz-more li + li {
+    border-top: 1px solid var(--bone-200);
+  }
+  .kz-more a {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 56px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ink-900);
+    text-decoration: none;
+  }
+  .kz-more a .kz-icon:last-child {
+    margin-left: auto;
+    color: var(--ink-500);
+  }
+  .kz-more a[aria-current='page'] {
+    box-shadow: inset 3px 0 0 var(--ink-900);
+    padding-left: 12px;
+  }
+
+  /* ---------- Window ---------- */
+  .kz-wwin {
+    min-width: 0;
+    border-radius: 12px;
+    background: var(--paper);
+    box-shadow:
+      0 0 0 1px var(--bone-200),
+      0 1px 2px rgb(20 20 18 / 0.05);
+    overflow: clip;
+  }
+  .kz-wwin__bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 8px 0 14px;
+    border-bottom: 1px solid var(--bone-200);
+    background: var(--bone-50);
+    color: var(--ink-600);
+  }
+  .kz-wwin__title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .kz-wwin__meta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-600);
+  }
+  .kz-wwin__acts {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+  }
+  .kz-wwin__body {
+    padding: 16px;
+  }
+  .kz-wwin__body.is-flush {
+    padding: 0;
+  }
+  .kz-wgrid {
+    display: grid;
+    gap: 16px;
+  }
+
+  /* ---------- Dropdown menu ---------- */
+  .kz-menu {
+    z-index: 60;
+    min-width: 13rem;
+    padding: 6px;
+    border-radius: 10px;
+    background: var(--paper);
+    box-shadow:
+      0 0 0 1px var(--bone-200),
+      0 16px 32px -16px rgb(20 20 18 / 0.35);
+    transform-origin: var(--radix-dropdown-menu-content-transform-origin);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .kz-menu[data-state='open'] {
+      animation: kz-menu-in var(--dur-state) var(--ease-out);
+    }
+  }
+  @keyframes kz-menu-in {
+    from {
+      opacity: 0;
+      scale: 0.97;
+    }
+  }
+  .kz-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 10px;
+    border-radius: 6px;
+    font-size: 0.9375rem;
+    color: var(--ink-700);
+    text-decoration: none;
+    outline: none;
+    cursor: pointer;
+  }
+  .kz-menu__item[data-highlighted] {
+    background: var(--bone-100);
+    color: var(--ink-900);
+  }
+  .kz-menu__item.is-danger {
+    margin-top: 6px;
+    border-top: 1px solid var(--bone-200);
+    border-radius: 0 0 6px 6px;
+    color: var(--clay-ink);
+  }
+
+  /* ---------- Command palette ---------- */
+  .kz-pal {
+    width: min(36rem, calc(100vw - 24px));
+    max-height: min(32rem, calc(100vh - 96px));
+    margin: 12vh auto auto;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: var(--paper);
+    box-shadow:
+      0 0 0 1px var(--bone-200),
+      0 30px 60px -24px rgb(20 20 18 / 0.45);
+    color: var(--ink-700);
+  }
+  .kz-pal::backdrop {
+    background: rgb(14 13 12 / 0.45);
+  }
+  .kz-pal__panel {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    max-height: inherit;
+  }
+  .kz-pal__field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 14px;
+    border-bottom: 1px solid var(--bone-200);
+    color: var(--ink-500);
+  }
+  .kz-pal__field input {
+    flex: 1;
+    min-width: 0;
+    height: 56px;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 1rem;
+    color: var(--ink-900);
+    outline: none;
+  }
+  .kz-pal kbd {
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--bone-100);
+    box-shadow: inset 0 0 0 1px var(--bone-200);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--ink-600);
+  }
+  .kz-pal__list {
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    overflow-y: auto;
+  }
+  .kz-pal__opt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 0 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    color: var(--ink-700);
+  }
+  .kz-pal__opt[aria-selected='true'] {
+    background: var(--night-900);
+    color: var(--on-night);
+  }
+  .kz-pal__label {
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+  .kz-pal__group {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--ink-500);
+  }
+  .kz-pal__opt[aria-selected='true'] .kz-pal__group {
+    color: var(--on-night-2);
+  }
+  .kz-pal__none {
+    padding: 18px 10px;
+    font-size: 0.9375rem;
+    color: var(--ink-600);
+  }
+  .kz-pal__foot {
+    display: flex;
+    gap: 16px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--bone-200);
+    font-size: 0.75rem;
+    color: var(--ink-500);
+  }
+  .kz-pal__foot kbd + kbd {
+    margin-left: 2px;
+  }
+
+  /* ---------- Tablet: side dock with icons + short labels ---------- */
+  @media (min-width: 640px) {
+    .kz-ws {
+      grid-template-columns: 76px minmax(0, 1fr);
+      grid-template-areas: 'bar bar' 'dock desk';
+    }
+    .kz-bdock {
+      display: none;
+    }
+    .kz-dock {
+      grid-area: dock;
+      position: sticky;
+      top: 52px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: calc(100vh - 52px);
+      padding: 10px 6px;
+      background: var(--night-900);
+      border-right: 1px solid var(--night-700);
+    }
+    .kz-dock ul {
+      display: grid;
+      gap: 2px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .kz-dock a {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 9px 2px 8px;
+      border-radius: 8px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      line-height: 1.15;
+      text-align: center;
+      color: var(--on-night-3);
+      text-decoration: none;
+      transition:
+        background-color var(--dur-state) var(--ease-out),
+        color var(--dur-state) var(--ease-out);
+    }
+    .kz-dock a[aria-current='page'] {
+      background: var(--night-800);
+      color: var(--on-night);
+    }
+    .kz-dock a[aria-current='page']::before {
+      content: '';
+      position: absolute;
+      left: -6px;
+      top: 12px;
+      bottom: 12px;
+      width: 3px;
+      border-radius: 0 2px 2px 0;
+      background: var(--lit);
+    }
+    .kz-desk {
+      padding: 24px 24px 48px;
+    }
+    .kz-wsbar__online {
+      display: inline-flex;
+    }
+    .kz-wsbar__find {
+      padding: 0 12px;
+    }
+    .kz-wsbar__find-t {
+      display: inline;
+    }
+  }
+  @media (min-width: 640px) and (hover: hover) {
+    .kz-dock a:not([aria-current]):hover {
+      background: var(--night-800);
+      color: var(--on-night);
+    }
+  }
+
+  /* ---------- Desktop ---------- */
+  @media (min-width: 1024px) {
+    .kz-ws {
+      grid-template-columns: 84px minmax(0, 1fr);
+    }
+    .kz-wsbar {
+      min-height: 48px;
+      padding: 0 16px 0 20px;
+    }
+    .kz-dock {
+      top: 48px;
+      height: calc(100vh - 48px);
+    }
+    .kz-wsbar__where {
+      display: inline-flex;
+    }
+    .kz-wsbar__find kbd {
+      display: inline;
+    }
+    .kz-wsacct__text {
+      display: block;
+    }
+    .kz-desk {
+      padding: 32px 40px 64px;
+    }
+    .kz-desk > * {
+      max-width: 80rem;
+    }
+    .kz-wgrid {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 20px;
+    }
+    .kz-wwin--4 {
+      grid-column: span 4;
+    }
+    .kz-wwin--5 {
+      grid-column: span 5;
+    }
+    .kz-wwin--6 {
+      grid-column: span 6;
+    }
+    .kz-wwin--7 {
+      grid-column: span 7;
+    }
+    .kz-wwin--8 {
+      grid-column: span 8;
+    }
+    .kz-wwin--12 {
+      grid-column: 1 / -1;
+    }
+    .kz-wwin__body {
+      padding: 20px;
+    }
+  }
+}

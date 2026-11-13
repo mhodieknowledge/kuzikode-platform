@@ -1145,3 +1145,15 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Next step: R5.1 workspace shell (`src/layouts/PortalLayout.astro` → new WorkspaceLayout in `src/ui/workspace/`; PANEL_DESIGN_SPEC.md; Linux-
   inspired: side dock, status bar, window/panel pattern, command palette, mobile bottom dock + sheet, light/dark). Then R5.2–R5.4.
   Portal still uses legacy `components/portal/*` (incl. AttemptStatus for `/portal/payments/attempts/[id]`).
+
+## 2026-11-13 05:45 UTC · R5.1 ✅ Workspace shell
+- PortalLayout rewritten (Base, night status bar + side dock, bone desk, phone bottom dock + More sheet, ⌘K palette, online indicator);
+  `src/ui/workspace/{nav.ts,AccountMenu.tsx,MoreSheet.tsx,CommandPalette.tsx,Window.astro}`, `src/ui/primitives/menu.tsx`, `workspace.css`;
+  unit test `workspace-nav.test.ts`. Legacy `PortalUserMenu` no longer used by the layout (PortalAccount.tsx still hosts ProfileForm etc.).
+- Shots: /portal at 390, 768, 1440 + palette (signed in as the e2e client on a local `wrangler dev`; the astro dev server's API origin check
+  blocks sign-in on :4400). verify green (unit 521, integration 308); e2e 22/22 (portal-auth, checkout, subscriptions, quotations, invoices,
+  security, full-journey, sweep) after fixing an axe label/content mismatch on the "Jump to…" button.
+- Next step: R5.2 Overview + projects: rebuild `src/pages/portal/index.astro`, `projects/index.astro`, `projects/[id].astro` bodies with
+  Window (`src/ui/workspace/Window.astro`) in `.kz-wgrid` (PANEL_DESIGN_SPEC §2: Balance 8 / Waiting 4, Active projects 6 / Activity 6;
+  projects list 4 + project 8, milestones as a road strip, updates feed, deliverables, message composer → extract ProjectMessageForm logic).
+  Keep `data-testid="portal-unlinked"` and the e2e headings ("Hello, Kuda", etc.).

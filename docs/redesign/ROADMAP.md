@@ -73,10 +73,11 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
 - [x] **R4.8 Public document & checkout pages** (`/q/`, `/i/`, `/pay/…`, the custom checkout) in the new language. Payment flows still pass their e2e tests.
 
 ## R5: Client workspace (Linux-inspired)
-- [ ] **R5.1 Workspace shell:** side navigation, top status bar, window/panel pattern, command palette, mobile shell (bottom bar or sheet nav), light/dark surfaces.
+- [x] **R5.1 Workspace shell:** side navigation, top status bar, window/panel pattern, command palette, mobile shell (bottom bar or sheet nav), light/dark surfaces.
+  - Dark surfaces: the theme toggle ships with R5.4 (legacy page bodies are unreadable on night until R5.2–R5.4 rebuild them).
 - [ ] **R5.2 Overview, projects (milestones, updates, deliverables, messages).**
 - [ ] **R5.3 Quotations, invoices, payments and receipts, saved cards, subscriptions/services.**
-- [ ] **R5.4 Support, profile, devices, auth screens** (sign-in, reset, invite, verify).
+- [ ] **R5.4 Support, profile, devices, auth screens** (sign-in, reset, invite, verify). Also: enable the workspace dark theme toggle (night desk, night-800 windows; remembered per device via cookie so the server renders `data-theme`).
 
 ## R6: Admin interface
 - [ ] **R6.1 Admin shell** in the related but more utilitarian panel language (keep it distinct from the client workspace).

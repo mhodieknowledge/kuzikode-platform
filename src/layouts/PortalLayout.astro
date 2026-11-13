@@ -1,86 +1,142 @@
 ---
-import AppLayout from './AppLayout.astro';
-import Logo from '../components/Logo.astro';
-import { PortalUserMenu } from '../components/portal/PortalAccount';
+/**
+ * Client workspace shell (R5.1, rebuilt from scratch on Base; PANEL_DESIGN_SPEC §2, BRIEF §11 "Linux-inspired").
+ * Desktop: a night status bar (wordmark, "Workspace" + the client, an online indicator, ⌘K search, the account menu) over a night
+ * side dock (icon + label per workspace, Account at the foot) and a bone desktop where pages lay out their windows.
+ * Tablet: the dock keeps icons with short labels. Phones: a slim status bar and a bottom dock of four destinations + "More"
+ * (sheet), with safe-area padding; the page scrolls between them.
+ * Props are unchanged so every portal page keeps working while its body is rebuilt (R5.2–R5.4).
+ */
+import Base from './Base.astro';
+import Logo from '../ui/brand/Logo.astro';
+import Icon from '../ui/icons/Icon.astro';
+import { AccountMenu } from '../ui/workspace/AccountMenu';
+import { CommandPalette, type PaletteEntry } from '../ui/workspace/CommandPalette';
+import { MoreSheet } from '../ui/workspace/MoreSheet';
+import { splitForPhone, workspaceItems, type WorkspaceKey } from '../ui/workspace/nav';
 import type { PortalPage } from '../server/lib/portal-page';
 
-/** Calmer client-portal shell (docs/05 §3). Sections appear in the menu as they are built. */
 interface Props {
   title: string;
   page: PortalPage;
-  active?: 'overview' | 'projects' | 'quotations' | 'invoices' | 'payments' | 'services' | 'support' | 'account';
+  active?: WorkspaceKey;
 }
 const { title, page, active } = Astro.props;
-const items: { key: NonNullable<Props['active']>; label: string; href: string }[] = [
-  { key: 'overview', label: 'Overview', href: '/portal' },
-  ...(page.areas.projects ? [{ key: 'projects' as const, label: 'Projects', href: '/portal/projects' }] : []),
-  ...(page.areas.quotations ? [{ key: 'quotations' as const, label: 'Quotations', href: '/portal/quotations' }] : []),
-  ...(page.areas.finance
+const items = workspaceItems(page.areas);
+const main = items.filter((i) => i.key !== 'account');
+const account = items.find((i) => i.key === 'account')!;
+const phone = splitForPhone(items);
+const clientLabel = page.clients.map((c) => c.name).join(', ');
+const here = items.find((i) => i.key === active);
+const palette: PaletteEntry[] = [
+  ...items.map((i) => ({ label: i.label, href: i.href, icon: i.icon, group: 'Go to' as const })),
+  ...(page.areas.support
     ? [
-        { key: 'invoices' as const, label: 'Invoices', href: '/portal/invoices' },
-        { key: 'payments' as const, label: 'Payments', href: '/portal/payments' },
-        { key: 'services' as const, label: 'Services', href: '/portal/services' },
+        {
+          label: 'New support request',
+          href: '/portal/support/new',
+          icon: 'add' as const,
+          group: 'Actions' as const,
+          keywords: 'help ticket',
+        },
       ]
     : []),
-  ...(page.areas.support ? [{ key: 'support' as const, label: 'Support', href: '/portal/support' }] : []),
-  { key: 'account', label: 'Account', href: '/portal/account' },
+  {
+    label: 'Signed-in devices',
+    href: '/portal/account/sessions',
+    icon: 'key',
+    group: 'Actions',
+    keywords: 'sessions security',
+  },
+  { label: 'Two-step verification', href: '/portal/mfa', icon: 'lock', group: 'Actions', keywords: '2fa mfa security' },
 ];
-const clientLabel = page.clients.map((c) => c.name).join(', ');
 ---
 
-<AppLayout title={`${title} · Kuzikode Client Portal`} csrfToken={page.csrfToken} bodyClass="bg-surface text-[15px]">
-  <header class="border-b border-line bg-surface">
-    <div class="container-content flex h-16 items-center justify-between gap-4">
-      <div class="flex min-w-0 items-center gap-6">
-        <span class="shrink-0">
-          <Logo href="/portal" height={24} />
+<Base title={`${title} · Kuzikode Client Portal`} noindex csrfToken={page.csrfToken} bodyClass="kz-wsbody">
+  <div class="kz-ws">
+    <header class="kz-wsbar">
+      <div class="kz-wsbar__l">
+        <span class="kz-wsbar__logo">
+          <Logo href="/portal" height={22} />
         </span>
-        <nav aria-label="Portal navigation" class="hidden xl:block">
-          <ul class="flex gap-1">
-            {items.map((i) => (
-              <li>
-                <a
-                  href={i.href}
-                  aria-current={active === i.key ? 'page' : undefined}
-                  class:list={[
-                    'inline-flex h-16 items-center whitespace-nowrap border-b-2 px-2.5 text-[15px]',
-                    active === i.key
-                      ? 'border-brand-600 font-semibold text-ink-950'
-                      : 'border-transparent text-ink-600 hover:text-ink-950',
-                  ]}
-                >
-                  {i.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <span class="kz-wsbar__where">
+          <b>Workspace</b>
+          {clientLabel ? <span title={clientLabel}>{clientLabel}</span> : null}
+        </span>
       </div>
-      <div class="flex min-w-0 items-center gap-3">
-        {clientLabel ? <span class="hidden truncate text-sm text-ink-600 2xl:block">{clientLabel}</span> : null}
-        <PortalUserMenu client:load name={page.auth.user.name} email={page.auth.user.email} />
+      <div class="kz-wsbar__r">
+        <span class="kz-wsbar__online" data-ws-online>
+          <span aria-hidden="true"></span>
+          <span data-ws-online-label>Online</span>
+        </span>
+        <button type="button" class="kz-wsbar__find" data-ws-palette>
+          <Icon name="search" size={16} />
+          <span class="kz-wsbar__find-t">Jump to…</span>
+          <span class="sr-only">Search the workspace</span>
+          <kbd aria-hidden="true">⌘K</kbd>
+        </button>
+        <AccountMenu client:load name={page.auth.user.name} email={page.auth.user.email} />
       </div>
-    </div>
-    <nav aria-label="Portal navigation" class="border-t border-line xl:hidden">
-      <ul class="container-content flex flex-wrap gap-x-1">
-        {items.map((i) => (
+    </header>
+
+    <nav class="kz-dock" aria-label="Portal navigation">
+      <ul role="list">
+        {main.map((i) => (
           <li>
-            <a
-              href={i.href}
-              aria-current={active === i.key ? 'page' : undefined}
-              class:list={[
-                'inline-flex h-11 items-center whitespace-nowrap border-b-2 px-2.5 text-[15px]',
-                active === i.key ? 'border-brand-600 font-semibold text-ink-950' : 'border-transparent text-ink-600',
-              ]}
-            >
-              {i.label}
+            <a href={i.href} aria-current={active === i.key ? 'page' : undefined}>
+              <Icon name={i.icon} size={20} />
+              <span>{i.label}</span>
             </a>
           </li>
         ))}
       </ul>
+      <ul role="list" class="kz-dock__foot">
+        <li>
+          <a href={account.href} aria-current={active === 'account' ? 'page' : undefined}>
+            <Icon name={account.icon} size={20} />
+            <span>{account.label}</span>
+          </a>
+        </li>
+      </ul>
     </nav>
-  </header>
-  <main id="main" tabindex="-1" class="container-content py-8 focus:outline-none md:py-10">
-    <slot />
-  </main>
-</AppLayout>
+
+    <main id="main" tabindex="-1" class="kz-desk" data-ws-area={here?.key}>
+      <slot />
+    </main>
+
+    <nav class="kz-bdock" aria-label="Portal navigation">
+      <ul role="list">
+        {phone.dock.map((i) => (
+          <li>
+            <a class="kz-bdock__item" href={i.href} aria-current={active === i.key ? 'page' : undefined}>
+              <Icon name={i.icon} size={20} />
+              <span>{i.label}</span>
+            </a>
+          </li>
+        ))}
+        <li>
+          <MoreSheet client:idle items={phone.more} active={active} />
+        </li>
+      </ul>
+    </nav>
+  </div>
+  <CommandPalette client:idle entries={palette} />
+</Base>
+
+<script>
+  // Status-bar indicator follows the browser's connection state (never fake metrics).
+  const box = document.querySelector<HTMLElement>('[data-ws-online]');
+  const label = document.querySelector<HTMLElement>('[data-ws-online-label]');
+  const sync = () => {
+    if (!box || !label) return;
+    const on = navigator.onLine;
+    box.toggleAttribute('data-off', !on);
+    label.textContent = on ? 'Online' : 'Offline';
+  };
+  sync();
+  window.addEventListener('online', sync);
+  window.addEventListener('offline', sync);
+  document
+    .querySelector('[data-ws-palette]')
+    ?.addEventListener('click', () => window.dispatchEvent(new Event('kz:palette')));
+</script>

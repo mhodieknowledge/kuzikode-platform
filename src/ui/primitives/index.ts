@@ -6,4 +6,5 @@ export { Sheet, ConfirmSheet } from './sheet';
 export { ToastProvider, useToast, type ToastKind } from './toast';
 export { StatusPill, Spinner, EmptyState, ListRow, DataTable, type Column, type Tone } from './display';
 export { MoneyInput, type MoneyInputProps } from './money';
+export { Menu, type MenuEntry } from './menu';
 export { cx } from './cx';

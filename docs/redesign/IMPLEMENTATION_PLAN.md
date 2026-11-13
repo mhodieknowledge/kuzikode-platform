@@ -90,7 +90,7 @@ Ticked when the file is deleted (or, for the logic-only files marked *logic*, mo
 |---|---|---|
 | layouts/PublicLayout.astro | new PublicLayout (rewritten on layouts/Base.astro) | [x] R3.1 |
 | layouts/AppLayout.astro | layouts/Base.astro (new) | [ ] R5.1 (still used by legacy portal/admin layouts) |
-| layouts/PortalLayout.astro | WorkspaceLayout | [ ] R5.1 |
+| layouts/PortalLayout.astro | rewritten from scratch as the workspace shell (Base + ui/workspace: nav, AccountMenu, MoreSheet, CommandPalette, Window) | [x] R5.1 |
 | layouts/AdminLayout.astro | new AdminLayout | [ ] R6.1 |
 | layouts/AuthLayout.astro | new AuthLayout | [ ] R5.4 |
 | layouts/DocumentLayout.astro | new DocumentLayout (rewritten on layouts/Base.astro) | [x] R4.8 |

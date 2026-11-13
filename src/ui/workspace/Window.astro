@@ -1,0 +1,51 @@
+---
+/**
+ * Workspace window (R5.1, PANEL_DESIGN_SPEC §1): a paper panel with a 44 px title bar (icon, title, optional mono meta such as
+ * `INV-2026-00012`, actions on the right) and a body. Windows tile on the desktop grid via `span` (12-column grid from 1024 px;
+ * full width below). No dragging, no traffic-light dots: the window is a frame for real content, not an OS costume.
+ */
+import Icon from '../icons/Icon.astro';
+import type { IconName } from '../icons/registry';
+
+interface Props {
+  title: string;
+  icon?: IconName;
+  meta?: string | undefined;
+  /** Columns on the 12-column desktop grid. */
+  span?: 4 | 5 | 6 | 7 | 8 | 12;
+  /** Heading level of the title (the page H1 usually sits above the windows). */
+  level?: 'h1' | 'h2' | 'h3';
+  id?: string;
+  class?: string;
+  /** Body without padding (tables, lists that run edge to edge). */
+  flush?: boolean;
+  [key: `data-${string}`]: string | undefined;
+}
+const { title, icon, meta, span = 12, level = 'h2', id, class: className, flush = false, ...rest } = Astro.props;
+const H = level;
+const headId = id ? `${id}-title` : undefined;
+---
+
+<section
+  class:list={['kz-wwin', `kz-wwin--${span}`, className]}
+  id={id}
+  aria-labelledby={headId}
+  aria-label={headId ? undefined : title}
+  {...rest}
+>
+  <header class="kz-wwin__bar">
+    {icon ? <Icon name={icon} size={16} /> : null}
+    <H class="kz-wwin__title" id={headId}>
+      {title}
+    </H>
+    {meta ? <span class="kz-wwin__meta">{meta}</span> : null}
+    {Astro.slots.has('actions') ? (
+      <div class="kz-wwin__acts">
+        <slot name="actions" />
+      </div>
+    ) : null}
+  </header>
+  <div class:list={['kz-wwin__body', flush && 'is-flush']}>
+    <slot />
+  </div>
+</section>

@@ -1218,3 +1218,6 @@ The **Next step** line must be specific enough that a fresh session can continue
 - `scripts/images/process.mjs` now reads owner prompts from `docs/redesign/IMAGE-REQUESTS.md` (B.4). Processed into `public/images/site/`
   + manifest; inbox emptied. About, Services and How-we-work band pick them up automatically (screens checked at 390/1440, no overflow).
 - Still to place in R7.1: home-band (Home "Why Kuzikode"), how-we-work-editorial, careers-culture. Still requested: about-studio, careers-desk.
+
+## 2026-11-13 11:55 UTC · R6.2 started (heartbeat)
+- Group 1 (shared admin table/list-row, filter sheet, save bar, KPI strip; dashboard, enquiries, leads, clients, quotations) delegated: opus/medium builder.

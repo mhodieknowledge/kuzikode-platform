@@ -1,6 +1,6 @@
 ---
 import AuthLayout from '../../layouts/AuthLayout.astro';
-import { LoginForm } from '../../components/auth/AuthForms';
+import { LoginForm } from '../../ui/auth/AuthForms';
 import { adminAlreadySignedIn, safeNext } from '../../server/lib/admin-page';
 
 const { ctx } = Astro.locals;
@@ -8,6 +8,6 @@ const next = safeNext(Astro.url.searchParams.get('next'));
 if (await adminAlreadySignedIn(ctx, Astro.request)) return Astro.redirect(next, 303);
 ---
 
-<AuthLayout title="Sign in" heading="Sign in" intro="Kuzikode staff only." area="Admin">
+<AuthLayout title="Sign in" heading="Sign in" area="admin">
   <LoginForm client:load audience="admin" next={next} siteKey={ctx.config.turnstileSiteKey} />
 </AuthLayout>

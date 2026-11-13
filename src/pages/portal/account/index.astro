@@ -1,8 +1,18 @@
 ---
+/**
+ * Workspace account (R5.4, PANEL_DESIGN_SPEC §2 "profile, security (password, 2FA, sessions/devices) as stacked windows"). From
+ * 1024 px: details + password stacked in 8 columns, two-step verification, devices and companies stacked in 4. Phones: one column
+ * in that order. "Save details" is the one emerald action; the rest are secondary plates.
+ */
 import PortalLayout from '../../../layouts/PortalLayout.astro';
-import { ChangePasswordForm } from '../../../components/auth/AuthForms';
-import { MfaManage } from '../../../components/admin/AccountActions';
-import { ProfileForm, SendVerificationButton } from '../../../components/portal/PortalAccount';
+import PageHead from '../../../ui/workspace/PageHead.astro';
+import Window from '../../../ui/workspace/Window.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import { ChangePasswordForm } from '../../../ui/auth/AuthForms';
+import { MfaManage } from '../../../ui/workspace/account/MfaManage';
+import { ProfileForm } from '../../../ui/workspace/account/ProfileForm';
+import { SendVerification } from '../../../ui/workspace/account/SendVerification';
 import { loadPortalPage } from '../../../server/lib/portal-page';
 
 const { ctx } = Astro.locals;
@@ -17,85 +27,79 @@ const { mfa } = page.auth;
 ---
 
 <PortalLayout title="Your account" page={page} active="account">
-  <h1 class="text-2xl font-bold tracking-display md:text-3xl">Your account</h1>
-  <div class="mt-6 grid max-w-3xl gap-6">
-    <section class="rounded-lg border border-line p-6" aria-labelledby="details-title">
-      <h2 id="details-title" class="font-sans text-base font-semibold">
-        Your details
-      </h2>
-      <dl class="mt-3 text-sm">
-        <dt class="text-ink-600">Email</dt>
-        <dd class="mt-0.5 flex flex-wrap items-center gap-2 font-medium text-ink-950">
-          {user.email}
-          {user.email_verified_at ? (
-            <span class="rounded-full bg-success-50 px-2 py-0.5 text-[12px] font-semibold text-success-700">
-              Confirmed
-            </span>
-          ) : (
-            <span class="rounded-full bg-warning-50 px-2 py-0.5 text-[12px] font-semibold text-warning-700">
-              Not confirmed
-            </span>
-          )}
-        </dd>
-      </dl>
-      <p class="mt-1 text-[13px] text-ink-600">To change your email address, ask Kuzikode.</p>
-      {user.email_verified_at ? null : (
-        <div class="mt-3">
-          <SendVerificationButton client:visible />
-        </div>
-      )}
-      <div class="mt-5">
-        <ProfileForm client:visible name={user.name} phone={user.phone ?? ''} />
-      </div>
-    </section>
-    {page.clients.length ? (
-      <section class="rounded-lg border border-line p-6" aria-labelledby="companies-title">
-        <h2 id="companies-title" class="font-sans text-base font-semibold">
-          Companies
-        </h2>
-        <ul class="mt-2 text-sm text-ink-800">
-          {page.clients.map((c) => (
-            <li>{c.name}</li>
-          ))}
-        </ul>
-        <p class="mt-2 text-[13px] text-ink-600">To change company details, contact Kuzikode.</p>
-      </section>
-    ) : null}
-    <section class="rounded-lg border border-line p-6" aria-labelledby="pw-title">
-      <h2 id="pw-title" class="font-sans text-base font-semibold">
-        Change password
-      </h2>
-      <p class="mt-1 text-sm text-ink-600">Changing your password signs out your other devices.</p>
-      <div class="mt-4 max-w-md">
-        <ChangePasswordForm client:visible audience="portal" forced={false} />
-      </div>
-    </section>
-    <section class="rounded-lg border border-line p-6" aria-labelledby="mfa-title">
-      <h2 id="mfa-title" class="font-sans text-base font-semibold">
-        Two-factor authentication
-      </h2>
-      <p class="mt-1 text-sm text-ink-600">
-        {mfa.enabled
-          ? 'On. You enter a code from your authenticator app when you sign in.'
-          : 'Optional. Adds a code from your phone when you sign in.'}
-      </p>
-      <div class="mt-4">
-        {mfa.enabled ? (
-          <MfaManage client:visible canDisable audience="portal" />
-        ) : (
-          <a
-            href="/portal/mfa/setup"
-            class="inline-flex h-10 items-center rounded-sm border border-line px-4 text-sm font-semibold text-ink-950 hover:bg-canvas"
-          >
-            Set up two-factor authentication
-          </a>
+  <PageHead
+    title="Your account"
+    sub="Your details, password, two-factor authentication and the devices you are signed in on."
+  />
+
+  <div class="kz-acct">
+    <div class="kz-acct__main">
+      <Window title="Your details" icon="account" id="details">
+        <dl class="kz-acct__email">
+          <dt>Email</dt>
+          <dd>
+            <span class="kz-acct__addr">{user.email}</span>
+            {user.email_verified_at ? (
+              <StatusPill tone="ok">Confirmed</StatusPill>
+            ) : (
+              <StatusPill tone="warn">Not confirmed</StatusPill>
+            )}
+          </dd>
+        </dl>
+        <p class="kz-acct__hint">To change your email address, ask Kuzikode.</p>
+        {user.email_verified_at ? null : (
+          <div class="kz-acct__verify">
+            <SendVerification client:visible />
+          </div>
         )}
-      </div>
-    </section>
-    <p class="text-sm">
-      <a href="/portal/account/sessions" class="font-semibold text-brand-600 underline underline-offset-2">
-        See signed-in devices
-      </a>
-    </p>
+        <div class="kz-acct__form">
+          <ProfileForm client:visible name={user.name} phone={user.phone ?? ''} />
+        </div>
+      </Window>
+
+      <Window title="Change password" icon="key" id="password">
+        <p class="kz-acct__lead">Changing your password signs out your other devices.</p>
+        <ChangePasswordForm client:visible audience="portal" forced={false} />
+      </Window>
+    </div>
+
+    <div class="kz-acct__side">
+      <Window title="Two-factor authentication" icon="lock" id="mfa">
+        <StatusPill slot="actions" tone={mfa.enabled ? 'ok' : 'neutral'}>
+          {mfa.enabled ? 'On' : 'Off'}
+        </StatusPill>
+        <p class="kz-acct__lead">
+          {mfa.enabled
+            ? 'On. You enter a code from your authenticator app when you sign in.'
+            : 'Optional. Adds a code from your phone when you sign in.'}
+        </p>
+        {mfa.enabled ? (
+          <MfaManage client:visible />
+        ) : (
+          <Button href="/portal/mfa/setup" variant="secondary" size="sm" lead="lock">
+            Set up two-factor authentication
+          </Button>
+        )}
+      </Window>
+
+      <Window title="Devices" icon="smartphone" id="devices">
+        <p class="kz-acct__lead">See where you are signed in and sign out any device you don't recognise.</p>
+        <a class="kz-acct__go" href="/portal/account/sessions">
+          See signed-in devices
+          <span aria-hidden="true">→</span>
+        </a>
+      </Window>
+
+      {page.clients.length ? (
+        <Window title="Companies" icon="clients" id="companies" meta={String(page.clients.length)}>
+          <ul class="kz-acct__cos">
+            {page.clients.map((c) => (
+              <li>{c.name}</li>
+            ))}
+          </ul>
+          <p class="kz-acct__hint">To change company details, contact Kuzikode.</p>
+        </Window>
+      ) : null}
+    </div>
   </div>
 </PortalLayout>

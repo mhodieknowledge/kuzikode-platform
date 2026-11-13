@@ -1,0 +1,62 @@
+---
+/**
+ * Support requests list window (R5.4, PANEL_DESIGN_SPEC §2 "ticket list + conversation window"). Full width on the support page;
+ * on a request page from 1024 px it is the left 4 columns of the master/detail view and `current` marks the open request (that
+ * row leaves its state out: the page head already shows it).
+ */
+import Window from '../Window.astro';
+import StatusPill from '../../primitives/StatusPill.astro';
+import Icon from '../../icons/Icon.astro';
+import type { PortalSupportListItem } from '../../../server/modules/support/portal';
+import { harareDateTime } from '../../../shared/devices';
+import { portalSupportStatus } from '../../../shared/support';
+import { SUPPORT_TONE } from './tone';
+
+interface Props {
+  requests: PortalSupportListItem[];
+  multiClient: boolean;
+  title: string;
+  current?: string | undefined;
+  span?: 8 | 12;
+  class?: string;
+}
+const { requests, multiClient, title, current, span = 12, class: className } = Astro.props;
+---
+
+<Window title={title} icon="support" meta={String(requests.length)} id="slist" span={span} class={className} flush>
+  <ul class="kz-wlist" aria-label="Support requests">
+    {requests.map((r) => {
+      const at = r.lastMessageAt ?? r.createdAt;
+      const here = r.id === current;
+      return (
+        <li class:list={['kz-sreq', here && 'is-current']}>
+          <div class="kz-sreq__main">
+            <a
+              class="kz-wrow__title kz-wrow__link"
+              href={`/portal/support/${r.id}`}
+              aria-current={here ? 'page' : undefined}
+            >
+              {r.subject}
+            </a>
+            <p class="kz-wrow__meta">
+              <span class="kz-wmono">{r.reference}</span> · {r.category}
+              {multiClient ? ` · ${r.clientName}` : ''}
+            </p>
+            <p class="kz-sreq__at">
+              <time datetime={at}>{harareDateTime(at)}</time>
+              {r.teamReplied && r.status === 'awaiting_client' ? (
+                <span class="kz-sreq__new">Kuzikode replied</span>
+              ) : null}
+            </p>
+          </div>
+          {here ? null : (
+            <div class="kz-sreq__state">
+              <StatusPill tone={SUPPORT_TONE[r.status]}>{portalSupportStatus(r.status)}</StatusPill>
+            </div>
+          )}
+          <Icon name="chevron-right" size={16} class="kz-sreq__go" />
+        </li>
+      );
+    })}
+  </ul>
+</Window>

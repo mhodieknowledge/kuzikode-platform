@@ -1,6 +1,6 @@
 ---
 import AuthLayout from '../../layouts/AuthLayout.astro';
-import { SetPasswordForm } from '../../components/auth/AuthForms';
+import { SetPasswordForm } from '../../ui/auth/AuthForms';
 
 const token = (Astro.url.searchParams.get('token') ?? '').slice(0, 200);
 Astro.response.headers.set('referrer-policy', 'no-referrer');
@@ -10,12 +10,13 @@ Astro.response.headers.set('referrer-policy', 'no-referrer');
   title="Set up your account"
   heading="Set up your account"
   intro="Choose a password to finish setting up your Kuzikode client portal account."
-  area="Client portal"
+  area="portal"
+  step={2}
 >
   {token ? (
     <SetPasswordForm client:load audience="portal" token={token} mode="invite" />
   ) : (
-    <p class="text-ink-600">
+    <p class="kz-auth__note">
       This link is incomplete. Open the link from your email again, or ask Kuzikode to resend it.
     </p>
   )}

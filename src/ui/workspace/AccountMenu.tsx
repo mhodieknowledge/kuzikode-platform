@@ -1,9 +1,22 @@
-/** The account menu in the workspace status bar (R5.1): initials plate + name, then account, devices and sign out. */
+/**
+ * The account menu in the workspace status bar (R5.1): initials plate + name, then account, devices, the light/dark theme switch
+ * (R5.4) and sign out.
+ */
 import { apiFetch } from '../lib/api';
 import { Icon } from '../icons/icon';
 import { Menu } from '../primitives';
+import { useTheme, type WorkspaceTheme } from './theme';
 
-export function AccountMenu({ name, email }: { name: string; email: string }) {
+export function AccountMenu({
+  name,
+  email,
+  theme: initialTheme = 'light',
+}: {
+  name: string;
+  email: string;
+  theme?: WorkspaceTheme;
+}) {
+  const { theme, toggle } = useTheme(initialTheme);
   async function signOut() {
     await apiFetch('/api/v1/auth/portal/logout', { method: 'POST', body: {} }).catch(() => undefined);
     window.location.assign('/portal/login');
@@ -33,6 +46,9 @@ export function AccountMenu({ name, email }: { name: string; email: string }) {
       items={[
         { label: 'Your account', href: '/portal/account', icon: 'account' },
         { label: 'Signed-in devices', href: '/portal/account/sessions', icon: 'key' },
+        theme === 'dark'
+          ? { label: 'Light theme', onSelect: toggle, icon: 'theme-light' }
+          : { label: 'Dark theme', onSelect: toggle, icon: 'theme-dark' },
         { label: 'Sign out', onSelect: () => void signOut(), icon: 'sign-out', danger: true },
       ]}
     />

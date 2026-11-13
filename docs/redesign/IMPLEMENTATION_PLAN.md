@@ -112,8 +112,8 @@ Ticked when the file is deleted (or, for the logic-only files marked *logic*, mo
 | forms/InterestForm, ApplicationForm | ui/public/forms ApplicationForm + useApplication, InterestForm (useEnquiry) | [x] R4.7 (deleted) |
 | forms/QuotationResponse, documents/QuotationDocument, InvoiceDocument | ui/documents (DocumentSheet + Quotation/InvoiceSheet, DocAside, QuotationResponse + useQuotationResponse) | [x] R4.8 (deleted) |
 | payments/CheckoutPage, CheckoutSummary, CardReturn | ui/public/checkout (useCheckout, useAttemptStatus, Checkout, CheckoutSummary, CardReturn, AttemptResult) | [x] R4.8 (deleted) |
-| portal/PortalAccount, SupportForms (ProjectMessageForm removed R5.2; StatusPill, AttemptStatus, SavedCards removed R5.3) | workspace | [ ] R5.4 |
-| auth/AuthForms | workspace/admin auth | [ ] R5.4 |
+| portal/PortalAccount, SupportForms (ProjectMessageForm removed R5.2; StatusPill, AttemptStatus, SavedCards removed R5.3) | ui/workspace/account (useAccount, ProfileForm, SendVerification, MfaManage, SessionActions), ui/workspace/support (useSupport, NewRequest, ReplyComposer, ResolveButton, CancellationRequest, AttachField) | [x] R5.4 (deleted) |
+| auth/AuthForms | ui/auth (useAuthForms, AuthForms, FormAlert, QrCode) + layouts/AuthLayout | [x] R5.4 (deleted) |
 | admin/UserMenu, NotificationsBell, CommandPalette, actions | admin shell | [ ] R6.1 |
 | admin/*Admin.tsx (22 modules), LineItemEditor, BarChart, CmsTabs, ContentTabs, SettingsNav, SettingsSections, PaymentGateways, AccountActions | admin modules | [ ] R6.2 |
 | ui/* (Badge, Button, Card, Choice, DataTable, Dialog, Field, FileUpload, FilterBar, Input, Menu, MoneyInput, Pagination, QrCode, RichTextEditor, Spinner, States, Toast, cn, index; api.ts *logic*) | src/ui/primitives | [ ] R6.2 (last users are admin modules) |

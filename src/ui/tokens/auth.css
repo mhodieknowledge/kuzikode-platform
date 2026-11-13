@@ -1,0 +1,466 @@
+/*
+ * Auth screens (R5.4, PANEL_DESIGN_SPEC §4, composition from IMG_5017): night panel + paper form from 1024 px; on phones and
+ * tablets a night band (wordmark + the H1) over the form. Also the auth form pieces (alert, success state, backup codes, QR, the
+ * 2FA steps), which the workspace account page reuses.
+ */
+@layer components {
+  .kz-authbody {
+    min-height: 100vh;
+    background: var(--paper);
+    color: var(--ink-700);
+  }
+  .kz-auth {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'band' 'intro' 'form' 'after';
+    align-content: start;
+  }
+  .kz-auth:focus {
+    outline: none;
+  }
+
+  /* Night panel / band */
+  .kz-auth__panel {
+    grid-area: band;
+    position: relative;
+    min-height: 168px;
+    padding: 16px;
+    overflow: hidden;
+    background-color: var(--night-900);
+    /* A faint 32 px grid: the workspace "desk" seen from above. */
+    background-image:
+      linear-gradient(to right, rgb(242 238 230 / 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(242 238 230 / 0.045) 1px, transparent 1px);
+    background-size: 32px 32px;
+    background-position: -1px -1px;
+    --kz-logo-accent: var(--gold-400);
+  }
+  .kz-auth__brand {
+    position: relative;
+    z-index: 1;
+    display: flex;
+  }
+  .kz-auth__brand a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-block: -10px;
+    color: var(--on-night);
+  }
+  .kz-auth__story,
+  .kz-auth__staff {
+    display: none;
+  }
+  .kz-auth__sheet {
+    display: contents;
+  }
+  .kz-auth__head {
+    grid-area: band;
+    align-self: end;
+    position: relative;
+    z-index: 1;
+    margin-top: 68px;
+    padding: 0 16px 20px;
+  }
+  .kz-auth__area {
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    color: var(--gold-400);
+  }
+  .kz-auth__title {
+    margin-top: 6px;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--on-night);
+    overflow-wrap: anywhere;
+    text-wrap: pretty;
+  }
+  .kz-auth__intro {
+    grid-area: intro;
+    padding: 20px 16px 0;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--ink-600);
+  }
+  .kz-auth__form {
+    grid-area: form;
+    padding: 20px 16px 0;
+  }
+  .kz-auth__after {
+    grid-area: after;
+    padding: 24px 16px 40px;
+    font-size: 0.9375rem;
+    color: var(--ink-600);
+  }
+  .kz-auth__after a,
+  .kz-auth__note a,
+  .kz-authlink {
+    font-weight: 600;
+    color: var(--link);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+    text-underline-offset: 3px;
+  }
+  .kz-auth__after a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  .kz-auth__note {
+    font-size: 0.9375rem;
+    color: var(--ink-600);
+  }
+
+  /* Step cards (workspace panel, desktop) */
+  .kz-auth__line {
+    max-width: 24ch;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    color: var(--on-night);
+  }
+  .kz-auth__steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin: 28px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .kz-auth__step {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 4px;
+    min-height: 128px;
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--night-800);
+    box-shadow: inset 0 0 0 1px var(--night-700);
+    color: var(--on-night-2);
+  }
+  .kz-auth__stepn {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    margin-bottom: 12px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px var(--night-600);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--on-night);
+  }
+  .kz-auth__stept {
+    align-self: end;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--on-night);
+  }
+  .kz-auth__stepx {
+    min-height: 2.7em;
+    font-size: 0.8125rem;
+    line-height: 1.35;
+  }
+  .kz-auth__step.is-lit {
+    background: var(--gold-400);
+    box-shadow: none;
+    color: var(--night-800);
+  }
+  .kz-auth__step.is-lit .kz-auth__stepn {
+    background: var(--night-950);
+    box-shadow: none;
+    color: var(--gold-400);
+  }
+  .kz-auth__step.is-lit .kz-auth__stept {
+    color: var(--night-950);
+  }
+  .kz-auth__step.is-done .kz-auth__stepn {
+    background: var(--night-700);
+    box-shadow: none;
+  }
+
+  /* Admin panel: a single staff line under the wordmark */
+  .kz-auth__staff {
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.8125rem;
+    color: var(--on-night-2);
+  }
+
+  /* Forms */
+  .kz-authform {
+    display: grid;
+    gap: 20px;
+  }
+  .kz-authform__go {
+    display: grid;
+    justify-items: start;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .kz-authform__check {
+    display: grid;
+    gap: 4px;
+  }
+  .kz-authform__lead {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--ink-600);
+  }
+  .kz-authform__bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .kz-authform__code .kz-input {
+    max-width: 16rem;
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    letter-spacing: 0.16em;
+  }
+  .kz-authlink {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 0.9375rem;
+  }
+  .kz-alert,
+  .kz-okline {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+  }
+  .kz-alert {
+    background: var(--danger-50);
+    color: var(--danger-700);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger-600) 28%, transparent);
+  }
+  .kz-okline {
+    background: var(--ok-50);
+    color: var(--ok-700);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ok-600) 28%, transparent);
+  }
+  .kz-alert > svg,
+  .kz-okline > svg {
+    flex: none;
+    margin-top: 1px;
+  }
+
+  /* Success state that replaces a form */
+  .kz-done {
+    display: grid;
+    justify-items: start;
+    gap: 12px;
+  }
+  .kz-done__mark {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--ok-50);
+    color: var(--ok-700);
+  }
+  .kz-done__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--ink-900);
+  }
+  .kz-done__body {
+    display: grid;
+    gap: 10px;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--ink-600);
+  }
+  .kz-done__go {
+    justify-self: start;
+    margin-top: 6px;
+  }
+
+  /* Backup codes */
+  .kz-codes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 4px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .kz-codes li {
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: var(--bone-50);
+    box-shadow: inset 0 0 0 1px var(--bone-200);
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    color: var(--ink-900);
+  }
+
+  /* 2FA enrolment */
+  .kz-qr {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 0 0 1px var(--bone-200);
+  }
+  .kz-mfasteps {
+    display: grid;
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .kz-mfasteps > li {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 12px;
+  }
+  .kz-mfasteps__n {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--night-900);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--on-night);
+  }
+  .kz-mfasteps__body {
+    display: grid;
+    gap: 12px;
+    padding-top: 3px;
+    font-size: 0.9375rem;
+    color: var(--ink-700);
+  }
+  .kz-mfasteps__key {
+    font-size: 0.875rem;
+    color: var(--ink-600);
+  }
+  .kz-mfasteps__key code {
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--bone-50);
+    box-shadow: inset 0 0 0 1px var(--bone-200);
+    font-family: var(--font-mono);
+    color: var(--ink-900);
+    word-break: break-all;
+  }
+
+  /* Tablet: a taller band, the form column centred */
+  @media (min-width: 640px) {
+    .kz-auth__panel {
+      min-height: 200px;
+      padding: 20px 32px;
+    }
+    .kz-auth__head {
+      padding: 0 max(32px, calc((100% - 28rem) / 2)) 28px;
+    }
+    .kz-auth__title {
+      font-size: 2rem;
+    }
+    .kz-auth__intro,
+    .kz-auth__form,
+    .kz-auth__after {
+      justify-self: center;
+      width: min(100% - 64px, 28rem);
+      padding-inline: 0;
+    }
+    .kz-auth__intro {
+      padding-top: 28px;
+    }
+    .kz-auth__form {
+      padding-top: 24px;
+    }
+  }
+
+  /* Desktop: the split */
+  @media (min-width: 1024px) {
+    .kz-auth {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      grid-template-areas: 'panel sheet';
+      align-content: stretch;
+      padding: 12px;
+    }
+    .kz-auth__panel {
+      grid-area: panel;
+      position: sticky;
+      top: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 40px;
+      height: calc(100dvh - 24px);
+      min-height: 560px;
+      padding: 36px 40px 40px;
+      border-radius: 16px;
+    }
+    .kz-auth__story {
+      display: block;
+    }
+    .kz-auth__staff {
+      display: flex;
+    }
+    .kz-auth__sheet {
+      grid-area: sheet;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 56px 40px;
+    }
+    .kz-auth__sheet > * {
+      width: min(100%, 26rem);
+      margin-inline: auto;
+    }
+    .kz-auth__head,
+    .kz-auth__intro,
+    .kz-auth__form,
+    .kz-auth__after {
+      grid-area: auto;
+      justify-self: auto;
+      margin-top: 0;
+      padding: 0;
+    }
+    .kz-auth__area {
+      color: var(--ink-600);
+    }
+    .kz-auth__title {
+      font-size: 2.25rem;
+      color: var(--ink-900);
+    }
+    .kz-auth__intro {
+      margin-top: 12px;
+    }
+    .kz-auth__form {
+      margin-top: 32px;
+    }
+    .kz-auth__after {
+      margin-top: 24px;
+      padding-bottom: 0;
+    }
+  }
+  @media (min-width: 1440px) {
+    .kz-auth__panel {
+      padding: 44px 48px 48px;
+    }
+    .kz-auth__line {
+      font-size: 1.75rem;
+    }
+  }
+}

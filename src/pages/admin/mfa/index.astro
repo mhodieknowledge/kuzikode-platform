@@ -1,6 +1,6 @@
 ---
 import AuthLayout from '../../../layouts/AuthLayout.astro';
-import { MfaVerifyForm } from '../../../components/auth/AuthForms';
+import { MfaVerifyForm } from '../../../ui/auth/AuthForms';
 import { loadAdminPage, safeNext } from '../../../server/lib/admin-page';
 
 const { ctx } = Astro.locals;
@@ -13,7 +13,7 @@ const next = safeNext(Astro.url.searchParams.get('next'));
   title="Two-factor authentication"
   heading="Enter your code"
   intro="Open your authenticator app and enter the current code."
-  area="Admin"
+  area="admin"
   csrfToken={page.csrfToken}
 >
   <MfaVerifyForm client:load audience="admin" next={next} />

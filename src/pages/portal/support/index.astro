@@ -1,79 +1,74 @@
 ---
+/**
+ * Workspace support (R5.4, PANEL_DESIGN_SPEC §2): the filter (all / open), the requests window (8) and an "At a glance" window
+ * (4) with the counts per state; one emerald action, "New request", in the page head. Empty: a plain mono line in the window.
+ */
 import PortalLayout from '../../../layouts/PortalLayout.astro';
-import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import PageHead from '../../../ui/workspace/PageHead.astro';
+import Window from '../../../ui/workspace/Window.astro';
+import FilterNav from '../../../ui/workspace/finance/FilterNav.astro';
+import SupportList from '../../../ui/workspace/support/SupportList.astro';
+import Button from '../../../ui/primitives/Button.astro';
 import { loadPortalPage } from '../../../server/lib/portal-page';
 import { listPortalRequests } from '../../../server/modules/support/portal';
-import { harareDateTime } from '../../../shared/devices';
-import { SUPPORT_STATUS_TONE, portalSupportStatus } from '../../../shared/support';
 
 const { ctx } = Astro.locals;
 const page = await loadPortalPage(ctx, Astro.request, { area: 'support' });
 if (page instanceof Response) return page;
-const PILL_TONE = { info: 'info', warning: 'warn', success: 'ok', neutral: 'neutral' } as const;
 const show = Astro.url.searchParams.get('show') === 'open' ? 'open' : 'all';
 const requests = await listPortalRequests(ctx, { show });
 const multiClient = page.clients.length > 1;
-const tab = (on: boolean) =>
-  on
-    ? 'rounded-full bg-ink-950 px-3 py-1 text-sm font-semibold text-white'
-    : 'rounded-full px-3 py-1 text-sm font-semibold text-ink-800 underline-offset-2 hover:underline';
+const tabs = [
+  { key: 'all', label: 'All', href: '/portal/support' },
+  { key: 'open', label: 'Open', href: '/portal/support?show=open' },
+];
+const count = (pred: (s: string) => boolean) => requests.filter((r) => pred(r.status)).length;
+const glance = [
+  { label: 'Open', value: count((s) => s === 'open') },
+  { label: 'Waiting for your reply', value: count((s) => s === 'awaiting_client') },
+  ...(show === 'all' ? [{ label: 'Resolved or closed', value: count((s) => s === 'resolved' || s === 'closed') }] : []),
+];
 ---
 
 <PortalLayout title="Support" page={page} active="support">
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <h1 class="text-2xl font-bold tracking-display md:text-3xl">Support</h1>
-    <a
-      href="/portal/support/new"
-      class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
-    >
+  <PageHead title="Support" sub="Ask the Kuzikode team for help and follow every request here.">
+    <Button slot="aside" href="/portal/support/new" lead="add">
       New request
-    </a>
+    </Button>
+  </PageHead>
+  <FilterNav label="Filter requests" items={tabs} current={show} />
+
+  <div class="kz-wgrid">
+    {requests.length === 0 ? (
+      <Window title="Requests" icon="support" id="slist" span={8}>
+        <div class="kz-wnote">
+          <p class="kz-wnote__code">{show === 'open' ? 'no open requests' : 'no requests yet'}</p>
+          <p>
+            {show === 'open'
+              ? 'You have no open requests.'
+              : 'You have not asked for help yet. When you need something, open a request and our team will reply here.'}
+          </p>
+        </div>
+      </Window>
+    ) : (
+      <Fragment>
+        <SupportList
+          requests={requests}
+          multiClient={multiClient}
+          title={show === 'open' ? 'Open requests' : 'All requests'}
+          span={8}
+        />
+        <Window title="At a glance" icon="activity" id="glance" span={4} class="kz-sglance">
+          <dl class="kz-sglance__list">
+            {glance.map((g) => (
+              <div>
+                <dt>{g.label}</dt>
+                <dd>{g.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </Window>
+      </Fragment>
+    )}
   </div>
-  <nav class="mt-4 flex gap-2" aria-label="Filter requests">
-    <a href="/portal/support" class={tab(show === 'all')} aria-current={show === 'all' ? 'page' : undefined}>
-      All
-    </a>
-    <a
-      href="/portal/support?show=open"
-      class={tab(show === 'open')}
-      aria-current={show === 'open' ? 'page' : undefined}
-    >
-      Open
-    </a>
-  </nav>
-  {requests.length === 0 ? (
-    <p class="mt-6 max-w-2xl rounded-lg border border-line bg-surface p-6 text-ink-600">
-      {show === 'open'
-        ? 'You have no open requests.'
-        : 'You have not asked for help yet. When you need something, open a request and our team will reply here.'}
-    </p>
-  ) : (
-    <ul class="mt-6 divide-y divide-line rounded-lg border border-line bg-surface" aria-label="Support requests">
-      {requests.map((r) => {
-        const st = portalSupportStatus(r.status);
-        return (
-          <li class="relative flex flex-wrap items-start justify-between gap-x-4 gap-y-2 p-4 hover:bg-canvas md:p-5">
-            <div class="min-w-0">
-              <a
-                href={`/portal/support/${r.id}`}
-                class="font-semibold text-ink-950 after:absolute after:inset-0 hover:underline [overflow-wrap:anywhere]"
-              >
-                {r.subject}
-              </a>
-              <p class="mt-0.5 text-sm text-ink-600">
-                <span class="font-mono">{r.reference}</span> · {r.category}
-                {multiClient ? ` · ${r.clientName}` : ''}
-              </p>
-              <p class="mt-0.5 text-[13px] text-ink-600">
-                Last activity{' '}
-                <time datetime={r.lastMessageAt ?? r.createdAt}>{harareDateTime(r.lastMessageAt ?? r.createdAt)}</time>
-                {r.teamReplied && r.status === 'awaiting_client' ? ' · Kuzikode replied' : ''}
-              </p>
-            </div>
-            <StatusPill tone={PILL_TONE[SUPPORT_STATUS_TONE[r.status]]}>{st}</StatusPill>
-          </li>
-        );
-      })}
-    </ul>
-  )}
 </PortalLayout>

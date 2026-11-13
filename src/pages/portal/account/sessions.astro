@@ -1,6 +1,14 @@
 ---
+/**
+ * Signed-in devices (R5.4): one window listing the sessions (this device lit in gold, mono times and IP), each other device with
+ * its own "Sign out", and "Sign out everywhere" (clay, behind a confirmation sheet) at the window's foot.
+ */
 import PortalLayout from '../../../layouts/PortalLayout.astro';
-import { SessionActions } from '../../../components/admin/AccountActions';
+import PageHead from '../../../ui/workspace/PageHead.astro';
+import Window from '../../../ui/workspace/Window.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import Icon from '../../../ui/icons/Icon.astro';
+import { SignOutDevice, SignOutEverywhere } from '../../../ui/workspace/account/SessionActions';
 import { loadPortalPage } from '../../../server/lib/portal-page';
 import { listSessions } from '../../../server/modules/auth/service';
 import { deviceLabel, harareDateTime } from '../../../shared/devices';
@@ -9,40 +17,53 @@ const { ctx } = Astro.locals;
 const page = await loadPortalPage(ctx, Astro.request);
 if (page instanceof Response) return page;
 const sessions = await listSessions(ctx, page.auth);
+const mobile = (ua: string | null) => !!ua && /Mobi|Android|iPhone|iPad/i.test(ua);
 ---
 
 <PortalLayout title="Signed-in devices" page={page} active="account">
-  <p class="text-sm">
-    <a href="/portal/account" class="font-semibold text-brand-600 underline underline-offset-2">
-      Your account
-    </a>
-  </p>
-  <h1 class="mt-2 text-2xl font-bold tracking-display md:text-3xl">Signed-in devices</h1>
-  <p class="mt-1 text-sm text-ink-600">
-    You stay signed in for up to 30 days, or 24 hours without activity. Sign out any device you don't recognise.
-  </p>
-  <ul class="mt-6 grid max-w-3xl gap-3" aria-label="Signed-in devices">
-    {sessions.map((s) => (
-      <li class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line p-4">
-        <div class="min-w-0 text-sm">
-          <p class="font-semibold text-ink-950">
-            {deviceLabel(s.userAgent)}
-            {s.current ? (
-              <span class="ml-2 rounded-full bg-success-50 px-2 py-0.5 text-[12px] font-semibold text-success-700">
-                This device
+  <PageHead
+    title="Signed-in devices"
+    sub="You stay signed in for up to 30 days, or 24 hours without activity. Sign out any device you don't recognise."
+    back={{ href: '/portal/account', label: 'Your account' }}
+  />
+  <div class="kz-wgrid">
+    <Window title="Devices" icon="key" id="devices" span={8} meta={String(sessions.length)} flush>
+      <ul class="kz-wlist" aria-label="Signed-in devices">
+        {sessions.map((s) => {
+          const label = deviceLabel(s.userAgent);
+          return (
+            <li class:list={['kz-sess', s.current && 'is-current']}>
+              <span class="kz-sess__icon" aria-hidden="true">
+                <Icon name={mobile(s.userAgent) ? 'smartphone' : 'globe'} size={20} />
               </span>
-            ) : null}
-          </p>
-          <p class="mt-0.5 text-ink-600">
-            Signed in {harareDateTime(s.createdAt)} · last active {harareDateTime(s.lastSeenAt)}
-            {s.ip ? ` · IP ${s.ip}` : ''}
-          </p>
-        </div>
-        {s.current ? null : <SessionActions client:visible sessionId={s.id} audience="portal" />}
-      </li>
-    ))}
-  </ul>
-  <div class="mt-6">
-    <SessionActions client:visible audience="portal" />
+              <div class="kz-sess__main">
+                <p class="kz-wrow__title">
+                  {label}
+                  {s.current ? <StatusPill tone="lit">This device</StatusPill> : null}
+                </p>
+                <p class="kz-sess__meta">
+                  <span>
+                    Signed in <time datetime={s.createdAt}>{harareDateTime(s.createdAt)}</time>
+                  </span>
+                  <span>
+                    last active <time datetime={s.lastSeenAt}>{harareDateTime(s.lastSeenAt)}</time>
+                  </span>
+                  {s.ip ? <span>IP {s.ip}</span> : null}
+                </p>
+              </div>
+              {s.current ? null : (
+                <div class="kz-sess__act">
+                  <SignOutDevice client:visible sessionId={s.id} device={label} />
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      <div class="kz-sess__foot">
+        <p>Lost a phone or signed in somewhere public? Sign out of every device at once, including this one.</p>
+        <SignOutEverywhere client:visible />
+      </div>
+    </Window>
   </div>
 </PortalLayout>

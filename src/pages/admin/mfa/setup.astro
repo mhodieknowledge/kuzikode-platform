@@ -1,6 +1,6 @@
 ---
 import AuthLayout from '../../../layouts/AuthLayout.astro';
-import { MfaSetupForm } from '../../../components/auth/AuthForms';
+import { MfaSetupForm } from '../../../ui/auth/AuthForms';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 
 const { ctx } = Astro.locals;
@@ -18,7 +18,7 @@ const required = page.auth.mfa.required;
       ? 'Your role requires two-factor authentication. It protects your account if your password is ever stolen.'
       : 'Protect your account with a code from your phone each time you sign in.'
   }
-  area="Admin"
+  area="admin"
   csrfToken={page.csrfToken}
 >
   <MfaSetupForm client:load audience="admin" after={required ? '/admin' : '/admin/account/security'} />

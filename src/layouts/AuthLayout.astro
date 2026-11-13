@@ -1,37 +1,85 @@
 ---
-/** Centered card for sign-in, password and 2FA pages (admin and portal). */
-import AppLayout from './AppLayout.astro';
-import Logo from '../components/Logo.astro';
+/**
+ * Auth screens for the client workspace and the admin (R5.4, PANEL_DESIGN_SPEC §4, from IMG_5017's split composition): a night
+ * panel on the left and the form on paper on the right. The workspace panel carries one line on what the workspace is and three
+ * small step cards (invitation → password → workspace, the current one lit in gold); the admin panel is plain night with the
+ * wordmark and a "Staff sign-in" label, no marketing copy. Phones and tablets: the panel becomes a ~160 px night band holding the
+ * wordmark and the page title (the one H1), the form below on paper. Written from scratch on Base (BRIEF B.0).
+ */
+import Base from './Base.astro';
+import Logo from '../ui/brand/Logo.astro';
+import Icon from '../ui/icons/Icon.astro';
 
 interface Props {
   title: string;
   heading: string;
-  intro?: string;
-  area: 'Admin' | 'Client portal';
+  intro?: string | undefined;
+  area: 'portal' | 'admin';
+  /** Workspace journey step to light: 1 invitation, 2 password, 3 workspace. */
+  step?: 1 | 2 | 3;
   csrfToken?: string | undefined;
 }
-const { title, heading, intro, area, csrfToken } = Astro.props;
+const { title, heading, intro, area, step = 3, csrfToken } = Astro.props;
+const portal = area === 'portal';
+const label = portal ? 'Client workspace' : 'Staff sign-in';
+const steps = [
+  { n: 1, title: 'Invitation', text: 'Kuzikode emails you a link' },
+  { n: 2, title: 'Password', text: 'You choose your own' },
+  { n: 3, title: 'Workspace', text: 'Follow projects, pay invoices' },
+] as const;
 ---
 
-<AppLayout title={`${title} · Kuzikode ${area}`} csrfToken={csrfToken}>
-  <main
-    id="main"
-    tabindex="-1"
-    class="flex min-h-screen flex-col items-center justify-center px-4 py-12 focus:outline-none"
-  >
-    <div class="w-full max-w-md">
-      <div class="mb-8 flex items-center justify-between">
-        <Logo href="/" height={26} />
-        <span class="text-[13px] font-semibold text-ink-600">{area}</span>
+<Base
+  title={`${title} · Kuzikode ${portal ? 'Client Portal' : 'Admin'}`}
+  noindex
+  csrfToken={csrfToken}
+  bodyClass="kz-authbody"
+>
+  <main id="main" tabindex="-1" class:list={['kz-auth', `kz-auth--${area}`]}>
+    <aside class="kz-auth__panel on-night" aria-label={portal ? 'About the client workspace' : 'Kuzikode admin'}>
+      <div class="kz-auth__brand">
+        <Logo href="/" height={24} />
       </div>
-      <div class="rounded-lg border border-line bg-surface p-6 shadow-1 md:p-8">
-        <h1 class="text-2xl font-bold tracking-display">{heading}</h1>
-        {intro ? <p class="mt-2 text-[15px] text-ink-600">{intro}</p> : null}
-        <div class="mt-6">
-          <slot />
+      {portal ? (
+        <div class="kz-auth__story">
+          <p class="kz-auth__line">
+            Your quotations, invoices, payments and project progress with Kuzikode, in one workspace.
+          </p>
+          <ol class="kz-auth__steps" aria-label="How access works">
+            {steps.map((s) => (
+              <li class:list={['kz-auth__step', s.n === step && 'is-lit', s.n < step && 'is-done']}>
+                <span class="kz-auth__stepn" aria-hidden="true">
+                  {s.n < step ? <Icon name="check" size={16} /> : s.n}
+                </span>
+                <span class="kz-auth__stept">{s.title}</span>
+                <span class="kz-auth__stepx">{s.text}</span>
+                {s.n === step ? <span class="sr-only">(this step)</span> : null}
+              </li>
+            ))}
+          </ol>
         </div>
+      ) : (
+        <p class="kz-auth__staff">
+          <Icon name="lock" size={16} />
+          Kuzikode staff only
+        </p>
+      )}
+    </aside>
+
+    <div class="kz-auth__sheet">
+      <header class="kz-auth__head">
+        <p class="kz-auth__area">{label}</p>
+        <h1 class="kz-auth__title">{heading}</h1>
+      </header>
+      {intro ? <p class="kz-auth__intro">{intro}</p> : null}
+      <div class="kz-auth__form">
+        <slot />
       </div>
-      <slot name="after" />
+      {Astro.slots.has('after') ? (
+        <div class="kz-auth__after">
+          <slot name="after" />
+        </div>
+      ) : null}
     </div>
   </main>
-</AppLayout>
+</Base>

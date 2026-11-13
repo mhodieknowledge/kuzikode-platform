@@ -6,6 +6,8 @@
  * Tablet: the dock keeps icons with short labels. Phones: a slim status bar and a bottom dock of four destinations + "More"
  * (sheet), with safe-area padding; the page scrolls between them.
  * Props are unchanged so every portal page keeps working while its body is rebuilt (R5.2–R5.4).
+ * Theme (R5.4): the `kz_theme` cookie (set by the account menu / More sheet toggle) is read here so <html data-theme> is
+ * rendered server-side and dark pages never flash light.
  */
 import Base from './Base.astro';
 import Logo from '../ui/brand/Logo.astro';
@@ -14,6 +16,7 @@ import { AccountMenu } from '../ui/workspace/AccountMenu';
 import { CommandPalette, type PaletteEntry } from '../ui/workspace/CommandPalette';
 import { MoreSheet } from '../ui/workspace/MoreSheet';
 import { splitForPhone, workspaceItems, type WorkspaceKey } from '../ui/workspace/nav';
+import { THEME_COOKIE, readTheme } from '../ui/workspace/theme';
 import type { PortalPage } from '../server/lib/portal-page';
 
 interface Props {
@@ -28,6 +31,7 @@ const account = items.find((i) => i.key === 'account')!;
 const phone = splitForPhone(items);
 const clientLabel = page.clients.map((c) => c.name).join(', ');
 const here = items.find((i) => i.key === active);
+const theme = readTheme(Astro.cookies.get(THEME_COOKIE)?.value);
 const palette: PaletteEntry[] = [
   ...items.map((i) => ({ label: i.label, href: i.href, icon: i.icon, group: 'Go to' as const })),
   ...(page.areas.support
@@ -52,7 +56,13 @@ const palette: PaletteEntry[] = [
 ];
 ---
 
-<Base title={`${title} · Kuzikode Client Portal`} noindex csrfToken={page.csrfToken} bodyClass="kz-wsbody">
+<Base
+  title={`${title} · Kuzikode Client Portal`}
+  noindex
+  csrfToken={page.csrfToken}
+  bodyClass="kz-wsbody"
+  theme={theme === 'dark' ? 'dark' : undefined}
+>
   <div class="kz-ws">
     <header class="kz-wsbar">
       <div class="kz-wsbar__l">
@@ -75,7 +85,7 @@ const palette: PaletteEntry[] = [
           <span class="sr-only">Search the workspace</span>
           <kbd aria-hidden="true">⌘K</kbd>
         </button>
-        <AccountMenu client:load name={page.auth.user.name} email={page.auth.user.email} />
+        <AccountMenu client:load name={page.auth.user.name} email={page.auth.user.email} theme={theme} />
       </div>
     </header>
 
@@ -115,7 +125,7 @@ const palette: PaletteEntry[] = [
           </li>
         ))}
         <li>
-          <MoreSheet client:idle items={phone.more} active={active} />
+          <MoreSheet client:idle items={phone.more} active={active} theme={theme} />
         </li>
       </ul>
     </nav>

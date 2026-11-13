@@ -1,6 +1,9 @@
 ---
+/** New support request (R5.4): one window (8 columns from 1024 px) holding the form; "Support" goes back. */
 import PortalLayout from '../../../layouts/PortalLayout.astro';
-import { NewSupportRequest } from '../../../components/portal/SupportForms';
+import PageHead from '../../../ui/workspace/PageHead.astro';
+import Window from '../../../ui/workspace/Window.astro';
+import { NewRequest } from '../../../ui/workspace/support/NewRequest';
 import { loadPortalPage } from '../../../server/lib/portal-page';
 import { portalSupportOptions } from '../../../server/modules/support/portal';
 import { SUPPORT_CATEGORIES } from '../../../shared/support';
@@ -12,18 +15,19 @@ const options = await portalSupportOptions(ctx);
 ---
 
 <PortalLayout title="New support request" page={page} active="support">
-  <p class="text-sm">
-    <a href="/portal/support" class="font-semibold text-brand-600 underline underline-offset-2">
-      Support
-    </a>
-  </p>
-  <h1 class="mt-2 text-2xl font-bold tracking-display md:text-3xl">New support request</h1>
-  <div class="mt-6 max-w-2xl rounded-lg border border-line bg-surface p-5 md:p-6">
-    <NewSupportRequest
-      client:load
-      clients={options.clients}
-      projects={options.projects}
-      categories={SUPPORT_CATEGORIES.map((c) => ({ value: c.value, label: c.label }))}
-    />
+  <PageHead
+    title="New support request"
+    sub="Tell us what you need. Our team replies on the request, where you can follow up."
+    back={{ href: '/portal/support', label: 'Support' }}
+  />
+  <div class="kz-wgrid">
+    <Window title="Request" icon="support" id="new" span={8}>
+      <NewRequest
+        client:load
+        clients={options.clients}
+        projects={options.projects}
+        categories={SUPPORT_CATEGORIES.map((c) => ({ value: c.value, label: c.label }))}
+      />
+    </Window>
   </div>
 </PortalLayout>

@@ -83,6 +83,16 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
 - [x] **R6.1 Admin shell** in the related but more utilitarian panel language (keep it distinct from the client workspace).
 - [x] **R6.2 Restyle every admin module** (dashboard, clients, leads, services, packages, quotations, invoices, payments, projects, expenses, CMS, careers, notifications, settings, reports, audit) with functionality untouched. Dense data views get a mobile list/card pattern.
 
+## R9: Owner refinements (2026-11-13), DO THESE NEXT, before R7.2 and R8. Spec: `docs/redesign/REFINEMENTS.md`
+Scope guard: only these items; don't touch other sections.
+- [ ] **R9.1 Service catalogue + pricing data** (REFINEMENTS §1): migration (deactivate old, insert new), seeds, 301s, remove products/Business Suite/care/hosting/email/domains from public pages, update the pricing-accuracy test.
+- [ ] **R9.2 Pricing pages** (§2): carousel primary, tabs removed, all-plans comparison table below, one CTA, no duplicate sections; each division page only its own offers.
+- [ ] **R9.3 Brand + header + typography** (§8, §9): 3 mark explorations → chosen SVG set; "Kuzikode Intelligent Technologies" everywhere; header redesign; Poppins + webdev type scale in tokens; B.1a guard updated.
+- [ ] **R9.4 Floating side menu** (§5): bug fixes, floating panel, icons, no prices/dividers, Playwright open/close/nav tests.
+- [ ] **R9.5 Footer redesign** (§6) with the exact contact details (settings-backed).
+- [ ] **R9.6 Home page + hero redesign** (§7): background-image hero with overlay widgets, mid-page bands, division widgets with starting prices only, home image batch written + owner notified.
+- [ ] **R9.7 Image integration audit + tech-stack removal** (§3, §4) on all public pages; 301 `/technologies*`.
+
 ## R7: Imagery and motion polish
 - [x] **R7.1 Process delivered owner images** (B.4) and replace interim treatments. Further prompt batches as needed.
 - [ ] **R7.2 Motion pass (trimmed 2026-11-13 to save usage).** One pass on the public pages only: `review-animations` + `animation-performance` on the home, services, pricing and checkout flows; fix what they flag; `remove-animations` where motion is excessive. Skip `find-animation-opportunities` and `improve-animations`. Run as a fresh `sonnet`/`medium` subagent; you review.

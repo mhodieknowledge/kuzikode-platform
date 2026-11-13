@@ -81,7 +81,7 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
 
 ## R6: Admin interface
 - [x] **R6.1 Admin shell** in the related but more utilitarian panel language (keep it distinct from the client workspace).
-- [~] **R6.2 Restyle every admin module** (dashboard, clients, leads, services, packages, quotations, invoices, payments, projects, expenses, CMS, careers, notifications, settings, reports, audit) with functionality untouched. Dense data views get a mobile list/card pattern.
+- [x] **R6.2 Restyle every admin module** (dashboard, clients, leads, services, packages, quotations, invoices, payments, projects, expenses, CMS, careers, notifications, settings, reports, audit) with functionality untouched. Dense data views get a mobile list/card pattern.
 
 ## R7: Imagery and motion polish
 - [ ] **R7.1 Process delivered owner images** (B.4) and replace interim treatments. Further prompt batches as needed.

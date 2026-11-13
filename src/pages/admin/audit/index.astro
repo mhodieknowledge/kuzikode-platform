@@ -1,5 +1,16 @@
 ---
+/**
+ * Audit log (R6.2 group 3): filters (sheet on phones), a dense table → list rows with mono timestamps and an expandable
+ * before / after per entry, Newer / Older paging, CSV export of the current filter.
+ */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import DataTable from '../../../ui/admin/DataTable.astro';
+import Cell from '../../../ui/admin/Cell.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import EmptyState from '../../../ui/primitives/EmptyState.astro';
+import { FilterBar } from '../../../ui/admin/FilterBar';
+import { harareStamp } from '../../../ui/admin/projects/labels';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { auditFilters, listAudit } from '../../../server/modules/audit';
 import { auditQuery } from '../../../shared/schemas/reports';
@@ -17,155 +28,129 @@ const qs = (over: Record<string, string | number | undefined>) => {
   const s = out.toString();
   return s ? `?${s}` : '';
 };
-const when = (iso: string) =>
-  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
-    new Date(iso),
-  );
-const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm';
 const exportQs = qs({});
+const filtered = !!(filter.actor || filter.entityType || filter.action || filter.from || filter.to || filter.entityId);
 ---
 
 <AdminLayout title="Audit log" page={page}>
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <h1 class="text-2xl font-bold tracking-display">Audit log</h1>
-    <a
-      href={`/api/v1/admin/audit/export.csv${exportQs}`}
-      class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold hover:border-ink-400"
-      download
-    >
-      Export CSV
-    </a>
-  </div>
-  {data.financeOnly ? <p class="mt-2 text-sm text-ink-600">You see changes to financial records only.</p> : null}
-  <form
-    method="get"
-    class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-6 lg:items-end"
-    aria-label="Filter the audit log"
+  <PageHead
+    title="Audit log"
+    meta={
+      data.financeOnly
+        ? 'You see changes to financial records only.'
+        : 'Who changed what, newest first. Times are Harare time.'
+    }
   >
-    <label class="flex flex-col gap-1 text-sm font-medium">
-      Person
-      <select name="actor" class={field}>
-        <option value="">Anyone</option>
-        {options.actors.map((a) => (
-          <option value={a.id} selected={filter.actor === a.id}>
-            {a.name}
-          </option>
-        ))}
-      </select>
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium">
-      Record type
-      <select name="entityType" class={field}>
-        <option value="">Any</option>
-        {options.entityTypes.map((t) => (
-          <option value={t} selected={filter.entityType === t}>
-            {t.replace(/_/g, ' ')}
-          </option>
-        ))}
-      </select>
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium">
-      Action
-      <input name="action" value={filter.action ?? ''} placeholder="e.g. invoice." class={field} />
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium">
-      From
-      <input type="date" name="from" value={filter.from ?? ''} class={field} />
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium">
-      To
-      <input type="date" name="to" value={filter.to ?? ''} class={field} />
-    </label>
-    <button class="h-10 rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500">
-      Filter
-    </button>
-  </form>
+    <Fragment slot="actions">
+      <Button href={`/api/v1/admin/audit/export.csv${exportQs}`} variant="secondary" lead="download" download>
+        Export CSV
+      </Button>
+    </Fragment>
+  </PageHead>
+  <div class="kz-atools">
+    <FilterBar
+      client:load
+      label="Filter the audit log"
+      hidden={filter.entityId ? { entityId: filter.entityId } : {}}
+      clearHref="/admin/audit"
+      fields={[
+        { kind: 'search', name: 'action', label: 'Action', value: filter.action ?? '', placeholder: 'e.g. invoice.' },
+        {
+          kind: 'select',
+          name: 'actor',
+          label: 'Person',
+          value: filter.actor ?? '',
+          options: [{ value: '', label: 'Anyone' }, ...options.actors.map((a) => ({ value: a.id, label: a.name }))],
+        },
+        {
+          kind: 'select',
+          name: 'entityType',
+          label: 'Record type',
+          value: filter.entityType ?? '',
+          options: [
+            { value: '', label: 'Any' },
+            ...options.entityTypes.map((t) => ({ value: t, label: t.replace(/_/g, ' ') })),
+          ],
+        },
+        { kind: 'date', name: 'from', label: 'From', value: filter.from ?? '' },
+        { kind: 'date', name: 'to', label: 'To', value: filter.to ?? '' },
+      ]}
+    />
+  </div>
   {filter.entityId ? (
-    <p class="mt-3 text-sm text-ink-600">
-      Showing record <span class="font-mono">{filter.entityId}</span>.{' '}
-      <a class="font-semibold text-brand-600 hover:underline" href={`/admin/audit${qs({ entityId: undefined })}`}>
-        Show all
-      </a>
+    <p class="kz-anotice kz-anotice--info">
+      <span>
+        Showing record <span class="kz-amono">{filter.entityId}</span>.
+      </span>
+      <a href={`/admin/audit${qs({ entityId: undefined })}`}>Show all</a>
     </p>
   ) : null}
-  <div class="relative mt-4 overflow-x-auto rounded-lg border border-line bg-surface">
-    <table class="w-full min-w-[760px] text-sm">
-      <thead class="border-b border-line text-left text-[12px] text-ink-600">
-        <tr>
-          <th scope="col" class="px-4 py-2.5 font-semibold">
-            When (Harare)
-          </th>
-          <th scope="col" class="px-4 py-2.5 font-semibold">
-            Who
-          </th>
-          <th scope="col" class="px-4 py-2.5 font-semibold">
-            Action
-          </th>
-          <th scope="col" class="px-4 py-2.5 font-semibold">
-            Record
-          </th>
-          <th scope="col" class="px-4 py-2.5 font-semibold">
-            Details
-          </th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-line align-top">
-        {data.items.length === 0 ? (
-          <tr>
-            <td colspan="5" class="px-4 py-8 text-center text-ink-600">
-              No entries match.
-            </td>
-          </tr>
-        ) : null}
-        {data.items.map((a) => (
-          <tr>
-            <td class="px-4 py-2.5 whitespace-nowrap">{when(a.created_at)}</td>
-            <td class="px-4 py-2.5">{a.actor_name ?? (a.actor_type === 'staff' ? 'Former user' : a.actor_type)}</td>
-            <td class="px-4 py-2.5 font-mono text-[13px]">{a.action}</td>
-            <td class="px-4 py-2.5">
-              {a.entity_id ? (
-                <a
-                  class="font-mono text-[13px] hover:underline"
-                  href={`/admin/audit${qs({ entityId: a.entity_id, entityType: undefined })}`}
-                >
-                  {a.entity_type} · {a.entity_id}
-                </a>
-              ) : (
-                (a.entity_type ?? '')
-              )}
-            </td>
-            <td class="px-4 py-2.5">
-              {a.before || a.after ? (
-                <details>
-                  <summary class="cursor-pointer text-brand-600">Show</summary>
-                  {a.before ? (
-                    <pre class="mt-2 max-w-md relative overflow-x-auto rounded-sm bg-canvas p-2 text-[12px] whitespace-pre-wrap">Before: {a.before}</pre>
-                  ) : null}
-                  {a.after ? (
-                    <pre class="mt-2 max-w-md relative overflow-x-auto rounded-sm bg-canvas p-2 text-[12px] whitespace-pre-wrap">After: {a.after}</pre>
-                  ) : null}
-                </details>
-              ) : (
-                <span class="text-ink-600">–</span>
-              )}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
+  <DataTable
+    caption="Audit log entries"
+    count={data.items.length}
+    columns={[
+      { label: 'When (Harare)' },
+      { label: 'Who' },
+      { label: 'Action' },
+      { label: 'Record' },
+      { label: 'Details' },
+    ]}
+  >
+    <EmptyState slot="empty" code={filtered ? 'no matches' : '0 entries'} title="No entries match." />
+    {data.items.map((a) => (
+      <tr>
+        <Cell class="kz-dt__nw" tone="mute">
+          <span class="kz-amono">{harareStamp(a.created_at)}</span>
+        </Cell>
+        <Cell tone="mute">{a.actor_name ?? (a.actor_type === 'staff' ? 'Former user' : a.actor_type)}</Cell>
+        <Cell m="main">
+          <span class="kz-dt__strong kz-amono">{a.action}</span>
+          <span class="kz-dt__ph">
+            <span class="kz-dt__sub is-text">
+              {a.actor_name ?? (a.actor_type === 'staff' ? 'Former user' : a.actor_type)} · {harareStamp(a.created_at)}
+            </span>
+          </span>
+        </Cell>
+        <Cell m="meta" tone="mute">
+          {a.entity_id ? (
+            <a class="kz-amono" href={`/admin/audit${qs({ entityId: a.entity_id, entityType: undefined })}`}>
+              {a.entity_type} · {a.entity_id}
+            </a>
+          ) : (
+            (a.entity_type ?? '')
+          )}
+        </Cell>
+        <Cell m="acts">
+          {a.before || a.after ? (
+            <details class="kz-apay">
+              <summary>Show</summary>
+              {a.before ? <pre>Before: {a.before}</pre> : null}
+              {a.after ? <pre>After: {a.after}</pre> : null}
+            </details>
+          ) : (
+            <span class="kz-dt__dash">–</span>
+          )}
+        </Cell>
+      </tr>
+    ))}
+  </DataTable>
   {filter.page > 1 || data.hasMore ? (
-    <nav aria-label="Pages" class="mt-4 flex gap-4 text-sm">
+    <nav aria-label="Pages" class="kz-apager">
       {filter.page > 1 ? (
-        <a class="font-semibold text-brand-600 hover:underline" href={qs({ page: filter.page - 1 })}>
+        <Button variant="secondary" size="sm" href={qs({ page: filter.page - 1 })} lead="chevron-left">
           Newer
-        </a>
-      ) : null}
+        </Button>
+      ) : (
+        <span class="kz-apager__gap" />
+      )}
+      <span class="kz-apager__pos">page {filter.page}</span>
       {data.hasMore ? (
-        <a class="font-semibold text-brand-600 hover:underline" href={qs({ page: filter.page + 1 })}>
+        <Button variant="secondary" size="sm" href={qs({ page: filter.page + 1 })} icon="chevron-right">
           Older
-        </a>
-      ) : null}
+        </Button>
+      ) : (
+        <span class="kz-apager__gap" />
+      )}
     </nav>
   ) : null}
 </AdminLayout>

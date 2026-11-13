@@ -6,7 +6,7 @@
  *   the primary action is always in reach on phones.
  * - `CheckItem`: a compact native checkbox row (44 px on touch).
  */
-import type { InputHTMLAttributes, ReactNode } from 'react';
+import { useId, type InputHTMLAttributes, type ReactNode } from 'react';
 import { FormAlert } from '../auth/FormAlert';
 import { cx } from '../primitives/cx';
 import { Button } from '../primitives/button';
@@ -80,6 +80,41 @@ export function CheckItem({
       <input type="checkbox" {...input} />
       <span>{children}</span>
     </label>
+  );
+}
+
+/**
+ * A checkbox whose name is only `label`; `help` (a description, a key) sits under it and is linked with aria-describedby, so
+ * lists of roles or people read as short names to assistive tech and to tests.
+ */
+export function CheckWithHelp({
+  label,
+  help,
+  helpMono = false,
+  className,
+  ...input
+}: {
+  label: ReactNode;
+  help?: ReactNode;
+  helpMono?: boolean;
+  className?: string;
+} & Omit<InputHTMLAttributes<HTMLInputElement>, 'type'>) {
+  const uid = useId().replace(/:/g, '');
+  const id = `ck${uid}`;
+  return (
+    <div className={cx('kz-acheck has-d', className)}>
+      <input id={id} type="checkbox" aria-describedby={help ? `${id}-d` : undefined} {...input} />
+      <div>
+        <label htmlFor={id} className="kz-acheck__n">
+          {label}
+        </label>
+        {help ? (
+          <span id={`${id}-d`} className={helpMono ? 'kz-acheck__k' : 'kz-acheck__d'}>
+            {help}
+          </span>
+        ) : null}
+      </div>
+    </div>
   );
 }
 

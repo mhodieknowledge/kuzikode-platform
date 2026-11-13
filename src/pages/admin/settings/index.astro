@@ -1,7 +1,9 @@
 ---
+/** Settings, general (R6.2 group 3): section nav beside the settings sections. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import SettingsNav from '../../../components/admin/SettingsNav.astro';
-import SettingsSections from '../../../components/admin/SettingsSections.astro';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import SettingsNav from '../../../ui/admin/settings/SettingsNav.astro';
+import SettingsSections from '../../../ui/admin/settings/SettingsSections.astro';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { settingsPage } from '../../../server/modules/settings';
 
@@ -13,11 +15,14 @@ const canEdit = page.auth.permissions.has('settings.manage');
 ---
 
 <AdminLayout title="Settings" page={page}>
-  <SettingsNav current="general" canExport={page.auth.permissions.has('data.export')} />
-  {canEdit ? null : (
-    <p class="mt-4 text-sm text-ink-600">You can view settings. Ask an administrator to change them.</p>
-  )}
-  <div class="mt-6 flex max-w-4xl flex-col gap-6">
-    <SettingsSections sections={sections} canEdit={canEdit} />
+  <PageHead title="Settings" meta="General" />
+  <div class="kz-aset">
+    <SettingsNav current="general" canExport={page.auth.permissions.has('data.export')} />
+    <div class="kz-aset__main">
+      {canEdit ? null : (
+        <p class="kz-anotice kz-anotice--info">You can view settings. Ask an administrator to change them.</p>
+      )}
+      <SettingsSections sections={sections} canEdit={canEdit} />
+    </div>
   </div>
 </AdminLayout>

@@ -1,5 +1,15 @@
 ---
+/** Projects (R6.2 group 3): filters (sheet on phones), dense table → list rows with a progress bar and status. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import DataTable from '../../../ui/admin/DataTable.astro';
+import Cell from '../../../ui/admin/Cell.astro';
+import Pager from '../../../ui/admin/Pager.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import EmptyState from '../../../ui/primitives/EmptyState.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import { FilterBar } from '../../../ui/admin/FilterBar';
+import { PROJECT_STATUS_TONE } from '../../../ui/admin/projects/labels';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { listProjects } from '../../../server/modules/projects';
 import { projectListQuery } from '../../../shared/schemas/projects';
@@ -13,153 +23,92 @@ const parsed = projectListQuery.safeParse(Object.fromEntries(Astro.url.searchPar
 const filter = parsed.success ? parsed.data : projectListQuery.parse({});
 const result = await listProjects(ctx, filter);
 const canCreate = page.auth.permissions.has('projects.manage');
-const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
-const STATUS_CLASS: Record<string, string> = {
-  planning: 'bg-info-50 text-info-700',
-  active: 'bg-brand-50 text-brand-600',
-  on_hold: 'bg-warning-50 text-warning-700',
-  completed: 'bg-success-50 text-success-700',
-  cancelled: 'bg-ink-950/5 text-ink-800',
-};
 const pageHref = (n: number) => {
   const q = new URLSearchParams(Astro.url.searchParams);
   q.set('page', String(n));
   return `/admin/projects?${q.toString()}`;
 };
+const filtered = !!(filter.q || (filter.status && filter.status !== 'open'));
 ---
 
 <AdminLayout title="Projects" page={page}>
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold tracking-display">Projects</h1>
-      <p class="mt-1 text-sm text-ink-600">
-        {result.total} {result.total === 1 ? 'project' : 'projects'}
-      </p>
-    </div>
-    {canCreate ? (
-      <a
-        href="/admin/projects/new"
-        class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
-      >
-        New project
-      </a>
-    ) : null}
+  <PageHead title="Projects" meta={`${result.total} ${result.total === 1 ? 'project' : 'projects'}`}>
+    <Fragment slot="actions">
+      {canCreate ? (
+        <Button href="/admin/projects/new" lead="add">
+          New project
+        </Button>
+      ) : null}
+    </Fragment>
+  </PageHead>
+  <div class="kz-atools">
+    <FilterBar
+      client:load
+      label="Filter projects"
+      hidden={filter.clientId ? { clientId: filter.clientId } : {}}
+      clearHref="/admin/projects"
+      fields={[
+        { kind: 'search', name: 'q', label: 'Search', value: filter.q ?? '', placeholder: 'Reference, name or client' },
+        {
+          kind: 'select',
+          name: 'status',
+          label: 'Status',
+          value: filter.status ?? 'open',
+          options: [
+            { value: 'open', label: 'Open (planning, active, on hold)' },
+            ...Object.entries(PROJECT_STATUS_LABEL).map(([value, label]) => ({ value, label })),
+            { value: 'all', label: 'All' },
+          ],
+        },
+      ]}
+    />
   </div>
-  <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter projects">
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Search
-      <input
-        name="q"
-        type="search"
-        value={filter.q ?? ''}
-        maxlength="80"
-        class={field}
-        placeholder="Reference, name or client"
-      />
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Status
-      <select name="status" class={field}>
-        <option value="open" selected={!filter.status || filter.status === 'open'}>
-          Open (planning, active, on hold)
-        </option>
-        {Object.entries(PROJECT_STATUS_LABEL).map(([k, l]) => (
-          <option value={k} selected={filter.status === k}>
-            {l}
-          </option>
-        ))}
-        <option value="all" selected={filter.status === 'all'}>
-          All
-        </option>
-      </select>
-    </label>
-    {filter.clientId ? <input type="hidden" name="clientId" value={filter.clientId} /> : null}
-    <button
-      type="submit"
-      class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+  <DataTable
+    caption="Projects"
+    count={result.items.length}
+    columns={[
+      { label: 'Project' },
+      { label: 'Client' },
+      { label: 'Status' },
+      { label: 'Progress' },
+      { label: 'Target' },
+    ]}
+  >
+    <EmptyState
+      slot="empty"
+      code={filtered ? 'no matches' : '0 open'}
+      title={filtered ? 'No projects match these filters.' : 'No open projects.'}
     >
-      Filter
-    </button>
-  </form>
-  <div class="mt-6 relative overflow-x-auto rounded-lg border border-line bg-surface">
-    <table class="w-full min-w-[640px] text-left text-sm">
-      <caption class="sr-only">Projects</caption>
-      <thead class="bg-canvas text-[13px] text-ink-600">
-        <tr>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Project
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Client
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Status
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Progress
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Target
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {result.items.length === 0 ? (
-          <tr>
-            <td colspan="5" class="px-4 py-10 text-center text-ink-600">
-              {filter.q || filter.status ? 'No projects match these filters.' : 'No open projects.'}
-            </td>
-          </tr>
-        ) : (
-          result.items.map((p) => (
-            <tr class="border-t border-line">
-              <td class="px-4 py-3">
-                <a href={`/admin/projects/${p.id}`} class="font-semibold text-ink-950 hover:underline">
-                  {p.name}
-                </a>
-                <span class="block font-mono text-[12px] text-ink-600">
-                  {p.reference}
-                  {p.lead ? ` · ${p.lead}` : ''}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-ink-800">{p.client_name}</td>
-              <td class="px-4 py-3">
-                <span class={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${STATUS_CLASS[p.status]}`}>
-                  {PROJECT_STATUS_LABEL[p.status]}
-                </span>
-              </td>
-              <td class="px-4 py-3">
-                <span class="tnum text-ink-950">{p.progress_pct}%</span>
-                <span class="mt-1 block h-1.5 w-24 rounded-full bg-ink-950/10" aria-hidden="true">
-                  <span class="block h-1.5 rounded-full bg-brand-600" style={`width:${p.progress_pct}%`}></span>
-                </span>
-              </td>
-              <td class="px-4 py-3 text-ink-800">{p.target_date ? formatLongDate(p.target_date) : '—'}</td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-  </div>
-  {result.pages > 1 ? (
-    <nav aria-label="Pagination" class="mt-4 flex items-center justify-between text-sm font-semibold">
-      {result.page > 1 ? (
-        <a href={pageHref(result.page - 1)} rel="prev" class="text-brand-600">
-          Previous
-        </a>
-      ) : (
-        <span />
-      )}
-      <span class="text-ink-600">
-        Page {result.page} of {result.pages}
-      </span>
-      {result.page < result.pages ? (
-        <a href={pageHref(result.page + 1)} rel="next" class="text-brand-600">
-          Next
-        </a>
-      ) : (
-        <span />
-      )}
-    </nav>
-  ) : null}
+      Projects are created from an accepted quotation or by hand.
+    </EmptyState>
+    {result.items.map((p) => (
+      <tr>
+        <Cell
+          m="main"
+          href={`/admin/projects/${p.id}`}
+          title={p.name}
+          sub={`${p.reference}${p.lead ? ` · ${p.lead}` : ''}`}
+        />
+        <Cell m="meta" tone="mute">
+          <span>{p.client_name}</span>
+          {p.target_date ? <span class="kz-dt__ph"> · target {formatLongDate(p.target_date)}</span> : null}
+        </Cell>
+        <Cell m="status">
+          <StatusPill tone={PROJECT_STATUS_TONE[p.status]}>{PROJECT_STATUS_LABEL[p.status]}</StatusPill>
+        </Cell>
+        <Cell m="amount">
+          <span class="kz-aprog kz-aprog--sm">
+            <span class="kz-aprog__row">
+              <span class="kz-aprog__pct">{p.progress_pct}%</span>
+            </span>
+            <span class="kz-aprog__bar" aria-hidden="true">
+              <i style={`width:${p.progress_pct}%`} />
+            </span>
+          </span>
+        </Cell>
+        <Cell tone="mute">{p.target_date ? formatLongDate(p.target_date) : '—'}</Cell>
+      </tr>
+    ))}
+  </DataTable>
+  <Pager page={result.page} pages={result.pages} href={pageHref} />
 </AdminLayout>

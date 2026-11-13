@@ -121,8 +121,14 @@ Ticked when the file is deleted (or, for the logic-only files marked *logic*, mo
 | admin/BarChart.astro | ui/admin/BarChart.astro + chart.ts (dashboard and reports) | [x] R6.2 group 1 (deleted) |
 | admin/LineItemEditor.tsx | ui/admin/documents (lines.ts logic + new LineItemEditor); quotations use it | [x] R6.2 group 2 (deleted) |
 | admin/InvoicesAdmin, PaymentsAdmin (RefundAction, PaymentAttempts), PaymentGateways, SubscriptionsAdmin (incl. AssetForm), ExpensesAdmin | ui/admin/{invoices,payments,subscriptions,expenses} (hooks + InvoiceEditor/Actions, RefundAction, PaymentAttempts, PaymentGateways, SubscriptionForm/Actions, AssetForm, ExpenseForm, VoidExpense, CategoriesManager), ui/admin/finance/labels.ts, PeriodForm.astro, FormSheet in form.tsx | [x] R6.2 group 2 (deleted) |
-| admin/actions.tsx | ui/admin/action.ts (useAdminAction) | [ ] R6.2 (still imported by Cms, Careers, Content, Projects, Support, Time islands) |
-| admin/*Admin.tsx (remaining modules), CmsTabs, ContentTabs, SettingsNav, SettingsSections, AccountActions | admin modules | [ ] R6.2 |
+| admin/actions.tsx | ui/admin/action.ts (useAdminAction) | [ ] R6.2 Website group (still imported by Cms, Careers, Content islands only) |
+| admin/ProjectsAdmin.tsx | ui/admin/projects (useProjects, labels, ProjectForm, ProjectPanels: Milestones, TaskBoard, UpdateComposer, FileUploader/Actions, MessageComposer, ProgressSettings) | [x] R6.2 group 3 (deleted) |
+| admin/TimeAdmin.tsx | ui/admin/time (useTime, labels, ProjectTaskFields, TimerWidget, EntryDialog, BillTime) | [x] R6.2 group 3 (deleted) |
+| admin/SupportAdmin.tsx | ui/admin/support (useSupport, labels, NewRequestForm, ReplyComposer, RequestControls) | [x] R6.2 group 3 (deleted) |
+| admin/UsersAdmin.tsx | ui/admin/users (useUsers, labels, RoleChecklist, InviteStaff, StaffActions, RoleEditor) | [x] R6.2 group 3 (deleted) |
+| admin/SettingsAdmin.tsx, SettingsNav.astro, SettingsSections.astro | ui/admin/settings (useSettings, SettingsSectionForm, LogoUploader, SettingsParts, NotificationPrefsForm, SettingsNav.astro, SettingsSections.astro) | [x] R6.2 group 3 (deleted) |
+| admin/AccountActions.tsx | ui/admin/account (useAdminAccount, AccountActions: MarkRead, SignOutDevice/Everywhere, MfaManage) | [x] R6.2 group 3 (deleted) |
+| admin/CmsAdmin, CareersAdmin, ContentAdmin, PackagesAdmin, ServicesAdmin, CmsTabs, ContentTabs | admin Website modules | [ ] R6.2 Website group |
 | ui/* (Badge, Button, Card, Choice, DataTable, Dialog, Field, FileUpload, FilterBar, Input, Menu, MoneyInput, Pagination, QrCode, RichTextEditor, Spinner, States, Toast, cn, index; api.ts *logic*) | src/ui/primitives | [ ] R6.2 (last users are admin modules) |
 | dev/KitchenSink.tsx, pages/dev/ui.astro | new dev gallery | [x] R2.4 |
 | Token aliases in tokens.css / global.css | — | [ ] R6.2 exit |

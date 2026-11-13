@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { NewRequestForm } from '../../../components/admin/SupportAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import { NewRequestForm } from '../../../ui/admin/support/NewRequestForm';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { newRequestOptions } from '../../../server/modules/support';
 
@@ -12,19 +13,10 @@ const clientId = Astro.url.searchParams.get('clientId') ?? '';
 ---
 
 <AdminLayout title="New support request" page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/support" class="hover:text-ink-950 hover:underline">
-      Support
-    </a>{' '}
-    / <span class="text-ink-950">New</span>
-  </nav>
-  <h1 class="mt-2 text-2xl font-bold tracking-display">New support request</h1>
-  <p class="mt-1 mb-6 text-sm text-ink-600">For a request that came in by phone, WhatsApp or email.</p>
-  <div class="max-w-3xl">
-    <NewRequestForm
-      client:load
-      initialClientId={opts.clients.some((c) => c.id === clientId) ? clientId : ''}
-      {...opts}
-    />
-  </div>
+  <PageHead
+    title="New support request"
+    meta="For a request that came in by phone, WhatsApp or email."
+    crumbs={[{ label: 'Support', href: '/admin/support' }, { label: 'New' }]}
+  />
+  <NewRequestForm client:load initialClientId={opts.clients.some((c) => c.id === clientId) ? clientId : ''} {...opts} />
 </AdminLayout>

@@ -1,0 +1,29 @@
+---
+/** The settings sections of one page, each an independent form section with its own Save (R6.2 group 3). */
+import { SettingsSectionForm } from './SettingsSectionForm';
+import type { SettingField } from '../../../shared/settings';
+
+interface Props {
+  sections: {
+    id: string;
+    title: string;
+    description: string;
+    fields: SettingField[];
+    values: Record<string, unknown>;
+  }[];
+  canEdit: boolean;
+}
+const { sections, canEdit } = Astro.props;
+---
+
+{sections.map((s) => (
+  <SettingsSectionForm
+    client:visible
+    sectionId={s.id}
+    title={s.title}
+    description={s.description}
+    fields={s.fields}
+    values={s.values}
+    canEdit={canEdit}
+  />
+))}

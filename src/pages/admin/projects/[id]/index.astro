@@ -1,5 +1,18 @@
 ---
+/**
+ * One project (R6.2 group 3): head with reference, status, client and progress; sections as a view switch (overview, tasks,
+ * updates, files, messages, time, activity), each a set of panes. Query `?tab=` and every control label are the e2e contract.
+ */
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import PageHead from '../../../../ui/admin/PageHead.astro';
+import Pane from '../../../../ui/admin/Pane.astro';
+import Views from '../../../../ui/admin/Views.astro';
+import DataTable from '../../../../ui/admin/DataTable.astro';
+import Cell from '../../../../ui/admin/Cell.astro';
+import DetailList from '../../../../ui/admin/DetailList.astro';
+import Button from '../../../../ui/primitives/Button.astro';
+import EmptyState from '../../../../ui/primitives/EmptyState.astro';
+import StatusPill from '../../../../ui/primitives/StatusPill.astro';
 import {
   FileActions,
   FileUploader,
@@ -8,12 +21,14 @@ import {
   ProgressSettings,
   TaskBoard,
   UpdateComposer,
-} from '../../../../components/admin/ProjectsAdmin';
+} from '../../../../ui/admin/projects/ProjectPanels';
+import { EntryDialogButton } from '../../../../ui/admin/time/EntryDialog';
+import { billingLabel, workLabel } from '../../../../ui/admin/time/labels';
+import { fileSize, harareStamp, PROJECT_ACTION_LABEL, PROJECT_STATUS_TONE } from '../../../../ui/admin/projects/labels';
 import { loadAdminPage } from '../../../../server/lib/admin-page';
 import { AppError } from '../../../../server/lib/errors';
 import { getProject, staffOptions } from '../../../../server/modules/projects';
 import { projectTime, trackingOptions } from '../../../../server/modules/timetracking';
-import { EntryDialogButton } from '../../../../components/admin/TimeAdmin';
 import { businessDate } from '../../../../server/lib/dates';
 import { formatMinutes } from '../../../../shared/schemas/time';
 import { PROJECT_STATUS_LABEL } from '../../../../shared/projects';
@@ -46,250 +61,198 @@ const {
 } = data;
 const canManage = page.auth.permissions.has('projects.manage');
 const staff = canManage ? await staffOptions(ctx) : [];
-const TABS = [
-  ['overview', 'Overview'],
-  ['tasks', `Tasks (${tasks.length})`],
-  ['updates', `Updates (${updates.length})`],
-  ['files', `Files (${files.length})`],
-  ['messages', `Messages (${messages.length})`],
-  ['activity', 'Activity'],
-] as const;
 const perms = page.auth.permissions;
 const timeVisible = perms.has('time.track') || perms.has('time.view_all') || perms.has('time.bill');
-const ALL_TABS = timeVisible ? ([...TABS.slice(0, 5), ['time', 'Time'], TABS[5]] as const) : TABS;
+const tabs = [
+  { key: 'overview', label: 'Overview' },
+  { key: 'tasks', label: 'Tasks', count: tasks.length },
+  { key: 'updates', label: 'Updates', count: updates.length },
+  { key: 'files', label: 'Files', count: files.length },
+  { key: 'messages', label: 'Messages', count: messages.length },
+  ...(timeVisible ? [{ key: 'time', label: 'Time' }] : []),
+  { key: 'activity', label: 'Activity' },
+].map((t) => ({ ...t, href: `/admin/projects/${p.id}${t.key === 'overview' ? '' : `?tab=${t.key}`}` }));
 const tabParam = Astro.url.searchParams.get('tab');
-const tab = ALL_TABS.some(([k]) => k === tabParam) ? tabParam! : 'overview';
+const tab = tabs.some((t) => t.key === tabParam) ? tabParam! : 'overview';
 const time = tab === 'time' ? await projectTime(ctx, p.id) : null;
 const timeProjects =
   tab === 'time' && perms.has('time.track') ? (await trackingOptions(ctx)).filter((o) => o.id === p.id) : [];
-const when = (iso: string) =>
-  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
-    new Date(iso),
-  );
-const kb = (n: number) =>
-  n < 1024 * 1024 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`;
-const ACTION: Record<string, string> = {
-  'project.created': 'Project created',
-  'project.created_from_quotation': 'Created from the quotation',
-  'project.updated': 'Details changed',
-  'project.settings_changed': 'Progress or notes changed',
-  'project.milestone_added': 'Milestone added',
-  'project.milestone_updated': 'Milestone updated',
-  'project.milestone_deleted': 'Milestone deleted',
-  'project.task_added': 'Task added',
-  'project.task_updated': 'Task updated',
-  'project.task_moved': 'Task moved',
-  'project.task_deleted': 'Task deleted',
-  'project.update_posted': 'Update posted',
-  'project.file_added': 'File added',
-  'project.file_visibility': 'File visibility changed',
-  'project.file_deleted': 'File deleted',
-};
-const tabClass = (active: boolean) =>
-  `inline-flex h-10 shrink-0 items-center border-b-2 px-1 text-sm font-semibold ${active ? 'border-brand-600 text-ink-950' : 'border-transparent text-ink-600 hover:text-ink-950'}`;
-const card = 'rounded-lg border border-line bg-surface p-5';
 ---
 
 <AdminLayout title={p.name} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/projects" class="hover:text-ink-950 hover:underline">
-      Projects
-    </a>{' '}
-    /<span class="font-mono text-ink-950">{p.reference}</span>
-  </nav>
-  <div class="mt-2 flex flex-wrap items-start justify-between gap-4">
-    <div class="min-w-0">
-      <h1 class="text-2xl font-bold tracking-display">{p.name}</h1>
-      <p class="mt-1 text-sm text-ink-600">
-        <span class="font-mono">{p.reference}</span> · {PROJECT_STATUS_LABEL[p.status]} ·{' '}
-        <a href={`/admin/clients/${p.client_id}`} class="text-brand-600 underline">
-          {client?.display_name}
-        </a>
-        {quotation ? (
-          <>
-            {' '}
-            · from{' '}
-            <a href={`/admin/quotations/${quotation.id}`} class="text-brand-600 underline">
-              {quotation.number}
-            </a>
-          </>
-        ) : null}
-      </p>
-    </div>
-    {canManage ? (
-      <a
-        href={`/admin/projects/${p.id}/edit`}
-        class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
-      >
-        Edit project
-      </a>
-    ) : null}
-  </div>
-  <div class="mt-4 max-w-xl">
-    <p class="flex justify-between text-sm">
-      <span class="text-ink-600">Progress</span>
-      <span class="tnum font-semibold">{p.progress_pct}%</span>
-    </p>
+  <PageHead title={p.name} crumbs={[{ label: 'Projects', href: '/admin/projects' }, { label: p.reference }]}>
+    <Fragment slot="meta">
+      <span class="kz-amono">{p.reference}</span> ·
+      <StatusPill tone={PROJECT_STATUS_TONE[p.status]} plain>
+        {PROJECT_STATUS_LABEL[p.status]}
+      </StatusPill>{' '}
+      · <a href={`/admin/clients/${p.client_id}`}>{client?.display_name}</a>
+      {quotation ? (
+        <>
+          {' '}
+          · from <a href={`/admin/quotations/${quotation.id}`}>{quotation.number}</a>
+        </>
+      ) : null}
+    </Fragment>
+    <Fragment slot="actions">
+      {canManage ? (
+        <Button href={`/admin/projects/${p.id}/edit`} variant="secondary" lead="edit">
+          Edit project
+        </Button>
+      ) : null}
+    </Fragment>
     <div
-      class="mt-1 h-2 rounded-full bg-ink-950/10"
+      class="kz-aprog"
       role="progressbar"
       aria-label="Project progress"
       aria-valuenow={p.progress_pct}
       aria-valuemin="0"
       aria-valuemax="100"
     >
-      <div class="h-2 rounded-full bg-brand-600" style={`width:${p.progress_pct}%`}></div>
+      <span class="kz-aprog__row">
+        <span>Progress</span>
+        <span class="kz-aprog__pct">{p.progress_pct}%</span>
+      </span>
+      <span class="kz-aprog__bar" aria-hidden="true">
+        <i style={`width:${p.progress_pct}%`} />
+      </span>
     </div>
+  </PageHead>
+  <div class="kz-atools">
+    <Views label="Project sections" items={tabs} current={tab} />
   </div>
-  <nav aria-label="Project sections" class="mt-6 flex gap-6 relative overflow-x-auto border-b border-line">
-    {ALL_TABS.map(([k, l]) => (
-      <a
-        href={`/admin/projects/${p.id}?tab=${k}`}
-        class={tabClass(tab === k)}
-        aria-current={tab === k ? 'page' : undefined}
-      >
-        {l}
-      </a>
-    ))}
-  </nav>
 
-  <div class="mt-6">
-    {tab === 'overview' ? (
-      <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <div class="flex flex-col gap-6">
-          <MilestonesPanel
-            client:load
-            projectId={p.id}
-            milestones={milestones}
-            invoices={invoices}
-            canManage={canManage}
+  {tab === 'overview' ? (
+    <div class="kz-agrid kz-agrid--detail">
+      <div class="kz-astack">
+        <MilestonesPanel
+          client:load
+          projectId={p.id}
+          milestones={milestones}
+          invoices={invoices}
+          canManage={canManage}
+        />
+        {p.description ? (
+          <Pane title="Description" id="desc-h">
+            <p class="kz-aprose">{p.description}</p>
+          </Pane>
+        ) : null}
+      </div>
+      <aside class="kz-astack" aria-label="Project summary">
+        <Pane title="Details" id="facts-h">
+          <DetailList
+            rows
+            items={[
+              { label: 'Start', value: p.start_date ? formatLongDate(p.start_date) : null },
+              { label: 'Target', value: p.target_date ? formatLongDate(p.target_date) : null },
+              ...(p.completed_at ? [{ label: 'Completed', value: formatLongDate(p.completed_at) }] : []),
+              {
+                label: 'Budget',
+                value: p.budget_minor != null && p.currency ? formatMoney(p.budget_minor, p.currency) : null,
+                mono: true,
+              },
+            ]}
           />
-          {p.description ? (
-            <section class={card} aria-labelledby="desc-h">
-              <h2 id="desc-h" class="font-sans text-base font-semibold">
-                Description
-              </h2>
-              <p class="mt-2 text-sm whitespace-pre-line text-ink-800">{p.description}</p>
-            </section>
-          ) : null}
-        </div>
-        <aside class="flex flex-col gap-6">
-          <section class={card} aria-labelledby="facts-h">
-            <h2 id="facts-h" class="font-sans text-base font-semibold">
-              Details
-            </h2>
-            <dl class="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-              <dt class="text-ink-600">Start</dt>
-              <dd>{p.start_date ? formatLongDate(p.start_date) : '—'}</dd>
-              <dt class="text-ink-600">Target</dt>
-              <dd>{p.target_date ? formatLongDate(p.target_date) : '—'}</dd>
-              {p.completed_at ? (
-                <>
-                  <dt class="text-ink-600">Completed</dt>
-                  <dd>{formatLongDate(p.completed_at)}</dd>
-                </>
-              ) : null}
-              <dt class="text-ink-600">Budget</dt>
-              <dd class="tnum">
-                {p.budget_minor != null && p.currency ? formatMoney(p.budget_minor, p.currency) : '—'}
-              </dd>
-            </dl>
-          </section>
-          <section class={card} aria-labelledby="team-h">
-            <h2 id="team-h" class="font-sans text-base font-semibold">
-              Team
-            </h2>
-            <ul class="mt-3 flex flex-col gap-2 text-sm">
+        </Pane>
+        <Pane title="Team" id="team-h" flush meta={String(members.length)}>
+          {members.length === 0 ? (
+            <p class="kz-anone">
+              <span class="kz-anone__code">0 members</span>No team yet.
+            </p>
+          ) : (
+            <ul class="kz-alist">
               {members.map((m) => (
                 <li>
-                  {m.name}
-                  {m.role === 'lead' ? <span class="text-[12px] text-ink-600"> · lead</span> : null}
+                  <span class="kz-alist__t">{m.name}</span>
+                  {m.role === 'lead' ? (
+                    <StatusPill tone="lit" plain class="kz-pill--xs">
+                      Lead
+                    </StatusPill>
+                  ) : null}
                 </li>
               ))}
             </ul>
-          </section>
-          {canManage ? (
-            <section class={card} aria-labelledby="prog-h">
-              <h2 id="prog-h" class="mb-3 font-sans text-base font-semibold">
-                Progress and notes
-              </h2>
-              <ProgressSettings
-                client:load
-                projectId={p.id}
-                mode={p.progress_mode}
-                pct={p.progress_pct}
-                notes={p.internal_notes}
-              />
-            </section>
-          ) : p.internal_notes ? (
-            <section class={card} aria-labelledby="notes-h">
-              <h2 id="notes-h" class="font-sans text-base font-semibold">
-                Internal notes
-              </h2>
-              <p class="mt-2 text-sm whitespace-pre-line text-ink-800">{p.internal_notes}</p>
-            </section>
-          ) : null}
-        </aside>
-      </div>
-    ) : null}
+          )}
+        </Pane>
+        {canManage ? (
+          <Pane title="Progress and notes" id="prog-h">
+            <ProgressSettings
+              client:load
+              projectId={p.id}
+              mode={p.progress_mode}
+              pct={p.progress_pct}
+              notes={p.internal_notes}
+            />
+          </Pane>
+        ) : p.internal_notes ? (
+          <Pane title="Internal notes" id="notes-h">
+            <p class="kz-aprose">{p.internal_notes}</p>
+          </Pane>
+        ) : null}
+      </aside>
+    </div>
+  ) : null}
 
-    {tab === 'tasks' ? (
-      <TaskBoard
-        client:load
-        projectId={p.id}
-        tasks={tasks}
-        milestones={milestones.map((m) => ({ id: m.id, title: m.title }))}
-        staff={staff}
-        canManage={canManage}
-        userId={page.auth.user.id}
-      />
-    ) : null}
+  {tab === 'tasks' ? (
+    <TaskBoard
+      client:load
+      projectId={p.id}
+      tasks={tasks}
+      milestones={milestones.map((m) => ({ id: m.id, title: m.title }))}
+      staff={staff}
+      canManage={canManage}
+      userId={page.auth.user.id}
+    />
+  ) : null}
 
-    {tab === 'updates' ? (
-      <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-        <section class={card} aria-labelledby="upd-h">
-          <h2 id="upd-h" class="font-sans text-base font-semibold">
-            Updates
-          </h2>
-          {updates.length === 0 ? <p class="mt-2 text-sm text-ink-600">No updates yet.</p> : null}
-          <ol class="mt-3 flex flex-col divide-y divide-line">
+  {tab === 'updates' ? (
+    <div class="kz-agrid kz-agrid--detail">
+      <Pane title="Updates" id="upd-h" flush meta={String(updates.length)}>
+        {updates.length === 0 ? (
+          <p class="kz-anone">
+            <span class="kz-anone__code">0 updates</span>No updates yet.
+          </p>
+        ) : (
+          <ol class="kz-afeed">
             {updates.map((u) => (
-              <li class="py-3">
-                <p class="text-[12px] text-ink-600">
-                  {when(u.created_at)} · {u.author} ·{' '}
+              <li data-kind={u.visibility === 'client' ? 'lit' : undefined}>
+                <p class="kz-afeed__b">{u.body}</p>
+                <p class="kz-afeed__t">
+                  {harareStamp(u.created_at)} · {u.author} ·{' '}
                   {u.visibility === 'client' ? 'shared with the client' : 'internal'}
                 </p>
-                <p class="mt-1 text-sm whitespace-pre-line text-ink-950">{u.body}</p>
               </li>
             ))}
           </ol>
-        </section>
-        {canManage ? (
-          <section class={card} aria-label="New update">
-            <UpdateComposer client:load projectId={p.id} />
-          </section>
-        ) : null}
-      </div>
-    ) : null}
+        )}
+      </Pane>
+      {canManage ? (
+        <Pane title="New update" id="upd-new">
+          <UpdateComposer client:load projectId={p.id} />
+        </Pane>
+      ) : null}
+    </div>
+  ) : null}
 
-    {tab === 'files' ? (
-      <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-        <section class={card} aria-labelledby="files-h">
-          <h2 id="files-h" class="font-sans text-base font-semibold">
-            Files and deliverables
-          </h2>
-          {files.length === 0 ? <p class="mt-2 text-sm text-ink-600">No files yet.</p> : null}
-          <ul class="mt-3 flex flex-col divide-y divide-line">
+  {tab === 'files' ? (
+    <div class="kz-agrid kz-agrid--detail">
+      <Pane title="Files and deliverables" id="files-h" flush meta={String(files.length)}>
+        {files.length === 0 ? (
+          <p class="kz-anone">
+            <span class="kz-anone__code">0 files</span>No files yet.
+          </p>
+        ) : (
+          <ul class="kz-alist">
             {files.map((f) => (
-              <li class="flex flex-wrap items-center justify-between gap-3 py-3">
-                <div class="min-w-0">
-                  <a href={`/api/v1/admin/files/${f.file_id}`} class="font-medium text-brand-600 hover:underline">
+              <li>
+                <div class="kz-alist__main">
+                  <a href={`/api/v1/admin/files/${f.file_id}`} class="kz-afile">
                     {f.label}
                   </a>
-                  <p class="text-[12px] text-ink-600">
-                    {f.original_name} · {kb(f.size_bytes)} · {f.kind}
+                  <span class="kz-alist__m">
+                    {f.original_name} · {fileSize(f.size_bytes)} · {f.kind}
                     {f.client_visible ? ' · visible to the client' : ' · staff only'}
-                  </p>
+                  </span>
                 </div>
                 {canManage ? (
                   <FileActions
@@ -304,143 +267,115 @@ const card = 'rounded-lg border border-line bg-surface p-5';
               </li>
             ))}
           </ul>
-        </section>
-        {canManage ? (
-          <section class={card} aria-labelledby="up-h">
-            <h2 id="up-h" class="mb-3 font-sans text-base font-semibold">
-              Upload
-            </h2>
-            <FileUploader client:load projectId={p.id} />
-          </section>
-        ) : null}
-      </div>
-    ) : null}
+        )}
+      </Pane>
+      {canManage ? (
+        <Pane title="Upload" id="up-h">
+          <FileUploader client:load projectId={p.id} />
+        </Pane>
+      ) : null}
+    </div>
+  ) : null}
 
-    {tab === 'messages' ? (
-      <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-        <section class={card} aria-labelledby="msg-h">
-          <h2 id="msg-h" class="font-sans text-base font-semibold">
-            Messages with the client
-          </h2>
-          {messages.length === 0 ? <p class="mt-2 text-sm text-ink-600">No messages yet.</p> : null}
-          <ol class="mt-3 flex flex-col gap-3">
+  {tab === 'messages' ? (
+    <div class="kz-agrid kz-agrid--detail">
+      <Pane title="Messages with the client" id="msg-h" meta={String(messages.length)}>
+        {messages.length === 0 ? (
+          <p class="kz-anone">
+            <span class="kz-anone__code">0 messages</span>No messages yet.
+          </p>
+        ) : (
+          <ol class="kz-athread" aria-label="Messages">
             {messages.map((m) => (
-              <li class={`rounded-sm p-3 text-sm ${m.user_type === 'client' ? 'bg-canvas' : 'bg-brand-50'}`}>
-                <p class="text-[12px] text-ink-600">
-                  {m.author} · {when(m.created_at)}
-                  {m.user_type !== 'client' && m.read_by_client_at ? ' · read' : ''}
+              <li class="kz-amsg" data-who={m.user_type === 'client' ? 'client' : 'staff'}>
+                <p class="kz-amsg__head">
+                  <span class="kz-amsg__who">{m.author}</span>
+                  <span class="kz-amsg__t">{harareStamp(m.created_at)}</span>
+                  {m.user_type !== 'client' && m.read_by_client_at ? <span class="kz-amsg__tag">read</span> : null}
                 </p>
-                <p class="mt-1 whitespace-pre-line text-ink-950">{m.body}</p>
+                <p class="kz-amsg__body">{m.body}</p>
               </li>
             ))}
           </ol>
-        </section>
-        <section class={card} aria-label="New message">
-          <MessageComposer client:load projectId={p.id} />
-        </section>
-      </div>
-    ) : null}
+        )}
+      </Pane>
+      <Pane title="New message" id="msg-new">
+        <MessageComposer client:load projectId={p.id} />
+      </Pane>
+    </div>
+  ) : null}
 
-    {tab === 'time' && time ? (
-      <div class="flex flex-col gap-6">
-        <section class={card} aria-labelledby="time-h">
-          <div class="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h2 id="time-h" class="text-lg font-semibold">
-                Time
-              </h2>
-              <p class="text-sm text-ink-600">
-                {formatMinutes(time.totalMinutes)} logged{time.seesEveryone ? '' : ' by you'}
-                {time.unbilled
-                  .map((u) => ` · ${formatMinutes(u.minutes)} unbilled (${formatMoney(u.amountMinor, u.currency)})`)
-                  .join('')}
-              </p>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              {timeProjects.length ? (
-                <EntryDialogButton client:load projects={timeProjects} today={businessDate(ctx.now())} />
-              ) : null}
-              {perms.has('time.bill') && time.unbilled.length ? (
-                <a
-                  href={`/admin/time/bill/${p.id}`}
-                  class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
-                >
-                  Bill unbilled time
-                </a>
-              ) : null}
-            </div>
-          </div>
-        </section>
-        <div class="relative overflow-x-auto rounded-lg border border-line bg-surface">
-          <table class="w-full min-w-[640px] text-sm">
-            <thead class="border-b border-line text-left text-[12px] text-ink-600">
-              <tr>
-                <th scope="col" class="px-4 py-2.5 font-semibold">
-                  Date
-                </th>
-                <th scope="col" class="px-4 py-2.5 font-semibold">
-                  Person
-                </th>
-                <th scope="col" class="px-4 py-2.5 font-semibold">
-                  Work
-                </th>
-                <th scope="col" class="px-4 py-2.5 text-right font-semibold">
-                  Time
-                </th>
-                <th scope="col" class="px-4 py-2.5 font-semibold">
-                  Billing
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-line">
-              {time.entries.length === 0 ? (
-                <tr>
-                  <td colspan="5" class="px-4 py-8 text-center text-ink-600">
-                    No time logged yet.
-                  </td>
-                </tr>
-              ) : null}
-              {time.entries.map((e) => (
-                <tr>
-                  <td class="px-4 py-2.5 whitespace-nowrap">{e.entry_date}</td>
-                  <td class="px-4 py-2.5">{e.user_name}</td>
-                  <td class="px-4 py-2.5 text-ink-600">
-                    {[e.task_title, e.description].filter(Boolean).join(': ') || 'Project work'}
-                  </td>
-                  <td class="tnum px-4 py-2.5 text-right">{formatMinutes(e.minutes ?? 0)}</td>
-                  <td class="px-4 py-2.5 text-ink-600">
-                    {e.invoice_id
-                      ? `Billed${e.invoice_number ? ` · ${e.invoice_number}` : ' · draft'}`
-                      : e.billable
-                        ? 'Unbilled'
-                        : 'Not billable'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+  {tab === 'time' && time ? (
+    <div class="kz-asect">
+      <Pane title="Time" id="time-h">
+        <div slot="actions" class="kz-aacts-row">
+          {timeProjects.length ? (
+            <EntryDialogButton client:load projects={timeProjects} today={businessDate(ctx.now())} />
+          ) : null}
+          {perms.has('time.bill') && time.unbilled.length ? (
+            <Button href={`/admin/time/bill/${p.id}`} size="sm">
+              Bill unbilled time
+            </Button>
+          ) : null}
         </div>
-      </div>
-    ) : null}
+        <p class="kz-amono">
+          {formatMinutes(time.totalMinutes)} logged{time.seesEveryone ? '' : ' by you'}
+          {time.unbilled
+            .map((u) => ` · ${formatMinutes(u.minutes)} unbilled (${formatMoney(u.amountMinor, u.currency)})`)
+            .join('')}
+        </p>
+      </Pane>
+      <DataTable
+        caption="Time logged on this project"
+        count={time.entries.length}
+        columns={[
+          { label: 'Date' },
+          { label: 'Person' },
+          { label: 'Work' },
+          { label: 'Time', num: true },
+          { label: 'Billing' },
+        ]}
+      >
+        <EmptyState slot="empty" code="0 entries" title="No time logged yet." />
+        {time.entries.map((e) => (
+          <tr>
+            <Cell m="meta" class="kz-dt__nw">
+              <span class="kz-amono">{e.entry_date}</span>
+              <span class="kz-dt__ph"> · {e.user_name}</span>
+            </Cell>
+            <Cell>{e.user_name}</Cell>
+            <Cell m="main">{workLabel(e)}</Cell>
+            <Cell m="amount" num>
+              {formatMinutes(e.minutes ?? 0)}
+            </Cell>
+            <Cell m="status" tone="mute">
+              {billingLabel(e)}
+            </Cell>
+          </tr>
+        ))}
+      </DataTable>
+    </div>
+  ) : null}
 
-    {tab === 'activity' ? (
-      <section class={card} aria-labelledby="act-h">
-        <h2 id="act-h" class="font-sans text-base font-semibold">
-          Activity
-        </h2>
-        <ol class="mt-3 flex flex-col gap-2 text-sm">
+  {tab === 'activity' ? (
+    <Pane title="Activity" id="act-h" flush meta={String(activity.length)}>
+      {activity.length === 0 ? (
+        <p class="kz-anone">
+          <span class="kz-anone__code">0 events</span>Nothing recorded yet.
+        </p>
+      ) : (
+        <ol class="kz-afeed">
           {activity.map((a) => (
             <li>
-              <span class="font-medium text-ink-950">{ACTION[a.action] ?? a.action}</span>
-              <span class="text-[12px] text-ink-600">
-                {' '}
-                · {when(a.created_at)}
+              <span class="kz-afeed__k">{PROJECT_ACTION_LABEL[a.action] ?? a.action}</span>
+              <span class="kz-afeed__t">
+                {harareStamp(a.created_at)}
                 {a.actor ? ` · ${a.actor}` : ''}
               </span>
             </li>
           ))}
         </ol>
-      </section>
-    ) : null}
-  </div>
+      )}
+    </Pane>
+  ) : null}
 </AdminLayout>

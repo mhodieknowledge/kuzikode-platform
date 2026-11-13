@@ -1,0 +1,43 @@
+---
+/**
+ * Settings section navigation (R6.2 group 3): a sticky side list from 1024 px; below that the same links as the scrolling
+ * segmented view switch (real links, no script). The current page is `aria-current`; CSS shows one of the two renderings, so
+ * link names stay unique for assistive tech and tests.
+ */
+import Views from '../Views.astro';
+
+interface Props {
+  current: 'general' | 'billing' | 'numbering' | 'website' | 'integrations' | 'export';
+  /** Show the Data export entry (Super Admin, data.export). */
+  canExport?: boolean;
+}
+const { current, canExport = false } = Astro.props;
+const tabs = [
+  ['general', 'General', '/admin/settings'],
+  ['billing', 'Billing & taxes', '/admin/settings/billing'],
+  ['numbering', 'Numbering', '/admin/settings/numbering'],
+  ['website', 'Website', '/admin/settings/website'],
+  ['integrations', 'Integrations', '/admin/settings/integrations'],
+  ...(canExport ? ([['export', 'Data export', '/admin/settings/data-export']] as const) : []),
+] as const;
+---
+
+<div class="kz-asetnav">
+  <nav aria-label="Settings sections" class="kz-asetnav__list">
+    <ul>
+      {tabs.map(([key, label, href]) => (
+        <li>
+          <a href={href} aria-current={current === key ? 'page' : undefined}>
+            {label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+  <Views
+    class="kz-asetnav__views"
+    label="Settings sections"
+    current={current}
+    items={tabs.map(([key, label, href]) => ({ key, label, href }))}
+  />
+</div>

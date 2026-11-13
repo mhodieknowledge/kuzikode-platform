@@ -1,6 +1,17 @@
 ---
+/**
+ * One support request (R6.2 group 3): head with reference, status, priority, category and links; the conversation (mono
+ * timestamps, internal notes marked) with the reply composer, and a side column with controls and details.
+ */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { ReplyComposer, RequestControls } from '../../../components/admin/SupportAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Pane from '../../../ui/admin/Pane.astro';
+import DetailList from '../../../ui/admin/DetailList.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import { ReplyComposer } from '../../../ui/admin/support/ReplyComposer';
+import { RequestControls } from '../../../ui/admin/support/RequestControls';
+import { messageKind, SUPPORT_TONE } from '../../../ui/admin/support/labels';
+import { fileSize, harareStamp } from '../../../ui/admin/projects/labels';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { AppError } from '../../../server/lib/errors';
 import { getRequest, supportStaff } from '../../../server/modules/support';
@@ -21,79 +32,66 @@ const { request: r, client, project, messages, openedBy } = data;
 const perms = page.auth.permissions;
 const canManage = perms.has('support.manage');
 const staff = canManage ? await supportStaff(ctx) : [];
-const when = (iso: string) =>
-  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
-    new Date(iso),
-  );
-const kb = (n: number) =>
-  n < 1024 * 1024 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`;
 const category = SUPPORT_CATEGORIES.find((c) => c.value === r.category)?.label ?? r.category;
 ---
 
 <AdminLayout title={`${r.reference}: ${r.subject}`} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/support" class="hover:text-ink-950 hover:underline">
-      Support
-    </a>{' '}
-    / <span class="font-mono text-ink-950">{r.reference}</span>
-  </nav>
-  <h1 class="mt-2 text-2xl font-bold tracking-display">{r.subject}</h1>
-  <p class="mt-1 text-sm text-ink-600">
-    <span class="font-mono">{r.reference}</span> · {SUPPORT_STATUS_LABEL[r.status]} ·{' '}
-    {SUPPORT_PRIORITY_LABEL[r.priority]} · {category} ·{' '}
-    <a href={`/admin/clients/${r.client_id}`} class="text-brand-600 underline">
-      {client?.display_name}
-    </a>
-    {project ? (
-      <>
-        {' '}
-        ·{' '}
-        <a href={`/admin/projects/${project.id}`} class="text-brand-600 underline">
-          {project.reference}
-        </a>
-      </>
-    ) : null}
-  </p>
-  <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-    <div class="flex flex-col gap-6">
-      <ol class="flex flex-col gap-3" aria-label="Conversation">
-        {messages.map((m) => (
-          <li
-            class={`rounded-lg border p-4 text-sm ${m.is_internal_note ? 'border-warning-600/40 bg-warning-50' : m.user_type === 'client' ? 'border-line bg-surface' : 'border-brand-600/20 bg-brand-50'}`}
-          >
-            <p class="text-[12px] text-ink-600">
-              <span class="font-semibold text-ink-950">{m.author}</span>
-              {m.user_type === 'client' ? ' (client)' : ''} · {when(m.created_at)}
-              {m.is_internal_note ? ' · internal note' : ''}
-            </p>
-            <p class="mt-2 whitespace-pre-line text-ink-950">{m.body}</p>
-            {m.attachments.length ? (
-              <ul class="mt-2 flex flex-wrap gap-3 text-[13px]">
-                {m.attachments.map((f) => (
-                  <li>
-                    <a href={`/api/v1/admin/files/${f.file_id}`} class="text-brand-600 underline">
-                      {f.original_name}
-                    </a>{' '}
-                    <span class="text-ink-600">({kb(f.size_bytes)})</span>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </li>
-        ))}
-      </ol>
+  <PageHead title={r.subject} crumbs={[{ label: 'Support', href: '/admin/support' }, { label: r.reference }]}>
+    <Fragment slot="meta">
+      <span class="kz-amono">{r.reference}</span> ·
+      <StatusPill tone={SUPPORT_TONE[r.status]} plain>
+        {SUPPORT_STATUS_LABEL[r.status]}
+      </StatusPill>{' '}
+      · {SUPPORT_PRIORITY_LABEL[r.priority]} · {category} ·{' '}
+      <a href={`/admin/clients/${r.client_id}`}>{client?.display_name}</a>
+      {project ? (
+        <>
+          {' '}
+          · <a href={`/admin/projects/${project.id}`}>{project.reference}</a>
+        </>
+      ) : null}
+    </Fragment>
+  </PageHead>
+  <div class="kz-agrid kz-agrid--detail">
+    <div class="kz-astack">
+      <Pane title="Conversation" id="conv-h" meta={String(messages.length)}>
+        <ol class="kz-athread" aria-label="Conversation">
+          {messages.map((m) => (
+            <li class="kz-amsg" data-who={messageKind(m)}>
+              <p class="kz-amsg__head">
+                <span class="kz-amsg__who">
+                  {m.author}
+                  {m.user_type === 'client' ? ' (client)' : ''}
+                </span>
+                <span class="kz-amsg__t">{harareStamp(m.created_at)}</span>
+                {m.is_internal_note ? <span class="kz-amsg__tag">internal note</span> : null}
+              </p>
+              <p class="kz-amsg__body">{m.body}</p>
+              {m.attachments.length ? (
+                <ul class="kz-amsg__files">
+                  {m.attachments.map((f) => (
+                    <li>
+                      <a class="kz-afile" href={`/api/v1/admin/files/${f.file_id}`}>
+                        {f.original_name}
+                      </a>
+                      <span class="kz-amono">{fileSize(f.size_bytes)}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </li>
+          ))}
+        </ol>
+      </Pane>
       {perms.has('support.reply') ? (
-        <section class="rounded-lg border border-line bg-surface p-5" aria-label="Reply">
+        <Pane title="Reply" id="reply-h">
           <ReplyComposer client:load requestId={r.id} canManage={canManage} />
-        </section>
+        </Pane>
       ) : null}
     </div>
-    <aside class="flex flex-col gap-6">
+    <aside class="kz-astack" aria-label="Request summary">
       {canManage ? (
-        <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="ctl-h">
-          <h2 id="ctl-h" class="mb-3 font-sans text-base font-semibold">
-            Request
-          </h2>
+        <Pane title="Request" id="ctl-h">
           <RequestControls
             client:load
             requestId={r.id}
@@ -102,22 +100,20 @@ const category = SUPPORT_CATEGORIES.find((c) => c.value === r.category)?.label ?
             assignedTo={r.assigned_to}
             staff={staff}
           />
-        </section>
+        </Pane>
       ) : null}
-      <section class="rounded-lg border border-line bg-surface p-5 text-sm" aria-labelledby="info-h">
-        <h2 id="info-h" class="font-sans text-base font-semibold">
-          Details
-        </h2>
-        <dl class="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-          <dt class="text-ink-600">Opened</dt>
-          <dd>{when(r.created_at)}</dd>
-          <dt class="text-ink-600">By</dt>
-          <dd>
-            {openedBy?.name ?? '—'}
-            {openedBy?.user_type === 'staff' ? ' (staff, for the client)' : ''}
-          </dd>
-        </dl>
-      </section>
+      <Pane title="Details" id="info-h">
+        <DetailList
+          rows
+          items={[
+            { label: 'Opened', value: harareStamp(r.created_at), mono: true },
+            {
+              label: 'By',
+              value: `${openedBy?.name ?? '—'}${openedBy?.user_type === 'staff' ? ' (staff, for the client)' : ''}`,
+            },
+          ]}
+        />
+      </Pane>
     </aside>
   </div>
 </AdminLayout>

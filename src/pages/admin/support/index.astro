@@ -1,5 +1,16 @@
 ---
+/** Support requests (R6.2 group 3): filters (sheet on phones), dense table → list rows with priority and status. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import DataTable from '../../../ui/admin/DataTable.astro';
+import Cell from '../../../ui/admin/Cell.astro';
+import Pager from '../../../ui/admin/Pager.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import EmptyState from '../../../ui/primitives/EmptyState.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import { FilterBar } from '../../../ui/admin/FilterBar';
+import { isUrgent, SUPPORT_TONE } from '../../../ui/admin/support/labels';
+import { harareStamp } from '../../../ui/admin/projects/labels';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { listRequests } from '../../../server/modules/support';
 import { supportListQuery } from '../../../shared/schemas/support';
@@ -11,150 +22,120 @@ if (page instanceof Response) return page;
 const parsed = supportListQuery.safeParse(Object.fromEntries(Astro.url.searchParams));
 const filter = parsed.success ? parsed.data : supportListQuery.parse({});
 const result = await listRequests(ctx, filter);
-const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
-const STATUS_CLASS: Record<string, string> = {
-  open: 'bg-info-50 text-info-700',
-  awaiting_client: 'bg-warning-50 text-warning-700',
-  resolved: 'bg-success-50 text-success-700',
-  closed: 'bg-ink-950/5 text-ink-800',
-};
-const when = (iso: string) =>
-  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
-    new Date(iso),
-  );
 const pageHref = (n: number) => {
   const q = new URLSearchParams(Astro.url.searchParams);
   q.set('page', String(n));
   return `/admin/support?${q.toString()}`;
 };
 const active = (result.counts['open'] ?? 0) + (result.counts['awaiting_client'] ?? 0);
+const filtered = !!(filter.q || filter.priority || filter.assignee || (filter.status && filter.status !== 'active'));
 ---
 
 <AdminLayout title="Support" page={page}>
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold tracking-display">Support</h1>
-      <p class="mt-1 text-sm text-ink-600">
-        {active} active · {result.counts['open'] ?? 0} need a reply
-      </p>
-    </div>
-    {page.auth.permissions.has('support.reply') ? (
-      <a
-        href="/admin/support/new"
-        class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
-      >
-        New request
-      </a>
-    ) : null}
+  <PageHead title="Support" meta={`${active} active · ${result.counts['open'] ?? 0} need a reply`}>
+    <Fragment slot="actions">
+      {page.auth.permissions.has('support.reply') ? (
+        <Button href="/admin/support/new" lead="add">
+          New request
+        </Button>
+      ) : null}
+    </Fragment>
+  </PageHead>
+  <div class="kz-atools">
+    <FilterBar
+      client:load
+      label="Filter support requests"
+      hidden={filter.clientId ? { clientId: filter.clientId } : {}}
+      clearHref="/admin/support"
+      fields={[
+        {
+          kind: 'search',
+          name: 'q',
+          label: 'Search',
+          value: filter.q ?? '',
+          placeholder: 'Reference, subject or client',
+        },
+        {
+          kind: 'select',
+          name: 'status',
+          label: 'Status',
+          value: filter.status ?? 'active',
+          options: [
+            { value: 'active', label: 'Active (open, waiting)' },
+            ...Object.entries(SUPPORT_STATUS_LABEL).map(([value, label]) => ({ value, label })),
+            { value: 'all', label: 'All' },
+          ],
+        },
+        {
+          kind: 'select',
+          name: 'priority',
+          label: 'Priority',
+          value: filter.priority ?? '',
+          options: [
+            { value: '', label: 'Any' },
+            ...Object.entries(SUPPORT_PRIORITY_LABEL).map(([value, label]) => ({ value, label })),
+          ],
+        },
+        {
+          kind: 'select',
+          name: 'assignee',
+          label: 'Assigned',
+          value: filter.assignee ?? '',
+          options: [
+            { value: '', label: 'Anyone' },
+            { value: 'me', label: 'Me' },
+            { value: 'none', label: 'Unassigned' },
+          ],
+        },
+      ]}
+    />
   </div>
-  <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter support requests">
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Search
-      <input
-        name="q"
-        type="search"
-        value={filter.q ?? ''}
-        maxlength="80"
-        class={field}
-        placeholder="Reference, subject or client"
-      />
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Status
-      <select name="status" class={field}>
-        <option value="active" selected={!filter.status || filter.status === 'active'}>
-          Active (open, waiting)
-        </option>
-        {Object.entries(SUPPORT_STATUS_LABEL).map(([k, l]) => (
-          <option value={k} selected={filter.status === k}>
-            {l}
-          </option>
-        ))}
-        <option value="all" selected={filter.status === 'all'}>
-          All
-        </option>
-      </select>
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Priority
-      <select name="priority" class={field}>
-        <option value="">Any</option>
-        {Object.entries(SUPPORT_PRIORITY_LABEL).map(([k, l]) => (
-          <option value={k} selected={filter.priority === k}>
-            {l}
-          </option>
-        ))}
-      </select>
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Assigned
-      <select name="assignee" class={field}>
-        <option value="">Anyone</option>
-        <option value="me" selected={filter.assignee === 'me'}>
-          Me
-        </option>
-        <option value="none" selected={filter.assignee === 'none'}>
-          Unassigned
-        </option>
-      </select>
-    </label>
-    {filter.clientId ? <input type="hidden" name="clientId" value={filter.clientId} /> : null}
-    <button
-      type="submit"
-      class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+  <DataTable
+    caption="Support requests"
+    count={result.items.length}
+    columns={[
+      { label: 'Request' },
+      { label: 'Client' },
+      { label: 'Assigned' },
+      { label: 'Last message' },
+      { label: 'Priority' },
+      { label: 'Status' },
+    ]}
+  >
+    <EmptyState
+      slot="empty"
+      code={filtered ? 'no matches' : '0 active'}
+      title={filtered ? 'No support requests match these filters.' : 'No support requests here.'}
     >
-      Filter
-    </button>
-  </form>
-  <ul class="mt-6 divide-y divide-line rounded-lg border border-line bg-surface">
-    {result.items.length === 0 ? (
-      <li class="px-4 py-10 text-center text-sm text-ink-600">No support requests here.</li>
-    ) : (
-      result.items.map((r) => (
-        <li class="flex flex-wrap items-start justify-between gap-3 px-4 py-3">
-          <div class="min-w-0">
-            <a href={`/admin/support/${r.id}`} class="font-semibold text-ink-950 hover:underline">
-              {r.subject}
-            </a>
-            <p class="text-[12px] text-ink-600">
-              <span class="font-mono">{r.reference}</span> · {r.client_name} · {r.assignee ?? 'Unassigned'}
-              {r.last_message_at ? ` · ${when(r.last_message_at)}` : ''}
-              {r.last_author_type === 'client' ? ' · client replied' : ''}
-            </p>
-          </div>
-          <div class="flex gap-2">
-            {r.priority === 'urgent' || r.priority === 'high' ? (
-              <span class="rounded-full bg-danger-50 px-2 py-0.5 text-[12px] font-semibold text-danger-700">
-                {SUPPORT_PRIORITY_LABEL[r.priority]}
-              </span>
-            ) : null}
-            <span class={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${STATUS_CLASS[r.status]}`}>
-              {SUPPORT_STATUS_LABEL[r.status]}
-            </span>
-          </div>
-        </li>
-      ))
-    )}
-  </ul>
-  {result.pages > 1 ? (
-    <nav aria-label="Pagination" class="mt-4 flex items-center justify-between text-sm font-semibold">
-      {result.page > 1 ? (
-        <a href={pageHref(result.page - 1)} rel="prev" class="text-brand-600">
-          Previous
-        </a>
-      ) : (
-        <span />
-      )}
-      <span class="text-ink-600">
-        Page {result.page} of {result.pages}
-      </span>
-      {result.page < result.pages ? (
-        <a href={pageHref(result.page + 1)} rel="next" class="text-brand-600">
-          Next
-        </a>
-      ) : (
-        <span />
-      )}
-    </nav>
-  ) : null}
+      Requests from clients and ones taken by phone appear here.
+    </EmptyState>
+    {result.items.map((r) => (
+      <tr>
+        <Cell m="main" href={`/admin/support/${r.id}`} title={r.subject} sub={r.reference} />
+        <Cell m="meta" tone="mute">
+          <span>{r.client_name}</span>
+          <span class="kz-dt__ph">
+            {r.last_message_at ? ` · ${harareStamp(r.last_message_at)}` : ''}
+            {r.last_author_type === 'client' ? ' · client replied' : ''}
+          </span>
+        </Cell>
+        <Cell tone="mute">{r.assignee ?? 'Unassigned'}</Cell>
+        <Cell tone="mute" class="kz-dt__nw">
+          {r.last_message_at ? harareStamp(r.last_message_at) : '—'}
+          {r.last_author_type === 'client' ? <span class="kz-amono"> · client replied</span> : null}
+        </Cell>
+        <Cell m="amount">
+          {isUrgent(r.priority) ? (
+            <StatusPill tone="danger">{SUPPORT_PRIORITY_LABEL[r.priority]}</StatusPill>
+          ) : (
+            <span class="kz-dt__dash">—</span>
+          )}
+        </Cell>
+        <Cell m="status">
+          <StatusPill tone={SUPPORT_TONE[r.status]}>{SUPPORT_STATUS_LABEL[r.status]}</StatusPill>
+        </Cell>
+      </tr>
+    ))}
+  </DataTable>
+  <Pager page={result.page} pages={result.pages} href={pageHref} />
 </AdminLayout>

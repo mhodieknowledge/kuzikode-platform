@@ -1,6 +1,10 @@
 ---
+/** Settings, data export (R6.2 group 3): one pane per area with a JSON download and a CSV link per table. Every download is audited. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import SettingsNav from '../../../components/admin/SettingsNav.astro';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Pane from '../../../ui/admin/Pane.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import SettingsNav from '../../../ui/admin/settings/SettingsNav.astro';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { EXPORT_MODULES } from '../../../server/modules/audit';
 
@@ -10,35 +14,35 @@ if (page instanceof Response) return page;
 ---
 
 <AdminLayout title="Data export" page={page}>
-  <SettingsNav current="export" canExport />
-  <p class="mt-6 max-w-3xl text-sm text-ink-600">
-    Download your business data per area as JSON (every table) or one table at a time as CSV. Passwords, security codes,
-    tokens and payment credentials are never included. Every download is recorded in the audit log.
-  </p>
-  <ul class="mt-6 grid gap-4 md:grid-cols-2">
-    {Object.entries(EXPORT_MODULES).map(([key, m]) => (
-      <li class="rounded-lg border border-line bg-surface p-5">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <h2 class="text-base font-semibold">{m.label}</h2>
-          <a
-            href={`/api/v1/admin/data-export/${key}`}
-            download
-            class="inline-flex h-9 items-center rounded-sm bg-brand-600 px-3 text-sm font-semibold text-white hover:bg-brand-500"
-          >
-            Download JSON
-          </a>
-        </div>
-        <p class="mt-3 text-[13px] text-ink-600">CSV per table:</p>
-        <ul class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[13px]">
-          {m.tables.map((t) => (
-            <li>
-              <a class="text-brand-600 hover:underline" href={`/api/v1/admin/data-export/${key}/${t}.csv`} download>
-                {t}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </li>
-    ))}
-  </ul>
+  <PageHead title="Settings" meta="Data export" />
+  <div class="kz-aset">
+    <SettingsNav current="export" canExport />
+    <div class="kz-aset__main">
+      <p class="kz-anotice kz-anotice--info">
+        Download your business data per area as JSON (every table) or one table at a time as CSV. Passwords, security
+        codes, tokens and payment credentials are never included. Every download is recorded in the audit log.
+      </p>
+      <div class="kz-agrid kz-agrid--2">
+        {Object.entries(EXPORT_MODULES).map(([key, m]) => (
+          <Pane title={m.label} id={`exp-${key}`}>
+            <Button slot="actions" size="sm" href={`/api/v1/admin/data-export/${key}`} download lead="download">
+              Download JSON
+            </Button>
+            <div class="kz-adownload" style="padding:0">
+              <p class="kz-hint">CSV per table:</p>
+              <ul class="kz-adownload__tables">
+                {m.tables.map((t) => (
+                  <li>
+                    <a href={`/api/v1/admin/data-export/${key}/${t}.csv`} download>
+                      {t}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Pane>
+        ))}
+      </div>
+    </div>
+  </div>
 </AdminLayout>

@@ -1,6 +1,18 @@
 ---
+/**
+ * Time (R6.2 group 3): my time (timer + the last 30 days), the weekly timesheet and unbilled time per project, as views over
+ * one page. Tables become list rows on phones; the timesheet grid scrolls inside its own box.
+ */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { EntryDialogButton, TimerWidget } from '../../../components/admin/TimeAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Views from '../../../ui/admin/Views.astro';
+import DataTable from '../../../ui/admin/DataTable.astro';
+import Cell from '../../../ui/admin/Cell.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import EmptyState from '../../../ui/primitives/EmptyState.astro';
+import { EntryDialogButton } from '../../../ui/admin/time/EntryDialog';
+import { TimerWidget } from '../../../ui/admin/time/TimerWidget';
+import { billingLabel, workLabel } from '../../../ui/admin/time/labels';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { businessDate } from '../../../server/lib/dates';
 import {
@@ -34,6 +46,7 @@ const userParam = q.get('user') ?? undefined;
 const projects = canTrack ? await trackingOptions(ctx) : [];
 const running = tab === 'mine' ? await runningTimer(ctx) : null;
 const mine = tab === 'mine' ? await listEntries(ctx, { from: addDays(today, -30) }) : [];
+const myEntries = mine.filter((e) => e.user_id === page.auth.user.id);
 const sheet = tab === 'timesheet' ? await timesheet(ctx, userParam ?? null, date) : null;
 const staff = tab === 'timesheet' && canViewAll ? await timeStaff(ctx) : [];
 const unbilled = tab === 'billing' ? await unbilledByProject(ctx) : [];
@@ -41,29 +54,28 @@ const dayLabel = (d: string) =>
   new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }).format(
     new Date(`${d}T00:00:00Z`),
   );
-const tabClass = (active: boolean) =>
-  `inline-flex h-10 shrink-0 items-center border-b-2 px-1 text-sm font-semibold ${active ? 'border-brand-600 text-ink-950' : 'border-transparent text-ink-600 hover:text-ink-950'}`;
 const sheetHref = (d: string) => `/admin/time?tab=timesheet&date=${d}${sheet && userParam ? `&user=${userParam}` : ''}`;
 ---
 
 <AdminLayout title="Time" page={page}>
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <h1 class="text-2xl font-bold tracking-display">Time</h1>
-    {canTrack && projects.length > 0 ? <EntryDialogButton client:load projects={projects} today={today} /> : null}
+  <PageHead title="Time">
+    <Fragment slot="actions">
+      {canTrack && projects.length > 0 ? <EntryDialogButton client:load projects={projects} today={today} /> : null}
+    </Fragment>
+  </PageHead>
+  <div class="kz-atools">
+    <Views
+      label="Time"
+      current={tab}
+      items={tabs.map(([key, label]) => ({ key, label, href: `/admin/time?tab=${key}` }))}
+    />
   </div>
-  <nav aria-label="Time" class="mt-4 flex gap-6 relative overflow-x-auto border-b border-line">
-    {tabs.map(([k, l]) => (
-      <a href={`/admin/time?tab=${k}`} class={tabClass(tab === k)} aria-current={tab === k ? 'page' : undefined}>
-        {l}
-      </a>
-    ))}
-  </nav>
 
   {tab === 'mine' ? (
-    <div class="mt-6 flex flex-col gap-6">
+    <div class="kz-asect">
       {projects.length === 0 && !running ? (
-        <p class="rounded-md border border-line bg-surface p-5 text-sm text-ink-600">
-          You aren't on any open projects yet. Ask a project lead to add you to the team.
+        <p class="kz-anotice kz-anotice--info">
+          You aren&apos;t on any open projects yet. Ask a project lead to add you to the team.
         </p>
       ) : (
         <TimerWidget
@@ -81,223 +93,195 @@ const sheetHref = (d: string) => `/admin/time?tab=timesheet&date=${d}${sheet && 
         />
       )}
       <section aria-labelledby="recent-h">
-        <h2 id="recent-h" class="mb-3 text-lg font-semibold">
+        <h2 id="recent-h" class="kz-ashead">
           Last 30 days
         </h2>
-        <div class="relative overflow-x-auto rounded-lg border border-line bg-surface">
-          <table class="w-full min-w-[640px] text-sm">
-            <thead class="border-b border-line text-left text-[12px] text-ink-600">
-              <tr>
-                <th scope="col" class="px-4 py-2.5 font-semibold">
-                  Date
-                </th>
-                <th scope="col" class="px-4 py-2.5 font-semibold">
-                  Project
-                </th>
-                <th scope="col" class="px-4 py-2.5 font-semibold">
-                  Work
-                </th>
-                <th scope="col" class="px-4 py-2.5 text-right font-semibold">
-                  Time
-                </th>
-                <th scope="col" class="px-4 py-2.5 font-semibold">
-                  Billing
-                </th>
-                <th scope="col" class="px-4 py-2.5">
-                  <span class="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-line">
-              {mine.filter((e) => e.user_id === page.auth.user.id).length === 0 ? (
-                <tr>
-                  <td colspan="6" class="px-4 py-8 text-center text-ink-600">
-                    No time logged in the last 30 days.
-                  </td>
-                </tr>
-              ) : null}
-              {mine
-                .filter((e) => e.user_id === page.auth.user.id)
-                .map((e) => (
-                  <tr>
-                    <td class="px-4 py-2.5 whitespace-nowrap">{e.entry_date}</td>
-                    <td class="px-4 py-2.5">{e.project_reference}</td>
-                    <td class="px-4 py-2.5 text-ink-600">
-                      {[e.task_title, e.description].filter(Boolean).join(': ') || 'Project work'}
-                    </td>
-                    <td class="tnum px-4 py-2.5 text-right">{formatMinutes(e.minutes ?? 0)}</td>
-                    <td class="px-4 py-2.5 text-ink-600">
-                      {e.invoice_id ? (
-                        <span>Billed{e.invoice_number ? ` · ${e.invoice_number}` : ' · draft'}</span>
-                      ) : e.billable ? (
-                        'Unbilled'
-                      ) : (
-                        'Not billable'
-                      )}
-                    </td>
-                    <td class="px-4 py-2.5 text-right">
-                      {!e.invoice_id ? (
-                        <EntryDialogButton
-                          client:visible
-                          projects={projects}
-                          today={today}
-                          label="Edit"
-                          entry={{
-                            id: e.id,
-                            projectId: e.project_id,
-                            taskId: e.task_id,
-                            entryDate: e.entry_date,
-                            minutes: e.minutes ?? 0,
-                            description: e.description,
-                            billable: e.billable === 1,
-                          }}
-                        />
-                      ) : null}
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          caption="Time logged in the last 30 days"
+          count={myEntries.length}
+          columns={[
+            { label: 'Date' },
+            { label: 'Project' },
+            { label: 'Work' },
+            { label: 'Time', num: true },
+            { label: 'Billing' },
+            { label: 'Actions' },
+          ]}
+        >
+          <EmptyState slot="empty" code="0 entries" title="No time logged in the last 30 days.">
+            Start the timer or log time by hand.
+          </EmptyState>
+          {myEntries.map((e) => (
+            <tr>
+              <Cell m="meta" class="kz-dt__nw">
+                <span class="kz-amono">{e.entry_date}</span>
+                <span class="kz-dt__ph"> · {e.project_reference}</span>
+              </Cell>
+              <Cell tone="mute">{e.project_reference}</Cell>
+              <Cell m="main">{workLabel(e)}</Cell>
+              <Cell m="amount" num>
+                {formatMinutes(e.minutes ?? 0)}
+              </Cell>
+              <Cell m="status" tone="mute">
+                {billingLabel(e)}
+              </Cell>
+              <Cell m="acts" class="kz-dt__acts">
+                {!e.invoice_id ? (
+                  <EntryDialogButton
+                    client:visible
+                    projects={projects}
+                    today={today}
+                    label="Edit"
+                    entry={{
+                      id: e.id,
+                      projectId: e.project_id,
+                      taskId: e.task_id,
+                      entryDate: e.entry_date,
+                      minutes: e.minutes ?? 0,
+                      description: e.description,
+                      billable: e.billable === 1,
+                    }}
+                  />
+                ) : null}
+              </Cell>
+            </tr>
+          ))}
+        </DataTable>
       </section>
     </div>
   ) : null}
 
   {tab === 'timesheet' && sheet ? (
-    <section class="mt-6" aria-labelledby="sheet-h">
-      <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 id="sheet-h" class="text-lg font-semibold">
-            Week of {dayLabel(sheet.week)}
-          </h2>
-          <p class="text-sm text-ink-600">
+    <section aria-labelledby="sheet-h" class="kz-asect">
+      <div>
+        <h2 id="sheet-h" class="kz-ashead">
+          Week of {dayLabel(sheet.week)}
+          <span class="kz-ashead__m">
             {formatMinutes(sheet.total)} total · {formatMinutes(sheet.billableTotal)} billable
-          </p>
-        </div>
-        <div class="flex flex-wrap items-end gap-3">
+          </span>
+        </h2>
+        <div class="kz-atools">
           {canViewAll ? (
-            <form method="get" class="flex items-end gap-2" aria-label="Choose person">
+            <form method="get" class="kz-aperiod" aria-label="Choose person">
               <input type="hidden" name="tab" value="timesheet" />
               <input type="hidden" name="date" value={sheet.week} />
-              <label class="flex flex-col gap-1 text-sm font-medium">
-                Person
-                <select name="user" class="h-10 rounded-sm border border-line bg-surface px-3 text-sm">
+              <div class="kz-field">
+                <label class="kz-label" for="ts-person">
+                  Person
+                </label>
+                <select id="ts-person" name="user" class="kz-input">
                   {staff.map((s) => (
                     <option value={s.id} selected={s.id === sheet.userId}>
                       {s.name}
                     </option>
                   ))}
                 </select>
-              </label>
-              <button class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold hover:border-ink-400">
-                Show
+              </div>
+              <button type="submit" class="kz-btn kz-btn--secondary">
+                <span>Show</span>
               </button>
             </form>
           ) : null}
-          <a
-            href={sheetHref(addDays(sheet.week, -7))}
-            class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-3 text-sm font-semibold hover:border-ink-400"
-          >
-            Previous week
-          </a>
-          <a
-            href={sheetHref(weekStart(today))}
-            class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-3 text-sm font-semibold hover:border-ink-400"
-          >
-            This week
-          </a>
-          <a
-            href={sheetHref(addDays(sheet.week, 7))}
-            class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-3 text-sm font-semibold hover:border-ink-400"
-          >
-            Next week
-          </a>
+          <div class="kz-aacts-row">
+            <Button href={sheetHref(addDays(sheet.week, -7))} variant="secondary" size="sm" lead="chevron-left">
+              Previous week
+            </Button>
+            <Button href={sheetHref(weekStart(today))} variant="secondary" size="sm">
+              This week
+            </Button>
+            <Button href={sheetHref(addDays(sheet.week, 7))} variant="secondary" size="sm" icon="chevron-right">
+              Next week
+            </Button>
+          </div>
         </div>
       </div>
-      <div class="relative overflow-x-auto rounded-lg border border-line bg-surface">
-        <table class="w-full min-w-[760px] text-sm">
-          <thead class="border-b border-line text-left text-[12px] text-ink-600">
-            <tr>
-              <th scope="col" class="px-4 py-2.5 font-semibold">
-                Project
-              </th>
-              {sheet.days.map((d) => (
-                <th scope="col" class="px-3 py-2.5 text-right font-semibold whitespace-nowrap">
-                  {dayLabel(d)}
-                </th>
-              ))}
-              <th scope="col" class="px-4 py-2.5 text-right font-semibold">
-                Total
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-line">
-            {sheet.rows.length === 0 ? (
-              <tr>
-                <td colspan="9" class="px-4 py-8 text-center text-ink-600">
-                  No time logged this week.
-                </td>
-              </tr>
-            ) : null}
-            {sheet.rows.map((r) => (
-              <tr>
-                <th scope="row" class="px-4 py-2.5 text-left font-medium">
-                  {r.label}
-                </th>
-                {r.minutes.map((m) => (
-                  <td class="tnum px-3 py-2.5 text-right">{m ? formatMinutes(m) : '–'}</td>
+      <section class="kz-apane" aria-label="Timesheet">
+        <div class="kz-apane__body is-flush">
+          <div class="kz-rscroll">
+            <table class="kz-rt kz-rt--week">
+              <caption class="sr-only">Hours per project and day</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Project</th>
+                  {sheet.days.map((d) => (
+                    <th scope="col" class="is-num">
+                      {dayLabel(d)}
+                    </th>
+                  ))}
+                  <th scope="col" class="is-num">
+                    Total
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {sheet.rows.length === 0 ? (
+                  <tr>
+                    <td colspan="9" class="is-none">
+                      No time logged this week.
+                    </td>
+                  </tr>
+                ) : null}
+                {sheet.rows.map((r) => (
+                  <tr>
+                    <th scope="row">{r.label}</th>
+                    {r.minutes.map((m) => (
+                      <td class="is-num">{m ? formatMinutes(m) : '–'}</td>
+                    ))}
+                    <td class="is-num is-strong">{formatMinutes(r.total)}</td>
+                  </tr>
                 ))}
-                <td class="tnum px-4 py-2.5 text-right font-semibold">{formatMinutes(r.total)}</td>
-              </tr>
-            ))}
-          </tbody>
-          {sheet.rows.length > 0 ? (
-            <tfoot class="border-t border-line font-semibold">
-              <tr>
-                <th scope="row" class="px-4 py-2.5 text-left">
-                  Total
-                </th>
-                {sheet.dayTotals.map((m) => (
-                  <td class="tnum px-3 py-2.5 text-right">{m ? formatMinutes(m) : '–'}</td>
-                ))}
-                <td class="tnum px-4 py-2.5 text-right">{formatMinutes(sheet.total)}</td>
-              </tr>
-            </tfoot>
-          ) : null}
-        </table>
-      </div>
+              </tbody>
+              {sheet.rows.length > 0 ? (
+                <tfoot>
+                  <tr>
+                    <th scope="row">Total</th>
+                    {sheet.dayTotals.map((m) => (
+                      <td class="is-num">{m ? formatMinutes(m) : '–'}</td>
+                    ))}
+                    <td class="is-num">{formatMinutes(sheet.total)}</td>
+                  </tr>
+                </tfoot>
+              ) : null}
+            </table>
+          </div>
+        </div>
+      </section>
     </section>
   ) : null}
 
   {tab === 'billing' ? (
-    <section class="mt-6" aria-labelledby="unbilled-h">
-      <h2 id="unbilled-h" class="mb-3 text-lg font-semibold">
+    <section aria-labelledby="unbilled-h">
+      <h2 id="unbilled-h" class="kz-ashead">
         Projects with unbilled time
       </h2>
-      <ul class="divide-y divide-line rounded-lg border border-line bg-surface">
-        {unbilled.length === 0 ? (
-          <li class="px-4 py-8 text-center text-sm text-ink-600">All billable time has been billed.</li>
-        ) : null}
-        {unbilled.map((u) => (
-          <li class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-            <div>
-              <p class="font-medium text-ink-950">
-                {u.reference} · {u.name}
-              </p>
-              <p class="text-[12px] text-ink-600">
-                {u.client_name} · {u.entries} entries · {formatMinutes(u.minutes)} · {u.currency ?? 'USD'} · since{' '}
-                {u.oldest}
-              </p>
-            </div>
-            <a
-              href={`/admin/time/bill/${u.id}`}
-              class="inline-flex h-9 items-center rounded-sm border border-line px-3 text-sm font-semibold hover:border-ink-400"
-            >
-              Review and bill
-            </a>
-          </li>
-        ))}
-      </ul>
+      <section class="kz-apane" aria-label="Unbilled time by project">
+        <div class="kz-apane__body is-flush">
+          {unbilled.length === 0 ? (
+            <p class="kz-anone">
+              <span class="kz-anone__code">0 unbilled</span>All billable time has been billed.
+            </p>
+          ) : (
+            <ul class="kz-alist">
+              {unbilled.map((u) => (
+                <li>
+                  <div class="kz-alist__main">
+                    <span class="kz-alist__t">
+                      {u.reference} · {u.name}
+                    </span>
+                    <span class="kz-alist__m">
+                      {u.client_name} · {u.entries} {u.entries === 1 ? 'entry' : 'entries'} · {formatMinutes(u.minutes)}{' '}
+                      · {u.currency ?? 'USD'} · since {u.oldest}
+                    </span>
+                  </div>
+                  <Button href={`/admin/time/bill/${u.id}`} variant="secondary" size="sm">
+                    Review and bill
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
     </section>
   ) : null}
 </AdminLayout>

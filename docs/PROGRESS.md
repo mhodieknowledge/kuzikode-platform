@@ -1198,3 +1198,16 @@ The **Next step** line must be specific enough that a fresh session can continue
   (Overview · Sales · Finance · Delivery · Website · Administration), collapsible to 64 px, bone top bar with search/⌘K (extract logic of
   `components/admin/CommandPalette.tsx` to a hook), NotificationsBell + UserMenu rebuilt in `src/ui/admin/`; phone: top bar + left sheet;
   PANEL_DESIGN_SPEC §3, compact density, light only). Keep every admin e2e hook (admin-shell spec, sweep). Then R6.2 module by module.
+
+## 2026-11-13 11:50 UTC · R6.1 ✅ Admin shell
+- `src/layouts/AdminLayout.astro` rewritten (same props); `src/ui/admin/{nav.ts,useAdminSearch.ts,useNotifications.ts,account.ts,AdminPalette.tsx,
+  AdminNotifications.tsx,AdminUserMenu.tsx,Pane.astro}`, `src/ui/tokens/admin.css`, unit test `admin-nav.test.ts`. Deleted old admin CommandPalette,
+  NotificationsBell, UserMenu, `layouts/AppLayout.astro`, `components/BaseHead.astro`. Menu primitive gained an optional `header`.
+- Review round 1 FAIL on spec detail (top bar height/type, red badge, sidebar overflow, user trigger, notification weights) → fixed.
+- verify green (unit 569, integration 308); e2e admin-shell, sweep, users-admin, security, settings, clients, invoices, reports, content-admin, leads green.
+- Usage limit hit once mid-task (reset 11:30 UTC); the builder resumed. A snapshot of the in-progress fixes was pushed to `wip/r6.1-fixes` (stale; safe to delete).
+- Next step: R6.2 admin modules, one group at a time with `src/ui/admin/Pane.astro` + list/table pattern (dense; mobile list rows; filters in a bottom
+  sheet on phones; sticky save bar on forms). Order: dashboard (KPI strip as one grooved row of mono figures, charts in panes) → Sales (enquiries, leads,
+  clients, quotations) → Finance (invoices, payments, subscriptions, managed services, expenses, reports) → Delivery (projects, time, support) →
+  Website (pages, services, packages, content, media, careers) → Administration (users, settings, audit, notifications). Islands in
+  `src/components/admin/*Admin.tsx` hold the logic: extract into hooks under `src/ui/admin/<module>/`, new markup, delete old. Keep every admin e2e hook.

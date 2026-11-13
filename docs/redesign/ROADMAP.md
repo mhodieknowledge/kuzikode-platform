@@ -80,7 +80,7 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
 - [x] **R5.4 Support, profile, devices, auth screens** (sign-in, reset, invite, verify). Also: enable the workspace dark theme toggle (night desk, night-800 windows; remembered per device via cookie so the server renders `data-theme`).
 
 ## R6: Admin interface
-- [ ] **R6.1 Admin shell** in the related but more utilitarian panel language (keep it distinct from the client workspace).
+- [x] **R6.1 Admin shell** in the related but more utilitarian panel language (keep it distinct from the client workspace).
 - [ ] **R6.2 Restyle every admin module** (dashboard, clients, leads, services, packages, quotations, invoices, payments, projects, expenses, CMS, careers, notifications, settings, reports, audit) with functionality untouched. Dense data views get a mobile list/card pattern.
 
 ## R7: Imagery and motion polish

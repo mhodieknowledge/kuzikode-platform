@@ -371,6 +371,25 @@
     outline: none;
     cursor: pointer;
   }
+  .kz-menu__head {
+    display: grid;
+    gap: 2px;
+    margin-bottom: 6px;
+    padding: 8px 10px 10px;
+    border-bottom: 1px solid var(--bone-200);
+  }
+  .kz-menu__head-name {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .kz-menu__head-mail {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+  }
   .kz-menu__item[data-highlighted] {
     background: var(--bone-100);
     color: var(--ink-900);

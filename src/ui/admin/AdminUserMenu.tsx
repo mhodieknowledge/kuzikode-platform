@@ -1,6 +1,6 @@
 /**
- * Account menu at the right of the admin top bar (R6.1): an initials plate (name and email beside it from 1024 px), then
- * security, signed-in devices, notification preferences and sign out. Behaviour from the shared Menu primitive (Radix).
+ * Account menu at the right of the admin top bar (R6.1): an initials plate (name and email beside it from 1024 px), then a header with
+ * the name and email, security, signed-in devices, notification preferences and sign out. Behaviour from the shared Menu primitive (Radix).
  */
 import { Icon } from '../icons/icon';
 import { Menu } from '../primitives';
@@ -10,6 +10,12 @@ export function AdminUserMenu({ name, email }: { name: string; email: string }) 
   return (
     <Menu
       label="Account"
+      header={
+        <>
+          <span className="kz-menu__head-name">{name}</span>
+          <span className="kz-menu__head-mail">{email}</span>
+        </>
+      }
       trigger={
         <button type="button" className="kz-aacct">
           <span className="sr-only">Account menu: </span>

@@ -20,18 +20,22 @@ export function Menu({
   items,
   align = 'end',
   label,
+  header,
 }: {
   trigger: ReactNode;
   items: MenuEntry[];
   align?: 'start' | 'end';
   /** Accessible name of the menu itself. */
   label?: string;
+  /** Non-interactive heading at the top (e.g. who is signed in). */
+  header?: ReactNode;
 }) {
   return (
     <R.Root>
       <R.Trigger asChild>{trigger}</R.Trigger>
       <R.Portal>
         <R.Content align={align} sideOffset={8} className="kz-menu" aria-label={label}>
+          {header ? <R.Label className="kz-menu__head">{header}</R.Label> : null}
           {items.map((item) => {
             const inner = (
               <>

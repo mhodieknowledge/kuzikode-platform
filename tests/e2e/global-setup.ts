@@ -42,7 +42,7 @@ export default async function globalSetup() {
   execFileSync('node', ['scripts/seed.ts', '--env', 'local'], { stdio: 'pipe' });
   const hash = await hashPassword(E2E_PASSWORD);
   const clientSnap = JSON.stringify({ name: E2E_PORTAL_USER.clientName, email: 'hello@borrowdale-florists.example' });
-  const businessSnap = JSON.stringify({ name: 'Kuzikode Technologies' });
+  const businessSnap = JSON.stringify({ name: 'Kuzikode Intelligent Technologies' });
   const now = new Date().toISOString();
   // checkout.spec (P6.3d/e): six fresh $25.00 invoices per run (paying one closes it for good).
   const run = Date.now().toString(36);
@@ -184,14 +184,14 @@ export default async function globalSetup() {
     `UPDATE subscriptions SET autocharge_method_id = NULL WHERE client_id = ${q(E2E_CHECKOUT_USER.clientId)};`,
     `UPDATE saved_payment_methods SET status = 'removed', token_enc = NULL, is_default = 0, removed_at = ${q(now)}
      WHERE client_id = ${q(E2E_CHECKOUT_USER.clientId)} AND status <> 'removed';`,
-    `UPDATE application_settings SET value = ${q(JSON.stringify('Kuzikode Technologies (e2e test details)\nExample Bank, Harare\nAccount 0000000000'))}
+    `UPDATE application_settings SET value = ${q(JSON.stringify('Kuzikode Intelligent Technologies (e2e test details)\nExample Bank, Harare\nAccount 0000000000'))}
      WHERE key = 'documents.bank_details';`,
     "UPDATE application_settings SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT) WHERE key = 'content_version';",
     // The portal quotation spec accepts it, so it is reset to "sent" on every run.
     `INSERT INTO quotations (id, number, client_id, title, currency, status, issue_date, valid_until, subtotal_minor, total_minor, sent_at,
        client_snapshot, business_snapshot)
      VALUES ('quo_e2e_portal_1', 'QUO-E2E-P001', ${q(E2E_PORTAL_USER.clientId)}, 'Online ordering website', 'USD', 'sent', '2026-10-20', '2099-12-31', 250000, 250000, '2026-10-20T09:00:00.000Z',
-       ${q(JSON.stringify({ name: E2E_PORTAL_USER.clientName, email: 'hello@borrowdale-florists.example' }))}, ${q(JSON.stringify({ name: 'Kuzikode Technologies' }))})
+       ${q(JSON.stringify({ name: E2E_PORTAL_USER.clientName, email: 'hello@borrowdale-florists.example' }))}, ${q(JSON.stringify({ name: 'Kuzikode Intelligent Technologies' }))})
      ON CONFLICT(id) DO UPDATE SET status = 'sent', viewed_at = NULL, accepted_at = NULL, accepted_by_name = NULL, accepted_ip = NULL,
        accepted_user_agent = NULL, rejected_at = NULL, rejection_reason = NULL, client_snapshot = excluded.client_snapshot,
        business_snapshot = excluded.business_snapshot, subtotal_minor = excluded.subtotal_minor;`,

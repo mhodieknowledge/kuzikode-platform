@@ -14,10 +14,14 @@ import { isPdf, pdfText } from '../helpers/pdf-text';
 
 const settings = {
   accentColour: '#2747E8',
-  footerText: 'Kuzikode Technologies · Harare',
+  footerText: 'Kuzikode Intelligent Technologies · Harare',
   bankDetails: 'Bank: Example Bank\nAccount: 0000000000',
 };
-const business = { name: 'Kuzikode Technologies', email: 'billing@kuzikode.example', address: 'Harare, Zimbabwe' };
+const business = {
+  name: 'Kuzikode Intelligent Technologies',
+  email: 'billing@kuzikode.example',
+  address: 'Harare, Zimbabwe',
+};
 const client = {
   name: 'Baobab Foods',
   legalName: 'Baobab Foods (Pvt) Ltd',

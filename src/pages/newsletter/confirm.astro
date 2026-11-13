@@ -16,7 +16,7 @@ if (Astro.request.method === 'POST') {
 Astro.response.headers.set('cache-control', 'private, no-store');
 ---
 
-<PublicLayout title="Confirm your subscription · Kuzikode Technologies" noindex>
+<PublicLayout title="Confirm your subscription · Kuzikode Intelligent Technologies" noindex>
   <section class="bg-canvas py-16 md:py-24">
     <div class="container-content max-w-xl">
       {outcome === 'confirmed' ? (
@@ -42,7 +42,8 @@ Astro.response.headers.set('cache-control', 'private, no-store');
         <form method="post">
           <h1 class="text-3xl font-bold tracking-display">Confirm your subscription</h1>
           <p class="mt-3 text-ink-600">
-            Press the button to start receiving occasional updates and new articles from Kuzikode Technologies.
+            Press the button to start receiving occasional updates and new articles from Kuzikode Intelligent
+            Technologies.
           </p>
           <input type="hidden" name="token" value={token} />
           <button

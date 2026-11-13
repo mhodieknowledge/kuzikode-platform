@@ -29,7 +29,7 @@ test('article page: Article JSON-LD, tags, share links, related posts', async ({
   await page.goto('/insights');
   await page.getByRole('link', { name: 'Business email on your own domain: why and how' }).click();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Business email on your own domain: why and how');
-  await expect(page.locator('header').getByText(/By Kuzikode Technologies/)).toContainText('min read');
+  await expect(page.locator('header').getByText(/By Kuzikode Intelligent Technologies/)).toContainText('min read');
   const ld = (await page.locator('script[type="application/ld+json"]').allTextContents()).flatMap(
     (t) => JSON.parse(t) as Record<string, unknown>[],
   );

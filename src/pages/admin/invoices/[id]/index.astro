@@ -57,7 +57,7 @@ const clientParty: ClientSnapshot = inv.client_snapshot
 const business: BusinessSnapshot = inv.business_snapshot
   ? (JSON.parse(inv.business_snapshot) as BusinessSnapshot)
   : {
-      name: settingText(settings, 'company.name') ?? 'Kuzikode Technologies',
+      name: settingText(settings, 'company.name') ?? 'Kuzikode Intelligent Technologies',
       legalName: settingText(settings, 'company.legal_name') ?? null,
       registrationNumber: null,
       taxNumber: settingText(settings, 'company.tax_number') ?? null,

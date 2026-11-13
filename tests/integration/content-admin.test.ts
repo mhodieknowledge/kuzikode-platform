@@ -41,7 +41,7 @@ const post = (over: Record<string, unknown> = {}) => ({
   body: '<h2>Start with clear terms</h2><p>Say when payment is due.</p><script>alert(1)</script>',
   categoryId: 'pcat_guides',
   tags: ['Payments', 'Small business', 'payments'],
-  authorDisplayName: 'Kuzikode Technologies',
+  authorDisplayName: 'Kuzikode Intelligent Technologies',
   status: 'draft',
   ...over,
 });

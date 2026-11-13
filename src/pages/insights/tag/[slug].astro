@@ -12,7 +12,7 @@ const n = Number(Astro.url.searchParams.get('page') ?? '1');
 <InsightsIndex
   title={`Tagged “${tag.name}”`}
   seoTitle={`${tag.name} · Kuzikode Insights`}
-  seoDescription={`Kuzikode Technologies articles tagged ${tag.name}.`}
+  seoDescription={`Kuzikode Intelligent Technologies articles tagged ${tag.name}.`}
   filter={{ tag: tag.slug, page: Number.isFinite(n) ? n : 1 }}
   basePath={`/insights/tag/${tag.slug}`}
   crumbs={[{ name: tag.name, path: `/insights/tag/${tag.slug}` }]}

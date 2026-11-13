@@ -229,7 +229,7 @@ export function renderRss(ctx: RequestContext, posts: PostSummary[]): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Kuzikode Technologies · Insights</title>
+    <title>Kuzikode Intelligent Technologies · Insights</title>
     <link>${xml(abs(ctx, '/insights'))}</link>
     <description>Practical guides on websites, online payments, business email and software.</description>
     <language>en</language>

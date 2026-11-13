@@ -7,7 +7,7 @@ exports[`templates > application_acknowledgement renders HTML and text with the 
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">Thank you for applying: Junior Web Developer.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">Thank you for applying</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Ann,</p>
@@ -15,7 +15,7 @@ exports[`templates > application_acknowledgement renders HTML and text with the 
 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 20px;border-collapse:collapse"><tr><td style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#57524A">Your reference</td><td align="right" style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#141412;font-weight:600">APP-2026-0001</td></tr><tr><td style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#57524A">Position</td><td align="right" style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#141412;font-weight:600">Junior Web Developer</td></tr></table>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">We keep applications for 12 months after the position closes and then delete your CV. To withdraw your application or ask us to delete your data sooner, reply to this email.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -34,7 +34,7 @@ Position: Junior Web Developer
 We keep applications for 12 months after the position closes and then delete your CV. To withdraw your application or ask us to delete your data sooner, reply to this email.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -46,16 +46,16 @@ exports[`templates > candidate_message renders HTML and text with the branded la
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">We would like to invite you to an interview.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">Interview invitation: Junior Developer</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Tino,</p>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">We would like to invite you to an interview.</p>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Kind regards,
-Kuzikode Technologies</p>
+Kuzikode Intelligent Technologies</p>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">Application reference APP-2026-0001. Reply to this email to reach us.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -69,12 +69,12 @@ Hi Tino,
 We would like to invite you to an interview.
 
 Kind regards,
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 
 Application reference APP-2026-0001. Reply to this email to reach us.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -86,7 +86,7 @@ exports[`templates > card_charge_failed renders HTML and text with the branded l
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">$25.00 is still due on invoice INV-2026-00007.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">Your automatic card payment did not go through</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Ann Moyo Bakery,</p>
@@ -95,7 +95,7 @@ exports[`templates > card_charge_failed renders HTML and text with the branded l
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:#1E7A52;border-radius:6px"><a href="https://example.com/pay/abc" style="display:inline-block;padding:12px 22px;font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none">Pay invoice</a></td></tr></table>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">You can pay with another card, a mobile wallet or a bank transfer. If your card has expired, remove it in the client portal and save a new one.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -116,7 +116,7 @@ Pay invoice: https://example.com/pay/abc
 You can pay with another card, a mobile wallet or a bank transfer. If your card has expired, remove it in the client portal and save a new one.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -128,7 +128,7 @@ exports[`templates > client_invitation renders HTML and text with the branded la
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">See quotations, invoices and project updates in one place.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">Welcome to your client portal</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Ann,</p>
@@ -136,7 +136,7 @@ exports[`templates > client_invitation renders HTML and text with the branded la
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:#1E7A52;border-radius:6px"><a href="https://kuzikode.example/portal/accept-invite?token=abc" style="display:inline-block;padding:12px 22px;font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none">Set up your account</a></td></tr></table>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">This invitation works once and expires in 7 days.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -154,7 +154,7 @@ Set up your account: https://kuzikode.example/portal/accept-invite?token=abc
 This invitation works once and expires in 7 days.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -166,7 +166,7 @@ exports[`templates > email_verification renders HTML and text with the branded l
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">One click to confirm your email address.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">Confirm your email address</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Ann,</p>
@@ -174,7 +174,7 @@ exports[`templates > email_verification renders HTML and text with the branded l
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:#1E7A52;border-radius:6px"><a href="https://kuzikode.example/portal/verify-email?token=abc" style="display:inline-block;padding:12px 22px;font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none">Confirm email address</a></td></tr></table>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">The link expires in 24 hours.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -192,7 +192,7 @@ Confirm email address: https://kuzikode.example/portal/verify-email?token=abc
 The link expires in 24 hours.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -211,7 +211,7 @@ Your reference: ENQ-2026-0001
 Reply to this email if you want to add anything. Please keep the reference in the subject.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -223,7 +223,7 @@ exports[`templates > enquiry_acknowledgement renders HTML and text with the bran
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">Thank you for contacting Kuzikode. We will reply soon.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">Thank you for getting in touch</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Ann,</p>
@@ -231,7 +231,7 @@ exports[`templates > enquiry_acknowledgement renders HTML and text with the bran
 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 20px;border-collapse:collapse"><tr><td style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#57524A">Your reference</td><td align="right" style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#141412;font-weight:600">ENQ-2026-0001</td></tr></table>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">Reply to this email if you want to add anything. Please keep the reference in the subject.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -249,7 +249,7 @@ Your reference: ENQ-2026-0001
 Reply to this email if you want to add anything. Please keep the reference in the subject.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -261,14 +261,14 @@ exports[`templates > enquiry_admin renders HTML and text with the branded layout
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">We need a website.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">New enquiry</h1>
 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 20px;border-collapse:collapse"><tr><td style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#57524A">Reference</td><td align="right" style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#141412;font-weight:600">ENQ-2026-0001</td></tr><tr><td style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#57524A">From</td><td align="right" style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#141412;font-weight:600">Ann (ann@example.com)</td></tr><tr><td style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#57524A">Category</td><td align="right" style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#141412;font-weight:600">web-development</td></tr></table>
 <p style="margin:0 0 16px;padding:12px 14px;background:#F6F3EE;border:1px solid #DDD6CA;border-radius:6px;font-size:14px;line-height:1.5;color:#2C2A26">We need a website.</p>
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:#1E7A52;border-radius:6px"><a href="https://kuzikode.example/admin/enquiries/enq_1" style="display:inline-block;padding:12px 22px;font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none">Open in admin</a></td></tr></table>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -286,19 +286,19 @@ We need a website.
 Open in admin: https://kuzikode.example/admin/enquiries/enq_1
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
 
 exports[`templates > invoice_issued renders HTML and text with the branded layout 1`] = `
 "<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>Invoice INV-2026-00001 from Kuzikode Technologies</title></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>Invoice INV-2026-00001 from Kuzikode Intelligent Technologies</title></head>
 <body style="margin:0;padding:0;background:#F6F3EE;font-family:Inter,'Segoe UI',Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">Invoice INV-2026-00001 for $500.00, due 13 November 2026.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">Your invoice</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Ann,</p>
@@ -308,13 +308,13 @@ exports[`templates > invoice_issued renders HTML and text with the branded layou
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">Have a client portal account? The invoice is also in your portal, where you can pay online: https://kuzikode.example/portal/invoices/inv_1</p>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">Please quote the invoice number with your payment. Reply to this email with any questions.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
 exports[`templates > invoice_issued renders HTML and text with the branded layout 2`] = `
 {
-  "subject": "Invoice INV-2026-00001 from Kuzikode Technologies",
+  "subject": "Invoice INV-2026-00001 from Kuzikode Intelligent Technologies",
   "text": "Your invoice
 
 Hi Ann,
@@ -332,7 +332,7 @@ Have a client portal account? The invoice is also in your portal, where you can 
 Please quote the invoice number with your payment. Reply to this email with any questions.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -355,7 +355,7 @@ View invoice: https://example.com/i/abc
 If you have already paid, thank you, and please ignore this reminder. Reply to this email if anything is unclear.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -378,7 +378,7 @@ View invoice: https://example.com/i/abc
 If you have already paid, thank you, and please ignore this reminder. Reply to this email if anything is unclear.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -390,7 +390,7 @@ exports[`templates > invoice_reminder renders HTML and text with the branded lay
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">$250.00 outstanding on invoice INV-2026-00001.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">Your invoice is overdue</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Ann,</p>
@@ -399,7 +399,7 @@ exports[`templates > invoice_reminder renders HTML and text with the branded lay
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:#1E7A52;border-radius:6px"><a href="https://example.com/i/abc" style="display:inline-block;padding:12px 22px;font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none">View invoice</a></td></tr></table>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">If you have already paid, thank you, and please ignore this reminder. Reply to this email if anything is unclear.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -421,7 +421,7 @@ View invoice: https://example.com/i/abc
 If you have already paid, thank you, and please ignore this reminder. Reply to this email if anything is unclear.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -433,14 +433,14 @@ exports[`templates > newsletter_confirmation renders HTML and text with the bran
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">One click to confirm your subscription.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">Confirm your subscription</h1>
-<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Please confirm that you would like to receive occasional updates and articles from Kuzikode Technologies.</p>
+<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Please confirm that you would like to receive occasional updates and articles from Kuzikode Intelligent Technologies.</p>
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:#1E7A52;border-radius:6px"><a href="https://kuzikode.example/newsletter/confirm?token=abc" style="display:inline-block;padding:12px 22px;font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none">Confirm subscription</a></td></tr></table>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">The link expires in 7 days. If you did not sign up, ignore this email and you will not be subscribed. Every newsletter includes an unsubscribe link.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -449,26 +449,26 @@ exports[`templates > newsletter_confirmation renders HTML and text with the bran
   "subject": "Confirm your newsletter subscription",
   "text": "Confirm your subscription
 
-Please confirm that you would like to receive occasional updates and articles from Kuzikode Technologies.
+Please confirm that you would like to receive occasional updates and articles from Kuzikode Intelligent Technologies.
 
 Confirm subscription: https://kuzikode.example/newsletter/confirm?token=abc
 
 The link expires in 7 days. If you did not sign up, ignore this email and you will not be subscribed. Every newsletter includes an unsubscribe link.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
 
 exports[`templates > notification renders HTML and text with the branded layout 1`] = `
 "<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>New enquiry from Ann Moyo · Kuzikode Technologies</title></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>New enquiry from Ann Moyo · Kuzikode Intelligent Technologies</title></head>
 <body style="margin:0;padding:0;background:#F6F3EE;font-family:Inter,'Segoe UI',Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">Website for a bakery, budget USD 1,000–2,500.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">New enquiry from Ann Moyo</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Tendai,</p>
@@ -476,13 +476,13 @@ exports[`templates > notification renders HTML and text with the branded layout 
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:#1E7A52;border-radius:6px"><a href="https://kuzikode.example/admin/enquiries/enq_1" style="display:inline-block;padding:12px 22px;font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none">Open in admin</a></td></tr></table>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">You get this email because &quot;New enquiry&quot; emails are on. Change it under Account → Notification preferences.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
 exports[`templates > notification renders HTML and text with the branded layout 2`] = `
 {
-  "subject": "New enquiry from Ann Moyo · Kuzikode Technologies",
+  "subject": "New enquiry from Ann Moyo · Kuzikode Intelligent Technologies",
   "text": "New enquiry from Ann Moyo
 
 Hi Tendai,
@@ -494,7 +494,7 @@ Open in admin: https://kuzikode.example/admin/enquiries/enq_1
 You get this email because "New enquiry" emails are on. Change it under Account → Notification preferences.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -506,7 +506,7 @@ exports[`templates > password_reset renders HTML and text with the branded layou
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">Use this link within 60 minutes.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">Reset your password</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Ann,</p>
@@ -514,7 +514,7 @@ exports[`templates > password_reset renders HTML and text with the branded layou
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:#1E7A52;border-radius:6px"><a href="https://kuzikode.example/admin/reset-password?token=abc" style="display:inline-block;padding:12px 22px;font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none">Choose a new password</a></td></tr></table>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">The link works once and expires in 60 minutes. If you didn&#39;t ask for this, you can ignore this email.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -532,7 +532,7 @@ Choose a new password: https://kuzikode.example/admin/reset-password?token=abc
 The link works once and expires in 60 minutes. If you didn't ask for this, you can ignore this email.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -544,7 +544,7 @@ exports[`templates > payment_receipt renders HTML and text with the branded layo
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">Thank you. We received $600.00 for invoice INV-2026-00001.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">Thank you for your payment</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Ann,</p>
@@ -553,7 +553,7 @@ exports[`templates > payment_receipt renders HTML and text with the branded layo
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:#1E7A52;border-radius:6px"><a href="https://example.com/i/abc" style="display:inline-block;padding:12px 22px;font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none">View invoice</a></td></tr></table>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">Keep this email for your records.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -577,7 +577,7 @@ View invoice: https://example.com/i/abc
 Keep this email for your records.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -589,14 +589,14 @@ exports[`templates > project_update renders HTML and text with the branded layou
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">The design is approved. Build starts on Monday.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">An update on Online ordering website</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Ann,</p>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">The design is approved. Build starts on Monday.</p>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">Project PRJ-2026-0001. Reply to this email with any questions.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -612,7 +612,7 @@ The design is approved. Build starts on Monday.
 Project PRJ-2026-0001. Reply to this email with any questions.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -639,7 +639,7 @@ Open the quotation: https://kuzikode.example/admin/quotations/quo_1
 You get this email because "Quotation accepted" emails are on. Change it under Account → Notification preferences.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -651,7 +651,7 @@ exports[`templates > quotation_accepted renders HTML and text with the branded l
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">Baobab Foods accepted Website redesign (US$1,200.00).</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">A quotation was accepted</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Tendai,</p>
@@ -661,7 +661,7 @@ exports[`templates > quotation_accepted renders HTML and text with the branded l
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:#1E7A52;border-radius:6px"><a href="https://kuzikode.example/admin/quotations/quo_1" style="display:inline-block;padding:12px 22px;font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none">Open the quotation</a></td></tr></table>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">You get this email because &quot;Quotation accepted&quot; emails are on. Change it under Account → Notification preferences.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -687,7 +687,7 @@ Open the quotation: https://kuzikode.example/admin/quotations/quo_1
 You get this email because "Quotation accepted" emails are on. Change it under Account → Notification preferences.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -696,10 +696,10 @@ exports[`templates > quotation_sent renders HTML and text with the branded layou
 "<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>Quotation QUO-2026-0001: Website redesign</title></head>
 <body style="margin:0;padding:0;background:#F6F3EE;font-family:Inter,'Segoe UI',Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0">Your quotation from Kuzikode Technologies (US$1,200.00).</div>
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">Your quotation from Kuzikode Intelligent Technologies (US$1,200.00).</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">Your quotation</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Ann,</p>
@@ -708,7 +708,7 @@ exports[`templates > quotation_sent renders HTML and text with the branded layou
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:#1E7A52;border-radius:6px"><a href="https://example.com/q/abc" style="display:inline-block;padding:12px 22px;font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none">View quotation</a></td></tr></table>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">If you have questions, reply to this email and we will get back to you.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -730,7 +730,7 @@ View quotation: https://example.com/q/abc
 If you have questions, reply to this email and we will get back to you.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -750,7 +750,7 @@ Renewal date: 6 December 2026
 We send this reminder 30, 14 and 7 days before each renewal.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -762,7 +762,7 @@ exports[`templates > renewal_reminder renders HTML and text with the branded lay
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">Renews on 6 December 2026.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">A renewal is coming up</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Ann,</p>
@@ -770,7 +770,7 @@ exports[`templates > renewal_reminder renders HTML and text with the branded lay
 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 20px;border-collapse:collapse"><tr><td style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#57524A">Service</td><td align="right" style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#141412;font-weight:600">Domain: baobab.co.zw</td></tr><tr><td style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#57524A">Renewal date</td><td align="right" style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#141412;font-weight:600">6 December 2026</td></tr></table>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">We send this reminder 30, 14 and 7 days before each renewal.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -789,7 +789,7 @@ Renewal date: 6 December 2026
 We send this reminder 30, 14 and 7 days before each renewal.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -809,7 +809,7 @@ IP address: 1.2.3.4
 If this was not you, reset your password straight away and contact us.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -821,7 +821,7 @@ exports[`templates > security_alert renders HTML and text with the branded layou
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">Your password was changed. If this wasn&#39;t you, reset your password now.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">Your password was changed</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Ann,</p>
@@ -829,7 +829,7 @@ exports[`templates > security_alert renders HTML and text with the branded layou
 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 20px;border-collapse:collapse"><tr><td style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#57524A">When</td><td align="right" style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#141412;font-weight:600">Thu, 05 Nov 2026 10:00:00 GMT</td></tr><tr><td style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#57524A">IP address</td><td align="right" style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#141412;font-weight:600">1.2.3.4</td></tr></table>
 <p style="margin:0 0 16px;padding:12px 14px;background:#F6F3EE;border:1px solid #DDD6CA;border-radius:6px;font-size:14px;line-height:1.5;color:#2C2A26">If this was not you, reset your password straight away and contact us.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -848,7 +848,7 @@ IP address: 1.2.3.4
 If this was not you, reset your password straight away and contact us.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -860,7 +860,7 @@ exports[`templates > staff_invitation renders HTML and text with the branded lay
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">Set your password to get started.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">Welcome to the team workspace</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Ann,</p>
@@ -868,7 +868,7 @@ exports[`templates > staff_invitation renders HTML and text with the branded lay
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:#1E7A52;border-radius:6px"><a href="https://kuzikode.example/admin/accept-invite?token=abc" style="display:inline-block;padding:12px 22px;font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none">Set your password</a></td></tr></table>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">This invitation works once and expires in 7 days.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -886,7 +886,7 @@ Set your password: https://kuzikode.example/admin/accept-invite?token=abc
 This invitation works once and expires in 7 days.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -898,7 +898,7 @@ exports[`templates > support_ack renders HTML and text with the branded layout 1
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">Your support request SUP-2026-0002 is with our team.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">We received your support request</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Ann,</p>
@@ -906,7 +906,7 @@ exports[`templates > support_ack renders HTML and text with the branded layout 1
 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 20px;border-collapse:collapse"><tr><td style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#57524A">Request</td><td align="right" style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#141412;font-weight:600">SUP-2026-0002: Website is down</td></tr></table>
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px"><tr><td style="background:#1E7A52;border-radius:6px"><a href="https://kuzikode.example/portal/support/sup_1" style="display:inline-block;padding:12px 22px;font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none">View your request</a></td></tr></table>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -924,7 +924,7 @@ Request: SUP-2026-0002: Website is down
 View your request: https://kuzikode.example/portal/support/sup_1
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
@@ -936,7 +936,7 @@ exports[`templates > support_reply renders HTML and text with the branded layout
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">We reset the mailbox password; please try again.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">A reply to your support request</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Ann,</p>
@@ -944,7 +944,7 @@ exports[`templates > support_reply renders HTML and text with the branded layout
 <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 20px;border-collapse:collapse"><tr><td style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#57524A">Request</td><td align="right" style="padding:8px 0;border-bottom:1px solid #DDD6CA;font-size:14px;color:#141412;font-weight:600">SUP-2026-0001: Email not syncing</td></tr></table>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">Reply to this email and we will add your message to the request.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
@@ -962,32 +962,32 @@ Request: SUP-2026-0001: Email not syncing
 Reply to this email and we will add your message to the request.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;
 
 exports[`templates > system_test renders HTML and text with the branded layout 1`] = `
 "<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>Test email from Kuzikode Technologies</title></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light"><title>Test email from Kuzikode Intelligent Technologies</title></head>
 <body style="margin:0;padding:0;background:#F6F3EE;font-family:Inter,'Segoe UI',Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">Your email settings are working.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F3EE"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid #DDD6CA;border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid #DDD6CA"><a href="https://kuzikode.example/" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#141412"><span style="color:#1E7A52">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid #DDD6CA;line-height:0"><a href="https://kuzikode.example/" style="text-decoration:none"><img src="https://kuzikode.example/brand/email-header.png" width="600" height="80" alt="Kuzikode Intelligent Technologies" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:#141412"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:#141412;font-weight:700">Email is working</h1>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">Hi Ann,</p>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#2C2A26">This is a test sent from the admin settings. If you can read it, outgoing email is set up correctly.</p>
 <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#57524A">Sent 2026-11-06T10:00:00.000Z.</p>
 </td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #DDD6CA;font-size:12px;line-height:1.5;color:#57524A">Kuzikode Intelligent Technologies<br><a href="https://kuzikode.example/" style="color:#57524A">kuzikode.example</a></td></tr>
 </table></td></tr></table></body></html>"
 `;
 
 exports[`templates > system_test renders HTML and text with the branded layout 2`] = `
 {
-  "subject": "Test email from Kuzikode Technologies",
+  "subject": "Test email from Kuzikode Intelligent Technologies",
   "text": "Email is working
 
 Hi Ann,
@@ -997,7 +997,7 @@ This is a test sent from the admin settings. If you can read it, outgoing email 
 Sent 2026-11-06T10:00:00.000Z.
 
 —
-Kuzikode Technologies
+Kuzikode Intelligent Technologies
 https://kuzikode.example/",
 }
 `;

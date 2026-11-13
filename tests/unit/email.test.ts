@@ -5,7 +5,7 @@ import { renderTemplate, TEMPLATE_NAMES } from '../../src/server/email/templates
 import { EMAIL_SAMPLES, EMAIL_VARIANTS } from '../../src/server/email/templates/samples';
 import { escapeHtml } from '../../src/server/email/templates/layout';
 
-const brand = { companyName: 'Kuzikode Technologies', siteUrl: 'https://kuzikode.example/' };
+const brand = { companyName: 'Kuzikode Intelligent Technologies', siteUrl: 'https://kuzikode.example/' };
 const msg = {
   to: 'a@example.com',
   from: 'Kuzikode <onboarding@resend.dev>',
@@ -69,10 +69,10 @@ describe('templates', () => {
     const r = renderTemplate(name, brand, EMAIL_SAMPLES[name]);
     expect(r.subject.length).toBeGreaterThan(5);
     expect(r.html).toContain('<!doctype html>');
-    expect(r.html).toContain('Kuzikode Technologies');
+    expect(r.html).toContain('Kuzikode Intelligent Technologies');
     expect(r.html).toContain('color-scheme');
     expect(r.text).not.toContain('<');
-    expect(r.text).toContain('Kuzikode Technologies');
+    expect(r.text).toContain('Kuzikode Intelligent Technologies');
     expect(r.html).toMatchSnapshot();
     expect({ subject: r.subject, text: r.text }).toMatchSnapshot();
   });

@@ -570,7 +570,7 @@ export async function snapshots(ctx: RequestContext, q: { client_id: string; con
     contact: k ? { name: k.name, email: k.email } : null,
   };
   const business: BusinessSnapshot = {
-    name: settingText(settings, 'company.name') ?? 'Kuzikode Technologies',
+    name: settingText(settings, 'company.name') ?? 'Kuzikode Intelligent Technologies',
     legalName: settingText(settings, 'company.legal_name') ?? null,
     registrationNumber: settingText(settings, 'company.registration_number') ?? null,
     taxNumber: settingText(settings, 'company.tax_number') ?? null,

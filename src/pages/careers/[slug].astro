@@ -41,7 +41,7 @@ const closes = p.closesAt && open ? formatLongDate(p.closesAt) : null;
 const url = new URL(`/careers/${p.slug}`, ctx.config.siteUrl).toString();
 const share = [
   ['LinkedIn', `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`],
-  ['WhatsApp', `https://wa.me/?text=${encodeURIComponent(`${p.title} at Kuzikode Technologies ${url}`)}`],
+  ['WhatsApp', `https://wa.me/?text=${encodeURIComponent(`${p.title} at Kuzikode Intelligent Technologies ${url}`)}`],
   ['X', `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(p.title)}`],
 ] as const;
 const parts = (
@@ -64,7 +64,7 @@ const n = (i: number) => String(i + 1).padStart(2, '0');
 
 <PublicLayout
   structuredData={ld}
-  title={`${p.title} · Careers · Kuzikode Technologies`}
+  title={`${p.title} · Careers · Kuzikode Intelligent Technologies`}
   description={p.summary}
   noindex={!open}
   headerTone="bone"

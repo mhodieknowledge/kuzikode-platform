@@ -24,7 +24,7 @@ const insertPost = (slug: string, status: string, publishAt: string | null, publ
   env.DB.batch([
     env.DB.prepare(
       `INSERT OR REPLACE INTO posts (id, slug, title, excerpt, body, category_id, author_display_name, reading_minutes, status, publish_at, published_at)
-     VALUES (?, ?, ?, 'Excerpt', '<p>Body <script>alert(1)</script></p>', 'pcat_guides', 'Kuzikode Technologies', 1, ?, ?, ?)`,
+     VALUES (?, ?, ?, 'Excerpt', '<p>Body <script>alert(1)</script></p>', 'pcat_guides', 'Kuzikode Intelligent Technologies', 1, ?, ?, ?)`,
     ).bind(`post_${slug}`, slug, `Title ${slug} & <more>`, status, publishAt, publishedAt),
     bumpContentVersionStmt(env.DB),
   ]);

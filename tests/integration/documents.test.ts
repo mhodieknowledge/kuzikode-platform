@@ -180,7 +180,7 @@ describe('PDF engine (P4.8)', () => {
     const s = await session(['admin']);
     const clientId = await newClient(s);
     const client = JSON.stringify({ name: 'Baobab Foods', number: 'CL-0001', email: 'accounts@baobab.example' });
-    const business = JSON.stringify({ name: 'Kuzikode Technologies', email: 'billing@kuzikode.example' });
+    const business = JSON.stringify({ name: 'Kuzikode Intelligent Technologies', email: 'billing@kuzikode.example' });
     await env.DB.batch([
       env.DB.prepare(
         `INSERT INTO invoices (id, client_id, currency, issue_date, due_date, payment_terms_days, subtotal_minor, total_minor, balance_minor, status, client_snapshot, business_snapshot)

@@ -10,8 +10,8 @@ export const LEGAL_PAGES: PageSeed[] = [
   {
     key: 'legal-privacy',
     title: 'Privacy Policy',
-    seoTitle: 'Privacy Policy · Kuzikode Technologies',
-    seoDescription: 'How Kuzikode Technologies collects, uses, stores and protects personal information.',
+    seoTitle: 'Privacy Policy · Kuzikode Intelligent Technologies',
+    seoDescription: 'How Kuzikode Intelligent Technologies collects, uses, stores and protects personal information.',
     sections: [
       {
         key: 'body',
@@ -19,7 +19,7 @@ export const LEGAL_PAGES: PageSeed[] = [
         content: {
           title: 'Privacy Policy',
           html: `${UPDATED}
-<p>This policy explains how Kuzikode Technologies ("Kuzikode", "we") handles personal information collected through this website, our client portal and our services. We process personal information in line with Zimbabwe's Cyber and Data Protection Act [Chapter 12:07] and good international practice.</p>
+<p>This policy explains how Kuzikode Intelligent Technologies ("Kuzikode", "we") handles personal information collected through this website, our client portal and our services. We process personal information in line with Zimbabwe's Cyber and Data Protection Act [Chapter 12:07] and good international practice.</p>
 <h2>What we collect</h2>
 <ul>
 <li><strong>Enquiries and project requests:</strong> your name, email address, optional phone number and organisation, the service you are interested in, an optional budget range, your message and any file you choose to attach.</li>
@@ -56,8 +56,8 @@ export const LEGAL_PAGES: PageSeed[] = [
   {
     key: 'legal-terms',
     title: 'Terms of Use',
-    seoTitle: 'Terms of Use · Kuzikode Technologies',
-    seoDescription: 'The terms that apply when you use the Kuzikode Technologies website and client portal.',
+    seoTitle: 'Terms of Use · Kuzikode Intelligent Technologies',
+    seoDescription: 'The terms that apply when you use the Kuzikode Intelligent Technologies website and client portal.',
     sections: [
       {
         key: 'body',
@@ -71,7 +71,7 @@ export const LEGAL_PAGES: PageSeed[] = [
 <h2>Client portal accounts</h2>
 <p>Portal accounts are created by invitation. Keep your password private and tell us straight away if you think someone else has used your account. You are responsible for actions taken with your account. We may suspend access to protect you, us or other clients.</p>
 <h2>Content and intellectual property</h2>
-<p>The website's text, design, logo and code belong to Kuzikode Technologies or are used with permission. Some images on the website are illustrative and do not show Kuzikode staff or clients. You may not reuse our content without written permission, except for quoting short passages with a link back.</p>
+<p>The website's text, design, logo and code belong to Kuzikode Intelligent Technologies or are used with permission. Some images on the website are illustrative and do not show Kuzikode staff or clients. You may not reuse our content without written permission, except for quoting short passages with a link back.</p>
 <h2>Information on the website</h2>
 <p>We work to keep the information here accurate, but it is general information, not a binding offer. Package descriptions and indicative prices are confirmed only in a written quotation.</p>
 <h2>Links</h2>
@@ -89,7 +89,7 @@ export const LEGAL_PAGES: PageSeed[] = [
   {
     key: 'legal-service-terms',
     title: 'Service Terms',
-    seoTitle: 'Service Terms · Kuzikode Technologies',
+    seoTitle: 'Service Terms · Kuzikode Intelligent Technologies',
     seoDescription: 'Payment, milestone, revision, ownership, support and cancellation terms for Kuzikode projects.',
     sections: [
       {
@@ -98,7 +98,7 @@ export const LEGAL_PAGES: PageSeed[] = [
         content: {
           title: 'Service Terms',
           html: `${UPDATED}
-<p>These terms apply to services Kuzikode Technologies provides under a quotation you accept. If a quotation says something different, the quotation applies.</p>
+<p>These terms apply to services Kuzikode Intelligent Technologies provides under a quotation you accept. If a quotation says something different, the quotation applies.</p>
 <h2>Quotations and scope</h2>
 <p>Each quotation describes the scope, deliverables, price, currency, milestones and validity period. Work outside that scope is quoted separately before we start it.</p>
 <h2>Payment</h2>
@@ -131,8 +131,8 @@ export const LEGAL_PAGES: PageSeed[] = [
   {
     key: 'legal-cookies',
     title: 'Cookie notice',
-    seoTitle: 'Cookie notice · Kuzikode Technologies',
-    seoDescription: 'The strictly necessary cookies used on the Kuzikode Technologies website and portal.',
+    seoTitle: 'Cookie notice · Kuzikode Intelligent Technologies',
+    seoDescription: 'The strictly necessary cookies used on the Kuzikode Intelligent Technologies website and portal.',
     sections: [
       {
         key: 'body',
@@ -157,7 +157,7 @@ export const LEGAL_PAGES: PageSeed[] = [
   {
     key: 'legal-accessibility',
     title: 'Accessibility statement',
-    seoTitle: 'Accessibility statement · Kuzikode Technologies',
+    seoTitle: 'Accessibility statement · Kuzikode Intelligent Technologies',
     seoDescription: 'Our commitment to an accessible website and client portal.',
     sections: [
       {

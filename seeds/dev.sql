@@ -40,7 +40,7 @@ WHERE NOT EXISTS (SELECT 1 FROM invoice_items WHERE id = 'iit_dev_1');
 UPDATE invoices SET number = 'INV-2026-00001', status = 'partially_paid', amount_paid_minor = 15000, balance_minor = 25000,
   issued_at = '2026-10-20T10:00:00.000Z',
   client_snapshot = '{"displayName":"Sample Health Clinic","email":"admin@clinic.example.com"}',
-  business_snapshot = '{"name":"Kuzikode Technologies"}'
+  business_snapshot = '{"name":"Kuzikode Intelligent Technologies"}'
 WHERE id = 'inv_dev_1' AND status = 'draft';
 
 INSERT OR IGNORE INTO payments (id, receipt_number, client_id, provider_key, method, amount_minor, currency, received_at, reference, notes)

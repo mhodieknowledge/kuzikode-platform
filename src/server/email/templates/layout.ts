@@ -83,7 +83,7 @@ export function renderEmail(
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${escapeHtml(opts.preheader)}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${CANVAS}"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border:1px solid ${LINE};border-radius:10px">
-<tr><td style="padding:24px 32px;border-bottom:1px solid ${LINE}"><a href="${escapeHtml(brand.siteUrl)}" style="text-decoration:none;font-size:20px;font-weight:700;letter-spacing:-0.02em;color:${INK}"><span style="color:${BRAND}">&#9646;</span> kuzikode</a></td></tr>
+<tr><td style="padding:0;border-bottom:1px solid ${LINE};line-height:0"><a href="${escapeHtml(brand.siteUrl)}" style="text-decoration:none"><img src="${escapeHtml(brand.siteUrl.replace(/\/$/, ''))}/brand/email-header.png" width="600" height="80" alt="${escapeHtml(brand.companyName)}" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:10px 10px 0 0;font-size:20px;font-weight:700;line-height:1.3;color:${INK}"></a></td></tr>
 <tr><td style="padding:28px 32px 12px">
 <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:${INK};font-weight:700">${escapeHtml(opts.heading)}</h1>
 ${opts.blocks.map(renderBlock).join('\n')}

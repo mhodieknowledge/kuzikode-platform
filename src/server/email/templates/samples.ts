@@ -54,7 +54,7 @@ export const EMAIL_SAMPLES: Record<TemplateName, Record<string, unknown>> = {
   },
   candidate_message: {
     subject: 'Interview invitation: Junior Developer',
-    body: 'Hi Tino,\n\nWe would like to invite you to an interview.\n\nKind regards,\nKuzikode Technologies',
+    body: 'Hi Tino,\n\nWe would like to invite you to an interview.\n\nKind regards,\nKuzikode Intelligent Technologies',
     reference: 'APP-2026-0001',
   },
   renewal_reminder: {

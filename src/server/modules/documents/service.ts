@@ -106,7 +106,7 @@ async function prepareQuotation(ctx: RequestContext, id: string, settings: Docum
   let business: BusinessDetails;
   if (issued && q.client_snapshot && q.business_snapshot) {
     client = parse<ClientDetails>(q.client_snapshot, { name: 'Client' });
-    business = parse<BusinessDetails>(q.business_snapshot, { name: 'Kuzikode Technologies' });
+    business = parse<BusinessDetails>(q.business_snapshot, { name: 'Kuzikode Intelligent Technologies' });
   } else {
     const snap = await quotationSnapshots(ctx, q);
     client = snap.client;
@@ -183,7 +183,7 @@ async function liveClient(ctx: RequestContext, clientId: string): Promise<Client
 async function liveBusiness(ctx: RequestContext): Promise<BusinessDetails> {
   const s = await getSettings(ctx);
   return {
-    name: settingText(s, 'company.name') ?? 'Kuzikode Technologies',
+    name: settingText(s, 'company.name') ?? 'Kuzikode Intelligent Technologies',
     legalName: settingText(s, 'company.legal_name') ?? null,
     registrationNumber: settingText(s, 'company.registration_number') ?? null,
     taxNumber: settingText(s, 'company.tax_number') ?? null,
@@ -218,7 +218,7 @@ async function prepareInvoice(ctx: RequestContext, id: string, settings: Documen
           : await liveClient(ctx, inv.client_id),
       business:
         issued && inv.business_snapshot
-          ? parse<BusinessDetails>(inv.business_snapshot, { name: 'Kuzikode Technologies' })
+          ? parse<BusinessDetails>(inv.business_snapshot, { name: 'Kuzikode Intelligent Technologies' })
           : await liveBusiness(ctx),
       minorDigits: await minorDigits(ctx, inv.currency),
       settings,
@@ -268,7 +268,7 @@ async function prepareCreditNote(ctx: RequestContext, id: string, settings: Docu
         ? parse<ClientDetails>(cn.client_snapshot, { name: 'Client' })
         : await liveClient(ctx, cn.client_id),
       business: cn.business_snapshot
-        ? parse<BusinessDetails>(cn.business_snapshot, { name: 'Kuzikode Technologies' })
+        ? parse<BusinessDetails>(cn.business_snapshot, { name: 'Kuzikode Intelligent Technologies' })
         : await liveBusiness(ctx),
       minorDigits: await minorDigits(ctx, cn.currency),
       settings,

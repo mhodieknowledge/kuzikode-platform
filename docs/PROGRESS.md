@@ -110,3 +110,8 @@ The **Next step** line must be specific enough that a fresh session can continue
 - PlanDeck = Rail carousel (arrows, dots, peeking), PackageCompare = all-plans table with pinned feature column (Websites only has features), OfferCard for single offers, QuoteBand single CTA; tabs/duplicate FAQ/process removed. Tests updated + new carousel/table e2e. verify green; e2e 19 passed. Tier: sonnet/high; orchestrator reviewed 390 shot.
 - Left: sparse cards for divisions without inclusions data (AI/Automation/Business software/Add-ons); header nav still shows prices (R9.4).
 - Next step: R9.3 brand + header + typography. Brand mark: opus subagent for 3 explorations (refs in design/brand/references/), then Poppins tokens (@fontsource/poppins, update B.1a guard test), rename to Kuzikode Intelligent Technologies everywhere, header redesign.
+
+## 2026-11-13 22:40 UTC · R9.3 ✅ Brand + header + typography
+- Poppins + webdev type scale in tokens, B.1a guard H1<=38/H2<=30. Brace K mark (board in design/brand/logo-explorations), brand SVG/favicon/OG/email-header set in public/brand, Logo.astro variants, new header. Name = Kuzikode Intelligent Technologies everywhere (migration 0014). PDF mark redrawn (not visually inspected: check a generated PDF in R8.1).
+- verify green (unit 742, integration 308). Tiers: sonnet/high type, opus/medium brand, sonnet/medium rename.
+- Next step: R9.4 floating side menu (Header drawer in src/ui/public/shell/*): fix bugs, inset floating panel, icons+labels, no prices/dividers, tests at 360/390/430 incl. back button.

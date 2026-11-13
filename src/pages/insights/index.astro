@@ -11,7 +11,7 @@ const n = Number(Astro.url.searchParams.get('page') ?? '1');
 <InsightsIndex
   title={intro?.content.title ?? 'Insights'}
   introHtml={intro?.content.html}
-  seoTitle={page?.seoTitle ?? 'Insights · Kuzikode Technologies'}
+  seoTitle={page?.seoTitle ?? 'Insights · Kuzikode Intelligent Technologies'}
   seoDescription={page?.seoDescription ?? undefined}
   filter={{ page: Number.isFinite(n) ? n : 1 }}
   basePath="/insights"

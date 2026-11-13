@@ -100,7 +100,7 @@ describe('CMS read layer', () => {
 
   it('reads settings, products and time-windowed announcements', async () => {
     const s = await getSettings(ctx());
-    expect(settingText(s, 'company.name')).toBe('Kuzikode Technologies');
+    expect(settingText(s, 'company.name')).toBe('Kuzikode Intelligent Technologies');
     expect(settingText(s, 'contact.phone')).toBeUndefined();
     // Products are seeded unpublished (no products on public pages, REFINEMENTS §1); a published one is listed.
     expect(await listProducts(ctx())).toEqual([]);

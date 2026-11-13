@@ -76,7 +76,7 @@ describe('checkout page (P6.3d)', () => {
 
   it('view: summary with the first lines, amount due, routed methods, bank details, phone prefill, no gateway internals', async () => {
     const { invoiceId } = await setup(7);
-    await setBankDetails('Kuzikode Technologies\nCABS, Account 1234567');
+    await setBankDetails('Kuzikode Intelligent Technologies\nCABS, Account 1234567');
     const v = await checkoutView(createContext({ env }), invoiceId);
     expect(v.invoice).toMatchObject({ totalMinor: 70_000, paidMinor: 0, amountDueMinor: 70_000, currency: 'USD' });
     expect(v.invoice.lines).toHaveLength(5);
@@ -86,7 +86,7 @@ describe('checkout page (P6.3d)', () => {
     expect(v.testMode).toBe(true);
     expect(v.methods.map((m) => m.code)).toEqual(expect.arrayContaining(['ecocash', 'innbucks', 'omari', 'card']));
     expect(v.bankTransfer).toEqual({
-      details: 'Kuzikode Technologies\nCABS, Account 1234567',
+      details: 'Kuzikode Intelligent Technologies\nCABS, Account 1234567',
       reference: v.invoice.number,
     });
     expect(v.phone).toBe('0771234567');

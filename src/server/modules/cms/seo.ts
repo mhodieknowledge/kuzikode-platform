@@ -21,7 +21,7 @@ export async function organizationLd(ctx: RequestContext): Promise<Record<string
     '@context': 'https://schema.org',
     '@type': 'Organization',
     '@id': abs(ctx, '/#organization'),
-    name: settingText(s, 'company.name') ?? 'Kuzikode Technologies',
+    name: settingText(s, 'company.name') ?? 'Kuzikode Intelligent Technologies',
     url: abs(ctx, '/'),
     logo: abs(ctx, '/icon-512.png'),
     slogan: settingText(s, 'company.tagline'),
@@ -38,7 +38,7 @@ export function websiteLd(ctx: RequestContext): Record<string, unknown> {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     '@id': abs(ctx, '/#website'),
-    name: 'Kuzikode Technologies',
+    name: 'Kuzikode Intelligent Technologies',
     url: abs(ctx, '/'),
     publisher: { '@id': abs(ctx, '/#organization') },
   };

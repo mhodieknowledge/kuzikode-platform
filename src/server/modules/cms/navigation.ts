@@ -100,7 +100,7 @@ export async function siteNavigation(ctx: RequestContext): Promise<SiteNavigatio
         const href = httpsOnly(settingText(settings, key));
         return href ? [{ label, href, icon }] : [];
       }),
-      companyName: settingText(settings, 'company.name') ?? 'Kuzikode Technologies',
+      companyName: settingText(settings, 'company.name') ?? 'Kuzikode Intelligent Technologies',
       ...(registration
         ? { registration: `${legalName ?? settingText(settings, 'company.name')} · Reg. ${registration}` }
         : {}),

@@ -229,7 +229,7 @@ export async function jobPostingLd(ctx: RequestContext, p: PublicPosting): Promi
     employmentType: LD_TYPE[p.employmentType],
     hiringOrganization: {
       '@type': 'Organization',
-      name: settingText(settings, 'company.name') ?? 'Kuzikode Technologies',
+      name: settingText(settings, 'company.name') ?? 'Kuzikode Intelligent Technologies',
       sameAs: abs(ctx, '/'),
       logo: abs(ctx, '/icon-512.png'),
     },

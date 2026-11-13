@@ -72,7 +72,7 @@ test.describe('public layout', () => {
     }
     // Phone/email are blank in the seed, so nothing but the contact form link is shown.
     await expect(footer.locator('a[href^="tel:"], a[href^="mailto:"]')).toHaveCount(0);
-    await expect(footer).toContainText(`© ${new Date().getFullYear()} Kuzikode Technologies`);
+    await expect(footer).toContainText(`© ${new Date().getFullYear()} Kuzikode Intelligent Technologies`);
     await expect(footer).not.toContainText('(Private) Limited');
   });
 });

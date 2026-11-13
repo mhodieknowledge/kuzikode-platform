@@ -20,7 +20,7 @@ export const PAGES: PageSeed[] = [
   {
     key: 'home',
     title: 'Home',
-    seoTitle: 'Kuzikode Technologies · Building intelligent digital solutions',
+    seoTitle: 'Kuzikode Intelligent Technologies · Building intelligent digital solutions',
     seoDescription:
       'Kuzikode designs, builds and runs websites, apps and business software for organisations in Zimbabwe and across Africa.',
     sections: [
@@ -121,16 +121,16 @@ export const PAGES: PageSeed[] = [
   {
     key: 'about',
     title: 'About',
-    seoTitle: 'About Kuzikode Technologies',
+    seoTitle: 'About Kuzikode Intelligent Technologies',
     seoDescription:
-      'Kuzikode Technologies is a Zimbabwe-based technology company that designs, builds and runs digital solutions for businesses and organisations.',
+      'Kuzikode Intelligent Technologies is a Zimbabwe-based technology company that designs, builds and runs digital solutions for businesses and organisations.',
     sections: [
       {
         key: 'overview',
         type: 'rich_text',
         content: {
           title: 'About Kuzikode',
-          html: '<p>Kuzikode Technologies is a technology company based in Zimbabwe. We design, build and run digital solutions for businesses, organisations and individuals: websites and web applications, business software, cross-platform apps, data and AI tools, and the automations and integrations that connect them.</p><p>We work as a long-term technology partner rather than a one-off supplier. That means clear scope before we start, regular updates while we build, and support once the work is live.</p>',
+          html: '<p>Kuzikode Intelligent Technologies is a technology company based in Zimbabwe. We design, build and run digital solutions for businesses, organisations and individuals: websites and web applications, business software, cross-platform apps, data and AI tools, and the automations and integrations that connect them.</p><p>We work as a long-term technology partner rather than a one-off supplier. That means clear scope before we start, regular updates while we build, and support once the work is live.</p>',
         },
       },
       {
@@ -213,7 +213,7 @@ export const PAGES: PageSeed[] = [
   {
     key: 'services',
     title: 'Services',
-    seoTitle: 'Services · Kuzikode Technologies',
+    seoTitle: 'Services · Kuzikode Intelligent Technologies',
     seoDescription:
       'Websites and web applications, business software, cross-platform apps, AI and data, and automation and integration, with published prices.',
     sections: [
@@ -230,8 +230,8 @@ export const PAGES: PageSeed[] = [
   {
     key: 'work',
     title: 'Our Work',
-    seoTitle: 'Our Work · Kuzikode Technologies',
-    seoDescription: 'Case studies of websites, apps and systems built by Kuzikode Technologies.',
+    seoTitle: 'Our Work · Kuzikode Intelligent Technologies',
+    seoDescription: 'Case studies of websites, apps and systems built by Kuzikode Intelligent Technologies.',
     sections: [
       {
         key: 'intro',
@@ -252,9 +252,9 @@ export const PAGES: PageSeed[] = [
   {
     key: 'pricing',
     title: 'Pricing',
-    seoTitle: 'Pricing · Kuzikode Technologies',
+    seoTitle: 'Pricing · Kuzikode Intelligent Technologies',
     seoDescription:
-      'Website packages and published prices for business software, cross-platform apps, AI and data, automation and integration, and add-ons from Kuzikode Technologies.',
+      'Website packages and published prices for business software, cross-platform apps, AI and data, automation and integration, and add-ons from Kuzikode Intelligent Technologies.',
     sections: [
       {
         key: 'intro',
@@ -279,9 +279,9 @@ export const PAGES: PageSeed[] = [
   {
     key: 'start-a-project',
     title: 'Start a project',
-    seoTitle: 'Start a project · Kuzikode Technologies',
+    seoTitle: 'Start a project · Kuzikode Intelligent Technologies',
     seoDescription:
-      'Tell Kuzikode Technologies what you need in five short steps and get a reply with questions or a written quotation.',
+      'Tell Kuzikode Intelligent Technologies what you need in five short steps and get a reply with questions or a written quotation.',
     sections: [
       {
         key: 'intro',
@@ -296,7 +296,7 @@ export const PAGES: PageSeed[] = [
   {
     key: 'industries',
     title: 'Industries',
-    seoTitle: 'Industries · Kuzikode Technologies',
+    seoTitle: 'Industries · Kuzikode Intelligent Technologies',
     seoDescription:
       'Software, websites and systems for retail, financial services, education, healthcare, NGOs, hospitality, agriculture and logistics.',
     sections: [
@@ -313,7 +313,7 @@ export const PAGES: PageSeed[] = [
   {
     key: 'insights',
     title: 'Insights',
-    seoTitle: 'Insights · Kuzikode Technologies',
+    seoTitle: 'Insights · Kuzikode Intelligent Technologies',
     seoDescription:
       'Practical guides on websites, online payments, business email and software for businesses in Zimbabwe and across Africa.',
     sections: [
@@ -330,7 +330,7 @@ export const PAGES: PageSeed[] = [
   {
     key: 'how-we-work',
     title: 'How we work',
-    seoTitle: 'How we work · Kuzikode Technologies',
+    seoTitle: 'How we work · Kuzikode Intelligent Technologies',
     seoDescription:
       'Our process, engagement models, what clients can expect and the quality and security practices behind every Kuzikode project.',
     sections: [
@@ -457,8 +457,8 @@ export const PAGES: PageSeed[] = [
   {
     key: 'faq',
     title: 'Frequently asked questions',
-    seoTitle: 'FAQ · Kuzikode Technologies',
-    seoDescription: 'Answers to common questions about working with Kuzikode Technologies: projects, pricing, payments, support and careers.',
+    seoTitle: 'FAQ · Kuzikode Intelligent Technologies',
+    seoDescription: 'Answers to common questions about working with Kuzikode Intelligent Technologies: projects, pricing, payments, support and careers.',
     sections: [
       {
         key: 'intro',
@@ -473,7 +473,7 @@ export const PAGES: PageSeed[] = [
   {
     key: 'contact',
     title: 'Contact',
-    seoTitle: 'Contact Kuzikode Technologies',
+    seoTitle: 'Contact Kuzikode Intelligent Technologies',
     seoDescription: 'Tell us about your project or ask a question. We reply to every enquiry.',
     sections: [
       {
@@ -519,13 +519,13 @@ export const EXPENSE_CATEGORIES = [
 
 /** application_settings defaults. Blank values are hidden on the site, never shown as placeholders. */
 export const SETTINGS: Record<string, unknown> = {
-  'company.name': 'Kuzikode Technologies',
+  'company.name': 'Kuzikode Intelligent Technologies',
   'company.legal_name': '',
   'company.registration_number': '',
   'company.tax_number': '',
   'company.tagline': 'Building intelligent digital solutions.',
   'company.blurb':
-    'Kuzikode Technologies designs, builds and runs websites, apps and business software for organisations in Zimbabwe and across Africa.',
+    'Kuzikode Intelligent Technologies designs, builds and runs websites, apps and business software for organisations in Zimbabwe and across Africa.',
   'contact.email': '',
   'contact.billing_email': '',
   'contact.phone': '',

@@ -220,13 +220,16 @@ export class Composer {
     this.page.drawRectangle({ x, y: top - height, width, height, color: colour });
   }
 
-  /** The hand-built Kuzikode mark (public/brand/logo-mark.svg, 32×32 viewBox) at `size` points. */
+  /** The Brace K mark (public/brand/logo-mark.svg, 48×48 viewBox) at `size` points: a green brace stem and an amber chevron. */
   brandMark(x: number, top: number, size: number): void {
-    const s = size / 32;
+    const s = size / 48;
     const at = { x, y: top, scale: s };
-    this.page.drawRectangle({ x: x + 5 * s, y: top - 28 * s, width: 6.5 * s, height: 24 * s, color: COLOURS.ink950 });
-    this.page.drawSvgPath('M14 14.4 22.6 4H29.2L20.6 14.4Z', { ...at, color: this.accent });
-    this.page.drawSvgPath('M14 17.6H20.6L29.2 28H22.6Z', { ...at, color: COLOURS.ink950 });
+    this.page.drawSvgPath('M21 7h-3.5Q13 7 13 11.5V19q0 5-5 5 5 0 5 5v7.5q0 4.5 4.5 4.5H21', {
+      ...at,
+      borderColor: COLOURS.brand600,
+      borderWidth: 6,
+    });
+    this.page.drawSvgPath('M41 7.5 21.5 24 41 40.5', { ...at, borderColor: hex('#C98A17'), borderWidth: 6.5 });
   }
 
   image(img: PDFImage, x: number, top: number, maxWidth: number, maxHeight: number): { width: number; height: number } {

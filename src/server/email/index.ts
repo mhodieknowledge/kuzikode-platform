@@ -15,7 +15,7 @@ export async function brandFor(ctx: RequestContext): Promise<Brand> {
     .prepare("SELECT value FROM application_settings WHERE key = 'company.name'")
     .first<{ value: string }>();
   return {
-    companyName: row ? (JSON.parse(row.value) as string) : 'Kuzikode Technologies',
+    companyName: row ? (JSON.parse(row.value) as string) : 'Kuzikode Intelligent Technologies',
     siteUrl: ctx.config.siteUrl.toString(),
   };
 }

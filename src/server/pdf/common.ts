@@ -55,7 +55,7 @@ export function businessBlock(b: BusinessDetails): { name: string; lines: string
   if (contact) lines.push(contact);
   if (b.registrationNumber) lines.push(`Registration no. ${b.registrationNumber}`);
   if (b.taxNumber) lines.push(`Tax no. ${b.taxNumber}`);
-  return { name: b.name || 'Kuzikode Technologies', lines };
+  return { name: b.name || 'Kuzikode Intelligent Technologies', lines };
 }
 
 export function clientParty(label: string, c: ClientDetails): Party {

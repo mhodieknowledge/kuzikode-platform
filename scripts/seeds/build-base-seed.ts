@@ -164,7 +164,7 @@ export function buildBaseSeed(): string {
         icon: ind.icon,
         status: 'published',
         sort_order: (i + 1) * 10,
-        seo_title: `${ind.name} · Kuzikode Technologies`,
+        seo_title: `${ind.name} · Kuzikode Intelligent Technologies`,
         seo_description: ind.seoDescription,
       }),
     );
@@ -197,7 +197,7 @@ export function buildBaseSeed(): string {
         excerpt: p.excerpt,
         body: p.body,
         category_id: `pcat_${p.category.replace(/-/g, '_')}`,
-        author_display_name: 'Kuzikode Technologies',
+        author_display_name: 'Kuzikode Intelligent Technologies',
         reading_minutes: Math.max(1, Math.ceil(words / 200)),
         status: 'published',
         publish_at: LAUNCH_PUBLISHED_AT,

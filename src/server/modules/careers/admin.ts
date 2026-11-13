@@ -697,7 +697,7 @@ async function placeholders(ctx: RequestContext, a: ApplicationRow) {
     name: a.full_name.split(/\s+/)[0] ?? a.full_name,
     position: posting?.title ?? 'a role at our company',
     reference: a.reference,
-    company: settingText(settings, 'company.name') ?? 'Kuzikode Technologies',
+    company: settingText(settings, 'company.name') ?? 'Kuzikode Intelligent Technologies',
   };
 }
 

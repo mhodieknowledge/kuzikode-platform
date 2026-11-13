@@ -84,7 +84,7 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
 - [x] **R6.2 Restyle every admin module** (dashboard, clients, leads, services, packages, quotations, invoices, payments, projects, expenses, CMS, careers, notifications, settings, reports, audit) with functionality untouched. Dense data views get a mobile list/card pattern.
 
 ## R7: Imagery and motion polish
-- [ ] **R7.1 Process delivered owner images** (B.4) and replace interim treatments. Further prompt batches as needed.
+- [x] **R7.1 Process delivered owner images** (B.4) and replace interim treatments. Further prompt batches as needed.
 - [ ] **R7.2 Motion pass (trimmed 2026-11-13 to save usage).** One pass on the public pages only: `review-animations` + `animation-performance` on the home, services, pricing and checkout flows; fix what they flag; `remove-animations` where motion is excessive. Skip `find-animation-opportunities` and `improve-animations`. Run as a fresh `sonnet`/`medium` subagent; you review.
 
 ## R8: QA and finish

@@ -4,6 +4,7 @@
  * practices right as a two-column ticked list under hairlines. Phones: heading, then the ticked list (single sentences, one rule each).
  * The tick is the only icon; it is the list's meaning (each practice is standard on every project).
  */
+import PhotoStrip from '../shared/PhotoStrip.astro';
 import Icon from '../../icons/Icon.astro';
 import type { SectionContent } from '../../../shared/schemas/cms';
 
@@ -31,4 +32,5 @@ const { content: c, anchor } = Astro.props;
       }
     </ul>
   </div>
+  <PhotoStrip image="how-we-work-editorial" contained />
 </section>

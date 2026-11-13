@@ -93,3 +93,9 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Next step: R7.1 place processed photos `home-band` (Home "Why Kuzikode", src/ui/public/home/Approach.astro), `how-we-work-editorial`
   (How we work, src/ui/public/how/*), `careers-culture` (Careers, src/ui/public/careers/*) with the existing Picture/PhotoBand patterns
   (B.4a: bands/editorial only); public pages = full visual loop. Still requested: about-studio, careers-desk. Then R7.2 (trimmed), R8.
+
+## 2026-11-13 19:00 UTC · R7.1 ✅ Owner photos placed
+- `home-band` → Home photo strip between Approach and WorkRail; `how-we-work-editorial` → strip under the How-we-work quality list; `careers-culture` → Careers hero. New `src/ui/public/shared/PhotoStrip.astro` (4:3 phones, 21:9 desktop, warm duotone).
+- Screens checked 390/1440 (no overflow). verify green; e2e sweep + home/how/careers 105 passed. Still requested: about-studio, careers-desk (not blocking).
+- Tiers: orchestrator on sonnet only, no subagents.
+- Next step: R7.2 trimmed motion pass on public pages (fresh sonnet/medium subagent with review-animations + animation-performance; you review), then R8.1.

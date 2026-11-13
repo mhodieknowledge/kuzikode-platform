@@ -8,6 +8,7 @@
 import PublicLayout from '../layouts/PublicLayout.astro';
 import Hero from '../ui/public/home/Hero.astro';
 import ServicesBand from '../ui/public/home/ServicesBand.astro';
+import PhotoStrip from '../ui/public/shared/PhotoStrip.astro';
 import Approach from '../ui/public/home/Approach.astro';
 import WorkRail from '../ui/public/home/WorkRail.astro';
 import RoadStrip from '../ui/public/home/RoadStrip.astro';
@@ -74,6 +75,7 @@ const closing = byType('cta')?.content as Section<'cta'>['content'] | undefined;
   ) : null}
   {process ? <RoadStrip content={process.content as Section<'process'>['content']} anchor={process.key} /> : null}
   {why ? <Approach content={why.content as Section<'features'>['content']} anchor={why.key} /> : null}
+  <PhotoStrip image="home-band" />
   {work ? <WorkRail content={work.content as Section<'work_grid'>['content']} items={featured} /> : null}
   <Voices testimonials={testimonials} />
   <CompanyBand

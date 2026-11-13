@@ -12,9 +12,9 @@
     gap: 12px;
   }
   .kz-whead__title {
-    font-size: 2rem;
+    font-size: var(--kz-h1);
     line-height: 1.08;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.015em;
     font-weight: 700;
     color: var(--ink-900);
   }
@@ -55,9 +55,9 @@
     rx: 0;
   }
   .kz-wempty__title {
-    font-size: 1.5rem;
-    line-height: 1.15;
-    letter-spacing: -0.025em;
+    font-size: var(--kz-h2);
+    line-height: 1.18;
+    letter-spacing: -0.015em;
     font-weight: 700;
     color: var(--on-night);
     max-width: 18ch;
@@ -221,9 +221,9 @@
     margin-top: 12px;
   }
   .kz-case__title {
-    font-size: 2rem;
+    font-size: var(--kz-h1);
     line-height: 1.08;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.015em;
     font-weight: 700;
     color: var(--ink-900);
     max-width: 18ch;
@@ -328,8 +328,8 @@
     align-items: baseline;
     gap: 10px;
     margin-bottom: 12px;
-    font-size: 1.375rem;
-    line-height: 1.2;
+    font-size: var(--kz-h3);
+    line-height: 1.25;
     letter-spacing: -0.02em;
     font-weight: 700;
     color: var(--ink-900);
@@ -369,8 +369,8 @@
       gap: 64px;
     }
     .kz-whead__title {
-      font-size: clamp(2.75rem, 4.4vw, 4rem);
-      letter-spacing: -0.035em;
+      font-size: var(--kz-h1);
+      letter-spacing: -0.015em;
     }
     .kz-whead__intro {
       font-size: 1.125rem;
@@ -391,9 +391,6 @@
     }
     .kz-wempty__art .kz-ill {
       border-radius: 10px;
-    }
-    .kz-wempty__title {
-      font-size: 2rem;
     }
     .kz-wempty__acts {
       flex-direction: row;
@@ -449,10 +446,6 @@
       padding-top: 16px;
       border-top: 2px solid var(--ink-900);
     }
-    .kz-work.is-lead .kz-work__name {
-      font-size: 1.75rem;
-    }
-
     .kz-case__head {
       padding: 32px 0 40px;
     }
@@ -462,8 +455,8 @@
       gap: 64px;
     }
     .kz-case__title {
-      font-size: clamp(2.75rem, 4.4vw, 4rem);
-      letter-spacing: -0.035em;
+      font-size: var(--kz-h1);
+      letter-spacing: -0.015em;
     }
     .kz-case__sum {
       font-size: 1.125rem;

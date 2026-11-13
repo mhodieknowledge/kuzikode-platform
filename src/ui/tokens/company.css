@@ -15,9 +15,9 @@
     gap: 20px;
   }
   .kz-ahero__title {
-    font-size: 2rem;
+    font-size: var(--kz-h1);
     line-height: 1.08;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.015em;
     max-width: 16ch;
   }
   .kz-ahero__media {
@@ -110,9 +110,6 @@
     }
   }
   @media (min-width: 640px) {
-    .kz-ahero__title {
-      font-size: clamp(2.5rem, 1rem + 3.1vw, 3.75rem);
-    }
     .kz-ahero__intro {
       font-size: 1.125rem;
     }
@@ -197,9 +194,9 @@
     color: var(--lit);
   }
   .kz-stmt__body {
-    font-size: 1.25rem;
-    line-height: 1.3;
-    letter-spacing: -0.02em;
+    font-size: var(--kz-h2);
+    line-height: 1.18;
+    letter-spacing: -0.015em;
     font-weight: 600;
     color: var(--on-night);
     max-width: 30ch;
@@ -219,8 +216,8 @@
       border-left: 1px solid var(--night-700);
     }
     .kz-stmt__body {
-      font-size: clamp(1.75rem, 0.8rem + 1.6vw, 2.5rem);
-      line-height: 1.15;
+      font-size: var(--kz-h2);
+      line-height: 1.18;
     }
   }
 
@@ -423,9 +420,9 @@
     gap: 32px;
   }
   .kz-hhero__title {
-    font-size: 2rem;
+    font-size: var(--kz-h1);
     line-height: 1.08;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.015em;
     color: var(--on-night);
   }
   .kz-hhero__intro {
@@ -586,9 +583,6 @@
       left: auto;
       right: 12px;
     }
-    .kz-hhero__title {
-      font-size: clamp(2.5rem, 1rem + 3.1vw, 3.75rem);
-    }
     .kz-hhero__intro {
       font-size: 1.125rem;
     }
@@ -688,7 +682,7 @@
     padding-top: 8px;
   }
   .kz-proad__title {
-    font-size: 1.125rem;
+    font-size: var(--kz-h3);
     line-height: 1.25;
     letter-spacing: -0.015em;
   }
@@ -722,9 +716,6 @@
       width: 64px;
       height: 52px;
       font-size: 1rem;
-    }
-    .kz-proad__title {
-      font-size: 1.375rem;
     }
     .kz-proad__body {
       font-size: 1.0625rem;
@@ -894,9 +885,9 @@
   }
   .kz-ihead__title,
   .kz-isec-head__title {
-    font-size: 2rem;
+    font-size: var(--kz-h1);
     line-height: 1.08;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.015em;
     max-width: 18ch;
   }
   .kz-ihead__intro,
@@ -1013,9 +1004,6 @@
   }
   @media (min-width: 640px) {
     .kz-ihead__title,
-    .kz-isec-head__title {
-      font-size: clamp(2.5rem, 1rem + 3.1vw, 3.75rem);
-    }
     .kz-ihead__intro,
     .kz-isec-head__sum {
       font-size: 1.125rem;

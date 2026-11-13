@@ -6,6 +6,13 @@
  * Components use these through the Tailwind theme names in base.css; no raw hex in components.
  */
 :root {
+  /* Type scale (REFINEMENTS §8): phone values up to 440px, desktop values from 1024px, linear in between. */
+  --kz-h1: clamp(2.375rem, 1.339rem + 3.767vw, 3.75rem); /* 38px -> 60px */
+  --kz-h2: clamp(1.875rem, 1.593rem + 1.027vw, 2.25rem); /* 30px -> 36px */
+  --kz-h3: clamp(1.375rem, 1.187rem + 0.685vw, 1.625rem); /* 22px -> 26px */
+  --kz-body: clamp(1rem, 0.953rem + 0.171vw, 1.0625rem); /* 16px -> 17px */
+  --kz-eyebrow: clamp(0.8125rem, 0.7656rem + 0.171vw, 0.875rem); /* 13px -> 14px */
+
   /* Night: the dark surface (services band, recommended column, footer, panel chrome). */
   --night-950: #0e0d0c;
   --night-900: #141412;

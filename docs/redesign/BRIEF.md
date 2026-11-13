@@ -432,15 +432,15 @@ still be 100% on point; neither may be an afterthought.
 ### B.1a MOBILE HARD LIMITS (owner, 2026-11-12: "similar hero from before and weirdly large fonts on mobile; I'm emphasising mobile view")
 Measured problem in concept "Route" at 390 px: H1 40 px over 4 lines (11-word headline), section titles ~32 px, the hero again a
 full-bleed solid-colour block with a headline, a paragraph and a stack of 6 bordered rows (the old hero structure in a new colour), and a
-button label wrapping onto two lines. These limits are **mandatory** at 360–430 px wide and enforced by an automated test:
+button label wrapping onto two lines. **Updated 2026-11-13 (REFINEMENTS §8, Poppins):** the limits below are the current ones. These limits are **mandatory** at 360–430 px wide and enforced by an automated test:
 
 | Element (phones 360–430 px) | Limit |
 |---|---|
-| H1 | **28–34 px**, weight ≤ 700, line-height 1.05–1.15, **max 3 lines**. Write a **short mobile headline (≤ 7 words)** if the desktop one is longer |
-| H2 / section title | **22–26 px**, max 3 lines |
-| H3 / card title | 17–20 px |
-| Body | 15–16 px, line-height 1.5–1.6. Captions/meta 12–13 px |
-| Buttons | 15–16 px text, **never wrap** (one line), height ≥ 44 px |
+| H1 | **≤ 38 px** (Poppins 38 px / 1.08, weight 700; REFINEMENTS §8), **max 4 lines**. Write a **short mobile headline (≤ 7 words)** if the desktop one is longer |
+| H2 / section title | **≤ 30 px** (30 px / 1.18), max 3 lines |
+| H3 / card title | 22 px (REFINEMENTS §8) |
+| Body | **≥ 16 px**, line-height 1.6. Captions/meta 12–13 px |
+| Buttons | 16 px text (w500), **never wrap** (one line), height ≥ 44 px |
 | Side padding | 16–20 px. Section spacing 48–72 px (not 100 px+) |
 | Mono/label text | 11–13 px, used sparingly |
 

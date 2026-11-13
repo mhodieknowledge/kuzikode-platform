@@ -9,12 +9,16 @@
   }
   .kz-xhead__grid {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 20px;
   }
+  .kz-xhead__grid > * {
+    min-width: 0;
+  }
   .kz-xhead__title {
-    font-size: 2rem;
+    font-size: var(--kz-h1);
     line-height: 1.08;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.015em;
     font-weight: 700;
     color: var(--ink-900);
     max-width: 20ch;
@@ -154,8 +158,8 @@
     color: var(--ink-500);
   }
   .kz-qagroup__title {
-    font-size: 1.375rem;
-    line-height: 1.2;
+    font-size: var(--kz-h3);
+    line-height: 1.25;
     letter-spacing: -0.02em;
     font-weight: 700;
     color: var(--ink-900);
@@ -309,10 +313,12 @@
   /* ---------- Search ---------- */
   .kz-search__form {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 10px;
     margin-top: 20px;
   }
   .kz-search__box {
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -617,9 +623,6 @@
     .kz-xhead {
       padding: 40px 0 8px;
     }
-    .kz-xhead__title {
-      font-size: 2.75rem;
-    }
     .kz-qaroad,
     .kz-legal__docs {
       margin-inline: 0;
@@ -630,14 +633,11 @@
       padding-inline: 0;
       overflow: visible;
     }
-    .kz-qagroup__title {
-      font-size: 1.625rem;
-    }
     .kz-qa__q {
       font-size: 1.0625rem;
     }
     .kz-search__form {
-      grid-template-columns: 1fr auto;
+      grid-template-columns: minmax(0, 1fr) auto;
       align-items: stretch;
     }
     .kz-search__form .kz-btn {
@@ -653,9 +653,6 @@
   @media (min-width: 1024px) {
     .kz-xhead {
       padding-top: 56px;
-    }
-    .kz-xhead__title {
-      font-size: 3.25rem;
     }
     .kz-xhead__grid {
       grid-template-columns: minmax(0, 1fr) 380px;

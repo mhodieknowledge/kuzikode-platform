@@ -18,20 +18,11 @@
 @import './workspace.css';
 @import './auth.css';
 @import './admin.css';
-@import '@fontsource-variable/overpass/wght.css';
+@import '@fontsource/poppins/latin-400.css';
+@import '@fontsource/poppins/latin-500.css';
+@import '@fontsource/poppins/latin-600.css';
+@import '@fontsource/poppins/latin-700.css';
 @import '@fontsource-variable/overpass-mono/wght.css';
-
-/* Overpass draws the middle dot (U+00B7) off-centre, so " · " separators read as "·due". Serve that one character from Overpass
-   Mono, where it sits centred in its cell. Declared after the Overpass faces so it wins for its unicode-range. */
-@font-face {
-  font-family: 'Overpass Variable';
-  font-style: normal;
-  font-display: swap;
-  font-weight: 100 900;
-  src: url('../../../node_modules/@fontsource-variable/overpass-mono/files/overpass-mono-latin-wght-normal.woff2')
-    format('woff2-variations');
-  unicode-range: U+00B7;
-}
 
 @theme {
   /* Route structure, Zimbabwe earth palette (tokens.css). */
@@ -113,21 +104,21 @@
   --color-dark-surface: var(--dark-surface);
   --color-dark-brand: var(--dark-brand);
 
-  --font-sans: 'Overpass Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: 'Overpass Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Poppins', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Overpass Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Fluid type scale: phone → 1440. */
-  --text-display-xl: clamp(2rem, 1rem + 3.3vw, 3.875rem);
-  --text-display-xl--line-height: 0.98;
-  --text-display: clamp(2rem, 1.2rem + 2.6vw, 3.4rem);
-  --text-display--line-height: 1.02;
-  --text-h2: clamp(1.5rem, 1.1rem + 1.6vw, 2.75rem);
-  --text-h2--line-height: 1.06;
-  --text-h3: clamp(1.125rem, 1rem + 0.5vw, 1.5rem);
-  --text-h3--line-height: 1.2;
-  --text-body: clamp(1.0625rem, 1.03rem + 0.15vw, 1.125rem);
-  --text-body--line-height: 1.5;
+  /* Type scale (REFINEMENTS §8, Poppins). The sizes live in tokens.css as --kz-h1 … --kz-eyebrow. */
+  --text-display-xl: var(--kz-h1);
+  --text-display-xl--line-height: 1.08;
+  --text-display: var(--kz-h1);
+  --text-display--line-height: 1.08;
+  --text-h2: var(--kz-h2);
+  --text-h2--line-height: 1.18;
+  --text-h3: var(--kz-h3);
+  --text-h3--line-height: 1.25;
+  --text-body: var(--kz-body);
+  --text-body--line-height: 1.6;
   --text-small: 0.9375rem;
   --text-small--line-height: 1.5;
   --text-micro: 0.8125rem;
@@ -157,7 +148,7 @@
   body {
     @apply bg-canvas font-sans text-ink-800 antialiased;
     font-size: var(--text-body);
-    line-height: 1.5;
+    line-height: 1.6;
     font-feature-settings: 'kern'; /* common ligatures stay on by default; mono turns them off */
   }
   h1,
@@ -166,7 +157,7 @@
   h4 {
     @apply font-display text-ink-950;
     font-weight: 700;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.015em;
     text-wrap: balance;
   }
   p {
@@ -220,7 +211,7 @@
 }
 
 @utility tracking-display {
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
 }
 
 /* Sign caps: short uppercase labels on plates and table heads (never as eyebrows above headings). */
@@ -228,6 +219,14 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+/* Eyebrow: 13px w700 +0.1em uppercase (14px desktop), REFINEMENTS §8. */
+@utility eyebrow {
+  font-size: var(--kz-eyebrow);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 /* Vertical stack: a one-column grid whose column can shrink below its content (scrolling children never widen the page). */
@@ -239,7 +238,7 @@
 @utility display {
   font-family: var(--font-display);
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.015em;
 }
 
 @layer utilities {

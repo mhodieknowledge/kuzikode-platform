@@ -1,6 +1,6 @@
 /*
  * Home: premium hero (workspace window) and route index. Prototype: design/concepts/b2. Phone limits (BRIEF B.1a):
- * H1 32 px ≤ 3 lines, body 15–16 px, buttons on one line, the visual inside the first screen.
+ * H1 38 px ≤ 4 lines, body ≥ 16 px, buttons on one line, the visual inside the first screen.
  */
 @layer components {
   .kz-hero {
@@ -13,16 +13,16 @@
     gap: 16px;
   }
   .kz-hero__title {
-    font-size: 2rem;
+    font-size: var(--kz-h1);
     line-height: 1.08;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.015em;
     font-weight: 700;
     color: var(--ink-900);
     max-width: 16ch;
   }
   .kz-hero__value {
-    font-size: 0.9375rem;
-    line-height: 1.55;
+    font-size: 1rem;
+    line-height: 1.5;
     color: var(--ink-700);
     max-width: 46ch;
   }
@@ -51,7 +51,7 @@
   .kz-scene {
     position: relative;
     isolation: isolate;
-    padding-bottom: 70px;
+    padding-bottom: 58px;
   }
   .kz-win {
     position: relative;
@@ -360,9 +360,6 @@
   }
 
   @media (min-width: 768px) {
-    .kz-hero__title {
-      font-size: clamp(2.5rem, 1rem + 3.1vw, 3.875rem);
-    }
     .kz-hero__value {
       font-size: 1.125rem;
     }
@@ -483,9 +480,6 @@
       display: inline-block;
       width: 40px;
       color: var(--on-night-3);
-    }
-    .kz-win__title {
-      font-size: 1.375rem;
     }
     .kz-strip li {
       font-size: 0.8125rem;

@@ -75,10 +75,10 @@
     display: none;
   }
   .kz-auth__title {
-    font-size: 1.75rem;
+    font-size: var(--kz-h2);
     font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
+    line-height: 1.18;
+    letter-spacing: -0.015em;
     color: var(--on-night);
     overflow-wrap: anywhere;
     text-wrap: pretty;
@@ -379,9 +379,6 @@
     .kz-auth__head {
       padding: 0 max(32px, calc((100% - 28rem) / 2)) 28px;
     }
-    .kz-auth__title {
-      font-size: 2rem;
-    }
     .kz-auth__intro,
     .kz-auth__form,
     .kz-auth__after {
@@ -476,7 +473,7 @@
       padding-top: 28px;
     }
     .kz-auth__title {
-      font-size: 2rem;
+      font-size: var(--kz-h2);
       color: var(--ink-900);
     }
     .kz-auth__intro {

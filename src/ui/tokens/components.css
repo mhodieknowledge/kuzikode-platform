@@ -45,10 +45,10 @@
     border-radius: var(--radius-plate);
     border: 0;
     background: var(--plate-bg);
-    font-weight: 700;
+    font-weight: 500;
     font-size: 1rem;
     line-height: 1.1;
-    letter-spacing: -0.005em;
+    letter-spacing: 0;
     text-decoration: none;
     white-space: nowrap;
     cursor: pointer;
@@ -60,7 +60,7 @@
       transform var(--dur-press) var(--ease-out);
   }
   .kz-btn > span:not(.kz-btn__trail) {
-    padding-top: 0.12em; /* Overpass sits high: optical centring */
+    padding-top: 0.04em; /* Poppins sits slightly low: optical centring */
   }
   .kz-btn:active:not([disabled], [aria-disabled='true']) {
     transform: translateY(1px);

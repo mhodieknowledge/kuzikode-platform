@@ -11,9 +11,9 @@
     background: var(--bone-100);
   }
   .kz-h2 {
-    font-size: 1.5rem;
-    line-height: 1.12;
-    letter-spacing: -0.025em;
+    font-size: var(--kz-h2);
+    line-height: 1.18;
+    letter-spacing: -0.015em;
     font-weight: 700;
     max-width: 22ch;
   }
@@ -176,9 +176,9 @@
   }
   .kz-band__name {
     margin-top: 10px;
-    font-size: 1.25rem;
-    line-height: 1.2;
-    letter-spacing: -0.02em;
+    font-size: var(--kz-h2);
+    line-height: 1.18;
+    letter-spacing: -0.015em;
   }
   .kz-band__summary {
     margin-top: 8px;
@@ -361,7 +361,7 @@
     color: var(--action);
   }
   .kz-claim__body {
-    font-size: 0.9375rem;
+    font-size: 1rem;
     line-height: 1.55;
     color: var(--ink-700);
   }
@@ -423,7 +423,7 @@
     letter-spacing: -0.015em;
   }
   .kz-stop__body {
-    font-size: 0.9375rem;
+    font-size: 1rem;
     line-height: 1.55;
     color: var(--ink-700);
     max-width: 30ch;
@@ -617,8 +617,8 @@
   /* ---------- Tablet ---------- */
   @media (min-width: 640px) {
     .kz-h2 {
-      font-size: clamp(1.875rem, 1rem + 2vw, 3rem);
-      line-height: 1.06;
+      font-size: var(--kz-h2);
+      line-height: 1.18;
     }
     .kz-lede,
     .kz-band__intro {
@@ -637,9 +637,6 @@
     }
     .kz-band__art {
       order: 2;
-    }
-    .kz-band__name {
-      font-size: 1.5rem;
     }
     .kz-voice blockquote p {
       font-size: 1.5rem;
@@ -682,8 +679,8 @@
       max-width: 620px;
     }
     .kz-band__name {
-      font-size: 2rem;
-      line-height: 1.1;
+      font-size: var(--kz-h2);
+      line-height: 1.18;
     }
     .kz-band__summary {
       font-size: 1.125rem;

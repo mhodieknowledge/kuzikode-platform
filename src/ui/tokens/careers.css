@@ -14,9 +14,9 @@
     gap: 20px;
   }
   .kz-chero__title {
-    font-size: 2rem;
+    font-size: var(--kz-h1);
     line-height: 1.08;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.015em;
     font-weight: 700;
     color: var(--ink-900);
   }
@@ -314,9 +314,9 @@
     border-radius: 0;
   }
   .kz-rempty__title {
-    font-size: 1.375rem;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
+    font-size: var(--kz-h2);
+    line-height: 1.18;
+    letter-spacing: -0.015em;
     font-weight: 700;
     color: var(--on-night);
   }
@@ -349,7 +349,7 @@
   }
   .kz-happly__note {
     max-width: 48ch;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     line-height: 1.5;
     color: var(--ink-700);
   }
@@ -401,7 +401,7 @@
     color: var(--ink-900);
   }
   .kz-happly__b {
-    font-size: 0.9375rem;
+    font-size: 1rem;
     line-height: 1.5;
     color: var(--ink-700);
   }
@@ -409,7 +409,7 @@
     margin-top: 48px;
   }
   .kz-cfaq__h {
-    font-size: 1.125rem;
+    font-size: var(--kz-h3);
     font-weight: 700;
     letter-spacing: -0.01em;
     color: var(--ink-900);
@@ -451,9 +451,9 @@
   }
   .kz-job__title {
     margin-top: 4px;
-    font-size: 2rem;
+    font-size: var(--kz-h1);
     line-height: 1.08;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.015em;
     font-weight: 700;
     color: var(--ink-900);
     max-width: 20ch;
@@ -532,8 +532,8 @@
     margin-bottom: 12px;
     padding-bottom: 10px;
     border-bottom: 1px solid var(--bone-300);
-    font-size: 1.25rem;
-    line-height: 1.2;
+    font-size: var(--kz-h3);
+    line-height: 1.25;
     letter-spacing: -0.02em;
     font-weight: 700;
     color: var(--ink-900);
@@ -898,9 +898,9 @@
     gap: 10px;
   }
   .kz-phead__title {
-    font-size: 2rem;
+    font-size: var(--kz-h1);
     line-height: 1.08;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.015em;
     font-weight: 700;
     color: var(--ink-900);
   }
@@ -949,9 +949,9 @@
   }
   .kz-prod__name {
     margin-top: 14px;
-    font-size: 1.5rem;
-    line-height: 1.12;
-    letter-spacing: -0.025em;
+    font-size: var(--kz-h2);
+    line-height: 1.18;
+    letter-spacing: -0.015em;
     font-weight: 700;
     color: var(--ink-900);
   }
@@ -1011,11 +1011,6 @@
 
   /* ---------- Tablet ---------- */
   @media (min-width: 640px) {
-    .kz-chero__title,
-    .kz-job__title,
-    .kz-phead__title {
-      font-size: clamp(2.5rem, 1rem + 3.1vw, 3.75rem);
-    }
     .kz-chero__intro,
     .kz-job__sum,
     .kz-phead__intro {
@@ -1071,8 +1066,8 @@
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
     .kz-prod__name {
-      font-size: clamp(1.875rem, 1rem + 2vw, 2.75rem);
-      line-height: 1.06;
+      font-size: var(--kz-h2);
+      line-height: 1.18;
     }
   }
 
@@ -1135,8 +1130,8 @@
       gap: 72px;
     }
     .kz-chero__title {
-      font-size: clamp(3rem, 4.6vw, 4.25rem);
-      letter-spacing: -0.035em;
+      font-size: var(--kz-h1);
+      letter-spacing: -0.015em;
     }
     .kz-chero__acts {
       margin-top: 28px;
@@ -1174,10 +1169,6 @@
     .kz-rempty__art .kz-ill {
       border-radius: 10px;
     }
-    .kz-rempty__title {
-      font-size: 2rem;
-    }
-
     .kz-happly__head {
       grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
       align-items: end;
@@ -1226,7 +1217,7 @@
       margin-top: 72px;
     }
     .kz-cfaq__h {
-      font-size: 1.5rem;
+      font-size: var(--kz-h3);
       letter-spacing: -0.02em;
     }
     .kz-cfaq__list {
@@ -1242,8 +1233,8 @@
       gap: 64px;
     }
     .kz-job__title {
-      font-size: clamp(2.75rem, 4.4vw, 4rem);
-      letter-spacing: -0.035em;
+      font-size: var(--kz-h1);
+      letter-spacing: -0.015em;
     }
     .kz-job__spec {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1260,9 +1251,6 @@
       grid-column: 1 / span 7;
       max-width: 68ch;
       gap: 48px;
-    }
-    .kz-job__h {
-      font-size: 1.5rem;
     }
     .kz-job__list li {
       font-size: 1.0625rem;
@@ -1336,8 +1324,8 @@
       gap: 64px;
     }
     .kz-phead__title {
-      font-size: clamp(2.75rem, 4.4vw, 4rem);
-      letter-spacing: -0.035em;
+      font-size: var(--kz-h1);
+      letter-spacing: -0.015em;
     }
     .kz-pbody {
       padding-top: 48px;

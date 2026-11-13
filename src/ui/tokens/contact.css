@@ -14,9 +14,9 @@
     gap: 24px;
   }
   .kz-contact__title {
-    font-size: 2rem;
+    font-size: var(--kz-h1);
     line-height: 1.08;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.015em;
   }
   .kz-contact__intro {
     margin-top: 10px;
@@ -124,9 +124,6 @@
     color: var(--lit);
   }
   @media (min-width: 640px) {
-    .kz-contact__title {
-      font-size: clamp(2.5rem, 1rem + 3.1vw, 3.75rem);
-    }
     .kz-contact__intro {
       font-size: 1.125rem;
     }
@@ -290,8 +287,8 @@
     color: var(--ok-700);
   }
   .kz-sent__title {
-    font-size: 1.5rem;
-    line-height: 1.15;
+    font-size: var(--kz-h3);
+    line-height: 1.25;
     letter-spacing: -0.02em;
     color: var(--ink-900);
   }
@@ -333,9 +330,9 @@
   }
   .kz-consult__title {
     margin-top: 12px;
-    font-size: 2rem;
+    font-size: var(--kz-h1);
     line-height: 1.08;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.015em;
     max-width: 16ch;
   }
   .kz-consult__lede {
@@ -383,9 +380,6 @@
     margin-bottom: 20px;
   }
   @media (min-width: 640px) {
-    .kz-consult__title {
-      font-size: clamp(2.5rem, 1rem + 3.1vw, 3.5rem);
-    }
     .kz-consult__lede {
       font-size: 1.125rem;
     }

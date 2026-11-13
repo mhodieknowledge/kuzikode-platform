@@ -48,7 +48,8 @@
     gap: 4px;
     min-height: 44px;
     padding-inline: 12px;
-    font-weight: 560;
+    font-size: 1rem;
+    font-weight: 500;
     color: var(--kz-fg-2);
     text-decoration: none;
     background: none;
@@ -386,7 +387,7 @@
     color: var(--gold-400);
   }
   .kz-footer__route-title {
-    font-size: 1.25rem;
+    font-size: var(--kz-h3);
     font-weight: 700;
     letter-spacing: -0.015em;
   }
@@ -543,9 +544,6 @@
     .kz-footer__route {
       grid-template-columns: 48px minmax(0, 5fr) minmax(0, 6fr) 24px;
       padding: 22px 0;
-    }
-    .kz-footer__route-title {
-      font-size: 1.5rem;
     }
     .kz-footer__route-body {
       grid-column: 3;

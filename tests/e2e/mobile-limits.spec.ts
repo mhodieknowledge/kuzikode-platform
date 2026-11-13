@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { ownIp } from './helpers';
 
 /**
- * BRIEF B.1a mobile hard limits (R2.6), enforced at 360, 390 and 430 px on every rebuilt public page.
+ * BRIEF B.1a mobile hard limits (R2.6; typography per REFINEMENTS §8: H1 <= 38 px, H2 <= 30 px, body >= 16 px), enforced at 360, 390 and 430 px on every rebuilt public page.
  * A page joins REBUILT when its new UI ships (R3–R4); legacy pages are not held to limits they were never designed for, and
  * legacy sections still inside a rebuilt page are wrapped in [data-legacy] until their own rebuild (the home's below-hero sections, R4.1).
  */
@@ -56,7 +56,7 @@ async function measure(page: Page): Promise<Measure> {
       smallBody: Array.from(main.querySelectorAll<HTMLElement>('p:not([class*="proof"]):not(small), li > p'))
         .filter(visible)
         .filter((p) => !p.closest('[data-legacy]'))
-        .filter((p) => (p.textContent ?? '').trim().length > 60 && parseFloat(getComputedStyle(p).fontSize) < 15)
+        .filter((p) => (p.textContent ?? '').trim().length > 60 && parseFloat(getComputedStyle(p).fontSize) < 16)
         .map((p) => (p.textContent ?? '').trim().slice(0, 40)),
       // Labelled buttons only (icon-only buttons have no label to wrap); the label is the button's first text span.
       wrappedButtons: all<HTMLElement>('.kz-btn')
@@ -85,16 +85,16 @@ for (const path of REBUILT) {
       const at = `${path} @ ${width}px`;
       expect(m.overflow, `${at}: horizontal overflow`).toBeLessThanOrEqual(0);
       for (const h of m.h1) {
-        expect(h.size, `${at}: H1 size`).toBeLessThanOrEqual(34);
+        expect(h.size, `${at}: H1 size`).toBeLessThanOrEqual(38);
         expect(h.size, `${at}: H1 size`).toBeGreaterThanOrEqual(28);
-        expect(h.lines, `${at}: H1 lines`).toBeLessThanOrEqual(3);
+        expect(h.lines, `${at}: H1 lines`).toBeLessThanOrEqual(4);
         expect(h.weight, `${at}: H1 weight`).toBeLessThanOrEqual(700);
       }
       for (const h of m.h2) {
-        expect(h.size, `${at}: H2 "${h.text}" size`).toBeLessThanOrEqual(26);
+        expect(h.size, `${at}: H2 "${h.text}" size`).toBeLessThanOrEqual(30);
         expect(h.lines, `${at}: H2 "${h.text}" lines`).toBeLessThanOrEqual(3);
       }
-      expect(m.smallBody, `${at}: body text under 15 px`).toEqual([]);
+      expect(m.smallBody, `${at}: body text under 16 px`).toEqual([]);
       expect(m.wrappedButtons, `${at}: button labels that wrap`).toEqual([]);
       expect(m.shortButtons, `${at}: buttons under 40 px`).toEqual([]);
     }

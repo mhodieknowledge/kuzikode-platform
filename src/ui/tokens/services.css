@@ -69,9 +69,9 @@
     color: var(--kz-div-ink);
   }
   .kz-dhead__title {
-    font-size: 2rem;
+    font-size: var(--kz-h1);
     line-height: 1.08;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.015em;
     max-width: 18ch;
   }
   .kz-dhead__art {
@@ -294,9 +294,6 @@
 
   /* ---------- Tablet ---------- */
   @media (min-width: 640px) {
-    .kz-dhead__title {
-      font-size: clamp(2.5rem, 1rem + 3.1vw, 3.5rem);
-    }
     .kz-dhead__sum {
       font-size: 1.125rem;
     }
@@ -396,7 +393,7 @@
       color: var(--ink-500);
     }
     .kz-atlas__title {
-      font-size: 1.375rem;
+      font-size: var(--kz-h3);
       letter-spacing: -0.02em;
     }
     .kz-atlas__title a {
@@ -593,9 +590,9 @@
     padding-block: 24px 48px;
   }
   .kz-shero__title {
-    font-size: 2rem;
+    font-size: var(--kz-h1);
     line-height: 1.08;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.015em;
   }
   .kz-shero__intro {
     margin-top: 12px;
@@ -621,8 +618,8 @@
     margin-top: 20px;
   }
   .kz-pband__title {
-    font-size: 1.25rem;
-    line-height: 1.2;
+    font-size: var(--kz-h3);
+    line-height: 1.25;
     letter-spacing: -0.02em;
   }
   .kz-pband__prose {
@@ -630,9 +627,6 @@
     font-size: 1rem;
   }
   @media (min-width: 640px) {
-    .kz-shero__title {
-      font-size: clamp(2.5rem, 1rem + 3.1vw, 3.75rem);
-    }
     .kz-shero__intro {
       font-size: 1.125rem;
     }
@@ -657,9 +651,6 @@
     }
     .kz-shero__copy {
       max-width: 40%;
-    }
-    .kz-pband__title {
-      font-size: 1.625rem;
     }
   }
 }

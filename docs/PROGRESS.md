@@ -1254,3 +1254,4 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Next step: R6.2 group 4 Website: Cms (`CmsAdmin.tsx`, `CmsTabs.astro`), content (`ContentAdmin.tsx`, `ContentTabs.astro`), services (`ServicesAdmin.tsx`),
   packages (`PackagesAdmin.tsx`), careers (`CareersAdmin.tsx`), media pages; rebuild `components/ui/RichTextEditor` in `src/ui/`; delete `components/admin/actions.tsx`
   and remaining `src/components/` legacy UI (check `components/ui/*` users). Then tick R6.2.
+- 18:10 UTC heartbeat: group 4 (Website admin) builder running.

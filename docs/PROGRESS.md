@@ -1120,3 +1120,16 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Next step: R4.7 Insights/blog, Careers (+ apply, InterestForm/ApplicationForm → new forms using useEnquiry-style hooks), FAQ, Products
   (in-development item modest), legal, search, 404/500; remove legacy `src/components/public/sections/{Hero,SectionHeading}` and other
   public legacy as their last users go. Then R4.8 public documents/checkout.
+
+## 2026-11-12 22:40 UTC · R4.7 ✅ Insights, Careers, FAQ, Products, legal, search, 404/500
+- Session session_01LWwAASupazd6tkRyoY9mQD (hand-off). Connectors Figma/Canva/Cloudflare present; R2 `images/incoming/` empty; no `design/inbox/`; skills present.
+- New: `src/ui/public/insights/` (InsightsIndex, lib + unit test), `src/ui/illustrations/CoverArt.astro`, `src/ui/public/careers/*`,
+  `src/ui/public/products/*`, forms `ApplicationForm`/`useApplication`/`FileField`/`InterestForm`, tokens `insights.css`, `careers.css`, `pages.css`.
+  Pages rewritten: insights (index, category, tag, article), careers (index, role, apply), products, faq, legal, search, 404, 500.
+- Legacy deleted: `src/components/public/` (insights, sections Hero/SectionHeading, Icon), `ResponsiveImage.astro`, forms ApplicationForm/InterestForm.
+- Boards + reviewer: 8/8 PASS, 4 fixes applied (QA_REPORT). verify green (unit 492, integration 308); e2e green: insights, legal, site-content, public, careers, products, careers-admin, mobile-limits, sweep (404 entrance removed after an axe mid-fade contrast hit), links, public-layout, motion, security.
+- Tiers (CLAUDE.md §2b): insights/FAQ/legal/search/404 by the orchestrator; careers+products subagent opus/medium (reviewed by screenshots);
+  B.0d review opus/medium.
+- Next step: R4.8 public documents + checkout (`/q/`, `/i/`, `/pay/…`): `src/components/documents/*`, `src/components/payments/*`,
+  `src/components/forms/QuotationResponse.tsx`, `layouts/DocumentLayout.astro` → new `src/ui/public/documents/` + `src/ui/public/checkout/`
+  (extract `useCheckout`), payment e2e (`checkout`, `public-documents`, `full-journey`) must stay green. Refs IMG_5013, 5014, 5016, 5018.

@@ -1,0 +1,66 @@
+---
+/**
+ * Careers drawings in the Route drawing system (BRIEF B.4a, DESIGN_DIRECTION §8a: 2 px ink strokes, round joins, paper surfaces,
+ * one accent + tint, gold for the single lit detail, the dashed road). Colour roles come from illustrations.css; the accent is clay.
+ * - `role-board` (no open roles): the roles directory as an empty board. Three numbered rows (01–03, the same rows as the live
+ *   index) drawn dashed: the slots exist, nothing is posted. A CV sheet leans against the board, its paper clip is the lit detail
+ *   (`.i-move`). No invented job titles or names.
+ * Decorative by default (aria-hidden); pass `title` when the drawing carries meaning.
+ */
+interface Props {
+  kind: 'role-board';
+  title?: string;
+  class?: string;
+}
+const { kind, title, class: className } = Astro.props;
+---
+
+<svg
+  class={['kz-ill kz-ill--scene kz-cart', className].filter(Boolean).join(' ')}
+  viewBox="0 0 360 240"
+  xmlns="http://www.w3.org/2000/svg"
+  role={title ? 'img' : undefined}
+  aria-hidden={title ? undefined : 'true'}
+  focusable="false"
+  data-ill={kind}
+>
+  {title ? <title>{title}</title> : null}
+  <rect class="i-ground" x="0" y="0" width="360" height="240" rx="10"></rect>
+  <path class="i-road" d="M20 222H340"></path>
+
+  {
+    kind === 'role-board' && (
+      <g>
+        {/* The board on two legs */}
+        <path class="i-ink" d="M70 196V222M226 196V222" />
+        <rect class="i-paper" x="34" y="30" width="228" height="166" rx="8" />
+        <path class="i-line" d="M34 58H262" />
+        <rect class="i-solid" x="48" y="40" width="58" height="8" rx="3" />
+        <rect class="i-acc" x="236" y="40" width="10" height="10" rx="2" />
+
+        {/* Three numbered rows, drawn dashed: open slots, nothing posted */}
+        <g class="i-label">
+          <text x="50" y="86">01</text>
+          <text x="50" y="126">02</text>
+          <text x="50" y="166">03</text>
+        </g>
+        <rect class="i-line" x="76" y="72" width="172" height="22" rx="4" stroke-dasharray="5 5" />
+        <rect class="i-line" x="76" y="112" width="172" height="22" rx="4" stroke-dasharray="5 5" />
+        <rect class="i-line" x="76" y="152" width="172" height="22" rx="4" stroke-dasharray="5 5" />
+        <path class="i-line-s" d="M48 102H248M48 142H248M48 182H248" />
+
+        {/* A CV sheet leaning on the board */}
+        <g transform="rotate(8 292 150)">
+          <rect class="i-paper" x="252" y="86" width="82" height="112" rx="6" />
+          <circle class="i-tint" cx="274" cy="110" r="10" />
+          <rect class="i-soft" x="290" y="104" width="32" height="5" rx="2" />
+          <rect class="i-soft" x="290" y="113" width="22" height="4" rx="2" />
+          <path class="i-line-s" d="M264 132H322M264 142H322M264 152H310M264 168H322M264 178H302" />
+          <rect class="i-tint-f" x="264" y="160" width="26" height="4" rx="2" />
+          <path class="i-lit i-move" d="M300 80V96a6 6 0 0 0 12 0V78a4 4 0 0 0-8 0V94" fill="none" />
+        </g>
+      </g>
+    )
+  }
+</svg>
+

@@ -1,0 +1,240 @@
+---
+/**
+ * Insights listing (R4.7, rebuilt from scratch): the index, a category and a tag page share it.
+ * Spec (RESPONSIVE_DESIGN_SPEC "Insights"; references IMG_5055 numbered full-width rows, IMG_5056 text-first heads,
+ * IMG_5067 title-left/link-right row header):
+ * - Head: title + intro on the left; on desktop a small reading-desk note on the right (article count, RSS). Below it the category
+ *   road: route tabs (hue square, name, count), a scrolling row on phones, `aria-current="page"` on the current one.
+ * - The lead article (newest on the page) as an editorial spread: the code-drawn cover in the category hue (or the post's photo)
+ *   beside the title, excerpt and meta. Phones: cover on top, cropped 16:10.
+ * - Every other article as a numbered ledger row (02, 03…): title and excerpt, category, date and reading time; on desktop a small
+ *   cover thumbnail closes the row. No three-column card grid.
+ */
+import PublicLayout from '../../../layouts/PublicLayout.astro';
+import Icon from '../../icons/Icon.astro';
+import CoverArt from '../../illustrations/CoverArt.astro';
+import {
+  breadcrumbLd,
+  findPosts,
+  listPostCategories,
+  POSTS_PER_PAGE,
+  type PostFilter,
+  type PostSummary,
+} from '../../../server/modules/cms';
+import { formatLongDate } from '../../../shared/service-display';
+import { categoryHue, coverMotif } from './lib';
+
+interface Props {
+  title: string;
+  intro?: string | undefined;
+  introHtml?: string | undefined;
+  seoTitle: string;
+  seoDescription?: string | undefined;
+  filter: PostFilter;
+  basePath: string;
+  crumbs?: { name: string; path: string }[];
+}
+const { title, intro, introHtml, seoTitle, seoDescription, filter, basePath, crumbs = [] } = Astro.props;
+const { ctx } = Astro.locals;
+const [result, categories] = await Promise.all([findPosts(ctx, filter), listPostCategories(ctx)]);
+const slugs = categories.map((c) => c.slug);
+const hue = (p: PostSummary) => categoryHue(p.category?.slug, slugs);
+const pageHref = (n: number) => (n === 1 ? basePath : `${basePath}?page=${n}`);
+const ld = [breadcrumbLd(ctx, [{ name: 'Insights', path: '/insights' }, ...crumbs])];
+const [lead, ...rest] = result.posts;
+const offset = (result.page - 1) * POSTS_PER_PAGE;
+const no = (i: number) => String(offset + i + 2).padStart(2, '0');
+const shown = categories.filter((c) => c.count > 0);
+const total = shown.reduce((n, c) => n + c.count, 0);
+const isAll = !filter.category && !filter.tag;
+---
+
+<PublicLayout structuredData={ld} title={seoTitle} description={seoDescription} headerTone="bone" canonicalPath={pageHref(result.page)}>
+  <link slot="head" rel="alternate" type="application/rss+xml" title="Kuzikode Insights" href="/insights/rss.xml" />
+  <section class="kz-ihead" aria-labelledby="insights-title">
+    <div class="container-wide">
+      <div class="kz-ihead__grid">
+        <div>
+          {crumbs.length > 0 ? (
+            <a class="kz-ihead__back" href="/insights">
+              <Icon name="arrow-left" size={16} />
+              All insights
+            </a>
+          ) : null}
+          <h1 id="insights-title" class="kz-ihead__title" data-enter>
+            {title}
+          </h1>
+          {introHtml ? (
+            <div class="kz-ihead__intro" data-enter="2" set:html={introHtml} />
+          ) : intro ? (
+            <p class="kz-ihead__intro" data-enter="2">
+              {intro}
+            </p>
+          ) : null}
+        </div>
+        <p class="kz-ihead__desk" data-enter="2">
+          <span>
+            {result.total} {result.total === 1 ? 'article' : 'articles'}
+            {isAll ? '' : ` of ${total}`}
+          </span>
+          <a class="kz-link" href="/insights/rss.xml">
+            RSS feed
+            <Icon name="arrow-up-right" size={16} />
+          </a>
+        </p>
+      </div>
+      {
+        shown.length > 0 ? (
+          <nav class="kz-iroad" aria-label="Insight categories" data-enter="3">
+            <ul role="list">
+              <li>
+                <a href="/insights" aria-current={isAll ? 'page' : undefined}>
+                  <span class="kz-iroad__sq is-all" aria-hidden="true" />
+                  All
+                  <span class="kz-iroad__n" aria-hidden="true">
+                    {total}
+                  </span>
+                </a>
+              </li>
+              {shown.map((c) => (
+                <li class={categoryHue(c.slug, slugs)}>
+                  <a href={`/insights/category/${c.slug}`} aria-current={filter.category === c.slug ? 'page' : undefined}>
+                    <span class="kz-iroad__sq" aria-hidden="true" />
+                    {c.name}
+                    <span class="kz-iroad__n" aria-hidden="true">
+                      {c.count}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ) : null
+      }
+    </div>
+  </section>
+
+  <section class="kz-sec kz-ibody" aria-label="Articles">
+    <div class="container-wide">
+      {
+        !lead ? (
+          <div class="kz-iempty">
+            <CoverArt motif="guide" class="kz-iempty__art" />
+            <div>
+              <p class="kz-iempty__title">No articles here yet.</p>
+              <p class="kz-iempty__body">New articles appear here as soon as they are published.</p>
+              <a class="kz-link" href="/insights">
+                See all insights
+                <Icon name="arrow-right" size={16} />
+              </a>
+            </div>
+          </div>
+        ) : (
+          <Fragment>
+            <article class:list={['kz-ilead', hue(lead)]} aria-labelledby={`p-${lead.slug}`} data-reveal>
+              <a class="kz-ilead__media" href={`/insights/${lead.slug}`} tabindex="-1" aria-hidden="true">
+                {lead.cover ? (
+                  <img
+                    src={lead.cover.src}
+                    alt=""
+                    width={lead.cover.width ?? 1200}
+                    height={lead.cover.height ?? 750}
+                    loading="eager"
+                    decoding="async"
+                  />
+                ) : (
+                  <CoverArt motif={coverMotif(lead.category?.slug)} />
+                )}
+              </a>
+              <div class="kz-ilead__text">
+                {lead.category ? (
+                  <p class="kz-icat">
+                    <span class="kz-icat__sq" aria-hidden="true" />
+                    {lead.category.name}
+                  </p>
+                ) : null}
+                <h2 id={`p-${lead.slug}`} class="kz-ilead__title">
+                  <a href={`/insights/${lead.slug}`}>{lead.title}</a>
+                </h2>
+                <p class="kz-ilead__ex">{lead.excerpt}</p>
+                <p class="kz-imeta">
+                  <time datetime={lead.publishedAt}>{formatLongDate(lead.publishedAt)}</time>
+                  <span aria-hidden="true">·</span>
+                  {lead.readingMinutes} min read
+                </p>
+                <span class="kz-ilead__go" aria-hidden="true">
+                  Read the article
+                  <Icon name="arrow-right" size={16} />
+                </span>
+              </div>
+            </article>
+            {rest.length > 0 ? (
+              <ol class="kz-ilist" role="list">
+                {rest.map((p, i) => (
+                  <li class={hue(p)}>
+                    <article class="kz-irow" aria-labelledby={`p-${p.slug}`}>
+                      <span class="kz-irow__no" aria-hidden="true">
+                        {no(i)}
+                      </span>
+                      <div class="kz-irow__main">
+                        <h2 id={`p-${p.slug}`} class="kz-irow__title">
+                          <a href={`/insights/${p.slug}`}>{p.title}</a>
+                        </h2>
+                        <p class="kz-irow__ex">{p.excerpt}</p>
+                      </div>
+                      <p class="kz-irow__side">
+                        {p.category ? (
+                          <span class="kz-icat">
+                            <span class="kz-icat__sq" aria-hidden="true" />
+                            {p.category.name}
+                          </span>
+                        ) : null}
+                        <span class="kz-imeta">
+                          <time datetime={p.publishedAt}>{formatLongDate(p.publishedAt)}</time>
+                          <span aria-hidden="true">·</span>
+                          {p.readingMinutes} min
+                        </span>
+                      </p>
+                      <span class="kz-irow__thumb" aria-hidden="true">
+                        {p.cover ? (
+                          <img src={p.cover.src} alt="" width="160" height="100" loading="lazy" decoding="async" />
+                        ) : (
+                          <CoverArt motif={coverMotif(p.category?.slug)} />
+                        )}
+                      </span>
+                    </article>
+                  </li>
+                ))}
+              </ol>
+            ) : null}
+          </Fragment>
+        )
+      }
+      {
+        result.pages > 1 ? (
+          <nav aria-label="Pagination" class="kz-ipager">
+            {result.page > 1 ? (
+              <a class="kz-btn kz-btn--secondary" href={pageHref(result.page - 1)} rel="prev">
+                <Icon name="arrow-left" size={16} />
+                <span>Newer articles</span>
+              </a>
+            ) : (
+              <span />
+            )}
+            <span class="kz-ipager__n">
+              Page {result.page} of {result.pages}
+            </span>
+            {result.page < result.pages ? (
+              <a class="kz-btn kz-btn--secondary" href={pageHref(result.page + 1)} rel="next">
+                <span>Older articles</span>
+                <Icon name="arrow-right" size={16} />
+              </a>
+            ) : (
+              <span />
+            )}
+          </nav>
+        ) : null
+      }
+    </div>
+  </section>
+</PublicLayout>

@@ -1,5 +1,5 @@
 ---
-import InsightsListing from '../../../components/public/insights/InsightsListing.astro';
+import InsightsIndex from '../../../ui/public/insights/InsightsIndex.astro';
 import { listPostCategories } from '../../../server/modules/cms';
 
 const { ctx } = Astro.locals;
@@ -9,7 +9,7 @@ if (!category) return new Response(null, { status: 404, statusText: 'Not found' 
 const n = Number(Astro.url.searchParams.get('page') ?? '1');
 ---
 
-<InsightsListing
+<InsightsIndex
   title={category.name}
   intro={`Articles about ${category.name.toLowerCase()}.`}
   seoTitle={`${category.name} · Kuzikode Insights`}

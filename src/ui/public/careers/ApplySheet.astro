@@ -1,0 +1,49 @@
+---
+/**
+ * Application sheet (R4.7, IMG_5018 two-column form + order summary). Desktop: the form on a paper sheet (the slot: the
+ * ApplicationForm island) beside a sticky "Your application" summary: what you are applying for, what you need to attach, and how
+ * long the details are kept. Phones: the summary first as a compact ruled card, then the sheet edge to edge.
+ */
+interface Props {
+  position: string;
+  facts: { k: string; v: string }[];
+  retentionMonths: number;
+}
+const { position, facts, retentionMonths } = Astro.props;
+---
+
+<div class="kz-asheet">
+  <aside class="kz-asheet__sum" aria-label="Your application">
+    <p class="kz-asheet__k">Your application</p>
+    <p class="kz-asheet__pos">{position}</p>
+    {
+      facts.length > 0 ? (
+        <dl class="kz-asheet__facts">
+          {facts.map((f) => (
+            <div>
+              <dt>{f.k}</dt>
+              <dd>{f.v}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : null
+    }
+    <p class="kz-asheet__k kz-asheet__k--need">You will need</p>
+    <ul class="kz-asheet__need" role="list">
+      <li>
+        <span>CV</span>
+        <span>PDF or Word, up to 5 MB</span>
+      </li>
+      <li>
+        <span>Cover letter</span>
+        <span>Optional, typed or attached</span>
+      </li>
+    </ul>
+    <p class="kz-asheet__note">
+      We keep your details for {retentionMonths} months after the role closes, then delete them.
+    </p>
+  </aside>
+  <div class="kz-asheet__form">
+    <slot />
+  </div>
+</div>

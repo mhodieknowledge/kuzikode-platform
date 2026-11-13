@@ -1,0 +1,52 @@
+---
+/**
+ * One product (R4.7, BRIEF B.7 scope guard). Kept modest and clearly labelled: a square-cornered status tag ("In Development",
+ * the spec's exact words), the name, tagline and CMS description, the honest "no release date" note, and the Route drawing of an
+ * unfinished workspace (SuiteArt, replacing the old 3D device render). The interest form sits on its own paper sheet beside it
+ * (desktop) or below it (phones). Never promoted as a service: no offers, dates or purchase wording.
+ */
+import SuiteArt from './SuiteArt.astro';
+import InterestForm from '../forms/InterestForm';
+
+interface Props {
+  product: {
+    slug: string;
+    name: string;
+    tagline: string | null;
+    description: string;
+    status: string;
+    interestFormEnabled: boolean;
+  };
+  siteKey: string;
+}
+const { product: p, siteKey } = Astro.props;
+const label: Record<string, string> = { in_development: 'In Development', beta: 'Beta', available: 'Available' };
+---
+
+<article class:list={['kz-prod', !p.interestFormEnabled && 'kz-prod--solo']} aria-labelledby={`p-${p.slug}`}>
+  <div class="kz-prod__copy">
+    <p class:list={['kz-prod__status', `is-${p.status}`]}>
+      <span class="kz-prod__dot" aria-hidden="true"></span>{label[p.status] ?? p.status}
+    </p>
+    <h2 id={`p-${p.slug}`} class="kz-prod__name">{p.name}</h2>
+    {p.tagline ? <p class="kz-prod__tag">{p.tagline}</p> : null}
+    <div class="kz-prod__art" data-ill-host>
+      <SuiteArt />
+    </div>
+    <p class="kz-prod__desc">{p.description}</p>
+    {
+      p.status === 'in_development' ? (
+        <p class="kz-prod__note">We have not set a release date. Interested organisations can tell us what they need.</p>
+      ) : null
+    }
+  </div>
+  {
+    p.interestFormEnabled ? (
+      <div class="kz-prod__sheet">
+        <h3 class="kz-prod__sheet-h">Register interest</h3>
+        <p class="kz-prod__sheet-b">Tell us what you would use it for. We only contact you about {p.name}.</p>
+        <InterestForm client:visible product={p.slug} productName={p.name} siteKey={siteKey} />
+      </div>
+    ) : null
+  }
+</article>

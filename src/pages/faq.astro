@@ -1,5 +1,16 @@
 ---
+/**
+ * FAQ (R4.7, rebuilt from scratch). Spec (RESPONSIVE_DESIGN_SPEC; references IMG_5057 FAQ accordion with +/− and IMG_5055
+ * numbered full-width rows):
+ * - Head: title, intro, the live filter (appears only with JavaScript; every answer is in the HTML regardless).
+ * - Phones: the category road (numbered route tabs, a scrolling row) jumps to each group; groups of ruled accordions below; a
+ *   night "still have a question" plate closes the page.
+ * - Desktop: a sticky side index (numbered categories with their question counts, the current one marked while reading) and the
+ *   ask plate beside the groups.
+ * Deep links (`/faq#<question id>`) open and scroll to the answer.
+ */
 import PublicLayout from '../layouts/PublicLayout.astro';
+import Icon from '../ui/icons/Icon.astro';
 import { breadcrumbLd, FAQ_CATEGORIES, faqLd, getPage, listAllFaqs, sectionOf } from '../server/modules/cms';
 
 const { ctx } = Astro.locals;
@@ -9,81 +20,105 @@ const groups = FAQ_CATEGORIES.map((c) => ({ ...c, items: faqs.filter((f) => f.ca
   (g) => g.items.length > 0,
 );
 const ld = [breadcrumbLd(ctx, [{ name: 'FAQ', path: '/faq' }]), ...(faqs.length ? [faqLd(faqs)] : [])];
+const no = (i: number) => String(i + 1).padStart(2, '0');
 ---
 
 <PublicLayout
   structuredData={ld}
   title={page?.seoTitle ?? 'FAQ · Kuzikode Technologies'}
   description={page?.seoDescription ?? undefined}
+  canonicalPath="/faq"
+  headerTone="bone"
 >
-  <section class="bg-canvas py-14 md:py-20" aria-labelledby="faq-title">
-    <div class="container-content max-w-3xl">
-      <h1 id="faq-title" class="text-4xl font-bold tracking-display md:text-5xl">
-        {intro?.content.title ?? 'Frequently asked questions'}
-      </h1>
-      {intro ? <div class="prose-kz mt-4 text-lg" set:html={intro.content.html} /> : null}
-      <div class="mt-8 hidden" data-faq-filter-wrap>
-        <label for="faq-filter" class="text-sm font-medium text-ink-950">
+  <section class="kz-xhead" aria-labelledby="faq-title">
+    <div class="container-wide kz-xhead__grid">
+      <div>
+        <h1 id="faq-title" class="kz-xhead__title" data-enter>
+          {intro?.content.title ?? 'Frequently asked questions'}
+        </h1>
+        {intro ? <div class="kz-xhead__intro" data-enter="2" set:html={intro.content.html} /> : null}
+      </div>
+      <div class="kz-qafind" hidden data-faq-filter-wrap>
+        <label for="faq-filter" class="kz-qafind__label">
           Filter questions
         </label>
-        <input
-          id="faq-filter"
-          type="search"
-          autocomplete="off"
-          maxlength="100"
-          class="mt-1.5 h-11 w-full rounded-sm border border-line bg-surface px-3 text-[15px] text-ink-950 hover:border-ink-400 focus-visible:border-brand-500 focus-visible:outline-2 focus-visible:outline-brand-500"
-          data-faq-filter
-        />
-        <p class="mt-2 text-[13px] text-ink-600" role="status" aria-live="polite" data-faq-count></p>
+        <div class="kz-qafind__box">
+          <Icon name="search" size={20} />
+          <input
+            id="faq-filter"
+            type="search"
+            autocomplete="off"
+            maxlength="100"
+            placeholder="EcoCash, hosting, support…"
+            data-faq-filter
+          />
+        </div>
+        <p class="kz-qafind__count" role="status" aria-live="polite" data-faq-count></p>
       </div>
-      <nav aria-label="FAQ categories" class="mt-6">
-        <ul class="flex flex-wrap gap-2">
-          {groups.map((g) => (
-            <li>
-              <a
-                href={`#${g.key}`}
-                class="inline-flex h-9 items-center rounded-full border border-line bg-surface px-4 text-sm font-semibold text-ink-800 hover:border-ink-400"
-              >
-                {g.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
     </div>
   </section>
-  <div class="bg-surface py-14 md:py-20">
-    <div class="container-content flex max-w-3xl flex-col gap-14">
-      {groups.map((g) => (
-        <section id={g.key} class="scroll-mt-24" aria-labelledby={`faq-${g.key}`} data-faq-group>
-          <h2 id={`faq-${g.key}`} class="text-2xl font-bold tracking-display">
-            {g.label}
-          </h2>
-          <div class="mt-6 divide-y divide-line border-y border-line">
-            {g.items.map((f) => (
-              <details id={f.id} class="group scroll-mt-24 py-5" data-faq-item>
-                <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-ink-950">
-                  {f.question}
-                  <span
-                    aria-hidden="true"
-                    class="text-xl leading-none text-ink-600 transition-transform group-open:rotate-45"
-                  >
-                    +
+
+  <div class="kz-sec kz-qabody">
+    <div class="container-wide kz-qabody__grid">
+      <aside class="kz-qaside">
+        <nav class="kz-qaroad" aria-label="FAQ categories">
+          <ol role="list">
+            {groups.map((g, i) => (
+              <li>
+                <a href={`#${g.key}`} data-faq-nav={g.key}>
+                  <span class="kz-qaroad__no" aria-hidden="true">
+                    {no(i)}
                   </span>
-                </summary>
-                <p class="mt-3 text-[15px] leading-7 text-ink-600">{f.answer}</p>
-              </details>
+                  {g.label}
+                  <span class="kz-qaroad__n" aria-hidden="true">
+                    {g.items.length}
+                  </span>
+                </a>
+              </li>
             ))}
-          </div>
-        </section>
-      ))}
-      <p class="text-[15px] text-ink-600">
-        Still have a question?{' '}
-        <a href="/contact" class="font-semibold text-brand-600 underline underline-offset-2">
-          Contact us
-        </a>
-        .
-      </p>
+          </ol>
+        </nav>
+        <div class="kz-ask on-night kz-ask--side">
+          <p class="kz-ask__h">Still have a question?</p>
+          <p>Ask us directly. We usually reply within one business day.</p>
+          <a class="kz-btn kz-btn--primary" href="/contact">
+            <span>Contact us</span>
+          </a>
+        </div>
+      </aside>
+
+      <div class="kz-qagroups">
+        {groups.map((g, i) => (
+          <section id={g.key} class="kz-qagroup" aria-labelledby={`faq-${g.key}`} data-faq-group>
+            <div class="kz-qagroup__head">
+              <span class="kz-qagroup__no" aria-hidden="true">
+                {no(i)}
+              </span>
+              <h2 id={`faq-${g.key}`} class="kz-qagroup__title">
+                {g.label}
+              </h2>
+            </div>
+            <div class="kz-qalist">
+              {g.items.map((f) => (
+                <details id={f.id} class="kz-qa" data-faq-item>
+                  <summary>
+                    <span class="kz-qa__q">{f.question}</span>
+                    <span class="kz-qa__sign" aria-hidden="true" />
+                  </summary>
+                  <p class="kz-qa__a">{f.answer}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        ))}
+        <div class="kz-ask on-night kz-ask--foot">
+          <p class="kz-ask__h">Still have a question?</p>
+          <p>Ask us directly. We usually reply within one business day.</p>
+          <a class="kz-btn kz-btn--primary" href="/contact">
+            <span>Contact us</span>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 </PublicLayout>
@@ -95,8 +130,9 @@ const ld = [breadcrumbLd(ctx, [{ name: 'FAQ', path: '/faq' }]), ...(faqs.length 
   const count = document.querySelector<HTMLElement>('[data-faq-count]');
   const items = [...document.querySelectorAll<HTMLDetailsElement>('[data-faq-item]')];
   const groups = [...document.querySelectorAll<HTMLElement>('[data-faq-group]')];
+  const navs = [...document.querySelectorAll<HTMLAnchorElement>('[data-faq-nav]')];
   if (wrap && input && count) {
-    wrap.classList.remove('hidden');
+    wrap.hidden = false;
     input.addEventListener('input', () => {
       const terms = input.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
       let shown = 0;
@@ -108,6 +144,7 @@ const ld = [breadcrumbLd(ctx, [{ name: 'FAQ', path: '/faq' }]), ...(faqs.length 
         item.open = terms.length > 0 && match;
       }
       for (const g of groups) g.hidden = !g.querySelector('[data-faq-item]:not([hidden])');
+      for (const a of navs) a.parentElement!.hidden = document.getElementById(a.dataset.faqNav ?? '')?.hidden ?? false;
       count.textContent = terms.length ? `${shown} matching question${shown === 1 ? '' : 's'}` : '';
     });
     const openFromHash = () => {
@@ -123,4 +160,15 @@ const ld = [breadcrumbLd(ctx, [{ name: 'FAQ', path: '/faq' }]), ...(faqs.length 
     openFromHash();
     window.addEventListener('hashchange', openFromHash);
   }
+  // Mark the category being read in the side index.
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        for (const a of navs) a.toggleAttribute('data-on', a.dataset.faqNav === e.target.id);
+      }
+    },
+    { rootMargin: '-120px 0px -55% 0px' },
+  );
+  for (const g of groups) io.observe(g);
 </script>

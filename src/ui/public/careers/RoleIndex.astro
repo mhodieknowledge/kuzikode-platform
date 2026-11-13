@@ -1,0 +1,173 @@
+---
+/**
+ * Open roles directory (R4.7, IMG_5055 numbered full-width rows "01 UI/UX Design →"). Each open posting is one numbered row:
+ * numeral in its department's hue (department colour-coding is the hue's job here), department, title, type, place and closing
+ * date, one arrow at the row's end. Desktop: a typographic directory with column labels and hairlines between rows; phones: the
+ * numeral, the title and a single meta line per row (rows, not boxes). Filters (department, type, workplace: GET form, unchanged
+ * parameters) appear only when there is more than one open role, folded into a disclosure on phones. The empty state is a night
+ * panel with the empty role board drawing (`data-careers-empty`, the spec hook).
+ */
+import Icon from '../../icons/Icon.astro';
+import CareersArt from './CareersArt.astro';
+import { EMPLOYMENT_TYPES, WORKPLACES } from '../../../shared/schemas/careers';
+
+export interface RoleRow {
+  slug: string;
+  title: string;
+  department: string;
+  type: string;
+  place: string;
+  closes: string | null;
+}
+interface Props {
+  roles: RoleRow[];
+  total: number;
+  departments: string[];
+  filter: { department?: string | undefined; type?: string | undefined; workplace?: string | undefined };
+  general: boolean;
+}
+const { roles, total, departments, filter, general } = Astro.props;
+const filtered = Boolean(filter.department || filter.type || filter.workplace);
+const hues = ['kz-div-1', 'kz-div-2', 'kz-div-3', 'kz-div-4', 'kz-div-5', 'kz-div-6'];
+const hue = (d: string) => hues[Math.max(0, departments.indexOf(d)) % hues.length];
+---
+
+<section class="kz-sec kz-roles" id="roles" aria-labelledby="roles-title">
+  <div class="container-wide">
+    <header class="kz-roles__head">
+      <h2 id="roles-title" class="kz-h2">Open roles</h2>
+      {total > 0 ? <p class="kz-roles__count">{String(total).padStart(2, '0')} open</p> : null}
+    </header>
+
+    {
+      total > 1 ? (
+        <details class="kz-rfilter" open={filtered || undefined} data-rfilter>
+          <summary class="kz-rfilter__toggle">
+            <Icon name="filter" size={20} />
+            <span>Filter roles</span>
+            {filtered ? <span class="kz-rfilter__on">On</span> : null}
+          </summary>
+          <form method="get" action="/careers#roles" class="kz-rfilter__form" aria-label="Filter roles">
+            <div class="kz-field">
+              <label class="kz-label" for="rf-department">
+                Department
+              </label>
+              <select id="rf-department" name="department" class="kz-input">
+                <option value="">All</option>
+                {departments.map((d) => (
+                  <option value={d} selected={filter.department === d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div class="kz-field">
+              <label class="kz-label" for="rf-type">
+                Type
+              </label>
+              <select id="rf-type" name="type" class="kz-input">
+                <option value="">All</option>
+                {Object.entries(EMPLOYMENT_TYPES).map(([k, v]) => (
+                  <option value={k} selected={filter.type === k}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div class="kz-field">
+              <label class="kz-label" for="rf-workplace">
+                Workplace
+              </label>
+              <select id="rf-workplace" name="workplace" class="kz-input">
+                <option value="">All</option>
+                {Object.entries(WORKPLACES).map(([k, v]) => (
+                  <option value={k} selected={filter.workplace === k}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div class="kz-rfilter__acts">
+              <button type="submit" class="kz-btn kz-btn--secondary">
+                <span>Apply filters</span>
+              </button>
+              {filtered ? (
+                <a class="kz-link" href="/careers#roles">
+                  Clear
+                </a>
+              ) : null}
+            </div>
+          </form>
+        </details>
+      ) : null
+    }
+
+    {
+      total === 0 ? (
+        <div class="kz-rempty on-night" data-careers-empty data-ill-host>
+          <div class="kz-rempty__art">
+            <CareersArt kind="role-board" />
+          </div>
+          <div class="kz-rempty__copy">
+            <p class="kz-rempty__title">We're not hiring right now.</p>
+            <p class="kz-rempty__body">
+              New roles are listed here when they open, each with its closing date and an online application.
+            </p>
+            {general ? (
+              <div class="kz-rempty__acts">
+                <a class="kz-btn kz-btn--primary kz-btn--lg" href="/careers/apply">
+                  <span>Send us your CV</span>
+                </a>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : roles.length === 0 ? (
+        <p class="kz-roles__none" role="status">
+          No roles match these filters. <a href="/careers#roles">See all roles</a>.
+        </p>
+      ) : (
+        <Fragment>
+          <div class="kz-roles__cols" aria-hidden="true">
+            <span>No.</span>
+            <span>Role</span>
+            <span>Type</span>
+            <span>Where</span>
+            <span>Closing</span>
+          </div>
+          <ol class="kz-roles__list" role="list" data-reveal-group>
+            {roles.map((r, i) => (
+              <li class:list={['kz-role', hue(r.department)]}>
+                <a class="kz-role__link" href={`/careers/${r.slug}`}>
+                  <span class="kz-role__n" aria-hidden="true">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span class="kz-role__main">
+                    <span class="kz-role__dept">{r.department}</span>
+                    <span class="kz-role__title">{r.title}</span>
+                  </span>
+                  <span class="kz-role__meta">
+                    <span class="kz-role__cell">{r.type}</span>
+                    <span class="kz-role__cell">{r.place}</span>
+                    <span class="kz-role__cell kz-role__date">{r.closes ? `Apply by ${r.closes}` : 'No closing date'}</span>
+                  </span>
+                  <span class="kz-role__go" aria-hidden="true">
+                    <Icon name="arrow-right" size={20} />
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </Fragment>
+      )
+    }
+
+    {
+      general && total > 0 ? (
+        <p class="kz-roles__cv">
+          Don't see the right role? <a href="/careers/apply">Send us your CV</a>.
+        </p>
+      ) : null
+    }
+  </div>
+</section>

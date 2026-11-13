@@ -1,0 +1,78 @@
+---
+/**
+ * Careers hero (R4.7, BRIEF B.0e/B.4a: careers is a photo placement). Desktop: the heading, the CMS intro, one action and the
+ * live status line on the left; on the right the mentoring photograph in the warm duotone with a paper "next closing" plate laid
+ * over its lower edge (real posting data: title, type, workplace and closing date; or "no open roles"). Phones: heading, intro,
+ * action, then the photograph with the plate pulled over it, all inside the first screen.
+ * The photograph is illustrative (AI-generated people, BRIEF B.4 §5): decorative, never captioned as staff.
+ */
+import Icon from '../../icons/Icon.astro';
+import Picture from '../../primitives/Picture.astro';
+
+interface Props {
+  intro: string | undefined;
+  openCount: number;
+  general: boolean;
+  next: { title: string; meta: string; closes: string | null } | null;
+}
+const { intro, openCount, general, next } = Astro.props;
+---
+
+<section class="kz-chero" aria-labelledby="careers-title">
+  <div class="container-wide kz-chero__grid">
+    <div class="kz-chero__copy">
+      <h1 id="careers-title" class="kz-chero__title" data-enter>Work with us</h1>
+      {intro ? <p class="kz-chero__intro" data-enter="2">{intro}</p> : null}
+      <div class="kz-chero__acts" data-enter="2">
+        {
+          openCount > 0 ? (
+            <a class="kz-btn kz-btn--primary kz-btn--lg" href="#roles">
+              <span>See open roles</span>
+            </a>
+          ) : general ? (
+            <a class="kz-btn kz-btn--primary kz-btn--lg" href="/careers/apply">
+              <span>Send us your CV</span>
+            </a>
+          ) : null
+        }
+        <p class="kz-chero__status">
+          <span class:list={['kz-chero__dot', openCount > 0 && 'is-on']} aria-hidden="true"></span>
+          {openCount > 0 ? `${openCount} open ${openCount === 1 ? 'role' : 'roles'}` : 'No open roles right now'}
+        </p>
+      </div>
+    </div>
+    <div class="kz-chero__visual" data-enter="3">
+      <Picture
+        id="careers-mentoring"
+        alt=""
+        tone="warm"
+        priority
+        class="kz-chero__pic"
+        sizes="(min-width: 1024px) 640px, 100vw"
+      />
+      {
+        next ? (
+          <div class="kz-chero__plate">
+            <span class="kz-chero__plate-k">{next.closes ? 'Closing next' : 'Open now'}</span>
+            <span class="kz-chero__plate-t">{next.title}</span>
+            <span class="kz-chero__plate-m">{next.meta}</span>
+            {
+              next.closes ? (
+                <span class="kz-chero__plate-d">
+                  <Icon name="calendar" size={16} />
+                  Apply by {next.closes}
+                </span>
+              ) : null
+            }
+          </div>
+        ) : (
+          <div class="kz-chero__plate">
+            <span class="kz-chero__plate-k">Open roles</span>
+            <span class="kz-chero__plate-t">None right now</span>
+            <span class="kz-chero__plate-m">New roles are listed on this page when they open.</span>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>

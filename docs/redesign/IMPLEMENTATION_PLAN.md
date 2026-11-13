@@ -97,17 +97,17 @@ Ticked when the file is deleted (or, for the logic-only files marked *logic*, mo
 | components/BaseHead.astro | ui/head/Head.astro (new) | [ ] R5.1 (still used by legacy layouts) |
 | components/JsonLd.astro (*logic*) | kept as is (pure structured-data output) | — |
 | components/Logo.astro | ui/brand/Logo.astro (new) | [ ] R5.1 (still used by legacy layouts) |
-| components/ResponsiveImage.astro | src/ui/primitives/Picture.astro (new) | [ ] R4.1 |
+| components/ResponsiveImage.astro | src/ui/primitives/Picture.astro (new) | [x] R4.7 (deleted; products page now uses a drawing) |
 | public/SiteHeader.astro, AnnouncementBar.astro, WhatsAppButton.astro | ui/public/shell Header, Announcement, WhatsApp | [x] R3.1 |
-| public/Icon.astro | ui/icons/Icon.astro | [ ] R4 (last legacy sections use it) |
+| public/Icon.astro | ui/icons/Icon.astro | [x] R4.7 (deleted) |
 | public/SiteFooter.astro | ui/public/shell/Footer.astro | [x] R3.2 |
 | public/sections/ServicesGrid, WorkGallery, WorkGrid, ProductsGrid, Testimonials | ui/public/home (ServicesBand, WorkRail, CompanyBand, Voices) | [x] R4.1 (deleted) |
-| public/sections/Hero, Features, Process, PhotoPair, TechnologiesStrip, CtaBand, SectionHeading, Statement, Values, ListSection, RichText | new public sections | [~] R4.5 removed Features, Process, PhotoPair, TechnologiesStrip, CtaBand, Statement, Values, ListSection, RichText; Hero + SectionHeading remain (R4.7 users) |
+| public/sections/Hero, Features, Process, PhotoPair, TechnologiesStrip, CtaBand, SectionHeading, Statement, Values, ListSection, RichText | new public sections | [x] R4.5 removed Features, Process, PhotoPair, TechnologiesStrip, CtaBand, Statement, Values, ListSection, RichText; R4.7 removed Hero + SectionHeading (`src/components/public/` is gone) |
 | public/pricing/ComparisonTable.astro | ui/public/services/PackageCompare | [x] R4.3 (deleted) |
 | public/pricing/PackageCard.astro | ui/public/pricing/PlanDeck | [x] R4.5 (industries now use PlanDeck) |
-| public/insights/InsightsListing, PostCard, PostCover | insights components | [ ] R4.7 |
+| public/insights/InsightsListing, PostCard, PostCover | ui/public/insights/InsightsIndex + ui/illustrations/CoverArt | [x] R4.7 (deleted) |
 | forms/StartProjectWizard | removed with the wizard (B.0c); /start-a-project 301 → /contact | [x] R4.6b (deleted) |
-| forms/ContactForm, ConsultationForm, Turnstile | new forms + hooks | [ ] R4.6 |
+| forms/ContactForm, ConsultationForm, Turnstile | new forms + hooks | [x] R4.6 (deleted) |
 | forms/NewsletterForm | ui/public/forms/Newsletter.tsx + useNewsletter | [x] R3.2 |
 | forms/InterestForm, ApplicationForm | new forms + hooks | [ ] R4.7 |
 | forms/QuotationResponse, documents/QuotationDocument, InvoiceDocument | documents | [ ] R4.8 |

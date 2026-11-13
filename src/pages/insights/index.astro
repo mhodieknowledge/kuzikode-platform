@@ -1,5 +1,5 @@
 ---
-import InsightsListing from '../../components/public/insights/InsightsListing.astro';
+import InsightsIndex from '../../ui/public/insights/InsightsIndex.astro';
 import { getPage, sectionOf } from '../../server/modules/cms';
 
 const { ctx } = Astro.locals;
@@ -8,7 +8,7 @@ const intro = sectionOf(page, 'intro', 'rich_text');
 const n = Number(Astro.url.searchParams.get('page') ?? '1');
 ---
 
-<InsightsListing
+<InsightsIndex
   title={intro?.content.title ?? 'Insights'}
   introHtml={intro?.content.html}
   seoTitle={page?.seoTitle ?? 'Insights · Kuzikode Technologies'}

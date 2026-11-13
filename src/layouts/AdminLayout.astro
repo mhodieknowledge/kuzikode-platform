@@ -194,6 +194,16 @@ const aside = readAside(Astro.cookies.get(ASIDE_COOKIE)?.value);
   list?.addEventListener('focusout', hide);
   list?.addEventListener('scroll', hide, { passive: true });
 
+  // Fade the bottom edge while more modules sit below the fold.
+  const fade = () => {
+    if (list instanceof HTMLElement)
+      list.toggleAttribute('data-more', list.scrollTop + list.clientHeight < list.scrollHeight - 2);
+  };
+  fade();
+  list?.addEventListener('scroll', fade, { passive: true });
+  window.addEventListener('resize', fade);
+  toggle?.addEventListener('click', () => requestAnimationFrame(fade));
+
   // Phones: the sidebar as a left sheet (modal <dialog>: focus trap, Escape, inert page).
   const dialog = document.querySelector<HTMLDialogElement>('[data-admin-nav-dialog]');
   const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;

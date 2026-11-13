@@ -79,11 +79,11 @@
     scrollbar-width: thin;
     scrollbar-color: var(--night-700) transparent;
   }
-  .kz-anav__g + .kz-anav__g {
-    margin-top: 6px;
+  .kz-anav[data-more] {
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent);
   }
   .kz-anav__h {
-    padding: 12px 10px 4px;
+    padding: 12px 10px 2px;
     font-size: 0.6875rem;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -263,8 +263,11 @@
   .kz-abar__home {
     display: inline-grid;
     place-items: center;
-    width: 36px;
+    width: 40px;
     height: 44px;
+    margin-left: 2px;
+    padding-left: 4px;
+    border-left: 1px solid var(--bone-300);
     color: var(--ink-900);
   }
   .kz-abar__find {
@@ -339,19 +342,19 @@
   /* Bell */
   .kz-abell__n {
     position: absolute;
-    top: 6px;
-    right: 5px;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 4px;
-    border-radius: 5px;
-    background: var(--danger-600);
+    top: 5px;
+    right: 3px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 3px;
+    border-radius: 3px;
+    background: var(--clay-ink);
     box-shadow: 0 0 0 2px var(--bone-100);
     font-family: var(--font-mono);
     font-variant-ligatures: none;
-    font-size: 0.6875rem;
-    font-weight: 700;
-    line-height: 18px;
+    font-size: 0.625rem;
+    font-weight: 600;
+    line-height: 16px;
     text-align: center;
     color: #fff;
   }
@@ -506,7 +509,7 @@
     color: var(--ink-900);
   }
   .kz-anote__row:not([data-unread]) .kz-anote__t {
-    font-weight: 500;
+    font-weight: 400;
     color: var(--ink-700);
   }
   .kz-anote__b {
@@ -823,12 +826,45 @@
     .kz-aacct__text {
       display: block;
     }
+    .kz-aacct__mail {
+      display: none;
+    }
     .kz-aacct .kz-icon {
       display: block;
       color: var(--ink-500);
     }
     .kz-abar {
       padding: 0 16px 0 32px;
+    }
+    /* Pointer desktops: a 40 px console bar with 32–36 px controls (touch keeps 44 px targets). */
+    .kz-adm {
+      --abar-h: 40px;
+    }
+    .kz-afind {
+      height: 32px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-variant-ligatures: none;
+      font-size: 0.8125rem;
+    }
+    .kz-afind__t {
+      font-weight: 400;
+    }
+    .kz-abar .kz-abtn {
+      width: 36px;
+      height: 36px;
+    }
+    .kz-aacct {
+      min-height: 36px;
+      gap: 8px;
+    }
+    .kz-aacct__plate {
+      width: 28px;
+      height: 28px;
+      font-size: 0.75rem;
+    }
+    .kz-aacct__name {
+      font-size: 0.8125rem;
     }
     .kz-amain {
       padding: 28px 32px 64px;
@@ -880,6 +916,20 @@
     }
     .kz-adm[data-aside='collapsed'] .kz-aside__toggle .kz-icon {
       rotate: 180deg;
+    }
+  }
+  @media (min-width: 1024px) and (pointer: coarse) {
+    .kz-adm {
+      --abar-h: 48px;
+    }
+    .kz-afind {
+      height: 44px;
+    }
+    .kz-abar .kz-abtn,
+    .kz-aacct {
+      width: auto;
+      min-width: 44px;
+      height: 44px;
     }
   }
 }

@@ -1,6 +1,9 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { ProjectForm } from '../../../components/admin/ProjectsAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import EmptyState from '../../../ui/primitives/EmptyState.astro';
+import { ProjectForm } from '../../../ui/admin/projects/ProjectForm';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { formOptions } from '../../../server/modules/projects';
 
@@ -24,24 +27,15 @@ const initial = {
 ---
 
 <AdminLayout title="New project" page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/projects" class="hover:text-ink-950 hover:underline">
-      Projects
-    </a>{' '}
-    / <span class="text-ink-950">New</span>
-  </nav>
-  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">New project</h1>
+  <PageHead title="New project" crumbs={[{ label: 'Projects', href: '/admin/projects' }, { label: 'New' }]} />
   {opts.clients.length === 0 ? (
-    <div class="max-w-xl rounded-lg border border-line bg-surface p-6">
-      <p class="font-semibold">Add a client first</p>
-      <p class="mt-1 text-sm text-ink-600">Projects are run for a client record.</p>
-      <a href="/admin/clients/new" class="mt-4 inline-flex text-sm font-semibold text-brand-600 hover:underline">
+    <EmptyState code="0 clients" title="Add a client first">
+      Projects are run for a client record.
+      <Button slot="action" href="/admin/clients/new" lead="add">
         New client
-      </a>
-    </div>
+      </Button>
+    </EmptyState>
   ) : (
-    <div class="max-w-3xl">
-      <ProjectForm client:load initial={initial} {...opts} />
-    </div>
+    <ProjectForm client:load initial={initial} {...opts} />
   )}
 </AdminLayout>

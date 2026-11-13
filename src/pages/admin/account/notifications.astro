@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { NotificationPrefsForm } from '../../../components/admin/SettingsAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import { NotificationPrefsForm } from '../../../ui/admin/settings/NotificationPrefsForm';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { notificationPreferences } from '../../../server/modules/settings';
 
@@ -11,11 +12,12 @@ const prefs = await notificationPreferences(ctx);
 ---
 
 <AdminLayout title="Notification preferences" page={page}>
-  <h1 class="text-2xl font-bold tracking-display">Notification preferences</h1>
-  <p class="mt-1 text-sm text-ink-600">
-    Choose how you hear about each event. You only receive notifications for areas your role can see.
-  </p>
-  <div class="mt-6 max-w-3xl">
+  <PageHead
+    title="Notification preferences"
+    meta="Choose how you hear about each event. You only receive notifications for areas your role can see."
+    crumbs={[{ label: 'Notifications', href: '/admin/notifications' }, { label: 'Preferences' }]}
+  />
+  <div class="kz-aset__main">
     <NotificationPrefsForm client:load prefs={prefs.map((p) => ({ ...p }))} />
   </div>
 </AdminLayout>

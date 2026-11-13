@@ -1,6 +1,10 @@
 ---
+/** Notifications (R6.2 group 3): all / unread view switch, rows with a gold unread mark and mono times, mark-as-read actions. */
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import { MarkAllReadButton, MarkReadButton } from '../../components/admin/AccountActions';
+import PageHead from '../../ui/admin/PageHead.astro';
+import Pane from '../../ui/admin/Pane.astro';
+import Views from '../../ui/admin/Views.astro';
+import { MarkAllReadButton, MarkReadButton } from '../../ui/admin/account/AccountActions';
 import { loadAdminPage } from '../../server/lib/admin-page';
 import { listNotifications } from '../../server/modules/notifications';
 import { notificationLabel } from '../../shared/notifications';
@@ -14,67 +18,57 @@ const fmt = (iso: string) =>
   new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
     new Date(iso),
   );
-const tab = (active: boolean) =>
-  [
-    'rounded-md px-3 py-1.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600',
-    active ? 'bg-ink-950 text-white' : 'text-ink-800 hover:bg-ink-950/5',
-  ].join(' ');
 ---
 
 <AdminLayout title="Notifications" page={page}>
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold tracking-display">Notifications</h1>
-      <p class="mt-1 text-sm text-ink-600">
-        {unread} unread · showing the latest {items.length}
-        {' · '}
-        <a href="/admin/account/notifications" class="underline underline-offset-2 hover:text-ink-950">
-          Preferences
-        </a>
-      </p>
-    </div>
-    {unread > 0 ? <MarkAllReadButton client:load /> : null}
+  <PageHead title="Notifications">
+    <Fragment slot="meta">
+      {unread} unread · showing the latest {items.length} · <a href="/admin/account/notifications">Preferences</a>
+    </Fragment>
+    <Fragment slot="actions">{unread > 0 ? <MarkAllReadButton client:load /> : null}</Fragment>
+  </PageHead>
+  <div class="kz-atools">
+    <Views
+      label="Filter notifications"
+      current={unreadOnly ? 'unread' : 'all'}
+      items={[
+        { key: 'all', label: 'All', href: '/admin/notifications' },
+        { key: 'unread', label: `Unread (${unread})`, href: '/admin/notifications?filter=unread' },
+      ]}
+    />
   </div>
-  <nav aria-label="Filter notifications" class="mt-5 flex gap-1">
-    <a href="/admin/notifications" class={tab(!unreadOnly)} aria-current={!unreadOnly ? 'page' : undefined}>
-      All
-    </a>
-    <a href="/admin/notifications?filter=unread" class={tab(unreadOnly)} aria-current={unreadOnly ? 'page' : undefined}>
-      Unread ({unread})
-    </a>
-  </nav>
-  {items.length === 0 ? (
-    <p class="mt-6 rounded-lg border border-line bg-surface p-6 text-ink-600">
-      {unreadOnly ? 'You have read everything.' : 'You have no notifications yet.'}
-    </p>
-  ) : (
-    <ul class="mt-4 divide-y divide-line rounded-lg border border-line bg-surface">
-      {items.map((n) => (
-        <li class="flex gap-3 px-5 py-4" data-notification={n.id}>
-          <span
-            class:list={['mt-2 h-2 w-2 shrink-0 rounded-full', n.readAt ? 'bg-transparent' : 'bg-brand-600']}
-            aria-hidden="true"
-          />
-          <div class="min-w-0 flex-1">
-            <p class="text-[12px] font-medium uppercase tracking-wide text-ink-600">{notificationLabel(n.type)}</p>
-            {n.link ? (
-              <a href={n.link} class="font-semibold text-ink-950 hover:underline">
-                {n.title}
-              </a>
-            ) : (
-              <p class="font-semibold text-ink-950">{n.title}</p>
-            )}
-            {n.readAt ? null : <span class="sr-only"> (unread)</span>}
-            {n.body ? <p class="mt-0.5 text-sm text-ink-600">{n.body}</p> : null}
-            <p class="mt-0.5 text-[12px] text-ink-600">{fmt(n.createdAt)}</p>
-          </div>
-          {n.readAt ? null : (
-            <div class="shrink-0 self-center">
-              <MarkReadButton client:visible id={n.id} title={n.title} />
+  <Pane title={unreadOnly ? 'Unread' : 'Latest'} id="notes-h" flush meta={String(items.length)}>
+    {items.length === 0 ? (
+      <p class="kz-anone">
+        <span class="kz-anone__code">0 notifications</span>
+        {unreadOnly ? 'You have read everything.' : 'You have no notifications yet.'}
+      </p>
+    ) : (
+      <ul class="kz-anrows" role="list">
+        {items.map((n) => (
+          <li class:list={['kz-anrow', !n.readAt && 'is-unread']} data-notification={n.id}>
+            <span class="kz-anrow__dot" aria-hidden="true" />
+            <div class="kz-anrow__main">
+              <span class="kz-anrow__k">{notificationLabel(n.type)}</span>
+              {n.link ? (
+                <a href={n.link} class="kz-anrow__t">
+                  {n.title}
+                </a>
+              ) : (
+                <span class="kz-anrow__t">{n.title}</span>
+              )}
+              {n.readAt ? null : <span class="sr-only"> (unread)</span>}
+              {n.body ? <span class="kz-anrow__b">{n.body}</span> : null}
+              <span class="kz-anrow__w">{fmt(n.createdAt)}</span>
             </div>
-          )}
-        </li>
-      ))}
-    </ul>
-  )}
+            {n.readAt ? null : (
+              <div class="kz-anrow__act">
+                <MarkReadButton client:visible id={n.id} title={n.title} />
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    )}
+  </Pane>
 </AdminLayout>

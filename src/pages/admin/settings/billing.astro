@@ -1,8 +1,12 @@
 ---
+/** Settings, billing and taxes (R6.2 group 3): logo, billing sections, currencies, tax rates. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import SettingsNav from '../../../components/admin/SettingsNav.astro';
-import SettingsSections from '../../../components/admin/SettingsSections.astro';
-import { CurrencyToggle, LogoUploader, NewTaxRateForm, TaxRateRow } from '../../../components/admin/SettingsAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Pane from '../../../ui/admin/Pane.astro';
+import SettingsNav from '../../../ui/admin/settings/SettingsNav.astro';
+import SettingsSections from '../../../ui/admin/settings/SettingsSections.astro';
+import { LogoUploader } from '../../../ui/admin/settings/LogoUploader';
+import { CurrencyToggle, NewTaxRateForm, TaxRateRow } from '../../../ui/admin/settings/SettingsParts';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { currentLogo, listCurrencies, listTaxRates, settingsPage } from '../../../server/modules/settings';
 import { formatBpAsPercent } from '../../../shared/money';
@@ -20,65 +24,73 @@ const canEdit = page.auth.permissions.has('settings.manage');
 ---
 
 <AdminLayout title="Billing settings" page={page}>
-  <SettingsNav current="billing" canExport={page.auth.permissions.has('data.export')} />
-  <div class="mt-6 flex max-w-4xl flex-col gap-6">
-    <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="logo-title">
-      <h2 id="logo-title" class="font-sans text-base font-semibold">
-        Logo
-      </h2>
-      <p class="mt-1 mb-5 text-sm text-ink-600">Printed on quotations, invoices and receipts.</p>
-      <LogoUploader client:visible current={logo} canEdit={canEdit} />
-    </section>
-    <SettingsSections sections={sections} canEdit={canEdit} />
-    <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="cur-title">
-      <h2 id="cur-title" class="font-sans text-base font-semibold">
-        Currencies
-      </h2>
-      <p class="mt-1 text-sm text-ink-600">
-        Active currencies can be used on quotations and invoices. The default is preselected.
-      </p>
-      <ul class="mt-4 divide-y divide-line">
-        {currencies.map((c) => (
-          <li class="flex flex-wrap items-center justify-between gap-3 py-3">
-            <span class="text-sm">
-              <span class="font-semibold text-ink-950">{c.code}</span> · {c.name} ({c.symbol})
-            </span>
-            <CurrencyToggle client:visible code={c.code} active={c.active} isDefault={c.isDefault} canEdit={canEdit} />
-          </li>
-        ))}
-      </ul>
-    </section>
-    <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="tax-title">
-      <h2 id="tax-title" class="font-sans text-base font-semibold">
-        Tax rates
-      </h2>
-      <p class="mt-1 text-sm text-ink-600">
-        Confirm the current ZIMRA rate and your registration status before turning a tax on.
-      </p>
-      <ul class="mt-4 divide-y divide-line">
-        {taxes.map((t) => (
-          <li class="flex flex-wrap items-center justify-between gap-3 py-3">
-            <span class="text-sm">
-              <span class="font-semibold text-ink-950">{t.name}</span> · {formatBpAsPercent(t.rateBp)}
-              {t.inclusive ? ' (included in prices)' : ''}
-              {t.used ? <span class="ml-2 text-[12px] text-ink-600">Used on documents</span> : null}
-            </span>
-            <TaxRateRow
-              client:visible
-              id={t.id}
-              name={t.name}
-              active={t.active}
-              isDefault={t.isDefault}
-              canEdit={canEdit}
-            />
-          </li>
-        ))}
-      </ul>
-      {canEdit ? (
-        <div class="mt-5 border-t border-line pt-5">
-          <NewTaxRateForm client:visible />
+  <PageHead title="Settings" meta="Billing and taxes" />
+  <div class="kz-aset">
+    <SettingsNav current="billing" canExport={page.auth.permissions.has('data.export')} />
+    <div class="kz-aset__main">
+      <Pane title="Logo" id="logo-title">
+        <p class="kz-hint">Printed on quotations, invoices and receipts.</p>
+        <div class="kz-agap">
+          <LogoUploader client:visible current={logo} canEdit={canEdit} />
         </div>
-      ) : null}
-    </section>
+      </Pane>
+      <SettingsSections sections={sections} canEdit={canEdit} />
+      <Pane title="Currencies" id="cur-title" flush meta={String(currencies.length)}>
+        <p class="kz-apad kz-hint">
+          Active currencies can be used on quotations and invoices. The default is preselected.
+        </p>
+        <ul class="kz-alist">
+          {currencies.map((c) => (
+            <li>
+              <div class="kz-alist__main">
+                <span class="kz-alist__t">{c.code}</span>
+                <span class="kz-alist__m">
+                  {c.name} ({c.symbol})
+                </span>
+              </div>
+              <CurrencyToggle
+                client:visible
+                code={c.code}
+                active={c.active}
+                isDefault={c.isDefault}
+                canEdit={canEdit}
+              />
+            </li>
+          ))}
+        </ul>
+      </Pane>
+      <Pane title="Tax rates" id="tax-title" flush meta={String(taxes.length)}>
+        <p class="kz-apad kz-hint">
+          Confirm the current ZIMRA rate and your registration status before turning a tax on.
+        </p>
+        <ul class="kz-alist">
+          {taxes.map((t) => (
+            <li>
+              <div class="kz-alist__main">
+                <span class="kz-alist__t">{t.name}</span>
+                <span class="kz-alist__m">
+                  <span class="kz-amono">{formatBpAsPercent(t.rateBp)}</span>
+                  {t.inclusive ? ' (included in prices)' : ''}
+                  {t.used ? ' · Used on documents' : ''}
+                </span>
+              </div>
+              <TaxRateRow
+                client:visible
+                id={t.id}
+                name={t.name}
+                active={t.active}
+                isDefault={t.isDefault}
+                canEdit={canEdit}
+              />
+            </li>
+          ))}
+        </ul>
+        {canEdit ? (
+          <div class="kz-apad kz-apad--b kz-asub">
+            <NewTaxRateForm client:visible />
+          </div>
+        ) : null}
+      </Pane>
+    </div>
   </div>
 </AdminLayout>

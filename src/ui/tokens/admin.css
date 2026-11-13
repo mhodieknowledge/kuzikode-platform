@@ -3199,3 +3199,822 @@
     overflow-wrap: anywhere;
   }
 }
+@layer components {
+  /* ---------- Delivery and administration group (R6.2 group 3) ---------- */
+
+  /* Progress bar: label + mono percentage over a hairline track. */
+  .kz-aprog {
+    display: grid;
+    gap: 6px;
+    max-width: 520px;
+  }
+  .kz-aprog__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 0.875rem;
+    color: var(--ink-600);
+  }
+  .kz-aprog__pct {
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--ink-900);
+  }
+  .kz-aprog__bar {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--bone-200);
+    overflow: hidden;
+  }
+  .kz-aprog__bar > i {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+    background: var(--night-900);
+  }
+  .kz-aprog--sm {
+    gap: 4px;
+    max-width: 120px;
+  }
+  .kz-aprog--sm .kz-aprog__row {
+    font-size: 0.8125rem;
+    color: var(--ink-900);
+  }
+
+  /* Four-column task board (to do / in progress / review / done). */
+  @media (min-width: 1024px) {
+    .kz-aboard--4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1440px) {
+    .kz-aboard--4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .kz-aboard__ctl {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    position: relative;
+    z-index: 1;
+  }
+  .kz-aboard__ctl .kz-input {
+    flex: 1 1 130px;
+    min-height: 36px;
+    padding: 4px 8px;
+    font-size: 0.875rem;
+  }
+  @media (pointer: coarse) {
+    .kz-aboard__ctl .kz-input {
+      min-height: 44px;
+    }
+  }
+  .kz-aboard__card.is-static::after {
+    content: none;
+  }
+
+  /* Inline status select in list rows (milestones, tasks). */
+  .kz-ainline {
+    min-width: 150px;
+    min-height: 36px;
+    padding: 4px 28px 4px 8px;
+    font-size: 0.875rem;
+    max-width: 100%;
+  }
+  @media (pointer: coarse) {
+    .kz-ainline {
+      min-height: 44px;
+    }
+  }
+
+  /* Conversation: bubbles by author, mono timestamps. */
+  .kz-athread {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .kz-amsg {
+    display: grid;
+    gap: 6px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--paper);
+    box-shadow: 0 0 0 1px var(--bone-200);
+    min-width: 0;
+  }
+  .kz-amsg[data-who='staff'] {
+    background: var(--bone-50);
+  }
+  .kz-amsg[data-who='note'] {
+    background: var(--warn-50);
+    box-shadow: inset 3px 0 0 var(--warn-600);
+  }
+  .kz-amsg__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+  }
+  .kz-amsg__who {
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .kz-amsg__t {
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.75rem;
+    color: var(--ink-600);
+  }
+  .kz-amsg__tag {
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.75rem;
+    color: var(--ink-700);
+  }
+  .kz-amsg__body {
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+    color: var(--ink-900);
+  }
+  .kz-amsg__files {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.8125rem;
+  }
+  .kz-amsg__files li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Time: running timer band and start form. */
+  .kz-atimer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 16px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: var(--bone-100);
+    box-shadow:
+      inset 3px 0 0 var(--gold-400),
+      0 0 0 1px var(--bone-200);
+  }
+  .kz-atimer__t {
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .kz-atimer__t span {
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+  .kz-atimer__m {
+    font-size: 0.875rem;
+    color: var(--ink-700);
+    overflow-wrap: anywhere;
+  }
+  .kz-atimer__btns {
+    display: flex;
+    gap: 8px;
+  }
+  .kz-aform4 {
+    display: grid;
+    gap: 12px;
+    align-items: end;
+  }
+  @media (min-width: 768px) {
+    .kz-aform4 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1280px) {
+    .kz-aform4 {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.4fr) auto;
+    }
+  }
+  .kz-aform3 {
+    display: grid;
+    gap: 12px;
+  }
+  @media (min-width: 560px) {
+    .kz-aform3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .kz-amin {
+    min-width: 0;
+  }
+  .kz-adt-sheet {
+    min-width: 760px;
+  }
+
+  /* Role / permission checklists with a description under each name. */
+  .kz-acheck.has-d {
+    align-items: flex-start;
+    padding-block: 8px;
+  }
+  .kz-acheck.has-d input {
+    margin-top: 2px;
+  }
+  .kz-acheck__d {
+    display: block;
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+    overflow-wrap: anywhere;
+  }
+  .kz-acheck__k {
+    display: block;
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.75rem;
+    color: var(--ink-600);
+  }
+  .kz-alegend {
+    margin: 0 0 4px;
+    padding: 0;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .kz-aperm {
+    max-height: 50vh;
+    overflow-y: auto;
+    padding: 12px 14px;
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 1px var(--bone-200);
+  }
+  .kz-aperm fieldset {
+    margin: 0 0 14px;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+  .kz-aperm legend {
+    padding: 0;
+    margin-bottom: 2px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-stretch: condensed;
+    color: var(--ink-600);
+  }
+
+  /* Role cards (roles page) and the permission matrix. */
+  .kz-aroles {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 768px) {
+    .kz-aroles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1280px) {
+    .kz-aroles {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .kz-arole {
+    display: grid;
+    gap: 6px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: var(--paper);
+    box-shadow: 0 0 0 1px var(--bone-200);
+    align-content: start;
+  }
+  .kz-arole__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .kz-arole__name {
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .kz-arole__meta {
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.75rem;
+    color: var(--ink-600);
+  }
+  .kz-arole__d {
+    font-size: 0.875rem;
+    color: var(--ink-700);
+  }
+  .kz-amatrix {
+    min-width: 640px;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+  }
+  .kz-amatrix th,
+  .kz-amatrix td {
+    padding: 8px 12px;
+    text-align: left;
+    border-top: 1px solid var(--bone-200);
+    vertical-align: top;
+  }
+  .kz-amatrix thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    border-top: 0;
+    background: var(--bone-100);
+    font-size: 0.75rem;
+    font-weight: 650;
+    color: var(--ink-700);
+    white-space: nowrap;
+    text-align: center;
+  }
+  .kz-amatrix thead th:first-child {
+    text-align: left;
+    min-width: 240px;
+  }
+  .kz-amatrix tbody th[scope='row'] {
+    font-weight: 400;
+    color: var(--ink-900);
+  }
+  .kz-amatrix tbody th[scope='row'] span {
+    display: block;
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.6875rem;
+    color: var(--ink-600);
+  }
+  .kz-amatrix tbody th[scope='colgroup'] {
+    background: var(--bone-50);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-600);
+  }
+  .kz-amatrix td {
+    text-align: center;
+  }
+  .kz-amatrix td .kz-icon {
+    display: inline-block;
+  }
+  .kz-amatrix .is-yes {
+    color: var(--ok-700);
+  }
+  .kz-amatrix .is-no {
+    color: var(--ink-400, var(--ink-500));
+  }
+
+  /* Settings: section nav (side list from 1024 px, select on phones) and per-section footer. */
+  .kz-aset {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+  }
+  @media (min-width: 1024px) {
+    .kz-aset {
+      grid-template-columns: 200px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+  }
+  .kz-asetnav {
+    min-width: 0;
+  }
+  .kz-asetnav__list {
+    display: none;
+  }
+  .kz-asetnav__list ul {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 1024px) {
+    .kz-asetnav {
+      position: sticky;
+      top: 64px;
+    }
+    .kz-asetnav__list {
+      display: block;
+    }
+    .kz-asetnav__views {
+      display: none;
+    }
+    .kz-asetnav__list a {
+      display: flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 0 12px;
+      border-radius: 6px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--ink-700);
+      text-decoration: none;
+    }
+    .kz-asetnav__list a:hover {
+      background: var(--bone-100);
+      color: var(--ink-900);
+    }
+    .kz-asetnav__list a[aria-current='page'] {
+      background: var(--night-900);
+      color: var(--bone-50);
+    }
+  }
+  .kz-aset__main {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+    max-width: 1040px;
+  }
+  .kz-afsec__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding-top: 2px;
+  }
+  @media (min-width: 1024px) {
+    .kz-afsec__foot {
+      grid-column: 2;
+    }
+  }
+  .kz-astatus {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ok-700);
+  }
+  .kz-astatus.is-err {
+    color: var(--danger-700);
+  }
+  .kz-arow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--bone-200);
+    min-height: 52px;
+  }
+  .kz-arow:last-child {
+    border-bottom: 0;
+  }
+  .kz-arow__main {
+    min-width: 0;
+    display: grid;
+    gap: 1px;
+  }
+  .kz-arow__t {
+    font-weight: 650;
+    color: var(--ink-900);
+  }
+  .kz-arow__m {
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+  }
+  .kz-aacts-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .kz-anum {
+    display: grid;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--bone-200);
+    align-items: end;
+  }
+  .kz-anum:last-child {
+    border-bottom: 0;
+  }
+  @media (min-width: 768px) {
+    .kz-anum {
+      grid-template-columns: 150px minmax(0, 1fr) 150px auto;
+    }
+  }
+  .kz-anum__k {
+    font-weight: 650;
+    color: var(--ink-900);
+  }
+  .kz-anum__e {
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.75rem;
+    color: var(--ink-600);
+  }
+  .kz-input.is-mono {
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+  }
+  .kz-input[type='color'] {
+    width: 96px;
+    padding: 4px;
+  }
+  .kz-asw {
+    display: grid;
+    gap: 2px;
+  }
+  .kz-asw .kz-acheck {
+    min-height: 40px;
+  }
+  .kz-asw__h {
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+    padding-left: 28px;
+  }
+
+  /* Audit: expandable before / after payloads, notification rows, preference matrix. */
+  .kz-apay summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    cursor: pointer;
+    font-weight: 650;
+    color: var(--link);
+  }
+  @media (pointer: coarse) {
+    .kz-apay summary {
+      min-height: 44px;
+    }
+  }
+  .kz-apay pre {
+    margin: 6px 0 0;
+    max-width: 480px;
+    padding: 8px 10px;
+    overflow-x: auto;
+    border-radius: 6px;
+    background: var(--bone-100);
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.75rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .kz-anrow {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--bone-200);
+  }
+  .kz-anrow:last-child {
+    border-bottom: 0;
+  }
+  .kz-anrow__dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    margin-top: 8px;
+    border-radius: 2px;
+    background: transparent;
+  }
+  .kz-anrow.is-unread .kz-anrow__dot {
+    background: var(--gold-400);
+  }
+  .kz-anrow__main {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+  }
+  .kz-anrow__k {
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.6875rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-600);
+  }
+  .kz-anrow__t {
+    font-weight: 650;
+    color: var(--ink-900);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+  a.kz-anrow__t:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .kz-anrow__b {
+    font-size: 0.875rem;
+    color: var(--ink-700);
+    overflow-wrap: anywhere;
+  }
+  .kz-anrow__w {
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.75rem;
+    color: var(--ink-600);
+  }
+  .kz-anrow__act {
+    flex: none;
+    align-self: center;
+  }
+  .kz-aprefs {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .kz-aprefs > li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px 16px;
+    padding: 6px 16px;
+    border-bottom: 1px solid var(--bone-200);
+  }
+  .kz-aprefs > li:last-child {
+    border-bottom: 0;
+  }
+  .kz-aprefs__l {
+    font-size: 0.9375rem;
+    color: var(--ink-900);
+  }
+  .kz-aprefs__c {
+    display: flex;
+    gap: 20px;
+  }
+  .kz-acodes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 12px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.875rem;
+  }
+  @media (min-width: 640px) {
+    .kz-acodes {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+  .kz-adev {
+    display: grid;
+    gap: 2px;
+  }
+  .kz-adownload {
+    display: grid;
+    gap: 6px;
+    padding: 14px 16px;
+  }
+  .kz-adownload__tables {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.8125rem;
+  }
+  .kz-adownload__tables a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    color: var(--link);
+  }
+  @media (pointer: coarse) {
+    .kz-adownload__tables a {
+      min-height: 44px;
+    }
+  }
+}
+@layer components {
+  /* Heading above a standalone table or list (outside a pane). */
+  .kz-ashead {
+    margin: 0 0 8px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .kz-ashead__m {
+    margin-left: 8px;
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--ink-600);
+  }
+  .kz-asect {
+    display: grid;
+    gap: 24px;
+    min-width: 0;
+  }
+  /* Timesheet grid: scrolls inside its own box, first column stays put. */
+  .kz-rt--week th:first-child,
+  .kz-rt--week td:first-child {
+    position: sticky;
+    left: 0;
+    background: var(--paper);
+    z-index: 1;
+  }
+  .kz-rt--week thead th:first-child {
+    z-index: 2;
+  }
+  .kz-rt--week tbody th:first-child,
+  .kz-rt--week tfoot th:first-child {
+    min-width: 160px;
+    max-width: 240px;
+  }
+  .kz-rt--week {
+    min-width: 760px;
+  }
+  .kz-atools .kz-aperiod {
+    width: 100%;
+  }
+  .kz-atools .kz-aperiod .kz-field {
+    max-width: 260px;
+  }
+}
+@layer components {
+  .kz-acheck__n {
+    display: block;
+    cursor: pointer;
+    font-size: 0.9375rem;
+    color: var(--ink-900);
+  }
+  .kz-acheck.has-d > div {
+    min-width: 0;
+  }
+}
+@layer components {
+  .kz-anum__f .kz-input {
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+  }
+}
+@layer components {
+  .kz-anrows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+}
+@layer components {
+  .kz-amwrap {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .kz-amwrap .kz-rscroll {
+    max-width: 100%;
+  }
+}
+@layer components {
+  .kz-alist > li > .kz-arow-acts {
+    flex-wrap: wrap;
+    min-width: 0;
+    max-width: 100%;
+  }
+  @media (max-width: 639px) {
+    .kz-alist > li:has(> .kz-arow-acts) {
+      flex-wrap: wrap;
+    }
+  }
+  a.kz-anrow__t::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .kz-anrow__act {
+    position: relative;
+    z-index: 1;
+  }
+  .kz-acheck.has-d {
+    padding-block: 4px;
+  }
+}
+@layer components {
+  /* sr-only text inside wide tables is absolutely positioned: keep it clipped by the scroll box. */
+  .kz-amwrap,
+  .kz-rscroll {
+    position: relative;
+  }
+}

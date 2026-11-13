@@ -1,6 +1,11 @@
 ---
+/** Signed-in devices (R6.2 group 3): sessions as a dense table → list rows, this device marked, sign out per device and everywhere. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { SessionActions } from '../../../components/admin/AccountActions';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import DataTable from '../../../ui/admin/DataTable.astro';
+import Cell from '../../../ui/admin/Cell.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import { SignOutDevice, SignOutEverywhere } from '../../../ui/admin/account/AccountActions';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { listSessions } from '../../../server/modules/auth/service';
 import { deviceLabel, harareDateTime } from '../../../shared/devices';
@@ -9,60 +14,59 @@ const { ctx } = Astro.locals;
 const page = await loadAdminPage(ctx, Astro.request);
 if (page instanceof Response) return page;
 const sessions = await listSessions(ctx, page.auth);
-const fmt = harareDateTime;
-const device = deviceLabel;
 ---
 
 <AdminLayout title="Signed-in devices" page={page}>
-  <h1 class="text-2xl font-bold tracking-display">Signed-in devices</h1>
-  <p class="mt-1 text-sm text-ink-600">
-    Sessions end after 12 hours, or after 2 hours without activity. Sign out any you don't recognise.
-  </p>
-  <div class="mt-6 relative overflow-x-auto rounded-lg border border-line bg-surface">
-    <table class="w-full text-left text-sm">
-      <caption class="sr-only">Active sessions</caption>
-      <thead class="bg-canvas text-[13px] text-ink-600">
+  <PageHead
+    title="Signed-in devices"
+    meta="Sessions end after 12 hours, or after 2 hours without activity. Sign out any you don't recognise."
+    crumbs={[{ label: 'Security', href: '/admin/account/security' }, { label: 'Devices' }]}
+  >
+    <Fragment slot="actions">
+      <SignOutEverywhere client:visible />
+    </Fragment>
+  </PageHead>
+  <DataTable
+    caption="Active sessions"
+    count={sessions.length}
+    columns={[
+      { label: 'Device' },
+      { label: 'IP address' },
+      { label: 'Signed in' },
+      { label: 'Last active' },
+      { label: 'Actions' },
+    ]}
+  >
+    {sessions.map((s) => {
+      const label = deviceLabel(s.userAgent);
+      return (
         <tr>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Device
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            IP address
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Signed in
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Last active
-          </th>
-          <th scope="col" class="px-4 py-3">
-            <span class="sr-only">Actions</span>
-          </th>
+          <Cell m="main">
+            <span class="kz-dt__strong">{label}</span>
+            {s.current ? (
+              <StatusPill tone="lit" class="kz-pill--xs">
+                This device
+              </StatusPill>
+            ) : null}
+            <span class="kz-dt__ph">
+              <span class="kz-dt__sub">{s.ip ?? '—'}</span>
+            </span>
+          </Cell>
+          <Cell tone="mute">
+            <span class="kz-amono">{s.ip ?? '—'}</span>
+          </Cell>
+          <Cell tone="mute" class="kz-dt__nw">
+            {harareDateTime(s.createdAt)}
+          </Cell>
+          <Cell m="meta" tone="mute" class="kz-dt__nw">
+            <span class="kz-dt__ph">Active </span>
+            {harareDateTime(s.lastSeenAt)}
+          </Cell>
+          <Cell m="acts" class="kz-dt__acts">
+            {s.current ? null : <SignOutDevice client:visible sessionId={s.id} device={label} />}
+          </Cell>
         </tr>
-      </thead>
-      <tbody>
-        {sessions.map((s) => (
-          <tr class="border-t border-line">
-            <td class="px-4 py-3 font-medium text-ink-950">
-              {device(s.userAgent)}
-              {s.current ? (
-                <span class="ml-2 rounded-full bg-success-50 px-2 py-0.5 text-[12px] font-semibold text-success-700">
-                  This device
-                </span>
-              ) : null}
-            </td>
-            <td class="px-4 py-3 text-ink-800">{s.ip ?? '—'}</td>
-            <td class="px-4 py-3 text-ink-800">{fmt(s.createdAt)}</td>
-            <td class="px-4 py-3 text-ink-800">{fmt(s.lastSeenAt)}</td>
-            <td class="px-4 py-3 text-right">
-              {s.current ? null : <SessionActions client:visible sessionId={s.id} />}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-  <div class="mt-6">
-    <SessionActions client:visible />
-  </div>
+      );
+    })}
+  </DataTable>
 </AdminLayout>

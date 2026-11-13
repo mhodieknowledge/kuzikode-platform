@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import { ProjectForm } from '../../../../components/admin/ProjectsAdmin';
+import PageHead from '../../../../ui/admin/PageHead.astro';
+import { ProjectForm } from '../../../../ui/admin/projects/ProjectForm';
 import { loadAdminPage } from '../../../../server/lib/admin-page';
 import { AppError } from '../../../../server/lib/errors';
 import { formOptions, getProject } from '../../../../server/modules/projects';
@@ -41,18 +42,13 @@ const initial = {
 ---
 
 <AdminLayout title={`Edit ${p.name}`} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/projects" class="hover:text-ink-950 hover:underline">
-      Projects
-    </a>{' '}
-    /
-    <a href={`/admin/projects/${p.id}`} class="hover:text-ink-950 hover:underline">
-      {p.reference}
-    </a>{' '}
-    /<span class="text-ink-950">Edit</span>
-  </nav>
-  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">Edit project</h1>
-  <div class="max-w-3xl">
-    <ProjectForm client:load id={p.id} initial={initial} {...opts} />
-  </div>
+  <PageHead
+    title="Edit project"
+    crumbs={[
+      { label: 'Projects', href: '/admin/projects' },
+      { label: p.reference, href: `/admin/projects/${p.id}` },
+      { label: 'Edit' },
+    ]}
+  />
+  <ProjectForm client:load id={p.id} initial={initial} {...opts} />
 </AdminLayout>

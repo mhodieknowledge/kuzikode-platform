@@ -1,6 +1,15 @@
 ---
+/** Staff users (R6.2 group 3): filters (sheet on phones), dense table → list rows, invite as a head action. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { InviteStaffButton } from '../../../components/admin/UsersAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import DataTable from '../../../ui/admin/DataTable.astro';
+import Cell from '../../../ui/admin/Cell.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import EmptyState from '../../../ui/primitives/EmptyState.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import { FilterBar } from '../../../ui/admin/FilterBar';
+import { InviteStaffButton } from '../../../ui/admin/users/InviteStaff';
+import { dayOrNever, roleNames, STAFF_STATUS_LABEL, STAFF_STATUS_TONE } from '../../../ui/admin/users/labels';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { listRoles, listStaff } from '../../../server/modules/users';
 import { staffListQuery } from '../../../shared/schemas/users';
@@ -12,120 +21,74 @@ const parsed = staffListQuery.safeParse(Object.fromEntries(Astro.url.searchParam
 const filter = parsed.success ? parsed.data : {};
 const [staff, roles] = await Promise.all([listStaff(ctx, filter), listRoles(ctx)]);
 const canManage = page.auth.permissions.has('users.manage');
-const roleName = new Map(roles.map((r) => [r.key, r.name]));
+const names = new Map(roles.map((r) => [r.key, r.name]));
 const assignable = roles
   .filter((r) => r.key !== 'super_admin' || page.auth.roles.includes('super_admin'))
   .map((r) => ({ key: r.key, name: r.name, description: r.description }));
-const statusLabel = { invited: 'Invited', active: 'Active', disabled: 'Disabled' } as const;
-const statusTone = {
-  invited: 'bg-warning-50 text-warning-700',
-  active: 'bg-success-50 text-success-700',
-  disabled: 'bg-ink-950/5 text-ink-600',
-} as const;
-const fmt = (iso: string | null) =>
-  iso
-    ? new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeZone: 'Africa/Harare' }).format(new Date(iso))
-    : 'Never';
-const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
+const filtered = !!(filter.q || filter.status || filter.role);
 ---
 
 <AdminLayout title="Users" page={page}>
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold tracking-display">Users</h1>
-      <p class="mt-1 text-sm text-ink-600">
-        Kuzikode staff accounts.{' '}
-        <a href="/admin/users/roles" class="font-semibold text-brand-600">
-          Roles and permissions
-        </a>
-      </p>
-    </div>
-    {canManage ? <InviteStaffButton client:idle roles={assignable} /> : null}
+  <PageHead title="Users" meta={`Kuzikode staff accounts · ${staff.length} shown`}>
+    <Fragment slot="actions">
+      <Button href="/admin/users/roles" variant="secondary" lead="settings">
+        Roles and permissions
+      </Button>
+      {canManage ? <InviteStaffButton client:load roles={assignable} /> : null}
+    </Fragment>
+  </PageHead>
+  <div class="kz-atools">
+    <FilterBar
+      client:load
+      label="Filter users"
+      clearHref="/admin/users"
+      fields={[
+        { kind: 'search', name: 'q', label: 'Search', value: filter.q ?? '', placeholder: 'Name or email' },
+        {
+          kind: 'select',
+          name: 'status',
+          label: 'Status',
+          value: filter.status ?? '',
+          options: [
+            { value: '', label: 'All' },
+            ...Object.entries(STAFF_STATUS_LABEL).map(([value, label]) => ({ value, label })),
+          ],
+        },
+        {
+          kind: 'select',
+          name: 'role',
+          label: 'Role',
+          value: filter.role ?? '',
+          options: [{ value: '', label: 'All' }, ...roles.map((r) => ({ value: r.key, label: r.name }))],
+        },
+      ]}
+    />
   </div>
-  <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter users">
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Search
-      <input name="q" type="search" value={filter.q ?? ''} maxlength="80" class={field} />
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Status
-      <select name="status" class={field}>
-        <option value="">All</option>
-        {Object.entries(statusLabel).map(([k, v]) => (
-          <option value={k} selected={filter.status === k}>
-            {v}
-          </option>
-        ))}
-      </select>
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Role
-      <select name="role" class={field}>
-        <option value="">All</option>
-        {roles.map((r) => (
-          <option value={r.key} selected={filter.role === r.key}>
-            {r.name}
-          </option>
-        ))}
-      </select>
-    </label>
-    <button
-      type="submit"
-      class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
-    >
-      Filter
-    </button>
-  </form>
-  <div class="mt-6 relative overflow-x-auto rounded-lg border border-line bg-surface">
-    <table class="w-full text-left text-sm">
-      <caption class="sr-only">Staff users</caption>
-      <thead class="bg-canvas text-[13px] text-ink-600">
-        <tr>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Name
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Roles
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Status
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            2FA
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Last sign-in
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {staff.length === 0 ? (
-          <tr>
-            <td colspan="5" class="px-4 py-8 text-center text-ink-600">
-              No users match these filters.
-            </td>
-          </tr>
-        ) : (
-          staff.map((u) => (
-            <tr class="border-t border-line">
-              <td class="px-4 py-3">
-                <a href={`/admin/users/${u.id}`} class="font-semibold text-ink-950 hover:underline">
-                  {u.name}
-                </a>
-                <span class="block text-[13px] text-ink-600">{u.email}</span>
-              </td>
-              <td class="px-4 py-3 text-ink-800">{u.roles.map((r) => roleName.get(r) ?? r).join(', ') || '—'}</td>
-              <td class="px-4 py-3">
-                <span class:list={['rounded-full px-2 py-0.5 text-[12px] font-semibold', statusTone[u.status]]}>
-                  {statusLabel[u.status]}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-ink-800">{u.mfaEnabled ? 'On' : 'Off'}</td>
-              <td class="px-4 py-3 text-ink-800">{fmt(u.lastLoginAt)}</td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-  </div>
+  <DataTable
+    caption="Staff users"
+    count={staff.length}
+    columns={[{ label: 'Name' }, { label: 'Roles' }, { label: 'Status' }, { label: '2FA' }, { label: 'Last sign-in' }]}
+  >
+    <EmptyState
+      slot="empty"
+      code={filtered ? 'no matches' : '0 users'}
+      title={filtered ? 'No users match these filters.' : 'No staff accounts.'}
+    />
+    {staff.map((u) => (
+      <tr>
+        <Cell m="main" href={`/admin/users/${u.id}`} title={u.name} sub={u.email} subText />
+        <Cell m="meta" tone="mute">
+          <span>{roleNames(u.roles, names)}</span>
+        </Cell>
+        <Cell m="status">
+          <StatusPill tone={STAFF_STATUS_TONE[u.status]}>{STAFF_STATUS_LABEL[u.status]}</StatusPill>
+        </Cell>
+        <Cell m="amount" tone="mute">
+          <span class="kz-dt__ph">2FA </span>
+          {u.mfaEnabled ? 'On' : 'Off'}
+        </Cell>
+        <Cell tone="mute">{dayOrNever(u.lastLoginAt)}</Cell>
+      </tr>
+    ))}
+  </DataTable>
 </AdminLayout>

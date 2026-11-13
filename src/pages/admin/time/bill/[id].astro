@@ -1,6 +1,8 @@
 ---
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import { BillTime } from '../../../../components/admin/TimeAdmin';
+import PageHead from '../../../../ui/admin/PageHead.astro';
+import EmptyState from '../../../../ui/primitives/EmptyState.astro';
+import { BillTime } from '../../../../ui/admin/time/BillTime';
 import { loadAdminPage } from '../../../../server/lib/admin-page';
 import { AppError } from '../../../../server/lib/errors';
 import { entryAmountMinor, projectTime } from '../../../../server/modules/timetracking';
@@ -30,44 +32,36 @@ const title = `Bill time · ${project?.reference ?? ''}`;
 ---
 
 <AdminLayout title={title} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/time?tab=billing" class="hover:text-ink-950 hover:underline">
-      Unbilled time
-    </a>{' '}
-    / <span class="text-ink-950">{project?.reference}</span>
-  </nav>
-  <h1 class="mt-2 text-2xl font-bold tracking-display">
-    {project?.reference} · {project?.name}
-  </h1>
-  <p class="mt-1 mb-6 text-sm text-ink-600">
-    {project?.client}. The chosen time goes onto a new draft invoice, one line per entry, which you can review before
-    issuing it.
-  </p>
+  <PageHead
+    title={`${project?.reference ?? ''} · ${project?.name ?? ''}`}
+    meta={`${project?.client ?? ''}. The chosen time goes onto a new draft invoice, one line per entry, which you can review before issuing it.`}
+    crumbs={[{ label: 'Unbilled time', href: '/admin/time?tab=billing' }, { label: project?.reference ?? 'Project' }]}
+  />
   {unbilled.length === 0 ? (
-    <p class="rounded-md border border-line bg-surface p-5 text-sm text-ink-600">
-      There is no unbilled time on this project.
-    </p>
+    <EmptyState code="0 unbilled" title="There is no unbilled time on this project." />
   ) : (
-    currencies.map((cur) => (
-      <section class="mb-8" aria-label={`Unbilled time in ${cur}`}>
-        {currencies.length > 1 ? <h2 class="mb-3 text-lg font-semibold">{cur}</h2> : null}
-        <BillTime
-          client:load
-          projectId={id}
-          entries={unbilled
-            .filter((e) => (e.currency ?? 'USD') === cur)
-            .map((e) => ({
-              id: e.id,
-              entry_date: e.entry_date,
-              user_name: e.user_name,
-              task_title: e.task_title,
-              description: e.description,
-              minutes: e.minutes ?? 0,
-              currency: cur,
-              amountLabel: formatMoney(entryAmountMinor(e.minutes ?? 0, e.rate_minor ?? 0), cur),
-            }))}
-        />
-      </section>
-    ))
+    <div class="kz-asect">
+      {currencies.map((cur) => (
+        <section aria-label={`Unbilled time in ${cur}`}>
+          {currencies.length > 1 ? <h2 class="kz-ashead">{cur}</h2> : null}
+          <BillTime
+            client:load
+            projectId={id}
+            entries={unbilled
+              .filter((e) => (e.currency ?? 'USD') === cur)
+              .map((e) => ({
+                id: e.id,
+                entry_date: e.entry_date,
+                user_name: e.user_name,
+                task_title: e.task_title,
+                description: e.description,
+                minutes: e.minutes ?? 0,
+                currency: cur,
+                amountLabel: formatMoney(entryAmountMinor(e.minutes ?? 0, e.rate_minor ?? 0), cur),
+              }))}
+          />
+        </section>
+      ))}
+    </div>
   )}
 </AdminLayout>

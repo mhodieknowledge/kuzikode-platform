@@ -1244,3 +1244,13 @@ The **Next step** line must be specific enough that a fresh session can continue
   packages, content, media, careers; rebuild `components/ui/RichTextEditor` into `src/ui/`), then Administration (users, settings + SettingsNav/Sections,
   audit, notifications, account `AccountActions.tsx`). Then delete `components/admin/actions.tsx` and the rest of `components/`.
 - 17:33 UTC heartbeat: group 3 (Delivery + Administration) builder running.
+
+## 2026-11-13 18:20 UTC · R6.2 group 3 ✅ Delivery + Administration (projects, time, support, users, settings, audit, notifications, account)
+- New `src/ui/admin/{projects,time,support,users,settings,account}/*`, `PaneBox.tsx`, `CheckWithHelp` in form.tsx, Cell `m="acts"`.
+  Deleted `components/admin/{ProjectsAdmin,TimeAdmin,SupportAdmin,UsersAdmin,SettingsAdmin,AccountActions}.tsx`, `{SettingsNav,SettingsSections}.astro`.
+- verify green (unit 681, integration 308); e2e time, users-admin, settings, security, admin-shell, sweep, full-journey, portal-auth, engagement, invoices green (31).
+- Settings keep a Save per section (settings e2e needs it). Not visually checked with data: populated task board, timesheet, bill page (seed has none) → R8.1.
+- Tiers: builder at session model/medium; orchestrator reviewed screenshots.
+- Next step: R6.2 group 4 Website: Cms (`CmsAdmin.tsx`, `CmsTabs.astro`), content (`ContentAdmin.tsx`, `ContentTabs.astro`), services (`ServicesAdmin.tsx`),
+  packages (`PackagesAdmin.tsx`), careers (`CareersAdmin.tsx`), media pages; rebuild `components/ui/RichTextEditor` in `src/ui/`; delete `components/admin/actions.tsx`
+  and remaining `src/components/` legacy UI (check `components/ui/*` users). Then tick R6.2.

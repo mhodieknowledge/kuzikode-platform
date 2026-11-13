@@ -1,7 +1,12 @@
 ---
+/** Account security (R6.2 group 3): two-factor and password panes, link to signed-in devices. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Pane from '../../../ui/admin/Pane.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
 import { ChangePasswordForm } from '../../../ui/auth/AuthForms';
-import { MfaManage } from '../../../components/admin/AccountActions';
+import { MfaManage } from '../../../ui/admin/account/AccountActions';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 
 const { ctx } = Astro.locals;
@@ -11,44 +16,39 @@ const { mfa } = page.auth;
 ---
 
 <AdminLayout title="Security" page={page}>
-  <h1 class="text-2xl font-bold tracking-display">Security</h1>
-  <div class="mt-6 grid max-w-3xl gap-6">
-    <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="mfa-title">
-      <h2 id="mfa-title" class="font-sans text-base font-semibold">
-        Two-factor authentication
-      </h2>
-      <p class="mt-1 text-sm text-ink-600">
+  <PageHead title="Security">
+    <Fragment slot="actions">
+      <Button href="/admin/account/sessions" variant="secondary" lead="lock">
+        See signed-in devices
+      </Button>
+    </Fragment>
+  </PageHead>
+  <div class="kz-aset__main">
+    <Pane title="Two-factor authentication" id="mfa-title">
+      <div slot="actions">
+        <StatusPill tone={mfa.enabled ? 'ok' : 'warn'}>{mfa.enabled ? 'On' : 'Off'}</StatusPill>
+      </div>
+      <p class="kz-hint">
         {mfa.enabled
-          ? 'On. You enter a code from your authenticator app when you sign in.'
-          : 'Off. Turn it on to protect your account if your password is ever stolen.'}
+          ? 'You enter a code from your authenticator app when you sign in.'
+          : 'Turn it on to protect your account if your password is ever stolen.'}
         {mfa.required ? ' Your role requires it.' : ''}
       </p>
-      <div class="mt-4">
+      <div class="kz-agap">
         {mfa.enabled ? (
           <MfaManage client:visible canDisable={!mfa.required} />
         ) : (
-          <a
-            href="/admin/mfa/setup"
-            class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
-          >
+          <Button href="/admin/mfa/setup" lead="key">
             Set up two-factor authentication
-          </a>
+          </Button>
         )}
       </div>
-    </section>
-    <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="pw-title">
-      <h2 id="pw-title" class="font-sans text-base font-semibold">
-        Change password
-      </h2>
-      <p class="mt-1 text-sm text-ink-600">Changing your password signs out your other sessions.</p>
-      <div class="mt-4 max-w-md">
+    </Pane>
+    <Pane title="Change password" id="pw-title">
+      <p class="kz-hint">Changing your password signs out your other sessions.</p>
+      <div class="kz-agap" style="max-width:420px">
         <ChangePasswordForm client:visible audience="admin" forced={false} />
       </div>
-    </section>
-    <p class="text-sm">
-      <a href="/admin/account/sessions" class="font-semibold text-brand-600 underline underline-offset-2">
-        See signed-in devices
-      </a>
-    </p>
+    </Pane>
   </div>
 </AdminLayout>

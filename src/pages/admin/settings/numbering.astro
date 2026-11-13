@@ -1,7 +1,10 @@
 ---
+/** Settings, numbering (R6.2 group 3): one row per document kind. Admins see it read-only (e2e text contract). */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import SettingsNav from '../../../components/admin/SettingsNav.astro';
-import { NumberingRowForm } from '../../../components/admin/SettingsAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Pane from '../../../ui/admin/Pane.astro';
+import SettingsNav from '../../../ui/admin/settings/SettingsNav.astro';
+import { NumberingRowForm } from '../../../ui/admin/settings/SettingsParts';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { numbering } from '../../../server/modules/settings';
 
@@ -13,30 +16,29 @@ const canEdit = page.auth.permissions.has('numbering.manage');
 ---
 
 <AdminLayout title="Numbering" page={page}>
-  <SettingsNav current="numbering" canExport={page.auth.permissions.has('data.export')} />
-  <section class="mt-6 max-w-5xl rounded-lg border border-line bg-surface p-6" aria-labelledby="num-title">
-    <h2 id="num-title" class="font-sans text-base font-semibold">
-      Document numbers
-    </h2>
-    <p class="mt-1 text-sm text-ink-600">
-      Use <code class="font-mono">{'{YYYY}'}</code> or <code class="font-mono">{'{YY}'}</code> for the year (numbering
-      restarts each year) and
-      <code class="font-mono">{'{SEQ:5}'}</code> for a zero-padded number. The next number can be raised but never
-      lowered, so numbers are never reused.
-      {canEdit ? '' : ' Only a Super Administrator can change numbering.'}
-    </p>
-    <div class="mt-4">
-      {rows.map((r) => (
-        <NumberingRowForm
-          client:visible
-          kind={r.kind}
-          label={r.label}
-          format={r.format}
-          nextValue={r.nextValue}
-          example={r.example}
-          canEdit={canEdit}
-        />
-      ))}
+  <PageHead title="Settings" meta="Numbering" />
+  <div class="kz-aset">
+    <SettingsNav current="numbering" canExport={page.auth.permissions.has('data.export')} />
+    <div class="kz-aset__main">
+      <Pane title="Document numbers" id="num-title" flush>
+        <p class="kz-apad kz-hint">
+          Use <code class="kz-amono">{'{YYYY}'}</code> or <code class="kz-amono">{'{YY}'}</code> for the year (numbering
+          restarts each year) and <code class="kz-amono">{'{SEQ:5}'}</code> for a zero-padded number. The next number
+          can be raised but never lowered, so numbers are never reused.
+          {canEdit ? '' : ' Only a Super Administrator can change numbering.'}
+        </p>
+        {rows.map((r) => (
+          <NumberingRowForm
+            client:visible
+            kind={r.kind}
+            label={r.label}
+            format={r.format}
+            nextValue={r.nextValue}
+            example={r.example}
+            canEdit={canEdit}
+          />
+        ))}
+      </Pane>
     </div>
-  </section>
+  </div>
 </AdminLayout>

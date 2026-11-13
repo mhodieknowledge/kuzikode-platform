@@ -1,14 +1,16 @@
 ---
 /**
- * Workspace support (R5.4, PANEL_DESIGN_SPEC §2): the filter (all / open), the requests window (8) and an "At a glance" window
- * (4) with the counts per state; one emerald action, "New request", in the page head. Empty: a plain mono line in the window.
+ * Workspace support (R5.4, PANEL_DESIGN_SPEC §2 "ticket list + conversation window"). From 1024 px the same 4/8 split as a
+ * request page: the requests window (count as title-bar meta, All / Open as small mono tabs in the title bar) on the left, and
+ * an empty conversation window on the right. Below 1024 px the list window only. One emerald action, "New request", in the
+ * page head; the empty state links to the form as text.
  */
 import PortalLayout from '../../../layouts/PortalLayout.astro';
 import PageHead from '../../../ui/workspace/PageHead.astro';
 import Window from '../../../ui/workspace/Window.astro';
-import FilterNav from '../../../ui/workspace/finance/FilterNav.astro';
 import SupportList from '../../../ui/workspace/support/SupportList.astro';
 import Button from '../../../ui/primitives/Button.astro';
+import Icon from '../../../ui/icons/Icon.astro';
 import { loadPortalPage } from '../../../server/lib/portal-page';
 import { listPortalRequests } from '../../../server/modules/support/portal';
 
@@ -22,12 +24,7 @@ const tabs = [
   { key: 'all', label: 'All', href: '/portal/support' },
   { key: 'open', label: 'Open', href: '/portal/support?show=open' },
 ];
-const count = (pred: (s: string) => boolean) => requests.filter((r) => pred(r.status)).length;
-const glance = [
-  { label: 'Open', value: count((s) => s === 'open') },
-  { label: 'Waiting for your reply', value: count((s) => s === 'awaiting_client') },
-  ...(show === 'all' ? [{ label: 'Resolved or closed', value: count((s) => s === 'resolved' || s === 'closed') }] : []),
-];
+const title = show === 'open' ? 'Open requests' : 'Requests';
 ---
 
 <PortalLayout title="Support" page={page} active="support">
@@ -36,11 +33,17 @@ const glance = [
       New request
     </Button>
   </PageHead>
-  <FilterNav label="Filter requests" items={tabs} current={show} />
 
-  <div class="kz-wgrid">
+  <div class="kz-sview">
     {requests.length === 0 ? (
-      <Window title="Requests" icon="support" id="slist" span={8}>
+      <Window title={title} icon="support" id="slist" class="kz-sview__list">
+        <nav slot="actions" class="kz-wtabs" aria-label="Filter requests">
+          {tabs.map((t) => (
+            <a href={t.href} aria-current={t.key === show ? 'page' : undefined}>
+              {t.label}
+            </a>
+          ))}
+        </nav>
         <div class="kz-wnote">
           <p class="kz-wnote__code">{show === 'open' ? 'no open requests' : 'no requests yet'}</p>
           <p>
@@ -48,27 +51,34 @@ const glance = [
               ? 'You have no open requests.'
               : 'You have not asked for help yet. When you need something, open a request and our team will reply here.'}
           </p>
+          <p>
+            <a class="kz-wnote__go" href="/portal/support/new">
+              Open a request
+              <Icon name="arrow-right" size={16} />
+            </a>
+          </p>
         </div>
       </Window>
     ) : (
-      <Fragment>
-        <SupportList
-          requests={requests}
-          multiClient={multiClient}
-          title={show === 'open' ? 'Open requests' : 'All requests'}
-          span={8}
-        />
-        <Window title="At a glance" icon="activity" id="glance" span={4} class="kz-sglance">
-          <dl class="kz-sglance__list">
-            {glance.map((g) => (
-              <div>
-                <dt>{g.label}</dt>
-                <dd>{g.value}</dd>
-              </div>
-            ))}
-          </dl>
-        </Window>
-      </Fragment>
+      <SupportList requests={requests} multiClient={multiClient} title={title} class="kz-sview__list">
+        <nav slot="actions" class="kz-wtabs" aria-label="Filter requests">
+          {tabs.map((t) => (
+            <a href={t.href} aria-current={t.key === show ? 'page' : undefined}>
+              {t.label}
+            </a>
+          ))}
+        </nav>
+      </SupportList>
     )}
+    <Window title="Conversation" icon="send" id="conversation" class="kz-sview__main">
+      <div class="kz-wnote">
+        <p class="kz-wnote__code">no request selected</p>
+        <p>
+          {requests.length
+            ? 'Choose a request on the left to read the conversation and reply.'
+            : 'Your conversations with the Kuzikode team appear here.'}
+        </p>
+      </div>
+    </Window>
   </div>
 </PortalLayout>

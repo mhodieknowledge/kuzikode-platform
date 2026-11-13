@@ -14,6 +14,7 @@ import { MfaManage } from '../../../ui/workspace/account/MfaManage';
 import { ProfileForm } from '../../../ui/workspace/account/ProfileForm';
 import { SendVerification } from '../../../ui/workspace/account/SendVerification';
 import { loadPortalPage } from '../../../server/lib/portal-page';
+import { deviceLabel, harareDateTime } from '../../../shared/devices';
 
 const { ctx } = Astro.locals;
 const page = await loadPortalPage(ctx, Astro.request);
@@ -24,6 +25,9 @@ const user = await ctx.db
   .first<{ name: string; email: string; phone: string | null; email_verified_at: string | null }>();
 if (!user) return Astro.redirect('/portal/login', 303);
 const { mfa } = page.auth;
+// The current device comes from this request and the loaded session (no extra query).
+const thisDevice = deviceLabel(Astro.request.headers.get('user-agent'));
+const signedInAt = page.auth.session.createdAt;
 ---
 
 <PortalLayout title="Your account" page={page} active="account">
@@ -84,6 +88,12 @@ const { mfa } = page.auth;
 
       <Window title="Devices" icon="smartphone" id="devices">
         <p class="kz-acct__lead">See where you are signed in and sign out any device you don't recognise.</p>
+        <p class="kz-acct__dev">
+          <span class="kz-acct__dev-name">{thisDevice}</span>
+          <span>
+            this device · since <time datetime={signedInAt}>{harareDateTime(signedInAt)}</time>
+          </span>
+        </p>
         <a class="kz-acct__go" href="/portal/account/sessions">
           See signed-in devices
           <span aria-hidden="true">→</span>

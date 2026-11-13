@@ -27,6 +27,7 @@
   .kz-whead__count {
     margin-top: 8px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     color: var(--ink-500);
   }
@@ -166,6 +167,7 @@
   }
   .kz-work__plate span {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
   }
   .kz-work__meta {
@@ -244,6 +246,7 @@
   }
   .kz-case__spec dt {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     color: var(--ink-500);
   }
@@ -291,6 +294,7 @@
   }
   .kz-case__plate span {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
   }
   .kz-case__body {
@@ -332,6 +336,7 @@
   }
   .kz-case__h span {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     font-weight: 500;
     color: var(--ink-500);

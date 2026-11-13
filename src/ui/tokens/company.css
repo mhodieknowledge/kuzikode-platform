@@ -99,6 +99,7 @@
   }
   .kz-ahero__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     font-weight: 700;
     color: var(--kz-div-ink);
@@ -262,6 +263,7 @@
   }
   .kz-vl__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     color: var(--ink-500);
   }
@@ -342,6 +344,7 @@
   }
   .kz-appr__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     font-weight: 700;
     line-height: 1.85;
@@ -507,6 +510,7 @@
   }
   .kz-scope__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     color: var(--ink-500);
   }
@@ -672,6 +676,7 @@
       inset 0 0 0 2px var(--night-900),
       0 0 0 3px var(--bone-50);
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.875rem;
     font-weight: 700;
     color: var(--ink-900);
@@ -762,6 +767,7 @@
   }
   .kz-model__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     color: var(--ink-700);
   }
@@ -890,6 +896,7 @@
   }
   .kz-tools__cat {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     font-weight: 600;
     color: var(--ink-500);
@@ -983,6 +990,7 @@
   }
   .kz-irow__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     font-weight: 700;
     line-height: 1.6;
@@ -1020,6 +1028,7 @@
     padding: 1px 6px;
     border-radius: 4px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     font-weight: 700;
     color: var(--kz-div-ink);
@@ -1160,6 +1169,7 @@
   }
   .kz-ichal__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     font-weight: 700;
     color: var(--clay-ink);
@@ -1215,6 +1225,7 @@
   }
   .kz-isvc__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-weight: 700;
     color: var(--kz-div-ink, var(--ink-500));
   }
@@ -1268,6 +1279,7 @@
   }
   .kz-iidx__legend b {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     color: var(--kz-div-ink);
   }
   .kz-isvc__list.kz-track {
@@ -1350,6 +1362,7 @@
   }
   .kz-isec-areas b {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     color: var(--kz-div-ink);
   }

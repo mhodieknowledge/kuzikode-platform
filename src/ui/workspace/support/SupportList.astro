@@ -24,6 +24,7 @@ const { requests, multiClient, title, current, span = 12, class: className } = A
 ---
 
 <Window title={title} icon="support" meta={String(requests.length)} id="slist" span={span} class={className} flush>
+  <slot name="actions" slot="actions" />
   <ul class="kz-wlist" aria-label="Support requests">
     {requests.map((r) => {
       const at = r.lastMessageAt ?? r.createdAt;

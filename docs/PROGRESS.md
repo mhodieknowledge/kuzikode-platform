@@ -1186,3 +1186,15 @@ The **Next step** line must be specific enough that a fresh session can continue
   `verify-email`, `password`; legacy `components/portal/{PortalAccount.tsx,SupportForms.tsx}` and `components/auth/*` (check admin auth uses them:
   admin auth screens may share; PANEL_DESIGN_SPEC §4 split layout, IMG_5017). Dark theme: cookie-remembered `data-theme` rendered by the server in
   PortalLayout, toggle in the account menu/More sheet; night-900 desk, night-800 windows; check every workspace page for contrast in dark (axe).
+
+## 2026-11-13 10:00 UTC · R5.4 ✅ Support, account, devices, auth screens, dark theme (R5 complete)
+- New `src/layouts/AuthLayout.astro`, `src/ui/auth/*` (useAuthForms + forms, FormAlert, QrCode), `src/ui/workspace/account/*`, `src/ui/workspace/support/*`,
+  `src/ui/workspace/theme.ts` (+ unit test), `src/ui/tokens/auth.css`. All portal + admin auth pages, support, account, sessions, MFA rebuilt; dark theme
+  (cookie `kz_theme`). Deleted `components/auth/AuthForms.tsx`, `components/portal/{PortalAccount,SupportForms}.tsx` (`components/portal/` is now empty
+  of UI). `components/admin/AccountActions.tsx` remains (admin, R6).
+- verify green (unit 555, integration 308); e2e green (QA_REPORT). Boards: support list re-done after review; others PASS.
+- Tiers: build subagent opus/medium (2 rounds); review impeccable-finish-reviewer opus/medium.
+- Next step: R6.1 admin shell (`src/layouts/AdminLayout.astro` → rewrite from scratch on Base: night sidebar 248 px with grouped modules
+  (Overview · Sales · Finance · Delivery · Website · Administration), collapsible to 64 px, bone top bar with search/⌘K (extract logic of
+  `components/admin/CommandPalette.tsx` to a hook), NotificationsBell + UserMenu rebuilt in `src/ui/admin/`; phone: top bar + left sheet;
+  PANEL_DESIGN_SPEC §3, compact density, light only). Keep every admin e2e hook (admin-shell spec, sweep). Then R6.2 module by module.

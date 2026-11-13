@@ -56,6 +56,9 @@
   .kz-auth__sheet {
     display: contents;
   }
+  .kz-auth__head .kz-auth__title {
+    margin-top: 0;
+  }
   .kz-auth__head {
     grid-area: band;
     align-self: end;
@@ -64,15 +67,14 @@
     margin-top: 68px;
     padding: 0 16px 20px;
   }
-  .kz-auth__area {
-    font-family: var(--font-mono);
-    font-variant-ligatures: none;
-    font-size: 0.75rem;
-    letter-spacing: 0.02em;
-    color: var(--gold-400);
+  /* The form window: chrome only from 1024 px; on phones and tablets its children join the page grid. */
+  .kz-auth__win {
+    display: contents;
+  }
+  .kz-auth__bar {
+    display: none;
   }
   .kz-auth__title {
-    margin-top: 6px;
     font-size: 1.75rem;
     font-weight: 700;
     line-height: 1.1;
@@ -154,6 +156,7 @@
     border-radius: 50%;
     box-shadow: inset 0 0 0 1px var(--night-600);
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     color: var(--on-night);
   }
@@ -165,7 +168,7 @@
   }
   .kz-auth__stepx {
     min-height: 2.7em;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     line-height: 1.35;
   }
   .kz-auth__step.is-lit {
@@ -193,7 +196,7 @@
     font-family: var(--font-mono);
     font-variant-ligatures: none;
     font-size: 0.8125rem;
-    color: var(--on-night-2);
+    color: var(--on-night);
   }
 
   /* Forms */
@@ -224,6 +227,7 @@
   .kz-authform__code .kz-input {
     max-width: 16rem;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 1.25rem;
     letter-spacing: 0.16em;
   }
@@ -307,6 +311,7 @@
     background: var(--bone-50);
     box-shadow: inset 0 0 0 1px var(--bone-200);
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.9375rem;
     color: var(--ink-900);
   }
@@ -339,6 +344,7 @@
     border-radius: 50%;
     background: var(--night-900);
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     color: var(--on-night);
   }
@@ -359,6 +365,7 @@
     background: var(--bone-50);
     box-shadow: inset 0 0 0 1px var(--bone-200);
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     color: var(--ink-900);
     word-break: break-all;
   }
@@ -404,18 +411,24 @@
       top: 12px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
       gap: 40px;
       height: calc(100dvh - 24px);
       min-height: 560px;
       padding: 36px 40px 40px;
       border-radius: 16px;
     }
+    /* The line + step cards sit a little above the middle of the panel; the admin staff line at its foot. */
     .kz-auth__story {
       display: block;
+      margin-block: auto;
+      padding-bottom: 6vh;
     }
     .kz-auth__staff {
       display: flex;
+      margin-top: auto;
+    }
+    .kz-authbody {
+      background: var(--bone-100);
     }
     .kz-auth__sheet {
       grid-area: sheet;
@@ -424,9 +437,30 @@
       justify-content: center;
       padding: 56px 40px;
     }
-    .kz-auth__sheet > * {
-      width: min(100%, 26rem);
+    .kz-auth__win {
+      display: block;
+      width: min(100%, 30rem);
       margin-inline: auto;
+      padding-bottom: 32px;
+      border-radius: 12px;
+      background: var(--paper);
+      box-shadow:
+        0 0 0 1px var(--bone-200),
+        0 1px 2px rgb(20 20 18 / 0.05);
+      overflow: clip;
+    }
+    .kz-auth__bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--bone-200);
+      background: var(--bone-50);
+      font-family: var(--font-mono);
+      font-variant-ligatures: none;
+      font-size: 0.8125rem;
+      color: var(--ink-600);
     }
     .kz-auth__head,
     .kz-auth__intro,
@@ -434,14 +468,15 @@
     .kz-auth__after {
       grid-area: auto;
       justify-self: auto;
+      width: auto;
       margin-top: 0;
-      padding: 0;
+      padding: 0 32px;
     }
-    .kz-auth__area {
-      color: var(--ink-600);
+    .kz-auth__head {
+      padding-top: 28px;
     }
     .kz-auth__title {
-      font-size: 2.25rem;
+      font-size: 2rem;
       color: var(--ink-900);
     }
     .kz-auth__intro {

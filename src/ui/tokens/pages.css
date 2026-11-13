@@ -69,6 +69,7 @@
     min-height: 1.4em;
     margin-top: 6px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     color: var(--ink-500);
   }
@@ -120,6 +121,7 @@
   .kz-qaroad__no,
   .kz-qaroad__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     color: var(--ink-500);
   }
@@ -146,6 +148,7 @@
   }
   .kz-qagroup__no {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     font-weight: 600;
     color: var(--ink-500);
@@ -360,6 +363,7 @@
   }
   .kz-search__count {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     color: var(--ink-500);
   }
@@ -381,6 +385,7 @@
   .kz-sgroup__h span {
     margin-left: auto;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     font-weight: 500;
     color: var(--ink-500);
@@ -489,6 +494,7 @@
   .kz-lost__code {
     margin-bottom: 10px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     font-weight: 600;
     color: var(--ink-500);
@@ -554,6 +560,7 @@
   .kz-lost__no {
     grid-row: span 2;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     font-weight: 600;
     color: var(--kz-div-ink, var(--ink-500));

@@ -200,6 +200,7 @@
   }
   .kz-eform__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     color: var(--ink-700);
   }
@@ -296,6 +297,7 @@
   }
   .kz-sent__ref {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     color: var(--ink-900);
   }
   @media (min-width: 640px) {
@@ -366,6 +368,7 @@
   }
   .kz-consult__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     line-height: 1.8;
     color: var(--on-night-3);
@@ -478,6 +481,7 @@
       inset 0 0 0 2px var(--ink-900),
       0 0 0 3px var(--bone-50);
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     font-weight: 700;
   }

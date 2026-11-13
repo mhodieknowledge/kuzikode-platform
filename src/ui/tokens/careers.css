@@ -42,6 +42,7 @@
     align-items: center;
     gap: 8px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     font-weight: 600;
     color: var(--ink-700);
@@ -85,6 +86,7 @@
   }
   .kz-chero__plate-k {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--ink-500);
@@ -122,6 +124,7 @@
   }
   .kz-roles__count {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     font-weight: 600;
     color: var(--ink-500);
@@ -206,6 +209,7 @@
     grid-area: n;
     padding-top: 3px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.875rem;
     font-weight: 700;
     color: var(--kz-div-ink, var(--ink-700));
@@ -381,6 +385,7 @@
     background: var(--paper);
     box-shadow: inset 0 0 0 2px var(--ink-900);
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     font-weight: 700;
     color: var(--ink-900);
@@ -476,6 +481,7 @@
   }
   .kz-job__spec dt {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     color: var(--ink-500);
   }
@@ -534,6 +540,7 @@
   }
   .kz-job__h span {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     font-weight: 600;
     color: var(--ink-500);
@@ -714,6 +721,7 @@
   }
   .kz-asheet__k {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--ink-500);
@@ -1081,6 +1089,7 @@
     .kz-roles__cols {
       padding-bottom: 10px;
       font-family: var(--font-mono);
+      font-variant-ligatures: none;
       font-size: 0.75rem;
       font-weight: 600;
       color: var(--ink-500);

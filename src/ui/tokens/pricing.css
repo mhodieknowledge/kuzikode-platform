@@ -66,6 +66,7 @@
     padding: 12px 16px 14px;
     border-top: 2px solid var(--ink-900);
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     line-height: 1.45;
     color: var(--ink-600);
@@ -90,6 +91,7 @@
     padding: 14px 0 10px;
     border-bottom: 2px solid var(--ink-900);
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -120,6 +122,7 @@
   }
   .kz-rate__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     color: var(--ink-500);
   }
@@ -192,6 +195,7 @@
   }
   .kz-ptab__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     color: var(--kz-fg-2);
   }
@@ -328,6 +332,7 @@
   .kz-plan__rec {
     flex: none;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--lit, var(--emerald-500));
@@ -442,6 +447,7 @@
   }
   .kz-plan__more summary small {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     font-weight: 500;
     color: var(--kz-fg-2, var(--ink-600));

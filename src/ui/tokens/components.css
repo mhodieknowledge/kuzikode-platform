@@ -177,6 +177,7 @@
     background: var(--kz-shield-bg, var(--night-900));
     color: var(--kz-shield-fg, #fff);
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-weight: 600;
     font-size: 0.9375rem;
     font-variant-numeric: tabular-nums;
@@ -944,6 +945,7 @@
   .kz-table .num {
     text-align: right;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.875rem;
   }
   @media (hover: hover) {
@@ -969,6 +971,7 @@
   }
   .kz-empty__code {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     color: var(--kz-fg-3);
   }

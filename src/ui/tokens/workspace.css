@@ -72,6 +72,7 @@
     align-items: center;
     gap: 6px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
   }
   .kz-wsbar__online > span:first-child {
@@ -109,6 +110,7 @@
     border-radius: 4px;
     background: var(--night-700);
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.6875rem;
     color: var(--on-night-2);
   }
@@ -271,6 +273,7 @@
   .kz-more__state {
     margin-left: auto;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     font-weight: 400;
     color: var(--ink-600);
@@ -311,6 +314,7 @@
   }
   .kz-wwin__meta {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     color: var(--ink-600);
   }
@@ -425,6 +429,7 @@
     background: var(--bone-100);
     box-shadow: inset 0 0 0 1px var(--bone-200);
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.6875rem;
     color: var(--ink-600);
   }
@@ -455,6 +460,7 @@
   .kz-pal__group {
     margin-left: auto;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.6875rem;
     color: var(--ink-500);
   }
@@ -621,6 +627,7 @@
 @layer components {
   .kz-wmono {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
   }
 
@@ -674,6 +681,7 @@
   }
   .kz-wshead__date {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     color: var(--ink-600);
   }
@@ -727,6 +735,7 @@
     flex: none;
     min-width: 3.25ch;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     font-variant-numeric: tabular-nums;
     text-align: right;
@@ -746,6 +755,7 @@
   }
   .kz-wnote__code {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     color: var(--ink-500);
   }
@@ -847,6 +857,7 @@
   .kz-wrow__fig {
     flex: none;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.9375rem;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
@@ -863,6 +874,7 @@
   }
   .kz-bal__label {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     color: var(--ink-500);
     text-transform: uppercase;
@@ -871,6 +883,7 @@
   .kz-bal__fig {
     margin-top: 4px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 2rem;
     font-weight: 600;
     line-height: 1.1;
@@ -921,6 +934,7 @@
     gap: 16px;
     margin-top: 8px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.6875rem;
     color: var(--ink-600);
   }
@@ -979,6 +993,7 @@
     flex-wrap: wrap;
     gap: 0 8px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     color: var(--ink-500);
   }
@@ -1027,6 +1042,7 @@
   .kz-feed__fig {
     grid-area: fig;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.875rem;
     font-variant-numeric: tabular-nums;
     color: var(--ink-950);
@@ -1097,6 +1113,7 @@
     padding: 10px 16px 6px;
     border-top: 1px solid var(--bone-200);
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.6875rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -1121,6 +1138,7 @@
   }
   .kz-pstats dt {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.6875rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -1129,6 +1147,7 @@
   .kz-pstats dd {
     margin-top: 4px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 1.75rem;
     font-weight: 600;
     line-height: 1;
@@ -1149,6 +1168,7 @@
   }
   .kz-sched__at {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     color: var(--ink-700);
   }
@@ -1168,6 +1188,7 @@
   }
   .kz-psum__fig {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 2.5rem;
     font-weight: 600;
     line-height: 1;
@@ -1187,6 +1208,7 @@
   }
   .kz-psum__dates dt {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.6875rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -1271,6 +1293,7 @@
     background: var(--paper);
     box-shadow: inset 0 0 0 2px var(--bone-300);
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--ink-600);
@@ -1304,6 +1327,7 @@
   .kz-mtrack__due {
     margin-top: 2px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     color: var(--ink-600);
   }
@@ -1338,6 +1362,7 @@
   }
   .kz-log__head time {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     color: var(--ink-500);
   }
@@ -1387,6 +1412,7 @@
   }
   .kz-msg__who time {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-weight: 400;
   }
   .is-mine .kz-msg__who,
@@ -1551,6 +1577,7 @@
   .kz-fend__of {
     margin-top: -4px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     color: var(--ink-600);
   }
@@ -1634,6 +1661,7 @@
   }
   .kz-frow__ref {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-weight: 600;
     color: var(--ink-900);
     text-decoration: underline;
@@ -1747,6 +1775,7 @@
   }
   .kz-fsum__label {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -1755,6 +1784,7 @@
   .kz-fsum__fig {
     margin-top: 4px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 2rem;
     font-weight: 600;
     line-height: 1.1;
@@ -1779,6 +1809,7 @@
   }
   .kz-fsum__facts dt {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.6875rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -1850,6 +1881,7 @@
     border-radius: 8px;
     background: var(--bone-100);
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     line-height: 1.6;
     white-space: pre-line;
@@ -1873,6 +1905,7 @@
   }
   .kz-fstat dt {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.6875rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -1881,6 +1914,7 @@
   .kz-fstat dd {
     margin-top: 4px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 1.75rem;
     font-weight: 600;
     line-height: 1;
@@ -2101,6 +2135,7 @@
   .kz-ftr__date {
     grid-area: date;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     color: var(--ink-600);
   }
@@ -2189,6 +2224,7 @@
   .kz-fsvc__label {
     margin: 4px 0 10px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -2204,6 +2240,7 @@
   }
   .kz-fsvc__fig {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 1.75rem;
     font-weight: 600;
     letter-spacing: -0.02em;
@@ -2274,6 +2311,7 @@
       border-bottom: 1px solid var(--bone-200);
       background: var(--paper);
       font-family: var(--font-mono);
+      font-variant-ligatures: none;
       font-size: 0.6875rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -2310,10 +2348,12 @@
     .kz-ftab--inv .kz-ftr__issued,
     .kz-ftab--inv .kz-ftr__due {
       font-family: var(--font-mono);
+      font-variant-ligatures: none;
       font-size: 0.8125rem;
     }
     .kz-ftr__date {
       font-family: var(--font-mono);
+      font-variant-ligatures: none;
       font-size: 0.8125rem;
     }
     .kz-ftab--pay .kz-ftr__for {
@@ -2369,6 +2409,7 @@
     gap: 2px 10px;
     margin-top: 4px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     color: var(--ink-600);
   }
@@ -2404,33 +2445,58 @@
       text-underline-offset: 3px;
     }
   }
-  .kz-sglance {
+  /* Support page: list (4) + empty conversation (8) from 1024 px; the list alone below */
+  .kz-sview {
+    display: grid;
+    gap: 16px;
+    align-items: start;
+  }
+  .kz-sview__main {
     display: none;
   }
-  .kz-sglance__list {
-    display: grid;
-    gap: 0;
-  }
-  .kz-sglance__list div {
+  .kz-wtabs {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 10px 0;
+    gap: 2px;
   }
-  .kz-sglance__list div + div {
-    border-top: 1px solid var(--bone-200);
-  }
-  .kz-sglance__list dt {
-    font-size: 0.9375rem;
-    color: var(--ink-700);
-  }
-  .kz-sglance__list dd {
+  .kz-wtabs a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 10px;
+    border-radius: 6px;
     font-family: var(--font-mono);
-    font-size: 1.5rem;
-    font-weight: 600;
-    line-height: 1;
-    color: var(--ink-950);
+    font-variant-ligatures: none;
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+    text-decoration: none;
+  }
+  .kz-wtabs a[aria-current='page'] {
+    color: var(--ink-900);
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-color: var(--lit);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
+  }
+  @media (hover: hover) {
+    .kz-wtabs a:hover {
+      background: var(--bone-100);
+      color: var(--ink-900);
+    }
+  }
+  .kz-wnote__go {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    font-weight: 700;
+    color: var(--ink-900);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+    text-underline-offset: 4px;
+  }
+  .kz-wnote__go svg {
+    flex: none;
   }
 
   /* Request facts under the page head; conversation extras */
@@ -2480,6 +2546,7 @@
   }
   .kz-msg__size {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
   }
   .is-mine .kz-msg__files,
@@ -2595,6 +2662,7 @@
     justify-content: space-between;
     gap: 12px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     color: var(--ink-700);
   }
@@ -2695,6 +2763,25 @@
   .kz-acct__go span {
     display: inline-block;
   }
+  .kz-acct__dev {
+    display: grid;
+    gap: 2px;
+    margin-bottom: 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--bone-50);
+    box-shadow:
+      inset 3px 0 0 var(--lit),
+      inset 0 0 0 1px var(--bone-200);
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+  }
+  .kz-acct__dev-name {
+    font-weight: 600;
+    color: var(--ink-900);
+  }
   .kz-acct__cos {
     display: grid;
     gap: 6px;
@@ -2776,6 +2863,7 @@
   }
   .kz-sess__meta time {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
   }
   .kz-sess__act {
@@ -2829,8 +2917,22 @@
     .kz-sess__foot {
       padding-inline: 20px;
     }
-    .kz-sglance {
+    .kz-sview {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 20px;
+    }
+    .kz-sview__list {
+      grid-column: 1 / span 4;
+    }
+    .kz-sview__main {
       display: block;
+      grid-column: 5 / -1;
+    }
+    .kz-sview .kz-sreq {
+      grid-template-columns: minmax(0, 1fr) 16px;
+      grid-template-areas: 'main go' 'state go';
+      gap: 8px 12px;
+      padding: 14px 16px;
     }
     .kz-pview .kz-sreq {
       grid-template-columns: minmax(0, 1fr) 16px;
@@ -2850,6 +2952,9 @@
     .kz-acct__side {
       grid-column: 9 / -1;
       gap: 20px;
+    }
+    .kz-acct .kz-input {
+      max-width: 30rem;
     }
   }
 }
@@ -2875,12 +2980,12 @@
     --ink-900: var(--on-night);
     --ink-800: #d9d3c7;
     --ink-700: #d0c9bc;
-    --ink-600: var(--on-night-2);
-    --ink-500: #a29b8d;
-    --ink-400: #8f887b;
+    --ink-600: #c9c2b5;
+    --ink-500: #b6afa2;
+    --ink-400: #a39c8f;
     --kz-fg: var(--on-night);
-    --kz-fg-2: var(--on-night-2);
-    --kz-fg-3: #a29b8d;
+    --kz-fg-2: #c9c2b5;
+    --kz-fg-3: #b6afa2;
     --kz-groove: #36342f;
     --kz-raise: var(--night-800);
     --link: #7fd0a5;

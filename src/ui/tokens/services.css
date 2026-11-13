@@ -65,6 +65,7 @@
   }
   .kz-dhead__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     color: var(--kz-div-ink);
   }
   .kz-dhead__title {
@@ -140,6 +141,7 @@
   }
   .kz-offer__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     font-weight: 600;
     color: var(--ink-500);
@@ -196,6 +198,7 @@
   }
   .kz-gains__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     color: var(--kz-div-ink, var(--ink-500));
   }
@@ -245,6 +248,7 @@
   }
   .kz-atlas__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.875rem;
     font-weight: 700;
     color: var(--kz-div-ink);

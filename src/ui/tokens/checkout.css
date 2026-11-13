@@ -8,6 +8,7 @@
 @layer components {
   .kz-mono {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-variant-numeric: tabular-nums;
   }
 
@@ -53,6 +54,7 @@
   }
   .kz-cosum__num {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 1.75rem;
     font-weight: 700;
     line-height: 1.1;
@@ -83,6 +85,7 @@
   }
   .kz-cosum__due-v {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-variant-numeric: tabular-nums;
     font-size: 1.75rem;
     font-weight: 700;
@@ -410,6 +413,7 @@
   }
   .kz-coinput-phone {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 1.25rem;
     letter-spacing: 0.02em;
   }
@@ -538,6 +542,7 @@
     background: var(--paper);
     box-shadow: inset 0 0 0 1.5px var(--bone-300);
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.75rem;
     font-weight: 700;
     color: var(--ink-600);
@@ -667,6 +672,7 @@
   }
   .kz-cocode__v {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-variant-numeric: tabular-nums;
     font-size: 1.75rem;
     font-weight: 700;
@@ -705,6 +711,7 @@
     background: var(--paper);
     text-align: center;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 1.375rem;
     color: var(--ink-900);
   }
@@ -726,6 +733,7 @@
     border-radius: var(--radius-plate);
     background: var(--bone-50);
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.9375rem;
     line-height: 1.6;
     color: var(--ink-900);

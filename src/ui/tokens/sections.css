@@ -137,6 +137,7 @@
   }
   .kz-band__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
@@ -269,11 +270,13 @@
   }
   .kz-slip__time {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     color: var(--ink-500);
   }
   .kz-slip__amt {
     margin-top: 14px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 2rem;
     font-weight: 700;
     letter-spacing: -0.03em;
@@ -297,6 +300,7 @@
   }
   .kz-slip__rows dd {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     color: var(--ink-900);
     text-align: right;
   }
@@ -339,6 +343,7 @@
   }
   .kz-claim__n {
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     font-weight: 600;
     color: var(--ink-500);
@@ -407,6 +412,7 @@
       inset 0 0 0 2px var(--night-900),
       0 0 0 3px var(--bone-100);
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-weight: 700;
     font-size: 0.875rem;
     color: var(--ink-900);
@@ -437,6 +443,7 @@
     display: block;
     margin-bottom: 6px;
     font-family: var(--font-mono);
+    font-variant-ligatures: none;
     font-size: 0.8125rem;
     font-weight: 600;
     color: var(--ink-500);

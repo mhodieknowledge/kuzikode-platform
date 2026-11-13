@@ -162,3 +162,15 @@ Harness: `playwright.visual.config.ts` (`SHOOT=… SHOOT_SET=all|core|quick SHOO
 - Found in the loop: Overpass middle-dot spacing ("·due") fixed site-wide; `npm run verify` rebuilding `dist/` under a running `wrangler dev`
   breaks island hydration in e2e until the server restarts (not a code fault).
 - e2e: portal-auth, checkout, subscriptions, invoices, quotations, full-journey, security, sweep, public-documents, mobile-limits green.
+
+## R5.4 Support, account, devices, auth, dark theme (2026-11-13)
+- Built by a subagent (opus/medium, two rounds); reviewed from screenshots + diff. Reference IMG_5017 (split sign-up with step cards).
+- Light captures `.shots/r54*/`: portal + admin auth pages, support list/new/conversation, account, sessions, MFA setup. Dark: 14 workspace pages +
+  More sheet, axe clean (scratch script toggles the real menu item).
+- Board review round 1: login, admin login, support conversation (dark), account, dark overview PASS; support list FAIL → 4/8 list + conversation,
+  in-window empty action, auth form in window chrome, centred night-panel content, readable staff line, capped inputs, current-device row, dark meta
+  contrast. Gold "Active" pill kept (convention). Mono "ff" ligature removed site-wide.
+- Open question for R8.2: two support requests created by a scratch script straight through the API returned 201 but were not listed/stored
+  (UI-created requests work). Investigate with the integration tests in R8.2.
+- e2e: portal-auth, security, users-admin, admin-shell, clients, full-journey, checkout, sweep, payment-gateways, subscriptions, services,
+  mobile-limits, home, pricing-accuracy green.

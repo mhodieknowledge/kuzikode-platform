@@ -157,7 +157,7 @@
     @apply bg-canvas font-sans text-ink-800 antialiased;
     font-size: var(--text-body);
     line-height: 1.5;
-    font-feature-settings: 'kern', 'liga';
+    font-feature-settings: 'kern'; /* common ligatures stay on by default; mono turns them off */
   }
   h1,
   h2,
@@ -197,6 +197,14 @@
   .font-mono,
   .tnum {
     font-variant-numeric: tabular-nums;
+  }
+  /* Overpass Mono draws "ff" as a ligature ("Staff"); mono text never ligates (every var(--font-mono) rule also says so). */
+  .font-mono,
+  code,
+  kbd,
+  samp,
+  pre {
+    font-variant-ligatures: none;
   }
   html {
     scrollbar-color: var(--bone-300) transparent;

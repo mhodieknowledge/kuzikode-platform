@@ -359,7 +359,10 @@
   .kz-doc__amt {
     grid-column: 3;
     grid-row: 1;
-    font-weight: 700;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
     color: var(--ink-900);
     text-align: right;
     white-space: nowrap;
@@ -389,8 +392,14 @@
     color: var(--ink-600);
   }
   .kz-doc__totals dd {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
     color: var(--ink-900);
     text-align: right;
+  }
+  .kz-doc__totals .is-key dd {
+    font-size: 1rem;
   }
   .kz-doc__totals .is-total {
     margin-top: 4px;
@@ -547,6 +556,11 @@
       border-bottom: 1px solid var(--bone-200);
       vertical-align: top;
       color: var(--ink-700);
+    }
+    .kz-doc__table td.is-num {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      font-variant-numeric: tabular-nums;
     }
     .kz-doc__table .is-num {
       text-align: right;

@@ -1580,8 +1580,8 @@
       margin-top: -4px;
     }
   }
-  .kz-wrow.is-over {
-    box-shadow: inset 3px 0 0 var(--clay);
+  .kz-wrow__fig.is-over {
+    color: var(--clay-ink);
   }
 
   /* Rows with their own links (credit notes): no stretched link */
@@ -1642,36 +1642,6 @@
     .kz-frow__dl:hover {
       background: var(--bone-100);
     }
-  }
-
-  /* Receipts ledger */
-  .kz-fpay {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: 'at end' 'main end' 'main dl';
-    gap: 2px 16px;
-    padding: 14px 16px 8px;
-  }
-  .kz-fpay__at {
-    grid-area: at;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--ink-600);
-  }
-  .kz-fpay__main {
-    grid-area: main;
-    min-width: 0;
-  }
-  .kz-fpay__end {
-    grid-area: end;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 6px;
-  }
-  .kz-fpay__dl {
-    grid-area: dl;
-    justify-self: end;
   }
 
   /* Saved cards */
@@ -1985,21 +1955,8 @@
     color: var(--danger-700);
   }
 
-  @media (min-width: 640px) {
-    .kz-fpay {
-      grid-template-columns: 8.5rem minmax(0, 1fr) auto auto;
-      grid-template-areas: 'at main end dl';
-      align-items: center;
-      padding-block: 12px;
-    }
-    .kz-fpay__dl {
-      margin-right: -10px;
-    }
-  }
-
   @media (min-width: 1024px) {
     .kz-frow,
-    .kz-fpay,
     .kz-fcard,
     .kz-fsub {
       padding-inline: 20px;
@@ -2025,6 +1982,294 @@
     }
     .kz-fglance {
       display: block;
+    }
+  }
+}
+
+/*
+ * Workspace finance, review pass (R5.3b): finance tables (list rows below 1024 px, a table with a sticky header from 1024 px),
+ * the title-bar PDF action, the side stack, services windows.
+ */
+@layer components {
+  /* Finance table: phones and tablets get list rows; the header row only shows from 1024 px */
+  .kz-ftab__head {
+    display: none;
+  }
+  .kz-ftr {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'id amt' 'dates amt' 'st dl';
+    align-items: start;
+    gap: 4px 16px;
+    padding: 14px 16px;
+  }
+  .kz-ftab--inv .kz-ftr {
+    grid-template-columns: minmax(0, 1fr) auto 16px;
+    grid-template-areas: 'id amt go' 'dates amt go' 'st amt go';
+  }
+  .kz-ftr__id {
+    grid-area: id;
+    min-width: 0;
+  }
+  .kz-ftr__sub {
+    margin-top: 2px;
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+  }
+  .kz-ftr__dates {
+    grid-area: dates;
+    min-width: 0;
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+    overflow-wrap: anywhere;
+  }
+  .kz-ftr__none {
+    display: none;
+  }
+  .kz-ftab--pay .kz-ftr {
+    grid-template-areas: 'date amt' 'id amt' 'dates dl';
+  }
+  .kz-ftab--pay .kz-ftr__amt {
+    gap: 6px;
+  }
+  .kz-ftab--pay .kz-ftr__id,
+  .kz-ftab--pay .kz-frow__ref {
+    white-space: nowrap;
+  }
+  .kz-ftr__date {
+    grid-area: date;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-600);
+  }
+  .kz-ftab--pay .kz-ftr__st {
+    margin: 0;
+    justify-self: end;
+  }
+  .kz-ftr__amt {
+    grid-area: amt;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    text-align: right;
+  }
+  .kz-ftr__amt .kz-fend__of {
+    margin: 0;
+  }
+  .kz-ftr__st {
+    grid-area: st;
+    margin-top: 6px;
+  }
+  .kz-ftr__dl {
+    grid-area: dl;
+    justify-self: end;
+    align-self: end;
+  }
+  .kz-ftr__go {
+    grid-area: go;
+    align-self: center;
+    color: var(--ink-400);
+  }
+  @media (hover: hover) {
+    .kz-ftr:has(.kz-wrow__link):hover,
+    .kz-ftab--pay .kz-ftr:hover {
+      background: var(--bone-50);
+    }
+    .kz-ftr:has(.kz-wrow__link):hover .kz-wrow__title {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  }
+  .kz-ftr:has(.kz-wrow__link:focus-visible) {
+    box-shadow: inset 0 0 0 2px var(--ink-900);
+  }
+
+  /* Title-bar action (PDF): icon + short label, 44 px target */
+  .kz-wwin__act {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    margin-block: -2px;
+    padding-inline: 10px;
+    border-radius: 7px;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--ink-900);
+    text-decoration: none;
+  }
+  @media (hover: hover) {
+    .kz-wwin__act:hover {
+      background: var(--bone-100);
+    }
+  }
+  .kz-wwin__act:focus-visible {
+    outline: 2px solid var(--ink-900);
+    outline-offset: -2px;
+  }
+  .kz-fsum__acts {
+    display: none;
+  }
+  .kz-fsum__facts.is-desk {
+    display: none;
+  }
+
+  /* Side stack (4 columns from 1024 px) */
+  .kz-fstack {
+    display: grid;
+    gap: 16px;
+    align-content: start;
+    min-width: 0;
+  }
+
+  /* Services */
+  .kz-fsvc__label {
+    margin: 4px 0 10px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-600);
+  }
+  .kz-fsvc__label:not(:first-child) {
+    margin-top: 24px;
+  }
+  .kz-fsvc__price {
+    font-size: 0.9375rem;
+    color: var(--ink-600);
+  }
+  .kz-fsvc__fig {
+    font-family: var(--font-mono);
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-950);
+  }
+  .kz-fsvc__facts {
+    margin-top: 14px;
+  }
+  .kz-fsvc__auto {
+    margin-top: 14px;
+  }
+  .kz-fasset__type {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--ink-900);
+  }
+  .kz-fasset__renew {
+    margin-top: 2px;
+    font-size: 0.875rem;
+    color: var(--ink-600);
+  }
+
+  @media (min-width: 640px) {
+    .kz-fsum__acts {
+      display: grid;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .kz-ftab--inv .kz-ftr {
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas: 'id amt' 'dates amt' 'st amt';
+    }
+    .kz-ftr__go {
+      display: none;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .kz-fsum__facts.is-desk {
+      display: grid;
+    }
+    .kz-fstack {
+      grid-column: span 4;
+      gap: 20px;
+    }
+    .kz-ftab__head,
+    .kz-ftr {
+      display: grid;
+      align-items: center;
+      gap: 0 16px;
+      padding: 0 20px;
+    }
+    .kz-ftab--inv :is(.kz-ftab__head, .kz-ftr) {
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr) minmax(6rem, auto) 7.5rem;
+      grid-template-areas: none;
+    }
+    .kz-ftab--pay :is(.kz-ftab__head, .kz-ftr) {
+      grid-template-columns: minmax(0, 1fr) 8rem 6.5rem minmax(0, 1fr) 7.5rem 6.5rem;
+      grid-template-areas: none;
+    }
+    .kz-ftab__head {
+      position: sticky;
+      top: 48px;
+      z-index: 2;
+      min-height: 40px;
+      border-bottom: 1px solid var(--bone-200);
+      background: var(--paper);
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-600);
+    }
+    .kz-ftab__head .is-num {
+      text-align: right;
+    }
+    .kz-ftr {
+      min-height: 56px;
+      padding-block: 10px;
+    }
+    .kz-ftr > * {
+      grid-area: auto;
+    }
+    .kz-ftr__dates,
+    .kz-ftr__for {
+      display: contents;
+    }
+    .kz-ftr__lbl {
+      display: none;
+    }
+    .kz-ftr__none {
+      display: inline;
+    }
+    .kz-ftr__issued,
+    .kz-ftr__due,
+    .kz-ftr__method,
+    .kz-ftr__date {
+      display: block;
+      font-size: 0.875rem;
+      color: var(--ink-700);
+    }
+    .kz-ftab--inv .kz-ftr__issued,
+    .kz-ftab--inv .kz-ftr__due {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+    }
+    .kz-ftr__date {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+    }
+    .kz-ftab--pay .kz-ftr__for {
+      display: block;
+      font-size: 0.875rem;
+    }
+    .kz-ftab--pay .kz-ftr__dates {
+      display: contents;
+    }
+    .kz-ftr__st,
+    .kz-ftab--pay .kz-ftr__st {
+      margin: 0;
+      justify-self: start;
+    }
+    .kz-ftr__dl {
+      justify-self: end;
+      align-self: center;
     }
   }
 }

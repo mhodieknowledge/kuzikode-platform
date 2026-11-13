@@ -65,7 +65,17 @@ const facts = [
       amountLabel="Total"
       amount={total}
       facts={facts}
-      primary={data.open ? { label: 'Respond to this quotation', href: '#respond', lead: 'check' } : undefined}
+      primary={
+        data.open
+          ? {
+              label: 'Respond to this quotation',
+              href: '#respond',
+              lead: 'chevron-down',
+              variant: 'secondary' as const,
+            }
+          : undefined
+      }
+      factsDesktopOnly
       pdfHref={`/api/v1/portal/quotations/${q.id}/pdf`}
     >
       {data.newerVersionId ? (

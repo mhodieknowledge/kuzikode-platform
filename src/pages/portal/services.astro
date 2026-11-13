@@ -1,8 +1,9 @@
 ---
 /**
- * Workspace services (R5.3, PANEL_DESIGN_SPEC §2 "Services"): per client, a "Subscriptions" window (each plan with its amount in
- * mono, state, next bill, the automatic-payment consent and the cancellation request) and a "Domains, hosting and accounts" window
- * (each with its renewal date). Side by side from 1024 px (7/5), stacked below.
+ * Workspace services (R5.3, PANEL_DESIGN_SPEC §2 "Services": cards-as-windows). One window per subscription: the plan name as
+ * title with its state pill in the title bar, the price in mono with the cycle, the next bill, the automatic-payment consent and
+ * the cancellation request at the foot. One compact window per domain/hosting/account (renewal date as mono title-bar meta), or
+ * one list window when there are more than four. No billing-period bar: the period start is not part of the data.
  */
 import PortalLayout from '../../layouts/PortalLayout.astro';
 import PageHead from '../../ui/workspace/PageHead.astro';
@@ -26,7 +27,8 @@ const autoCharge = await portalAutoChargeOptions(
   groups.flatMap((g) => g.subscriptions.map((s) => s.id)),
 );
 const empty = groups.every((g) => g.subscriptions.length === 0 && g.assets.length === 0);
-const level = multiClient ? 'h3' : 'h2';
+const level = 'h3';
+const GroupLabel = multiClient ? 'p' : 'h2';
 ---
 
 <PortalLayout title="Your services" page={page} active="services">
@@ -47,94 +49,132 @@ const level = multiClient ? 'h3' : 'h2';
     groups.map((g, gi) => (
       <section class="kz-fsvc" aria-label={multiClient ? g.client.name : undefined}>
         {multiClient ? <h2 class="kz-fsvc__client">{g.client.name}</h2> : null}
-        <div class="kz-wgrid">
-          <Window
-            title="Subscriptions"
-            icon="subscriptions"
-            level={level}
-            span={g.assets.length ? 7 : 12}
-            id={`subs-${gi}`}
-            meta={g.subscriptions.length ? String(g.subscriptions.length) : undefined}
-            flush={g.subscriptions.length > 0}
-          >
-            {g.subscriptions.length === 0 ? (
-              <div class="kz-wnote">
-                <p class="kz-wnote__code">no subscriptions</p>
-                <p>No subscriptions.</p>
+
+        {g.subscriptions.length ? (
+          <Fragment>
+            <GroupLabel class="kz-fsvc__label">Subscriptions</GroupLabel>
+            <div class="kz-wgrid" data-testid="subscriptions">
+              {g.subscriptions.map((s, si) => (
+                <Window
+                  title={s.description}
+                  icon="subscriptions"
+                  level={level}
+                  span={g.subscriptions.length > 1 ? 6 : 8}
+                  id={`sub-${gi}-${si}`}
+                >
+                  <StatusPill slot="actions" tone={s.paused ? 'warn' : 'lit'}>
+                    {s.paused ? 'Paused' : 'Active'}
+                  </StatusPill>
+                  <p class="kz-fsvc__price">
+                    <span class="kz-fsvc__fig">{formatMoney(s.amountMinor, s.currency)}</span>
+                    <span> per {s.interval}</span>
+                    {s.quantity !== '1' ? <span>{` · quantity ${s.quantity}`}</span> : null}
+                  </p>
+                  <dl class="kz-fsum__facts kz-fsvc__facts">
+                    <div>
+                      <dt>Next bill</dt>
+                      <dd class="kz-wmono">
+                        {s.paused ? 'Paused' : s.nextBillingDate ? formatLongDate(s.nextBillingDate) : '—'}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Billing cycle</dt>
+                      <dd>
+                        {s.interval === 'year' ? 'Yearly' : s.interval === 'month' ? 'Monthly' : `Every ${s.interval}`}
+                      </dd>
+                    </div>
+                  </dl>
+                  {autoCharge[s.id]?.cards.length ? (
+                    <div class="kz-fsvc__auto">
+                      <AutoCharge
+                        client:visible
+                        subscriptionId={s.id}
+                        description={s.description}
+                        cards={autoCharge[s.id]!.cards}
+                        current={autoCharge[s.id]!.current}
+                      />
+                    </div>
+                  ) : null}
+                  <div class="kz-fsub__acts">
+                    {s.cancellationRequested ? (
+                      <p class="kz-fsub__req">
+                        Cancellation requested. <a href="/portal/support?show=open">See your requests</a>
+                      </p>
+                    ) : (
+                      <CancellationRequest client:visible subscriptionId={s.id} description={s.description} />
+                    )}
+                  </div>
+                </Window>
+              ))}
+            </div>
+          </Fragment>
+        ) : null}
+
+        {g.assets.length ? (
+          <Fragment>
+            <GroupLabel class="kz-fsvc__label">Domains, hosting and accounts</GroupLabel>
+            {g.assets.length > 4 ? (
+              <div class="kz-wgrid">
+                <Window
+                  title="Domains, hosting and accounts"
+                  icon="managed-services"
+                  level={level}
+                  id={`assets-${gi}`}
+                  meta={String(g.assets.length)}
+                  flush
+                  data-testid="assets"
+                >
+                  <ul class="kz-wlist">
+                    {g.assets.map((a) => (
+                      <li class="kz-wrow">
+                        <div class="kz-wrow__main">
+                          <p class="kz-wrow__title">{a.name}</p>
+                          <p class="kz-wrow__meta">
+                            {a.typeLabel}
+                            {a.provider ? ` · ${a.provider}` : ''}
+                          </p>
+                        </div>
+                        <p class="kz-fasset__when">
+                          {a.renewalDate ? (
+                            <Fragment>
+                              <span>{a.autoRenew ? 'Renews' : 'Expires'}</span>
+                              <span class="kz-wmono">{formatLongDate(a.renewalDate)}</span>
+                            </Fragment>
+                          ) : (
+                            'No renewal date'
+                          )}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </Window>
               </div>
             ) : (
-              <ul class="kz-wlist" data-testid="subscriptions">
-                {g.subscriptions.map((s) => (
-                  <li class="kz-fsub">
-                    <div class="kz-fsub__head">
-                      <p class="kz-wrow__title">{s.description}</p>
-                      <StatusPill tone={s.paused ? 'warn' : 'lit'}>{s.paused ? 'Paused' : 'Active'}</StatusPill>
-                    </div>
-                    <p class="kz-wrow__meta">
-                      <span class="kz-wmono">{formatMoney(s.amountMinor, s.currency)}</span> per {s.interval}
-                      {s.quantity !== '1' ? ` · quantity ${s.quantity}` : ''}
-                      {!s.paused && s.nextBillingDate ? ` · next bill ${formatLongDate(s.nextBillingDate)}` : ''}
+              <div class="kz-wgrid" data-testid="assets">
+                {g.assets.map((a, ai) => (
+                  <Window
+                    title={a.name}
+                    icon="managed-services"
+                    level={level}
+                    span={4}
+                    id={`asset-${gi}-${ai}`}
+                    meta={a.renewalDate ? formatLongDate(a.renewalDate) : undefined}
+                  >
+                    <p class="kz-fasset__type">
+                      {a.typeLabel}
+                      {a.provider ? ` · ${a.provider}` : ''}
                     </p>
-                    <div class="kz-fsub__acts">
-                      {autoCharge[s.id]?.cards.length ? (
-                        <AutoCharge
-                          client:visible
-                          subscriptionId={s.id}
-                          description={s.description}
-                          cards={autoCharge[s.id]!.cards}
-                          current={autoCharge[s.id]!.current}
-                        />
-                      ) : null}
-                      {s.cancellationRequested ? (
-                        <p class="kz-fsub__req">
-                          Cancellation requested. <a href="/portal/support?show=open">See your requests</a>
-                        </p>
-                      ) : (
-                        <CancellationRequest client:visible subscriptionId={s.id} description={s.description} />
-                      )}
-                    </div>
-                  </li>
+                    <p class="kz-fasset__renew">
+                      {a.renewalDate
+                        ? `${a.autoRenew ? 'Renews' : 'Expires'} ${formatLongDate(a.renewalDate)}`
+                        : 'No renewal date'}
+                    </p>
+                  </Window>
                 ))}
-              </ul>
+              </div>
             )}
-          </Window>
-
-          {g.assets.length ? (
-            <Window
-              title="Domains, hosting and accounts"
-              icon="managed-services"
-              level={level}
-              span={5}
-              id={`assets-${gi}`}
-              meta={String(g.assets.length)}
-              flush
-            >
-              <ul class="kz-wlist" data-testid="assets">
-                {g.assets.map((a) => (
-                  <li class="kz-wrow">
-                    <div class="kz-wrow__main">
-                      <p class="kz-wrow__title">{a.name}</p>
-                      <p class="kz-wrow__meta">
-                        {a.typeLabel}
-                        {a.provider ? ` · ${a.provider}` : ''}
-                      </p>
-                    </div>
-                    <p class="kz-fasset__when">
-                      {a.renewalDate ? (
-                        <Fragment>
-                          <span>{a.autoRenew ? 'Renews' : 'Expires'}</span>
-                          <span class="kz-wmono">{formatLongDate(a.renewalDate)}</span>
-                        </Fragment>
-                      ) : (
-                        'No renewal date'
-                      )}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </Window>
-          ) : null}
-        </div>
+          </Fragment>
+        ) : null}
       </section>
     ))
   )}

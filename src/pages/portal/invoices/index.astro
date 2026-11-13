@@ -115,33 +115,59 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
             <p>{show === 'open' ? 'You have nothing to pay right now.' : 'There are no invoices yet.'}</p>
           </div>
         ) : (
-          <ul class="kz-wlist" aria-label="Invoices">
-            {invoices.map((i) => {
-              const st = portalInvoiceStatus(i.status, i.overdue);
-              const open = isOpen(i);
-              return (
-                <li class:list={['kz-wrow kz-wrow--fin', i.overdue && open && 'is-over']}>
-                  <div class="kz-wrow__main">
-                    <a class="kz-wrow__title kz-wrow__link kz-wmono" href={`/portal/invoices/${i.id}`}>
-                      {i.number}
-                    </a>
-                    <p class="kz-wrow__meta">
-                      {i.issueDate ? formatLongDate(i.issueDate) : ''}
-                      {open && i.dueDate ? ` · due ${formatLongDate(i.dueDate)}` : ''}
-                      {multiClient ? ` · ${i.clientName}` : ''}
+          <div class="kz-ftab kz-ftab--inv">
+            <div class="kz-ftab__head" aria-hidden="true">
+              <span>Number</span>
+              <span>Issued</span>
+              <span>Due</span>
+              <span class="is-num">Amount</span>
+              <span>Status</span>
+            </div>
+            <ul class="kz-wlist" aria-label="Invoices">
+              {invoices.map((i) => {
+                const st = portalInvoiceStatus(i.status, i.overdue);
+                const open = isOpen(i);
+                const over = i.overdue && open;
+                return (
+                  <li class="kz-ftr">
+                    <div class="kz-ftr__id">
+                      <a class="kz-wrow__title kz-wrow__link kz-wmono" href={`/portal/invoices/${i.id}`}>
+                        {i.number}
+                      </a>
+                      {multiClient ? <p class="kz-ftr__sub">{i.clientName}</p> : null}
+                    </div>
+                    <p class="kz-ftr__dates">
+                      <span class="kz-ftr__issued">{i.issueDate ? formatLongDate(i.issueDate) : ''}</span>
+                      <span class="kz-ftr__due">
+                        {open && i.dueDate ? (
+                          <Fragment>
+                            <span class="kz-ftr__lbl"> · due </span>
+                            {formatLongDate(i.dueDate)}
+                          </Fragment>
+                        ) : (
+                          <span class="kz-ftr__none" aria-hidden="true">
+                            —
+                          </span>
+                        )}
+                      </span>
                     </p>
-                  </div>
-                  <div class="kz-fend">
-                    <p class="kz-wrow__fig">{formatMoney(open ? i.balanceMinor : i.totalMinor, i.currency)}</p>
-                    {open && i.balanceMinor !== i.totalMinor ? (
-                      <p class="kz-fend__of">of {formatMoney(i.totalMinor, i.currency)}</p>
-                    ) : null}
-                    <StatusPill tone={pillTone(st.tone)}>{st.label}</StatusPill>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                    <div class="kz-ftr__amt">
+                      <p class:list={['kz-wrow__fig', over && 'is-over']}>
+                        {formatMoney(open ? i.balanceMinor : i.totalMinor, i.currency)}
+                      </p>
+                      {open && i.balanceMinor !== i.totalMinor ? (
+                        <p class="kz-fend__of">of {formatMoney(i.totalMinor, i.currency)}</p>
+                      ) : null}
+                    </div>
+                    <div class="kz-ftr__st">
+                      <StatusPill tone={pillTone(st.tone)}>{st.label}</StatusPill>
+                    </div>
+                    <Icon name="chevron-right" size={16} class="kz-ftr__go" />
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         )}
       </Window>
 

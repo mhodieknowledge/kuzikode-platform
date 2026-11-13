@@ -1,8 +1,7 @@
 ---
 /**
- * Workspace payments (R5.3, PANEL_DESIGN_SPEC §2): the receipts ledger (8): mono date, mono receipt number, method and the
- * invoices it paid, the amount in mono, the state and the receipt download. Saved cards sit in their own window (4) beside it
- * (below it on phones and tablets). Without saved cards the ledger takes the full width.
+ * Workspace payments (R5.3, PANEL_DESIGN_SPEC §1–2): the receipts window (8), a table from 1024 px (Receipt · Date · Method ·
+ * For · Amount · Status, receipt download) and list rows below; beside it (4) "Received" per currency and the saved cards.
  */
 import PortalLayout from '../../../layouts/PortalLayout.astro';
 import PageHead from '../../../ui/workspace/PageHead.astro';
@@ -27,6 +26,20 @@ const STATUS = {
   refunded: { label: 'Refunded', tone: 'neutral' },
   reversed: { label: 'Reversed', tone: 'danger' },
 } as const;
+const partRefunded = payments.some((p) => p.status === 'partially_refunded');
+/** Received per currency, from the listed payments (integer minor units); refunded and reversed ones are left out. */
+const paid = [
+  ...payments
+    .filter((p) => p.status === 'completed' || p.status === 'partially_refunded')
+    .reduce((m, p) => {
+      const t = m.get(p.currency) ?? { currency: p.currency, total: 0, count: 0, last: p.receivedAt };
+      t.total += p.amountMinor;
+      t.count += 1;
+      if (p.receivedAt > t.last) t.last = p.receivedAt;
+      return m.set(p.currency, t);
+    }, new Map<string, { currency: string; total: number; count: number; last: string }>())
+    .values(),
+];
 ---
 
 <PortalLayout title="Payments" page={page} active="payments">
@@ -36,7 +49,7 @@ const STATUS = {
     <Window
       title="Receipts"
       icon="receipt"
-      span={cards.length ? 8 : 12}
+      span={payments.length || cards.length ? 8 : 12}
       id="list"
       meta={payments.length ? String(payments.length) : undefined}
       flush={payments.length > 0}
@@ -44,51 +57,88 @@ const STATUS = {
       {payments.length === 0 ? (
         <div class="kz-wnote">
           <p class="kz-wnote__code">no payments yet</p>
-          <p>No payments yet. Receipts for what you pay appear here.</p>
+          <p>Receipts for what you pay appear here.</p>
         </div>
       ) : (
-        <ul class="kz-wlist" aria-label="Payments">
-          {payments.map((p) => (
-            <li class="kz-fpay">
-              <p class="kz-fpay__at">
-                <time datetime={p.receivedAt}>{formatLongDate(p.receivedAt)}</time>
-              </p>
-              <div class="kz-fpay__main">
-                <p class="kz-frow__title kz-wmono">{p.receiptNumber}</p>
-                <p class="kz-wrow__meta">
-                  {paymentMethodLabel(p.method)}
-                  {p.invoices.length ? ' · for ' : ''}
-                  {p.invoices.map((i, n) => (
-                    <Fragment>
-                      {n > 0 ? ', ' : ''}
-                      <a class="kz-frow__ref" href={`/portal/invoices/${i.id}`}>
-                        {i.number}
-                      </a>
-                    </Fragment>
-                  ))}
+        <div class="kz-ftab kz-ftab--pay">
+          <div class="kz-ftab__head" aria-hidden="true">
+            <span>Receipt</span>
+            <span>Date</span>
+            <span>Method</span>
+            <span>For</span>
+            <span class="is-num">Amount</span>
+            <span class="sr-only">Download</span>
+          </div>
+          <ul class="kz-wlist" aria-label="Payments">
+            {payments.map((p) => (
+              <li class="kz-ftr">
+                <p class="kz-ftr__id kz-frow__title kz-wmono">{p.receiptNumber}</p>
+                <p class="kz-ftr__date">
+                  <time datetime={p.receivedAt}>{formatLongDate(p.receivedAt)}</time>
                 </p>
-              </div>
-              <div class="kz-fpay__end">
-                <p class="kz-wrow__fig">{formatMoney(p.amountMinor, p.currency)}</p>
-                <StatusPill tone={STATUS[p.status].tone}>{STATUS[p.status].label}</StatusPill>
-              </div>
-              <a class="kz-frow__dl kz-fpay__dl" href={`/api/v1/portal/payments/${p.id}/receipt`} download>
-                <Icon name="download" size={16} />
-                Receipt<span class="sr-only"> {p.receiptNumber}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
+                <p class="kz-ftr__dates">
+                  <span class="kz-ftr__method">{paymentMethodLabel(p.method)}</span>
+                  <span class="kz-ftr__for">
+                    {p.invoices.length ? <span class="kz-ftr__lbl"> · for </span> : null}
+                    {p.invoices.map((i, n) => (
+                      <Fragment>
+                        {n > 0 ? ', ' : ''}
+                        <a class="kz-frow__ref" href={`/portal/invoices/${i.id}`}>
+                          {i.number}
+                        </a>
+                      </Fragment>
+                    ))}
+                  </span>
+                </p>
+                <div class="kz-ftr__amt">
+                  <p class="kz-wrow__fig">{formatMoney(p.amountMinor, p.currency)}</p>
+                  <StatusPill tone={STATUS[p.status].tone}>{STATUS[p.status].label}</StatusPill>
+                </div>
+                <a class="kz-frow__dl kz-ftr__dl" href={`/api/v1/portal/payments/${p.id}/receipt`} download>
+                  <Icon name="download" size={16} />
+                  Receipt<span class="sr-only"> {p.receiptNumber}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </Window>
 
-    {cards.length ? (
-      <Window title="Saved cards" icon="wallet" span={4} id="cards" meta={String(cards.length)} flush>
-        <p class="kz-fcards__intro">
-          Cards you saved when paying. We keep only a secure token from our payment partner, never your card number.
-        </p>
-        <SavedCards client:load cards={cards} showClient={multiClient} />
-      </Window>
+    {paid.length || cards.length ? (
+      <div class="kz-fstack">
+        {paid.length ? (
+          <Window title="Received" icon="wallet" id="paid">
+            <ul class="kz-bal" aria-label="Received by currency">
+              {paid.map((t) => (
+                <li>
+                  <p class="kz-bal__label">Received · {t.currency}</p>
+                  <p class="kz-bal__fig">{formatMoney(t.total, t.currency)}</p>
+                  <p class="kz-bal__meta">
+                    <span>{t.count === 1 ? '1 receipt' : `${t.count} receipts`}</span>
+                    <span>
+                      last <span class="kz-wmono">{formatLongDate(t.last)}</span>
+                    </span>
+                  </p>
+                </li>
+              ))}
+            </ul>
+            <p class="kz-fglance__hint">
+              {partRefunded
+                ? 'Refunded and reversed payments are not counted. Part-refunded payments count at the amount received.'
+                : 'Refunded and reversed payments are not counted.'}
+            </p>
+          </Window>
+        ) : null}
+        {cards.length ? (
+          <Window title="Saved cards" icon="wallet" id="cards" meta={String(cards.length)} flush>
+            <p class="kz-fcards__intro">
+              Cards you saved when paying. We keep only a secure token from our payment partner, never your card number.
+            </p>
+            <SavedCards client:load cards={cards} showClient={multiClient} />
+          </Window>
+        ) : null}
+      </div>
     ) : null}
   </div>
 </PortalLayout>

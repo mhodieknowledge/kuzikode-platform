@@ -1,12 +1,14 @@
 ---
 /**
  * Side window beside a paper document in the workspace (R5.3, PANEL_DESIGN_SPEC §2 "Quotations / Invoices / Payments"): the state
- * pill, the amount that matters in large mono, the dates, notices, and the actions (the one primary action in emerald, the PDF).
+ * pill, the amount that matters in large mono, the dates, notices and the one action; the PDF is a labelled icon button in the
+ * title bar.
  * Desktop: the right 4 columns, sticky. Phones: first on the page; the primary action moves to the sticky bar above the dock.
  */
 import Window from '../Window.astro';
 import Button from '../../primitives/Button.astro';
 import StatusPill from '../../primitives/StatusPill.astro';
+import Icon from '../../icons/Icon.astro';
 import type { IconName } from '../../icons/registry';
 
 interface Props {
@@ -19,14 +21,35 @@ interface Props {
   /** Words set after the figure, inside the same line ("to pay"). */
   amountSuffix?: string | undefined;
   facts: { k: string; v: string }[];
-  primary?: { label: string; href: string; lead?: IconName } | undefined;
+  /** Facts repeated by the paper sheet: hidden on phones, where the summary sits right above it. */
+  factsDesktopOnly?: boolean;
+  primary?: { label: string; href: string; lead?: IconName; variant?: 'primary' | 'secondary' } | undefined;
   pdfHref: string;
   [key: `data-${string}`]: string | undefined;
 }
-const { title, icon, meta, state, amountLabel, amount, amountSuffix, facts, primary, pdfHref, ...rest } = Astro.props;
+const {
+  title,
+  icon,
+  meta,
+  state,
+  amountLabel,
+  amount,
+  amountSuffix,
+  facts,
+  factsDesktopOnly,
+  primary,
+  pdfHref,
+  ...rest
+} = Astro.props;
 ---
 
 <Window title={title} icon={icon} meta={meta ?? undefined} id="summary" class="kz-fdoc__side" {...rest}>
+  <a slot="actions" class="kz-wwin__act" href={pdfHref} download>
+    <Icon name="download" size={16} />
+    <span>
+      <span class="sr-only">Download </span>PDF
+    </span>
+  </a>
   <div class="kz-fsum">
     <StatusPill tone={state.tone}>{state.label}</StatusPill>
     <div>
@@ -37,7 +60,7 @@ const { title, icon, meta, state, amountLabel, amount, amountSuffix, facts, prim
       </p>
     </div>
     {facts.length ? (
-      <dl class="kz-fsum__facts">
+      <dl class:list={['kz-fsum__facts', factsDesktopOnly && 'is-desk']}>
         {facts.map((f) => (
           <div>
             <dt>{f.k}</dt>
@@ -47,16 +70,19 @@ const { title, icon, meta, state, amountLabel, amount, amountSuffix, facts, prim
       </dl>
     ) : null}
     <slot name="notice" />
-    <div class="kz-fsum__acts">
-      {primary ? (
-        <Button href={primary.href} lead={primary.lead} block class="kz-wfoot__pay">
+    {primary ? (
+      <div class="kz-fsum__acts">
+        <Button
+          href={primary.href}
+          lead={primary.lead}
+          variant={primary.variant ?? 'primary'}
+          block
+          class="kz-wfoot__pay"
+        >
           {primary.label}
         </Button>
-      ) : null}
-      <Button href={pdfHref} download variant="secondary" lead="download" block>
-        Download PDF
-      </Button>
-    </div>
+      </div>
+    ) : null}
     <slot />
   </div>
 </Window>

@@ -1,5 +1,14 @@
 ---
+/** Expenses (R6.2): totals strip, filters (sheet on phones), dense table → list rows (description, vendor, amount, category). */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import DataTable from '../../../ui/admin/DataTable.astro';
+import Cell from '../../../ui/admin/Cell.astro';
+import Pager from '../../../ui/admin/Pager.astro';
+import KpiStrip, { type Kpi } from '../../../ui/admin/KpiStrip.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import EmptyState from '../../../ui/primitives/EmptyState.astro';
+import { FilterBar } from '../../../ui/admin/FilterBar';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { EXPENSE_DISCLAIMER, listCategories, listExpenses } from '../../../server/modules/expenses';
 import { expenseListQuery } from '../../../shared/schemas/expenses';
@@ -18,7 +27,6 @@ const currencies = (
     .all<{ code: string }>()
 ).results;
 const canManage = page.auth.permissions.has('expenses.manage');
-const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
 const exportQuery = new URLSearchParams(Astro.url.searchParams);
 exportQuery.delete('page');
 const pageHref = (n: number) => {
@@ -27,188 +35,125 @@ const pageHref = (n: number) => {
   return `/admin/expenses?${q.toString()}`;
 };
 const filtered = [...new URLSearchParams(Astro.url.searchParams).keys()].some((k) => k !== 'page');
-const link =
-  'inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400';
+const tiles: Kpi[] = result.totals.length
+  ? [
+      {
+        label: 'Total',
+        values: result.totals.map((t) => formatMoney(t.total, t.currency)),
+        note: `${result.totals.reduce((n, t) => n + t.n, 0)} expenses`,
+      },
+    ]
+  : [];
 ---
 
 <AdminLayout title="Expenses" page={page}>
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold tracking-display">Expenses</h1>
-      <p class="mt-1 text-sm text-ink-600">{EXPENSE_DISCLAIMER}</p>
-    </div>
-    <div class="flex flex-wrap gap-2">
-      <a href="/admin/expenses/report" class={link}>
+  <PageHead title="Expenses" meta={EXPENSE_DISCLAIMER}>
+    <Fragment slot="actions">
+      <Button variant="secondary" href="/admin/expenses/report">
         Report
-      </a>
-      <a href="/admin/expenses/categories" class={link}>
+      </Button>
+      <Button variant="secondary" href="/admin/expenses/categories">
         Categories
-      </a>
-      <a href={`/api/v1/admin/expenses/export.csv?${exportQuery.toString()}`} download class={link}>
+      </Button>
+      <Button
+        variant="secondary"
+        lead="download"
+        href={`/api/v1/admin/expenses/export.csv?${exportQuery.toString()}`}
+        download
+      >
         Export CSV
-      </a>
+      </Button>
       {canManage ? (
-        <a
-          href="/admin/expenses/new"
-          class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
-        >
+        <Button href="/admin/expenses/new" lead="add">
           Record expense
-        </a>
+        </Button>
       ) : null}
-    </div>
+    </Fragment>
+  </PageHead>
+  {tiles.length ? <KpiStrip items={tiles} testId="expense-kpis" /> : null}
+  <div class="kz-atools kz-agap">
+    <FilterBar
+      client:load
+      label="Filter expenses"
+      clearHref="/admin/expenses"
+      fields={[
+        {
+          kind: 'search',
+          name: 'q',
+          label: 'Search',
+          value: filter.q ?? '',
+          placeholder: 'Description, vendor or reference',
+        },
+        {
+          kind: 'select',
+          name: 'categoryId',
+          label: 'Category',
+          value: filter.categoryId ?? '',
+          options: [{ value: '', label: 'Any' }, ...categories.map((c) => ({ value: c.id, label: c.name }))],
+        },
+        {
+          kind: 'select',
+          name: 'currency',
+          label: 'Currency',
+          value: filter.currency ?? '',
+          options: [{ value: '', label: 'Any' }, ...currencies.map((c) => ({ value: c.code, label: c.code }))],
+        },
+        {
+          kind: 'select',
+          name: 'status',
+          label: 'Status',
+          value: filter.status ?? 'recorded',
+          options: [
+            { value: 'recorded', label: 'Recorded' },
+            { value: 'void', label: 'Void' },
+            { value: 'all', label: 'All' },
+          ],
+        },
+        { kind: 'date', name: 'from', label: 'From', value: filter.from ?? '' },
+        { kind: 'date', name: 'to', label: 'To', value: filter.to ?? '' },
+      ]}
+    />
   </div>
-  {result.totals.length ? (
-    <dl class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      {result.totals.map((t) => (
-        <div class="rounded-lg border border-line bg-surface p-4">
-          <dt class="text-[13px] font-semibold text-ink-600">Total ({t.currency})</dt>
-          <dd class="tnum mt-1 text-xl font-bold text-ink-950">{formatMoney(t.total, t.currency)}</dd>
-          <dd class="text-[13px] text-ink-600">
-            {t.n} {t.n === 1 ? 'expense' : 'expenses'}
-          </dd>
-        </div>
-      ))}
-    </dl>
-  ) : null}
-  <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter expenses">
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Search
-      <input
-        name="q"
-        type="search"
-        value={filter.q ?? ''}
-        maxlength="80"
-        class={field}
-        placeholder="Description, vendor or reference"
-      />
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Category
-      <select name="categoryId" class={field}>
-        <option value="">Any</option>
-        {categories.map((c) => (
-          <option value={c.id} selected={filter.categoryId === c.id}>
-            {c.name}
-          </option>
-        ))}
-      </select>
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Currency
-      <select name="currency" class={field}>
-        <option value="">Any</option>
-        {currencies.map((c) => (
-          <option value={c.code} selected={filter.currency === c.code}>
-            {c.code}
-          </option>
-        ))}
-      </select>
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Status
-      <select name="status" class={field}>
-        <option value="recorded" selected={!filter.status || filter.status === 'recorded'}>
-          Recorded
-        </option>
-        <option value="void" selected={filter.status === 'void'}>
-          Void
-        </option>
-        <option value="all" selected={filter.status === 'all'}>
-          All
-        </option>
-      </select>
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      From
-      <input name="from" type="date" value={filter.from ?? ''} class={field} />
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      To
-      <input name="to" type="date" value={filter.to ?? ''} class={field} />
-    </label>
-    <button
-      type="submit"
-      class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+  <DataTable
+    caption="Expenses"
+    count={result.items.length}
+    columns={[
+      { label: 'Date' },
+      { label: 'Description' },
+      { label: 'Category' },
+      { label: 'Project / client' },
+      { label: 'Amount', num: true },
+    ]}
+  >
+    <EmptyState
+      slot="empty"
+      code={filtered ? 'no matches' : '0 expenses'}
+      title={filtered ? 'No expenses match these filters.' : 'No expenses recorded yet.'}
     >
-      Filter
-    </button>
-  </form>
-  <div class="mt-6 relative overflow-x-auto rounded-lg border border-line bg-surface">
-    <table class="w-full min-w-[640px] text-left text-sm">
-      <caption class="sr-only">Expenses</caption>
-      <thead class="bg-canvas text-[13px] text-ink-600">
-        <tr>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Date
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Description
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Category
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Project / client
-          </th>
-          <th scope="col" class="px-4 py-3 text-right font-semibold">
-            Amount
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {result.items.length === 0 ? (
-          <tr>
-            <td colspan="5" class="px-4 py-10 text-center text-ink-600">
-              {filtered ? 'No expenses match these filters.' : 'No expenses recorded yet.'}
-            </td>
-          </tr>
-        ) : (
-          result.items.map((e) => (
-            <tr class="border-t border-line">
-              <td class="px-4 py-3 whitespace-nowrap text-ink-800">{formatLongDate(e.expense_date)}</td>
-              <td class="px-4 py-3">
-                <a
-                  href={`/admin/expenses/${e.id}`}
-                  class={`font-semibold text-ink-950 hover:underline ${e.status === 'void' ? 'line-through' : ''}`}
-                >
-                  {e.description}
-                </a>
-                <span class="block text-[12px] text-ink-600">
-                  {e.vendor ?? 'No vendor'}
-                  {e.receipt_file_id ? ' · receipt attached' : ''}
-                  {e.status === 'void' ? ' · void' : ''}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-ink-800">{e.category}</td>
-              <td class="px-4 py-3 text-ink-800">{e.project_reference ?? e.client_name ?? '—'}</td>
-              <td class="tnum px-4 py-3 text-right font-medium text-ink-950">
-                {formatMoney(e.amount_minor, e.currency)}
-              </td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-  </div>
-  {result.pages > 1 ? (
-    <nav aria-label="Pagination" class="mt-4 flex items-center justify-between text-sm font-semibold">
-      {result.page > 1 ? (
-        <a href={pageHref(result.page - 1)} rel="prev" class="text-brand-600">
-          Previous
-        </a>
-      ) : (
-        <span />
-      )}
-      <span class="text-ink-600">
-        Page {result.page} of {result.pages}
-      </span>
-      {result.page < result.pages ? (
-        <a href={pageHref(result.page + 1)} rel="next" class="text-brand-600">
-          Next
-        </a>
-      ) : (
-        <span />
-      )}
-    </nav>
-  ) : null}
+      Costs of running the business appear here once recorded.
+    </EmptyState>
+    {result.items.map((e) => (
+      <tr>
+        <Cell tone="mute" class="kz-dt__nowrap">
+          {formatLongDate(e.expense_date)}
+        </Cell>
+        <Cell
+          m="main"
+          href={`/admin/expenses/${e.id}`}
+          title={e.description}
+          sub={`${e.vendor ?? 'No vendor'}${e.receipt_file_id ? ' · receipt attached' : ''}${e.status === 'void' ? ' · void' : ''}`}
+          subText
+        />
+        <Cell m="meta" tone="mute">
+          <span class="kz-dt__ph">{formatLongDate(e.expense_date)} · </span>
+          <span>{e.category}</span>
+        </Cell>
+        <Cell>{e.project_reference ?? e.client_name ?? '—'}</Cell>
+        <Cell m="amount" num>
+          {formatMoney(e.amount_minor, e.currency)}
+        </Cell>
+      </tr>
+    ))}
+  </DataTable>
+  <Pager page={result.page} pages={result.pages} href={pageHref} />
 </AdminLayout>

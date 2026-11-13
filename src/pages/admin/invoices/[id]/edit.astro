@@ -1,7 +1,8 @@
 ---
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import { InvoiceEditor } from '../../../../components/admin/InvoicesAdmin';
-import { fromApiLine } from '../../../../components/admin/LineItemEditor';
+import PageHead from '../../../../ui/admin/PageHead.astro';
+import { InvoiceEditor } from '../../../../ui/admin/invoices/InvoiceEditor';
+import { fromApiLine } from '../../../../ui/admin/documents/lines';
 import { loadAdminPage } from '../../../../server/lib/admin-page';
 import { AppError } from '../../../../server/lib/errors';
 import { getInvoice } from '../../../../server/modules/invoices';
@@ -44,18 +45,13 @@ const initial = {
 ---
 
 <AdminLayout title="Edit draft invoice" page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/invoices" class="hover:text-ink-950 hover:underline">
-      Invoices
-    </a>{' '}
-    /{' '}
-    <a href={`/admin/invoices/${inv.id}`} class="hover:text-ink-950 hover:underline">
-      Draft
-    </a>{' '}
-    / <span class="text-ink-950">Edit</span>
-  </nav>
-  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">Edit draft invoice</h1>
-  <div class="max-w-4xl">
-    <InvoiceEditor client:load id={inv.id} initial={initial} {...props} />
-  </div>
+  <PageHead
+    title="Edit draft invoice"
+    crumbs={[
+      { label: 'Invoices', href: '/admin/invoices' },
+      { label: 'Draft', href: `/admin/invoices/${inv.id}` },
+      { label: 'Edit' },
+    ]}
+  />
+  <InvoiceEditor client:load id={inv.id} initial={initial} {...props} />
 </AdminLayout>

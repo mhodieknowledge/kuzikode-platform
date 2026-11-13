@@ -1,5 +1,9 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Pane from '../../../ui/admin/Pane.astro';
+import PeriodForm from '../../../ui/admin/PeriodForm.astro';
+import EmptyState from '../../../ui/primitives/EmptyState.astro';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { EXPENSE_DISCLAIMER, expenseReport } from '../../../server/modules/expenses';
 import { expenseReportQuery } from '../../../shared/schemas/expenses';
@@ -11,7 +15,6 @@ if (page instanceof Response) return page;
 const parsed = expenseReportQuery.safeParse(Object.fromEntries(Astro.url.searchParams));
 const range = parsed.success ? parsed.data : {};
 const report = await expenseReport(ctx, range);
-const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
 const monthLabel = (m: string) =>
   new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
     new Date(`${m}-01T00:00:00Z`),
@@ -23,114 +26,81 @@ const exportQuery = new URLSearchParams({
 ---
 
 <AdminLayout title="Expense report" page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/expenses" class="hover:text-ink-950 hover:underline">
-      Expenses
-    </a>{' '}
-    / <span class="text-ink-950">Report</span>
-  </nav>
-  <h1 class="mt-2 text-2xl font-bold tracking-display">Expense report</h1>
-  <p class="mt-1 text-sm text-ink-600">{EXPENSE_DISCLAIMER} Void expenses are left out.</p>
-  <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Report period">
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      From
-      <input name="from" type="date" value={range.from ?? ''} class={field} />
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      To
-      <input name="to" type="date" value={range.to ?? ''} class={field} />
-    </label>
-    <button
-      type="submit"
-      class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
-    >
-      Show
-    </button>
-    <a
-      href={`/api/v1/admin/expenses/export.csv?${exportQuery.toString()}`}
-      download
-      class="inline-flex h-10 items-center px-2 text-sm font-semibold text-brand-600 underline"
-    >
-      Export CSV
-    </a>
-  </form>
+  <PageHead
+    title="Expense report"
+    meta={`${EXPENSE_DISCLAIMER} Void expenses are left out.`}
+    crumbs={[{ label: 'Expenses', href: '/admin/expenses' }, { label: 'Report' }]}
+  />
+  <div class="kz-atools">
+    <PeriodForm label="Report period" from={range.from ?? ''} to={range.to ?? ''}>
+      <a class="kz-btn kz-btn--quiet" href={`/api/v1/admin/expenses/export.csv?${exportQuery.toString()}`} download>
+        <span>Export CSV</span>
+      </a>
+    </PeriodForm>
+  </div>
   {report.totals.length === 0 ? (
-    <p class="mt-6 rounded-lg border border-line bg-surface px-4 py-10 text-center text-sm text-ink-600">
-      No expenses in this period.
-    </p>
+    <EmptyState code="0 expenses" title="No expenses in this period." />
   ) : (
-    <div class="mt-6 grid gap-6 lg:grid-cols-2">
-      <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="cat-h">
-        <h2 id="cat-h" class="font-sans text-base font-semibold">
-          By category
-        </h2>
-        <table class="mt-3 w-full text-sm">
+    <div class="kz-agrid kz-agrid--2">
+      <Pane title="By category" id="cat-h" flush>
+        <table class="kz-rt">
           <caption class="sr-only">Totals by category</caption>
-          <thead class="text-[13px] text-ink-600">
+          <thead>
             <tr>
-              <th scope="col" class="py-2 text-left font-semibold">
-                Category
-              </th>
-              <th scope="col" class="py-2 text-right font-semibold">
+              <th scope="col">Category</th>
+              <th scope="col" class="is-num">
                 Count
               </th>
-              <th scope="col" class="py-2 text-right font-semibold">
+              <th scope="col" class="is-num">
                 Total
               </th>
             </tr>
           </thead>
-          <tbody class="tnum">
+          <tbody>
             {report.byCategory.map((r) => (
-              <tr class="border-t border-line">
-                <td class="py-2">{r.category}</td>
-                <td class="py-2 text-right">{r.n}</td>
-                <td class="py-2 text-right font-medium">{formatMoney(r.total, r.currency)}</td>
+              <tr>
+                <td>{r.category}</td>
+                <td class="is-num">{r.n}</td>
+                <td class="is-num">{formatMoney(r.total, r.currency)}</td>
               </tr>
             ))}
           </tbody>
-          <tfoot class="tnum">
+          <tfoot>
             {report.totals.map((t) => (
-              <tr class="border-t-2 border-line font-semibold">
-                <th scope="row" class="py-2 text-left">
-                  Total ({t.currency})
-                </th>
-                <td class="py-2 text-right">{t.n}</td>
-                <td class="py-2 text-right">{formatMoney(t.total, t.currency)}</td>
+              <tr>
+                <th scope="row">Total ({t.currency})</th>
+                <td class="is-num">{t.n}</td>
+                <td class="is-num">{formatMoney(t.total, t.currency)}</td>
               </tr>
             ))}
           </tfoot>
         </table>
-      </section>
-      <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="mon-h">
-        <h2 id="mon-h" class="font-sans text-base font-semibold">
-          By month
-        </h2>
-        <table class="mt-3 w-full text-sm">
+      </Pane>
+      <Pane title="By month" id="mon-h" flush>
+        <table class="kz-rt">
           <caption class="sr-only">Totals by month</caption>
-          <thead class="text-[13px] text-ink-600">
+          <thead>
             <tr>
-              <th scope="col" class="py-2 text-left font-semibold">
-                Month
-              </th>
-              <th scope="col" class="py-2 text-right font-semibold">
+              <th scope="col">Month</th>
+              <th scope="col" class="is-num">
                 Count
               </th>
-              <th scope="col" class="py-2 text-right font-semibold">
+              <th scope="col" class="is-num">
                 Total
               </th>
             </tr>
           </thead>
-          <tbody class="tnum">
+          <tbody>
             {report.byMonth.map((r) => (
-              <tr class="border-t border-line">
-                <td class="py-2">{monthLabel(r.month)}</td>
-                <td class="py-2 text-right">{r.n}</td>
-                <td class="py-2 text-right font-medium">{formatMoney(r.total, r.currency)}</td>
+              <tr>
+                <td>{monthLabel(r.month)}</td>
+                <td class="is-num">{r.n}</td>
+                <td class="is-num">{formatMoney(r.total, r.currency)}</td>
               </tr>
             ))}
           </tbody>
         </table>
-      </section>
+      </Pane>
     </div>
   )}
 </AdminLayout>

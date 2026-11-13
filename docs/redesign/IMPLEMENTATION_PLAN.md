@@ -119,9 +119,10 @@ Ticked when the file is deleted (or, for the logic-only files marked *logic*, mo
 | admin/ClientsAdmin.tsx (incl. PortalSignupActions) | ui/admin/clients (useClients, ClientForm, ClientPanels, PortalSignupActions) | [x] R6.2 group 1 (deleted) |
 | admin/QuotationsAdmin.tsx | ui/admin/quotations (useQuotations, QuotationEditor, AddPackage, QuotationActions) | [x] R6.2 group 1 (deleted) |
 | admin/BarChart.astro | ui/admin/BarChart.astro + chart.ts (dashboard and reports) | [x] R6.2 group 1 (deleted) |
-| admin/LineItemEditor.tsx | ui/admin/documents (lines.ts logic + new LineItemEditor); quotations use it | [ ] R6.2 group 2 (still imported by InvoicesAdmin.tsx and pages/admin/invoices/[id]/edit.astro) |
-| admin/actions.tsx | ui/admin/action.ts (useAdminAction) | [ ] R6.2 group 2 (still imported by 8 admin islands) |
-| admin/*Admin.tsx (remaining modules), CmsTabs, ContentTabs, SettingsNav, SettingsSections, PaymentGateways, AccountActions | admin modules | [ ] R6.2 |
+| admin/LineItemEditor.tsx | ui/admin/documents (lines.ts logic + new LineItemEditor); quotations use it | [x] R6.2 group 2 (deleted) |
+| admin/InvoicesAdmin, PaymentsAdmin (RefundAction, PaymentAttempts), PaymentGateways, SubscriptionsAdmin (incl. AssetForm), ExpensesAdmin | ui/admin/{invoices,payments,subscriptions,expenses} (hooks + InvoiceEditor/Actions, RefundAction, PaymentAttempts, PaymentGateways, SubscriptionForm/Actions, AssetForm, ExpenseForm, VoidExpense, CategoriesManager), ui/admin/finance/labels.ts, PeriodForm.astro, FormSheet in form.tsx | [x] R6.2 group 2 (deleted) |
+| admin/actions.tsx | ui/admin/action.ts (useAdminAction) | [ ] R6.2 (still imported by Cms, Careers, Content, Projects, Support, Time islands) |
+| admin/*Admin.tsx (remaining modules), CmsTabs, ContentTabs, SettingsNav, SettingsSections, AccountActions | admin modules | [ ] R6.2 |
 | ui/* (Badge, Button, Card, Choice, DataTable, Dialog, Field, FileUpload, FilterBar, Input, Menu, MoneyInput, Pagination, QrCode, RichTextEditor, Spinner, States, Toast, cn, index; api.ts *logic*) | src/ui/primitives | [ ] R6.2 (last users are admin modules) |
 | dev/KitchenSink.tsx, pages/dev/ui.astro | new dev gallery | [x] R2.4 |
 | Token aliases in tokens.css / global.css | — | [ ] R6.2 exit |

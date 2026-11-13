@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import { SubscriptionForm } from '../../../../components/admin/SubscriptionsAdmin';
+import PageHead from '../../../../ui/admin/PageHead.astro';
+import { SubscriptionForm } from '../../../../ui/admin/subscriptions/SubscriptionForm';
 import { loadAdminPage } from '../../../../server/lib/admin-page';
 import { AppError } from '../../../../server/lib/errors';
 import { formOptions, getSubscription } from '../../../../server/modules/subscriptions';
@@ -39,26 +40,21 @@ const initial = {
 ---
 
 <AdminLayout title={`Edit ${s.description}`} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/subscriptions" class="hover:text-ink-950 hover:underline">
-      Subscriptions
-    </a>{' '}
-    /{' '}
-    <a href={`/admin/subscriptions/${s.id}`} class="hover:text-ink-950 hover:underline">
-      {s.description}
-    </a>{' '}
-    /<span class="text-ink-950">Edit</span>
-  </nav>
-  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">Edit subscription</h1>
-  <div class="max-w-3xl">
-    <SubscriptionForm
-      client:load
-      initial={initial}
-      clients={opts.clients}
-      packages={opts.packages}
-      currencies={opts.currencies}
-      taxRates={opts.taxRates}
-      billed={data.periods.length > 0}
-    />
-  </div>
+  <PageHead
+    title="Edit subscription"
+    crumbs={[
+      { label: 'Subscriptions', href: '/admin/subscriptions' },
+      { label: s.description, href: `/admin/subscriptions/${s.id}` },
+      { label: 'Edit' },
+    ]}
+  />
+  <SubscriptionForm
+    client:load
+    initial={initial}
+    clients={opts.clients}
+    packages={opts.packages}
+    currencies={opts.currencies}
+    taxRates={opts.taxRates}
+    billed={data.periods.length > 0}
+  />
 </AdminLayout>

@@ -1,5 +1,16 @@
 ---
+/** Subscriptions (R6.2): MRR strip, filters (sheet on phones), dense table → list rows (description, client, amount, status). */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import DataTable from '../../../ui/admin/DataTable.astro';
+import Cell from '../../../ui/admin/Cell.astro';
+import Pager from '../../../ui/admin/Pager.astro';
+import KpiStrip, { type Kpi } from '../../../ui/admin/KpiStrip.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import EmptyState from '../../../ui/primitives/EmptyState.astro';
+import { FilterBar } from '../../../ui/admin/FilterBar';
+import { SUBSCRIPTION_STATUS } from '../../../ui/admin/finance/labels';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { listSubscriptions } from '../../../server/modules/subscriptions';
 import { subscriptionListQuery } from '../../../shared/schemas/subscriptions';
@@ -13,14 +24,6 @@ const parsed = subscriptionListQuery.safeParse(Object.fromEntries(Astro.url.sear
 const filter = parsed.success ? parsed.data : subscriptionListQuery.parse({});
 const result = await listSubscriptions(ctx, filter);
 const canManage = page.auth.permissions.has('subscriptions.manage');
-const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
-const STATUS: Record<string, { label: string; cls: string }> = {
-  active: { label: 'Active', cls: 'bg-success-50 text-success-700' },
-  at_risk: { label: 'At risk', cls: 'bg-danger-50 text-danger-700' },
-  paused: { label: 'Paused', cls: 'bg-warning-50 text-warning-700' },
-  cancelled: { label: 'Cancelled', cls: 'bg-ink-950/5 text-ink-800' },
-  ended: { label: 'Ended', cls: 'bg-ink-950/5 text-ink-800' },
-};
 const pageHref = (n: number) => {
   const q = new URLSearchParams(Astro.url.searchParams);
   q.set('page', String(n));
@@ -28,150 +31,96 @@ const pageHref = (n: number) => {
 };
 const amount = (s: (typeof result.items)[number]) =>
   formatMoney(mulDivHalfEven(s.unit_price_minor, s.quantity_milli, 1000), s.currency);
+const filtered = !!(filter.q || filter.status || filter.dueBy);
+const tiles: Kpi[] = result.mrr.length
+  ? [
+      { label: 'MRR', values: result.mrr.map((m) => `${formatMoney(m.mrrMinor, m.currency)} / mo`) },
+      {
+        label: 'ARR',
+        values: result.mrr.map((m) => formatMoney(m.arrMinor, m.currency)),
+        note: `${result.mrr.reduce((n, m) => n + m.count, 0)} subscriptions`,
+      },
+    ]
+  : [];
 ---
 
 <AdminLayout title="Subscriptions" page={page}>
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold tracking-display">Subscriptions</h1>
-      <p class="mt-1 text-sm text-ink-600">
-        Recurring billing. Invoices for each period are created automatically before the billing date.
-      </p>
-    </div>
+  <PageHead
+    title="Subscriptions"
+    meta="Recurring billing. Invoices for each period are created automatically before the billing date."
+  >
     {canManage ? (
-      <a
-        href="/admin/subscriptions/new"
-        class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
-      >
+      <Button slot="actions" href="/admin/subscriptions/new" lead="add">
         New subscription
-      </a>
+      </Button>
     ) : null}
+  </PageHead>
+  {tiles.length ? <KpiStrip items={tiles} testId="mrr" /> : null}
+  <div class="kz-atools kz-agap">
+    <FilterBar
+      client:load
+      label="Filter subscriptions"
+      clearHref="/admin/subscriptions"
+      fields={[
+        { kind: 'search', name: 'q', label: 'Search', value: filter.q ?? '', placeholder: 'Client or description' },
+        {
+          kind: 'select',
+          name: 'status',
+          label: 'Status',
+          value: filter.status ?? 'open',
+          options: [
+            { value: 'open', label: 'Open (active, at risk, paused)' },
+            ...Object.entries(SUBSCRIPTION_STATUS).map(([value, s]) => ({ value, label: s.label })),
+            { value: 'all', label: 'All' },
+          ],
+        },
+        { kind: 'date', name: 'dueBy', label: 'Next billing by', value: filter.dueBy ?? '' },
+      ]}
+    />
   </div>
-  {result.mrr.length ? (
-    <dl class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4" data-testid="mrr">
-      {result.mrr.map((m) => (
-        <div class="rounded-lg border border-line bg-surface p-4">
-          <dt class="text-[13px] font-semibold text-ink-600">MRR ({m.currency})</dt>
-          <dd class="tnum mt-1 text-xl font-bold text-ink-950">{formatMoney(m.mrrMinor, m.currency)}</dd>
-          <dd class="text-[13px] text-ink-600">
-            ARR {formatMoney(m.arrMinor, m.currency)} · {m.count} {m.count === 1 ? 'subscription' : 'subscriptions'}
-          </dd>
-        </div>
-      ))}
-    </dl>
-  ) : null}
-  <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter subscriptions">
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Search
-      <input
-        name="q"
-        type="search"
-        value={filter.q ?? ''}
-        maxlength="80"
-        class={field}
-        placeholder="Client or description"
-      />
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Status
-      <select name="status" class={field}>
-        <option value="open" selected={!filter.status || filter.status === 'open'}>
-          Open (active, at risk, paused)
-        </option>
-        {Object.entries(STATUS).map(([k, v]) => (
-          <option value={k} selected={filter.status === k}>
-            {v.label}
-          </option>
-        ))}
-        <option value="all" selected={filter.status === 'all'}>
-          All
-        </option>
-      </select>
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Next billing by
-      <input name="dueBy" type="date" value={filter.dueBy ?? ''} class={field} />
-    </label>
-    <button
-      type="submit"
-      class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
+  <DataTable
+    caption="Subscriptions"
+    count={result.items.length}
+    columns={[
+      { label: 'Description' },
+      { label: 'Client' },
+      { label: 'Amount', num: true },
+      { label: 'Next billing' },
+      { label: 'Status' },
+    ]}
+  >
+    <EmptyState
+      slot="empty"
+      code={filtered ? 'no matches' : '0 subscriptions'}
+      title={filtered ? 'No subscriptions match these filters.' : 'No subscriptions yet.'}
     >
-      Filter
-    </button>
-  </form>
-  <div class="relative mt-6 overflow-x-auto rounded-lg border border-line bg-surface">
-    <table class="w-full min-w-[720px] text-left text-sm">
-      <caption class="sr-only">Subscriptions</caption>
-      <thead class="bg-canvas text-[13px] text-ink-600">
-        <tr>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Client
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Description
-          </th>
-          <th scope="col" class="px-4 py-3 text-right font-semibold">
-            Amount
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Next billing
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Status
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {result.items.length === 0 ? (
-          <tr>
-            <td colspan="5" class="px-4 py-8 text-center text-ink-600">
-              {filter.q || filter.status ? 'No subscriptions match these filters.' : 'No subscriptions yet.'}
-            </td>
-          </tr>
-        ) : (
-          result.items.map((s) => (
-            <tr class="border-t border-line">
-              <td class="px-4 py-3 text-ink-950">{s.client_name}</td>
-              <td class="px-4 py-3">
-                <a href={`/admin/subscriptions/${s.id}`} class="font-semibold text-ink-950 hover:underline">
-                  {s.description}
-                </a>
-                {s.quantity_milli !== 1000 ? (
-                  <span class="text-ink-600"> × {formatQuantity(s.quantity_milli)}</span>
-                ) : null}
-              </td>
-              <td class="tnum px-4 py-3 text-right text-ink-950">
-                {amount(s)} <span class="text-ink-600">/ {s.interval === 'month' ? 'month' : 'year'}</span>
-              </td>
-              <td class="px-4 py-3 text-ink-800">
-                {['active', 'at_risk'].includes(s.status) ? formatLongDate(s.next_billing_date) : '—'}
-              </td>
-              <td class="px-4 py-3">
-                <span class={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${STATUS[s.status]?.cls ?? ''}`}>
-                  {STATUS[s.status]?.label ?? s.status}
-                </span>
-              </td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-  </div>
-  {result.pages > 1 ? (
-    <nav aria-label="Pages" class="mt-4 flex items-center gap-3 text-sm">
-      {result.page > 1 ? (
-        <a href={pageHref(result.page - 1)} class="font-semibold text-brand-600">
-          Previous
-        </a>
-      ) : null}
-      <span class="text-ink-600">
-        Page {result.page} of {result.pages}
-      </span>
-      {result.page < result.pages ? (
-        <a href={pageHref(result.page + 1)} class="font-semibold text-brand-600">
-          Next
-        </a>
-      ) : null}
-    </nav>
-  ) : null}
+      Recurring plans for clients appear here.
+    </EmptyState>
+    {result.items.map((s) => (
+      <tr>
+        <Cell
+          m="main"
+          href={`/admin/subscriptions/${s.id}`}
+          title={s.description}
+          sub={s.quantity_milli !== 1000 ? `× ${formatQuantity(s.quantity_milli)}` : undefined}
+        />
+        <Cell m="meta" tone="mute">
+          <span>{s.client_name}</span>
+          {['active', 'at_risk'].includes(s.status) ? (
+            <span class="kz-dt__ph"> · next {formatLongDate(s.next_billing_date)}</span>
+          ) : null}
+        </Cell>
+        <Cell m="amount" num>
+          {amount(s)} <span class="kz-dt__per">/ {s.interval === 'month' ? 'mo' : 'yr'}</span>
+        </Cell>
+        <Cell tone="mute">{['active', 'at_risk'].includes(s.status) ? formatLongDate(s.next_billing_date) : '—'}</Cell>
+        <Cell m="status">
+          <StatusPill tone={SUBSCRIPTION_STATUS[s.status]?.tone ?? 'neutral'}>
+            {SUBSCRIPTION_STATUS[s.status]?.label ?? s.status}
+          </StatusPill>
+        </Cell>
+      </tr>
+    ))}
+  </DataTable>
+  <Pager page={result.page} pages={result.pages} href={pageHref} />
 </AdminLayout>

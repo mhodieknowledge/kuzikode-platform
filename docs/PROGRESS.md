@@ -1234,3 +1234,12 @@ The **Next step** line must be specific enough that a fresh session can continue
   Known: quotation intro still uses legacy `components/ui/RichTextEditor` (rebuild in Website group).
 - 16:30 UTC: usage limit paused the group 2 (Finance) builder from ~13:00 to 16:30; resumed. Partial work in `src/ui/admin/{finance,invoices}/`.
 - 17:02 UTC heartbeat: group 2 builder still running.
+
+## 2026-11-13 17:40 UTC · R6.2 group 2 ✅ Finance (invoices, payments + gateways, subscriptions, managed services, expenses, reports)
+- New `src/ui/admin/{finance,invoices,payments,subscriptions,expenses}/*`, `PeriodForm.astro`, `FormSheet` in form.tsx, FilterBar `date` kind.
+  Deleted `components/admin/{InvoicesAdmin,PaymentsAdmin,SubscriptionsAdmin,ExpensesAdmin,PaymentGateways,LineItemEditor}.tsx`.
+- verify green (unit 636, integration 308); e2e invoices, payment-gateways, reconciliation, subscriptions, reports, checkout, full-journey, admin-shell, quotations, sweep green.
+- Tiers: builder ran opus/medium (a sonnet brief fell back to the session model); orchestrator reviewed screenshots. Paused 13:00–16:30 by the usage limit.
+- Next step: R6.2 group 3 Delivery (projects `ProjectsAdmin.tsx`, time `TimeAdmin.tsx`, support `SupportAdmin.tsx`), then Website (pages/CmsAdmin, services,
+  packages, content, media, careers; rebuild `components/ui/RichTextEditor` into `src/ui/`), then Administration (users, settings + SettingsNav/Sections,
+  audit, notifications, account `AccountActions.tsx`). Then delete `components/admin/actions.tsx` and the rest of `components/`.

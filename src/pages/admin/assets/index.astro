@@ -1,5 +1,16 @@
 ---
+/** Managed services register (R6.2): renewals calendar pane, filters (sheet on phones), dense table → list rows. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Pane from '../../../ui/admin/Pane.astro';
+import DataTable from '../../../ui/admin/DataTable.astro';
+import Cell from '../../../ui/admin/Cell.astro';
+import Pager from '../../../ui/admin/Pager.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import EmptyState from '../../../ui/primitives/EmptyState.astro';
+import { FilterBar } from '../../../ui/admin/FilterBar';
+import { ASSET_STATUS_TONE } from '../../../ui/admin/finance/labels';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { addDays, businessDate } from '../../../server/lib/dates';
 import { ASSET_TYPE_LABELS, listAssets } from '../../../server/modules/subscriptions';
@@ -27,59 +38,52 @@ const monthName = (k: string) =>
     new Date(`${k}-01T00:00:00Z`),
   );
 const overdue = (d: string | null) => !!d && d < today;
-const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
 const saved = Astro.url.searchParams.get('saved') === '1';
 const pageHref = (n: number) => {
   const q = new URLSearchParams(Astro.url.searchParams);
   q.set('page', String(n));
   return `/admin/assets?${q.toString()}`;
 };
+const filtered = !!(filter.q || filter.type);
+const cap = (st: string) => (st === 'all' ? 'All' : st.charAt(0).toUpperCase() + st.slice(1));
 ---
 
 <AdminLayout title="Managed services" page={page}>
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold tracking-display">Managed services</h1>
-      <p class="mt-1 text-sm text-ink-600">
-        Domains, hosting, email and certificates we look after. Reminders go out 30, 14 and 7 days before each renewal.
+  <PageHead
+    title="Managed services"
+    meta="Domains, hosting, email and certificates we look after. Reminders go out 30, 14 and 7 days before each renewal."
+  >
+    <Button slot="actions" href="/admin/assets/new" lead="add">
+      Add to register
+    </Button>
+  </PageHead>
+  {saved ? (
+    <div class="kz-anotices">
+      <p role="status" class="kz-anotice kz-anotice--ok">
+        Saved.
       </p>
     </div>
-    <a
-      href="/admin/assets/new"
-      class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
-    >
-      Add to register
-    </a>
-  </div>
-  {saved ? (
-    <p
-      role="status"
-      class="mt-4 rounded-sm border border-success-700/30 bg-success-50 px-4 py-3 text-sm text-success-700"
-    >
-      Saved.
-    </p>
   ) : null}
-  <section class="mt-6 rounded-lg border border-line bg-surface p-6" aria-labelledby="cal-title">
-    <h2 id="cal-title" class="font-sans text-base font-semibold">
-      Renewals in the next 90 days
-    </h2>
+  <Pane title="Renewals in the next 90 days" id="cal-title">
     {months.size === 0 ? (
-      <p class="mt-3 text-sm text-ink-600">Nothing renews in the next 90 days.</p>
+      <p class="kz-afeed__t">Nothing renews in the next 90 days.</p>
     ) : (
-      <div class="mt-3 grid gap-6 md:grid-cols-3">
+      <div class="kz-agrid kz-agrid--3 kz-cal">
         {[...months.entries()].map(([k, items]) => (
-          <div>
-            <h3 class="text-sm font-semibold text-ink-950">{monthName(k)}</h3>
-            <ul class="mt-2 flex flex-col gap-2">
+          <div class="kz-cal__m">
+            <h3 class="kz-cal__h">{monthName(k)}</h3>
+            <ul class="kz-alist kz-alist--bare" role="list">
               {items.map((a) => (
-                <li class="text-sm">
-                  <a href={`/admin/assets/${a.id}`} class="font-medium text-ink-950 hover:underline">
-                    {a.name}
-                  </a>
-                  <span class="block text-[12px] text-ink-600">
-                    {formatLongDate(a.renewal_date!)} · {a.client_name}
-                    {a.auto_renew === 1 ? ' · auto-renews' : ''}
-                  </span>
+                <li>
+                  <div class="kz-alist__main">
+                    <a href={`/admin/assets/${a.id}`} class="kz-alist__t">
+                      {a.name}
+                    </a>
+                    <span class="kz-alist__m">
+                      {formatLongDate(a.renewal_date!)} · {a.client_name}
+                      {a.auto_renew === 1 ? ' · auto-renews' : ''}
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -87,114 +91,79 @@ const pageHref = (n: number) => {
         ))}
       </div>
     )}
-  </section>
-  <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter the register">
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Search
-      <input
-        name="q"
-        type="search"
-        value={filter.q ?? ''}
-        maxlength="80"
-        class={field}
-        placeholder="Name, provider or client"
-      />
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Type
-      <select name="type" class={field}>
-        <option value="">Any</option>
-        {ASSET_TYPES.map((t) => (
-          <option value={t} selected={filter.type === t}>
-            {ASSET_TYPE_LABELS[t]}
-          </option>
-        ))}
-      </select>
-    </label>
-    <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-      Status
-      <select name="status" class={field}>
-        {['active', 'expired', 'cancelled', 'transferred', 'all'].map((st) => (
-          <option value={st} selected={(filter.status ?? 'active') === st}>
-            {st === 'all' ? 'All' : st.charAt(0).toUpperCase() + st.slice(1)}
-          </option>
-        ))}
-      </select>
-    </label>
-    <button
-      type="submit"
-      class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
-    >
-      Filter
-    </button>
-  </form>
-  <div class="relative mt-6 overflow-x-auto rounded-lg border border-line bg-surface">
-    <table class="w-full min-w-[680px] text-left text-sm">
-      <caption class="sr-only">Managed services</caption>
-      <thead class="bg-canvas text-[13px] text-ink-600">
-        <tr>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Name
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Type
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Client
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Provider
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Renewal
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {result.items.length === 0 ? (
-          <tr>
-            <td colspan="5" class="px-4 py-8 text-center text-ink-600">
-              {filter.q || filter.type ? 'Nothing matches these filters.' : 'The register is empty.'}
-            </td>
-          </tr>
-        ) : (
-          result.items.map((a) => (
-            <tr class="border-t border-line">
-              <td class="px-4 py-3">
-                <a href={`/admin/assets/${a.id}`} class="font-semibold text-ink-950 hover:underline">
-                  {a.name}
-                </a>
-              </td>
-              <td class="px-4 py-3 text-ink-800">{ASSET_TYPE_LABELS[a.type] ?? a.type}</td>
-              <td class="px-4 py-3 text-ink-800">{a.client_name}</td>
-              <td class="px-4 py-3 text-ink-800">{a.provider ?? '—'}</td>
-              <td
-                class:list={['px-4 py-3', overdue(a.renewal_date) ? 'font-semibold text-danger-700' : 'text-ink-800']}
-              >
-                {a.renewal_date ? formatLongDate(a.renewal_date) : '—'}
-                {overdue(a.renewal_date) ? ' (passed)' : ''}
-              </td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
+  </Pane>
+  <div class="kz-atools kz-agap">
+    <FilterBar
+      client:load
+      label="Filter the register"
+      clearHref="/admin/assets"
+      fields={[
+        { kind: 'search', name: 'q', label: 'Search', value: filter.q ?? '', placeholder: 'Name, provider or client' },
+        {
+          kind: 'select',
+          name: 'type',
+          label: 'Type',
+          value: filter.type ?? '',
+          options: [
+            { value: '', label: 'Any' },
+            ...ASSET_TYPES.map((t) => ({ value: t, label: ASSET_TYPE_LABELS[t] ?? t })),
+          ],
+        },
+        {
+          kind: 'select',
+          name: 'status',
+          label: 'Status',
+          value: filter.status ?? 'active',
+          options: ['active', 'expired', 'cancelled', 'transferred', 'all'].map((st) => ({
+            value: st,
+            label: cap(st),
+          })),
+        },
+      ]}
+    />
   </div>
-  {result.pages > 1 ? (
-    <nav aria-label="Pages" class="mt-4 flex items-center gap-3 text-sm">
-      {result.page > 1 ? (
-        <a href={pageHref(result.page - 1)} class="font-semibold text-brand-600">
-          Previous
-        </a>
-      ) : null}
-      <span class="text-ink-600">
-        Page {result.page} of {result.pages}
-      </span>
-      {result.page < result.pages ? (
-        <a href={pageHref(result.page + 1)} class="font-semibold text-brand-600">
-          Next
-        </a>
-      ) : null}
-    </nav>
-  ) : null}
+  <DataTable
+    caption="Managed services"
+    count={result.items.length}
+    columns={[
+      { label: 'Name' },
+      { label: 'Type' },
+      { label: 'Client' },
+      { label: 'Provider' },
+      { label: 'Renewal' },
+      { label: 'Status' },
+    ]}
+  >
+    <EmptyState
+      slot="empty"
+      code={filtered ? 'no matches' : '0 services'}
+      title={filtered ? 'Nothing matches these filters.' : 'The register is empty.'}
+    >
+      Domains, hosting and other services we manage for clients are listed here.
+    </EmptyState>
+    {result.items.map((a) => (
+      <tr>
+        <Cell
+          m="main"
+          href={`/admin/assets/${a.id}`}
+          title={a.name}
+          sub={ASSET_TYPE_LABELS[a.type] ?? a.type}
+          subText
+        />
+        <Cell m="meta" tone="mute">
+          <span>{a.client_name}</span>
+        </Cell>
+        <Cell tone="mute">{ASSET_TYPE_LABELS[a.type] ?? a.type}</Cell>
+        <Cell tone="mute">{a.provider ?? '—'}</Cell>
+        <Cell m="amount" tone={overdue(a.renewal_date) ? 'alert' : 'mute'}>
+          {a.renewal_date ? formatLongDate(a.renewal_date) : '—'}
+          {overdue(a.renewal_date) ? ' (passed)' : ''}
+        </Cell>
+        <Cell m="status">
+          <StatusPill tone={ASSET_STATUS_TONE[a.status] ?? 'neutral'}>{cap(a.status)}</StatusPill>
+        </Cell>
+      </tr>
+    ))}
+  </DataTable>
+  <Pager page={result.page} pages={result.pages} href={pageHref} />
 </AdminLayout>

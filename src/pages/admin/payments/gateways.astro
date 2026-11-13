@@ -1,7 +1,9 @@
 ---
 /** Payment gateways: provider accounts and routing (docs/06 §2, P6.3c). Super Administrators only. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { PaymentGateways } from '../../../components/admin/PaymentGateways';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Views from '../../../ui/admin/Views.astro';
+import { PaymentGateways } from '../../../ui/admin/payments/PaymentGateways';
 import { forbiddenPage, loadAdminPage } from '../../../server/lib/admin-page';
 import { isSuperAdmin } from '../../../server/lib/policies';
 import { paymentConfig } from '../../../server/modules/payments';
@@ -16,28 +18,27 @@ const currencies = (
     .prepare('SELECT code FROM currencies WHERE active = 1 ORDER BY is_default DESC, code')
     .all<{ code: string }>()
 ).results.map((c) => c.code);
-const tab = (active: boolean) =>
-  `inline-flex h-10 items-center border-b-2 px-1 text-sm font-semibold ${active ? 'border-brand-600 text-ink-950' : 'border-transparent text-ink-600 hover:text-ink-950'}`;
 ---
 
 <AdminLayout title="Payment gateways" page={page}>
-  <h1 class="text-2xl font-bold tracking-display">Payments</h1>
-  <nav aria-label="Payment views" class="mt-4 flex gap-6 border-b border-line">
-    <a href="/admin/payments" class={tab(false)}>
-      All payments
-    </a>
-    <a href="/admin/payments?view=unmatched" class={tab(false)}>
-      Unmatched
-    </a>
-    <a href="/admin/payments/gateways" class={tab(true)} aria-current="page">
-      Gateways
-    </a>
-  </nav>
-  <p class="mt-6 max-w-3xl text-sm text-ink-600">
-    Clients pay through the account that a route picks for the invoice's currency and the chosen method: an exact
-    currency beats "any", then an exact method beats "any", then the lowest priority number. Accounts with missing
-    secrets are skipped. Switching gateway is a change of route; payments already started finish on their own account.
-    Secrets are set as Worker secrets by name (never here).
-  </p>
+  <PageHead title="Payments">
+    <Fragment slot="meta">
+      Clients pay through the account that a route picks for the invoice&apos;s currency and the chosen method: an exact
+      currency beats &quot;any&quot;, then an exact method beats &quot;any&quot;, then the lowest priority number.
+      Accounts with missing secrets are skipped. Switching gateway is a change of route; payments already started finish
+      on their own account. Secrets are set as Worker secrets by name (never here).
+    </Fragment>
+  </PageHead>
+  <div class="kz-atools">
+    <Views
+      label="Payment views"
+      items={[
+        { key: 'all', label: 'All payments', href: '/admin/payments' },
+        { key: 'unmatched', label: 'Unmatched', href: '/admin/payments?view=unmatched' },
+        { key: 'gateways', label: 'Gateways', href: '/admin/payments/gateways' },
+      ]}
+      current="gateways"
+    />
+  </div>
   <PaymentGateways client:load initial={config} currencies={currencies} />
 </AdminLayout>

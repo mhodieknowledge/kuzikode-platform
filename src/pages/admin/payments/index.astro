@@ -1,10 +1,24 @@
 ---
+/**
+ * Payments (R6.2): views (all / unmatched / gateways), received strip, filters (sheet on phones), dense table → list rows
+ * (receipt, client, amount + status). Unmatched gateway notifications keep their own list.
+ */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Pane from '../../../ui/admin/Pane.astro';
+import Views from '../../../ui/admin/Views.astro';
+import DataTable from '../../../ui/admin/DataTable.astro';
+import Cell from '../../../ui/admin/Cell.astro';
+import Pager from '../../../ui/admin/Pager.astro';
+import KpiStrip, { type Kpi } from '../../../ui/admin/KpiStrip.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import EmptyState from '../../../ui/primitives/EmptyState.astro';
+import { FilterBar } from '../../../ui/admin/FilterBar';
+import { PAYMENT_METHOD, PAYMENT_PROVIDER, PAYMENT_STATUS } from '../../../ui/admin/finance/labels';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { isSuperAdmin } from '../../../server/lib/policies';
 import { listPayments, listUnmatched } from '../../../server/modules/payments';
 import { paymentListQuery, PAYMENT_STATUSES } from '../../../shared/schemas/payments';
-import { MANUAL_PAYMENT_METHODS } from '../../../shared/invoices';
 import { formatMoney } from '../../../shared/money';
 import { formatLongDate } from '../../../shared/service-display';
 
@@ -23,22 +37,6 @@ const currencies = (
     .prepare('SELECT code FROM currencies WHERE active = 1 ORDER BY is_default DESC, code')
     .all<{ code: string }>()
 ).results;
-const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink-950';
-const STATUS: Record<string, [string, string]> = {
-  completed: ['Completed', 'bg-success-50 text-success-700'],
-  partially_refunded: ['Part refunded', 'bg-warning-50 text-warning-700'],
-  refunded: ['Refunded', 'bg-ink-950/5 text-ink-800'],
-  reversed: ['Reversed', 'bg-danger-50 text-danger-700'],
-};
-const METHOD: Record<string, string> = Object.fromEntries(
-  MANUAL_PAYMENT_METHODS.map((m) => [m.value, m.label.replace(' (manual)', '')]),
-);
-const PROVIDER: Record<string, string> = {
-  manual: 'Recorded manually',
-  paynow: 'Paynow',
-  pesepay: 'PesePay',
-  mock: 'Test provider',
-};
 const pages = unmatchedView ? unmatched.pages : result!.pages;
 const current = unmatchedView ? unmatched.page : result!.page;
 const pageHref = (n: number) => {
@@ -46,238 +44,176 @@ const pageHref = (n: number) => {
   q.set('page', String(n));
   return `/admin/payments?${q.toString()}`;
 };
-const tab = (active: boolean) =>
-  `inline-flex h-10 items-center border-b-2 px-1 text-sm font-semibold ${active ? 'border-brand-600 text-ink-950' : 'border-transparent text-ink-600 hover:text-ink-950'}`;
+const filtered = parsed.success && Object.keys(Object.fromEntries(params)).length > 0;
+const tiles: Kpi[] =
+  result && result.totals.length
+    ? [
+        { label: 'Received', values: result.totals.map((t) => formatMoney(t.received, t.currency)) },
+        ...(result.totals.some((t) => t.refunded > 0)
+          ? [
+              {
+                label: 'Refunded',
+                values: result.totals.filter((t) => t.refunded > 0).map((t) => formatMoney(t.refunded, t.currency)),
+              },
+            ]
+          : []),
+      ]
+    : [];
+const views = [
+  { key: 'all', label: 'All payments', href: '/admin/payments' },
+  { key: 'unmatched', label: 'Unmatched', href: '/admin/payments?view=unmatched', count: unmatched.total || undefined },
+  ...(isSuperAdmin(ctx) ? [{ key: 'gateways', label: 'Gateways', href: '/admin/payments/gateways' }] : []),
+];
 ---
 
 <AdminLayout title="Payments" page={page}>
-  <h1 class="text-2xl font-bold tracking-display">Payments</h1>
-  <nav aria-label="Payment views" class="mt-4 flex gap-6 border-b border-line">
-    <a href="/admin/payments" class={tab(!unmatchedView)} aria-current={!unmatchedView ? 'page' : undefined}>
-      All payments
-    </a>
-    <a
-      href="/admin/payments?view=unmatched"
-      class={tab(unmatchedView)}
-      aria-current={unmatchedView ? 'page' : undefined}
-    >
-      Unmatched{unmatched.total ? ` (${unmatched.total})` : ''}
-    </a>
-    {isSuperAdmin(ctx) ? (
-      <a href="/admin/payments/gateways" class={tab(false)}>
-        Gateways
-      </a>
-    ) : null}
-  </nav>
-
+  <PageHead title="Payments" meta="Money received, by receipt." />
+  <div class="kz-atools">
+    <Views label="Payment views" items={views} current={unmatchedView ? 'unmatched' : 'all'} />
+  </div>
   {unmatchedView ? (
-    <section class="mt-6" aria-labelledby="um-h">
-      <h2 id="um-h" class="sr-only">
-        Unmatched gateway notifications
-      </h2>
-      <p class="max-w-3xl text-sm text-ink-600">
+    <Pane title="Unmatched gateway notifications" flush>
+      <p class="kz-apad kz-afeed__t">
         Notifications from a payment gateway that did not match any payment started here. Check the reference in the
-        gateway's merchant dashboard; if the client really paid, record the payment on the right invoice. Entries stay
-        here for the record.
+        gateway&apos;s merchant dashboard; if the client really paid, record the payment on the right invoice. Entries
+        stay here for the record.
       </p>
       {unmatched.items.length === 0 ? (
-        <p class="mt-6 rounded-lg border border-line bg-surface px-4 py-10 text-center text-sm text-ink-600">
-          Nothing unmatched.
+        <p class="kz-anone">
+          <span class="kz-anone__code">0 unmatched</span>Nothing unmatched.
         </p>
       ) : (
-        <ul class="mt-4 flex flex-col gap-3">
+        <ul class="kz-alist" role="list">
           {unmatched.items.map((e) => (
-            <li class="rounded-lg border border-line bg-surface p-4 text-sm">
-              <p class="font-semibold text-ink-950">
-                {PROVIDER[e.provider_key] ?? e.provider_key}
-                {e.account ? ` · ${e.account}` : ''} ·{' '}
-                <span class="font-mono">{e.provider_reference ?? 'no reference'}</span>
-              </p>
-              <p class="text-[12px] text-ink-600">{formatLongDate(e.received_at)}</p>
-              {e.payload_redacted ? (
-                <pre class="mt-2 max-h-40 overflow-auto rounded-sm bg-canvas p-3 text-[12px] whitespace-pre-wrap">{e.payload_redacted}</pre>
-              ) : null}
+            <li>
+              <div class="kz-alist__main">
+                <span class="kz-alist__t">
+                  {PAYMENT_PROVIDER[e.provider_key] ?? e.provider_key}
+                  {e.account ? ` · ${e.account}` : ''} ·{' '}
+                  <span class="kz-amono">{e.provider_reference ?? 'no reference'}</span>
+                </span>
+                <span class="kz-alist__m">{formatLongDate(e.received_at)}</span>
+                {e.payload_redacted ? <pre class="kz-apre">{e.payload_redacted}</pre> : null}
+              </div>
             </li>
           ))}
         </ul>
       )}
-    </section>
+    </Pane>
   ) : (
     <>
-      {result!.totals.length ? (
-        <dl class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {result!.totals.map((t) => (
-            <div class="rounded-lg border border-line bg-surface p-4">
-              <dt class="text-[13px] font-semibold text-ink-600">Received ({t.currency})</dt>
-              <dd class="tnum mt-1 text-xl font-bold text-ink-950">{formatMoney(t.received, t.currency)}</dd>
-              {t.refunded > 0 ? (
-                <dd class="tnum mt-1 text-[13px] text-ink-600">{formatMoney(t.refunded, t.currency)} refunded</dd>
-              ) : null}
-            </div>
-          ))}
-        </dl>
-      ) : null}
-      <form method="get" class="mt-6 flex flex-wrap items-end gap-3" aria-label="Filter payments">
-        <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-          Search
-          <input
-            name="q"
-            type="search"
-            value={filter.q ?? ''}
-            maxlength="80"
-            class={field}
-            placeholder="Receipt, invoice, reference or client"
-          />
-        </label>
-        <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-          Status
-          <select name="status" class={field}>
-            <option value="">Any</option>
-            {PAYMENT_STATUSES.map((s) => (
-              <option value={s} selected={filter.status === s}>
-                {STATUS[s]![0]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-          Provider
-          <select name="provider" class={field}>
-            <option value="">Any</option>
-            {Object.entries(PROVIDER).map(([k, l]) => (
-              <option value={k} selected={filter.provider === k}>
-                {l}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-          Method
-          <select name="method" class={field}>
-            <option value="">Any</option>
-            {Object.entries(METHOD).map(([k, l]) => (
-              <option value={k} selected={filter.method === k}>
-                {l}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-          Currency
-          <select name="currency" class={field}>
-            <option value="">Any</option>
-            {currencies.map((c) => (
-              <option value={c.code} selected={filter.currency === c.code}>
-                {c.code}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-          From
-          <input name="from" type="date" value={filter.from ?? ''} class={field} />
-        </label>
-        <label class="flex flex-col gap-1 text-sm font-medium text-ink-950">
-          To
-          <input name="to" type="date" value={filter.to ?? ''} class={field} />
-        </label>
-        {filter.clientId ? <input type="hidden" name="clientId" value={filter.clientId} /> : null}
-        <button
-          type="submit"
-          class="h-10 rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400"
-        >
-          Filter
-        </button>
-      </form>
-      <div class="mt-6 relative overflow-x-auto rounded-lg border border-line bg-surface">
-        <table class="w-full min-w-[720px] text-left text-sm">
-          <caption class="sr-only">Payments</caption>
-          <thead class="bg-canvas text-[13px] text-ink-600">
-            <tr>
-              <th scope="col" class="px-4 py-3 font-semibold">
-                Receipt
-              </th>
-              <th scope="col" class="px-4 py-3 font-semibold">
-                Client
-              </th>
-              <th scope="col" class="px-4 py-3 font-semibold">
-                Invoices
-              </th>
-              <th scope="col" class="px-4 py-3 font-semibold">
-                Method
-              </th>
-              <th scope="col" class="px-4 py-3 font-semibold">
-                Status
-              </th>
-              <th scope="col" class="px-4 py-3 text-right font-semibold">
-                Amount
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {result!.items.length === 0 ? (
-              <tr>
-                <td colspan="6" class="px-4 py-10 text-center text-ink-600">
-                  {parsed.success && Object.keys(Object.fromEntries(params)).length
-                    ? 'No payments match these filters.'
-                    : 'No payments yet. Payments recorded on invoices appear here.'}
-                </td>
-              </tr>
-            ) : (
-              result!.items.map((p) => (
-                <tr class="border-t border-line">
-                  <td class="px-4 py-3">
-                    <a href={`/admin/payments/${p.id}`} class="font-mono font-semibold text-ink-950 hover:underline">
-                      {p.receipt_number}
-                    </a>
-                    <span class="block text-[12px] text-ink-600">{formatLongDate(p.received_at)}</span>
-                  </td>
-                  <td class="px-4 py-3 text-ink-800">{p.client_name}</td>
-                  <td class="px-4 py-3 font-mono text-[13px] text-ink-800">{p.invoices ?? '—'}</td>
-                  <td class="px-4 py-3 text-ink-800">
-                    {METHOD[p.method] ?? p.method}
-                    <span class="block text-[12px] text-ink-600">{PROVIDER[p.provider_key] ?? p.provider_key}</span>
-                    {p.provider_reference || p.reference ? (
-                      <span class="block font-mono text-[12px] text-ink-600" title="Gateway or bank reference">
-                        {p.provider_reference ?? p.reference}
-                      </span>
-                    ) : null}
-                  </td>
-                  <td class="px-4 py-3">
-                    <span class={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${STATUS[p.status]?.[1] ?? ''}`}>
-                      {STATUS[p.status]?.[0] ?? p.status}
-                    </span>
-                  </td>
-                  <td class="tnum px-4 py-3 text-right font-medium text-ink-950">
-                    {formatMoney(p.amount_minor, p.currency)}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+      {tiles.length ? <KpiStrip items={tiles} testId="payment-kpis" /> : null}
+      <div class="kz-atools kz-agap">
+        <FilterBar
+          client:load
+          label="Filter payments"
+          hidden={filter.clientId ? { clientId: filter.clientId } : {}}
+          clearHref="/admin/payments"
+          fields={[
+            {
+              kind: 'search',
+              name: 'q',
+              label: 'Search',
+              value: filter.q ?? '',
+              placeholder: 'Receipt, invoice, reference or client',
+            },
+            {
+              kind: 'select',
+              name: 'status',
+              label: 'Status',
+              value: filter.status ?? '',
+              options: [
+                { value: '', label: 'Any' },
+                ...PAYMENT_STATUSES.map((s) => ({ value: s, label: PAYMENT_STATUS[s]!.label })),
+              ],
+            },
+            {
+              kind: 'select',
+              name: 'provider',
+              label: 'Provider',
+              value: filter.provider ?? '',
+              options: [
+                { value: '', label: 'Any' },
+                ...Object.entries(PAYMENT_PROVIDER).map(([value, label]) => ({ value, label })),
+              ],
+            },
+            {
+              kind: 'select',
+              name: 'method',
+              label: 'Method',
+              value: filter.method ?? '',
+              options: [
+                { value: '', label: 'Any' },
+                ...Object.entries(PAYMENT_METHOD).map(([value, label]) => ({ value, label })),
+              ],
+            },
+            {
+              kind: 'select',
+              name: 'currency',
+              label: 'Currency',
+              value: filter.currency ?? '',
+              options: [{ value: '', label: 'Any' }, ...currencies.map((c) => ({ value: c.code, label: c.code }))],
+            },
+            { kind: 'date', name: 'from', label: 'From', value: filter.from ?? '' },
+            { kind: 'date', name: 'to', label: 'To', value: filter.to ?? '' },
+          ]}
+        />
       </div>
+      <DataTable
+        caption="Payments"
+        count={result!.items.length}
+        columns={[
+          { label: 'Receipt' },
+          { label: 'Client' },
+          { label: 'Invoices' },
+          { label: 'Method' },
+          { label: 'Status' },
+          { label: 'Amount', num: true },
+        ]}
+      >
+        <EmptyState
+          slot="empty"
+          code={filtered ? 'no matches' : '0 payments'}
+          title={filtered ? 'No payments match these filters.' : 'No payments yet.'}
+        >
+          Payments recorded on invoices appear here.
+        </EmptyState>
+        {result!.items.map((p) => (
+          <tr>
+            <Cell
+              m="main"
+              class="kz-dt__nowrap"
+              href={`/admin/payments/${p.id}`}
+              title={p.receipt_number}
+              sub={formatLongDate(p.received_at)}
+            />
+            <Cell m="meta" tone="mute">
+              <span>{p.client_name}</span>
+            </Cell>
+            <Cell>
+              <span class="kz-amono">{p.invoices ?? '—'}</span>
+            </Cell>
+            <Cell>
+              <span class="kz-dt__strong kz-dt__nw">{PAYMENT_METHOD[p.method] ?? p.method}</span>
+              <span class="kz-dt__sub is-text">{PAYMENT_PROVIDER[p.provider_key] ?? p.provider_key}</span>
+              {p.provider_reference || p.reference ? (
+                <span class="kz-dt__sub kz-dt__ref" title="Gateway or bank reference">
+                  {p.provider_reference ?? p.reference}
+                </span>
+              ) : null}
+            </Cell>
+            <Cell m="status">
+              <StatusPill tone={PAYMENT_STATUS[p.status]?.tone ?? 'neutral'}>
+                {PAYMENT_STATUS[p.status]?.label ?? p.status}
+              </StatusPill>
+            </Cell>
+            <Cell m="amount" num>
+              {formatMoney(p.amount_minor, p.currency)}
+            </Cell>
+          </tr>
+        ))}
+      </DataTable>
     </>
   )}
-  {pages > 1 ? (
-    <nav aria-label="Pagination" class="mt-4 flex items-center justify-between text-sm font-semibold">
-      {current > 1 ? (
-        <a href={pageHref(current - 1)} rel="prev" class="text-brand-600">
-          Previous
-        </a>
-      ) : (
-        <span />
-      )}
-      <span class="text-ink-600">
-        Page {current} of {pages}
-      </span>
-      {current < pages ? (
-        <a href={pageHref(current + 1)} rel="next" class="text-brand-600">
-          Next
-        </a>
-      ) : (
-        <span />
-      )}
-    </nav>
-  ) : null}
+  <Pager page={current} pages={pages} href={pageHref} />
 </AdminLayout>

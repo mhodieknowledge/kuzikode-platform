@@ -1,6 +1,10 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import BarChart from '../../../ui/admin/BarChart.astro';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import Pane from '../../../ui/admin/Pane.astro';
+import PeriodForm from '../../../ui/admin/PeriodForm.astro';
+import DetailList from '../../../ui/admin/DetailList.astro';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { addMonths } from '../../../server/lib/dates';
 import { reports, resolveRange } from '../../../server/modules/reports';
@@ -27,54 +31,41 @@ for (let m = `${range.from.slice(0, 7)}-01`; m.slice(0, 7) <= range.to.slice(0, 
 const currencies = [...new Set(d.byMonth.map((x) => x.currency))];
 const compact = (currency: string) => (minor: number) =>
   `${currency} ${new Intl.NumberFormat('en-GB', { notation: 'compact', maximumFractionDigits: 1 }).format(minor / 100)}`;
-const card = 'rounded-lg border border-line bg-surface p-5';
-const th = 'px-4 py-2.5 font-semibold';
-const num = 'tnum px-4 py-2.5 text-right';
-const exportLink = 'text-sm font-semibold text-brand-600 hover:underline';
-const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm';
+const conversion = [
+  { label: 'Sent', value: String(d.conversion.sent), mono: true },
+  { label: 'Accepted', value: String(d.conversion.accepted), mono: true },
+  {
+    label: 'Conversion rate',
+    value: d.conversion.rateBp === null ? '–' : `${(d.conversion.rateBp / 100).toFixed(1)}%`,
+    mono: true,
+  },
+  { label: 'Rejected', value: String(d.conversion.rejected), mono: true },
+  { label: 'Expired', value: String(d.conversion.expired), mono: true },
+  { label: 'Still open', value: String(d.conversion.open), mono: true },
+];
 ---
 
 <AdminLayout title="Reports" page={page}>
-  <div class="flex flex-wrap items-end justify-between gap-4">
-    <div>
-      <h1 class="text-2xl font-bold tracking-display">Reports</h1>
-      <p class="mt-1 text-sm text-ink-600">
-        {range.from} to {range.to} (Africa/Harare). Every amount stays in its own currency; nothing is converted or
-        added across currencies.
-      </p>
-    </div>
-    <form method="get" class="flex flex-wrap items-end gap-3" aria-label="Report period">
-      <label class="flex flex-col gap-1 text-sm font-medium">
-        From
-        <input type="date" name="from" value={range.from} class={field} />
-      </label>
-      <label class="flex flex-col gap-1 text-sm font-medium">
-        To
-        <input type="date" name="to" value={range.to} class={field} />
-      </label>
-      <button class="h-10 rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500">
-        Show
-      </button>
-    </form>
+  <PageHead
+    title="Reports"
+    meta={`${range.from} to ${range.to} (Africa/Harare). Every amount stays in its own currency; nothing is converted or added across currencies.`}
+  />
+  <div class="kz-atools">
+    <PeriodForm label="Report period" from={range.from} to={range.to} />
   </div>
 
-  <div class="mt-6 grid gap-6 [&>*]:min-w-0">
-    <section class={card} aria-labelledby="rev-h">
-      <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <h2 id="rev-h" class="text-lg font-semibold">
-          Revenue received by month
-        </h2>
-        {canExport ? (
-          <a class={exportLink} href={csv('revenue_month')}>
-            Export CSV
-          </a>
-        ) : null}
-      </div>
-      <p class="mb-4 text-sm text-ink-600">
+  <div class="kz-astack">
+    <Pane title="Revenue received by month" id="rev-h">
+      {canExport ? (
+        <a slot="actions" class="kz-apane__link" href={csv('revenue_month')}>
+          Export CSV
+        </a>
+      ) : null}
+      <p class="kz-rnote">
         Payments received, minus refunds in the month they were made. Reversed payments are excluded.
       </p>
-      {currencies.length === 0 ? <p class="text-sm text-ink-600">No payments in this period.</p> : null}
-      <div class="grid gap-8 lg:grid-cols-2 [&>*]:min-w-0">
+      {currencies.length === 0 ? <p class="kz-afeed__t">No payments in this period.</p> : null}
+      <div class="kz-agrid kz-agrid--2">
         {currencies.map((cur) => (
           <BarChart
             id={`rev-${cur}`}
@@ -91,289 +82,227 @@ const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm';
           />
         ))}
       </div>
-    </section>
+    </Pane>
 
-    <section class={card} aria-labelledby="profit-h">
-      <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <h2 id="profit-h" class="text-lg font-semibold">
-          Indicative profit
-        </h2>
-        {canExport ? (
-          <a class={exportLink} href={csv('profit')}>
-            Export CSV
-          </a>
-        ) : null}
-      </div>
-      <p class="mb-4 text-sm text-ink-600">
+    <Pane title="Indicative profit" id="profit-h" flush>
+      {canExport ? (
+        <a slot="actions" class="kz-apane__link" href={csv('profit')}>
+          Export CSV
+        </a>
+      ) : null}
+      <p class="kz-rnote kz-apad">
         Indicative only: revenue received minus recorded expenses. These are not accounting figures.
       </p>
-      <div class="relative overflow-x-auto">
-        <table class="w-full min-w-[480px] text-sm">
-          <thead class="border-b border-line text-left text-[12px] text-ink-600">
+      <div class="kz-rscroll">
+        <table class="kz-rt">
+          <thead>
             <tr>
-              <th scope="col" class={th}>
-                Currency
-              </th>
-              <th scope="col" class={`${th} text-right`}>
+              <th scope="col">Currency</th>
+              <th scope="col" class="is-num">
                 Revenue received
               </th>
-              <th scope="col" class={`${th} text-right`}>
+              <th scope="col" class="is-num">
                 Expenses
               </th>
-              <th scope="col" class={`${th} text-right`}>
+              <th scope="col" class="is-num">
                 Indicative profit
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-line">
+          <tbody>
             {d.profit.length === 0 ? (
               <tr>
-                <td colspan="4" class="px-4 py-6 text-center text-ink-600">
+                <td colspan="4" class="is-none">
                   Nothing in this period.
                 </td>
               </tr>
             ) : null}
             {d.profit.map((p) => (
               <tr>
-                <th scope="row" class="px-4 py-2.5 text-left font-medium">
-                  {p.currency}
-                </th>
-                <td class={num}>{formatMoney(p.revenueMinor, p.currency)}</td>
-                <td class={num}>{formatMoney(p.expensesMinor, p.currency)}</td>
-                <td class={`${num} font-semibold`}>{formatMoney(p.profitMinor, p.currency)}</td>
+                <th scope="row">{p.currency}</th>
+                <td class="is-num">{formatMoney(p.revenueMinor, p.currency)}</td>
+                <td class="is-num">{formatMoney(p.expensesMinor, p.currency)}</td>
+                <td class="is-num is-strong">{formatMoney(p.profitMinor, p.currency)}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </section>
+    </Pane>
 
-    <div class="grid gap-6 xl:grid-cols-2 [&>*]:min-w-0">
-      <section class={card} aria-labelledby="client-h">
-        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <h2 id="client-h" class="text-lg font-semibold">
-            Revenue by client
-          </h2>
-          {canExport ? (
-            <a class={exportLink} href={csv('revenue_client')}>
-              Export CSV
-            </a>
-          ) : null}
-        </div>
-        <div class="relative max-h-96 overflow-auto">
-          <table class="w-full min-w-[420px] text-sm">
-            <thead class="border-b border-line text-left text-[12px] text-ink-600">
+    <div class="kz-agrid kz-agrid--2">
+      <Pane title="Revenue by client" id="client-h" flush>
+        {canExport ? (
+          <a slot="actions" class="kz-apane__link" href={csv('revenue_client')}>
+            Export CSV
+          </a>
+        ) : null}
+        <div class="kz-rscroll is-tall">
+          <table class="kz-rt">
+            <thead>
               <tr>
-                <th scope="col" class={th}>
-                  Client
-                </th>
-                <th scope="col" class={`${th} text-right`}>
+                <th scope="col">Client</th>
+                <th scope="col" class="is-num">
                   Net received
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-line">
+            <tbody>
               {d.byClient.length === 0 ? (
                 <tr>
-                  <td colspan="2" class="px-4 py-6 text-center text-ink-600">
+                  <td colspan="2" class="is-none">
                     No payments in this period.
                   </td>
                 </tr>
               ) : null}
               {d.byClient.map((c) => (
                 <tr>
-                  <td class="px-4 py-2.5">
-                    <a class="hover:underline" href={`/admin/clients/${c.client_id}`}>
-                      {c.client}
-                    </a>
+                  <td>
+                    <a href={`/admin/clients/${c.client_id}`}>{c.client}</a>
                   </td>
-                  <td class={num}>{formatMoney(c.net, c.currency)}</td>
+                  <td class="is-num">{formatMoney(c.net, c.currency)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      </section>
-
-      <section class={card} aria-labelledby="svc-h">
-        <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <h2 id="svc-h" class="text-lg font-semibold">
-            Invoiced by service
-          </h2>
-          {canExport ? (
-            <a class={exportLink} href={csv('revenue_service')}>
-              Export CSV
-            </a>
-          ) : null}
-        </div>
-        <p class="mb-4 text-sm text-ink-600">
+      </Pane>
+      <Pane title="Invoiced by service" id="svc-h" flush>
+        {canExport ? (
+          <a slot="actions" class="kz-apane__link" href={csv('revenue_service')}>
+            Export CSV
+          </a>
+        ) : null}
+        <p class="kz-rnote kz-apad">
           Line totals on invoices issued in this period (void and draft invoices excluded).
         </p>
-        <div class="relative max-h-96 overflow-auto">
-          <table class="w-full min-w-[420px] text-sm">
-            <thead class="border-b border-line text-left text-[12px] text-ink-600">
+        <div class="kz-rscroll is-tall">
+          <table class="kz-rt">
+            <thead>
               <tr>
-                <th scope="col" class={th}>
-                  Service
-                </th>
-                <th scope="col" class={`${th} text-right`}>
+                <th scope="col">Service</th>
+                <th scope="col" class="is-num">
                   Invoiced
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-line">
+            <tbody>
               {d.byService.length === 0 ? (
                 <tr>
-                  <td colspan="2" class="px-4 py-6 text-center text-ink-600">
+                  <td colspan="2" class="is-none">
                     No invoices issued in this period.
                   </td>
                 </tr>
               ) : null}
               {d.byService.map((s) => (
                 <tr>
-                  <td class="px-4 py-2.5">{s.service}</td>
-                  <td class={num}>{formatMoney(s.amount, s.currency)}</td>
+                  <td>{s.service}</td>
+                  <td class="is-num">{formatMoney(s.amount, s.currency)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      </section>
+      </Pane>
     </div>
 
-    <section class={card} aria-labelledby="age-h">
-      <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <h2 id="age-h" class="text-lg font-semibold">
-          Outstanding and ageing
-        </h2>
-        {canExport ? (
-          <a class={exportLink} href={csv('ageing')}>
-            Export CSV
-          </a>
-        ) : null}
-      </div>
-      <p class="mb-4 text-sm text-ink-600">Open invoice balances today ({d.ageing.asOf}), by days past the due date.</p>
-      <div class="relative overflow-x-auto">
-        <table class="w-full min-w-[720px] text-sm">
-          <thead class="border-b border-line text-left text-[12px] text-ink-600">
+    <Pane title="Outstanding and ageing" id="age-h" flush>
+      {canExport ? (
+        <a slot="actions" class="kz-apane__link" href={csv('ageing')}>
+          Export CSV
+        </a>
+      ) : null}
+      <p class="kz-rnote kz-apad">Open invoice balances today ({d.ageing.asOf}), by days past the due date.</p>
+      <div class="kz-rscroll">
+        <table class="kz-rt">
+          <thead>
             <tr>
-              <th scope="col" class={th}>
-                Currency
-              </th>
+              <th scope="col">Currency</th>
               {AGEING_BUCKETS.map((b) => (
-                <th scope="col" class={`${th} text-right`}>
+                <th scope="col" class="is-num">
                   {AGEING_LABEL[b]}
                 </th>
               ))}
-              <th scope="col" class={`${th} text-right`}>
+              <th scope="col" class="is-num">
                 Total
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-line">
+          <tbody>
             {d.ageing.summary.length === 0 ? (
               <tr>
-                <td colspan="7" class="px-4 py-6 text-center text-ink-600">
+                <td colspan="7" class="is-none">
                   Nothing outstanding.
                 </td>
               </tr>
             ) : null}
             {d.ageing.summary.map((s) => (
               <tr>
-                <th scope="row" class="px-4 py-2.5 text-left font-medium">
-                  {s.currency}
-                </th>
+                <th scope="row">{s.currency}</th>
                 {AGEING_BUCKETS.map((b) => (
-                  <td class={num}>
+                  <td class="is-num">
                     {formatMoney(s[b].amountMinor, s.currency)}
-                    <span class="block text-[12px] text-ink-600">{s[b].count} inv.</span>
+                    <span class="kz-rt__sub">{s[b].count} inv.</span>
                   </td>
                 ))}
-                <td class={`${num} font-semibold`}>{formatMoney(s.totalMinor, s.currency)}</td>
+                <td class="is-num is-strong">{formatMoney(s.totalMinor, s.currency)}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </section>
+    </Pane>
 
-    <div class="grid gap-6 xl:grid-cols-2 [&>*]:min-w-0">
-      <section class={card} aria-labelledby="conv-h">
-        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <h2 id="conv-h" class="text-lg font-semibold">
-            Quotation conversion
-          </h2>
-          {canExport ? (
-            <a class={exportLink} href={csv('conversion')}>
-              Export CSV
-            </a>
-          ) : null}
-        </div>
-        <dl class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {[
-            ['Sent', String(d.conversion.sent)],
-            ['Accepted', String(d.conversion.accepted)],
-            ['Conversion rate', d.conversion.rateBp === null ? '–' : `${(d.conversion.rateBp / 100).toFixed(1)}%`],
-            ['Rejected', String(d.conversion.rejected)],
-            ['Expired', String(d.conversion.expired)],
-            ['Still open', String(d.conversion.open)],
-          ].map(([k, v]) => (
-            <div class="rounded-md bg-canvas p-3">
-              <dt class="text-[12px] text-ink-600">{k}</dt>
-              <dd class="tnum text-xl font-bold">{v}</dd>
-            </div>
-          ))}
-        </dl>
+    <div class="kz-agrid kz-agrid--2">
+      <Pane title="Quotation conversion" id="conv-h">
+        {canExport ? (
+          <a slot="actions" class="kz-apane__link" href={csv('conversion')}>
+            Export CSV
+          </a>
+        ) : null}
+        <DetailList items={conversion} rows />
         {d.conversion.acceptedValue.length ? (
-          <p class="mt-3 text-sm text-ink-600">
+          <p class="kz-rnote">
             Accepted value: {d.conversion.acceptedValue.map((v) => formatMoney(v.amountMinor, v.currency)).join(' · ')}
           </p>
         ) : null}
-        <p class="mt-2 text-[13px] text-ink-600">Quotations first sent in this period; the rate is accepted ÷ sent.</p>
-      </section>
-
-      <section class={card} aria-labelledby="exp-h">
-        <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <h2 id="exp-h" class="text-lg font-semibold">
-            Expenses by category
-          </h2>
-          {canExport ? (
-            <a class={exportLink} href={csv('expenses')}>
-              Export CSV
-            </a>
-          ) : null}
-        </div>
-        <p class="mb-4 text-sm text-ink-600">Expense records. This is not a statutory accounting system.</p>
-        <div class="relative max-h-96 overflow-auto">
-          <table class="w-full min-w-[420px] text-sm">
-            <thead class="border-b border-line text-left text-[12px] text-ink-600">
+        <p class="kz-rnote">Quotations first sent in this period; the rate is accepted ÷ sent.</p>
+      </Pane>
+      <Pane title="Expenses by category" id="exp-h" flush>
+        {canExport ? (
+          <a slot="actions" class="kz-apane__link" href={csv('expenses')}>
+            Export CSV
+          </a>
+        ) : null}
+        <p class="kz-rnote kz-apad">Expense records. This is not a statutory accounting system.</p>
+        <div class="kz-rscroll is-tall">
+          <table class="kz-rt">
+            <thead>
               <tr>
-                <th scope="col" class={th}>
-                  Category
-                </th>
-                <th scope="col" class={`${th} text-right`}>
+                <th scope="col">Category</th>
+                <th scope="col" class="is-num">
                   Amount
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-line">
+            <tbody>
               {d.expenses.length === 0 ? (
                 <tr>
-                  <td colspan="2" class="px-4 py-6 text-center text-ink-600">
+                  <td colspan="2" class="is-none">
                     No expenses in this period.
                   </td>
                 </tr>
               ) : null}
               {d.expenses.map((e) => (
                 <tr>
-                  <td class="px-4 py-2.5">{e.category}</td>
-                  <td class={num}>{formatMoney(e.amount, e.currency)}</td>
+                  <td>{e.category}</td>
+                  <td class="is-num">{formatMoney(e.amount, e.currency)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      </section>
+      </Pane>
     </div>
   </div>
 </AdminLayout>

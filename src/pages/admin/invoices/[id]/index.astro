@@ -1,8 +1,12 @@
 ---
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
 import InvoiceDocument from '../../../../ui/documents/InvoiceSheet.astro';
-import { InvoiceActions } from '../../../../components/admin/InvoicesAdmin';
-import { PaymentAttempts } from '../../../../components/admin/PaymentsAdmin';
+import PageHead from '../../../../ui/admin/PageHead.astro';
+import Pane from '../../../../ui/admin/Pane.astro';
+import StatusPill from '../../../../ui/primitives/StatusPill.astro';
+import { InvoiceActions } from '../../../../ui/admin/invoices/InvoiceActions';
+import { PaymentAttempts } from '../../../../ui/admin/payments/PaymentAttempts';
+import { INVOICE_STATUS_TONE, PAYMENT_METHOD, formatWhen, reminderLabel } from '../../../../ui/admin/finance/labels';
 import { listInvoiceAttempts } from '../../../../server/modules/payments';
 import { paymentMethodLabel } from '../../../../shared/payment-methods';
 import { loadAdminPage } from '../../../../server/lib/admin-page';
@@ -78,55 +82,28 @@ const APPLIED: Record<string, string> = {
   refund: 'To be refunded',
 };
 const money = (m: number) => formatMoney(m, inv.currency, data.minorDigits);
-const when = (iso: string) =>
-  new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
-    new Date(iso),
-  );
+const when = formatWhen;
 const label = (s: string | null) => (s ? (INVOICE_STATUS_LABEL[s as keyof typeof INVOICE_STATUS_LABEL] ?? s) : '');
-const METHOD: Record<string, string> = {
-  bank_transfer: 'Bank transfer',
-  cash: 'Cash',
-  ecocash: 'EcoCash',
-  onemoney: 'OneMoney',
-  innbucks: 'InnBucks',
-  card: 'Card',
-  other: 'Other',
-};
-const REMINDER = (k: string) =>
-  k === 'due'
-    ? 'On the due date'
-    : k.startsWith('before_')
-      ? `${k.slice(7)} days before due`
-      : `${k.slice(6)} days overdue`;
 ---
 
 <AdminLayout title={inv.number ?? 'Draft invoice'} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/invoices" class="hover:text-ink-950 hover:underline">
-      Invoices
-    </a>{' '}
-    / <span class="text-ink-950">{inv.number ?? 'Draft'}</span>
-  </nav>
-  <div class="mt-2 flex flex-wrap items-start justify-between gap-4">
-    <div>
-      <p class="font-mono text-2xl font-bold tracking-display">{inv.number ?? 'Draft invoice'}</p>
-      <p class="mt-1 text-sm text-ink-600">
-        {INVOICE_STATUS_LABEL[inv.status]} ·{' '}
-        <a href={`/admin/clients/${inv.client_id}`} class="text-brand-600 underline">
-          {client?.display_name}
-        </a>
-        {quotation ? (
-          <>
-            {' '}
-            · from{' '}
-            <a href={`/admin/quotations/${quotation.id}`} class="text-brand-600 underline">
-              {quotation.number}
-            </a>
-          </>
-        ) : null}
-      </p>
-    </div>
+  <PageHead
+    as="p"
+    title={inv.number ?? 'Draft invoice'}
+    crumbs={[{ label: 'Invoices', href: '/admin/invoices' }, { label: inv.number ?? 'Draft' }]}
+  >
+    <Fragment slot="meta">
+      <StatusPill tone={INVOICE_STATUS_TONE[inv.status]}>{INVOICE_STATUS_LABEL[inv.status]}</StatusPill> ·{' '}
+      <a href={`/admin/clients/${inv.client_id}`}>{client?.display_name}</a>
+      {quotation ? (
+        <>
+          {' '}
+          · from <a href={`/admin/quotations/${quotation.id}`}>{quotation.number}</a>
+        </>
+      ) : null}
+    </Fragment>
     <InvoiceActions
+      slot="actions"
       client:load
       id={inv.id}
       number={inv.number}
@@ -141,13 +118,15 @@ const REMINDER = (k: string) =>
       creditOptions={data.creditOptions}
       can={can}
     />
-  </div>
+  </PageHead>
   {inv.status === 'void' ? (
-    <p role="status" class="mt-4 rounded-sm border border-line bg-surface px-4 py-3 text-sm text-ink-800">
-      Voided{inv.voided_at ? ` on ${formatLongDate(inv.voided_at)}` : ''}: {inv.void_reason}
-    </p>
+    <div class="kz-anotices">
+      <p role="status" class="kz-anotice">
+        Voided{inv.voided_at ? ` on ${formatLongDate(inv.voided_at)}` : ''}: {inv.void_reason}
+      </p>
+    </div>
   ) : null}
-  <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+  <div class="kz-agrid kz-agrid--doc">
     <InvoiceDocument
       number={inv.number}
       currency={inv.currency}
@@ -170,126 +149,111 @@ const REMINDER = (k: string) =>
       client={clientParty}
       business={business}
     />
-    <aside class="flex flex-col gap-6">
+    <aside class="kz-astack" aria-label="Invoice activity">
       {inv.status !== 'draft' ? (
-        <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="pay-title">
-          <h2 id="pay-title" class="font-sans text-base font-semibold">
-            Payments and credits
-          </h2>
+        <Pane title="Payments and credits" id="pay-title" flush>
           {payments.length === 0 && creditsApplied.length === 0 ? (
-            <p class="mt-2 text-sm text-ink-600">Nothing received yet.</p>
+            <p class="kz-anone">
+              <span class="kz-anone__code">0 payments</span>Nothing received yet.
+            </p>
           ) : (
-            <ul class="mt-3 flex flex-col gap-3 text-sm">
+            <ul class="kz-alist" role="list">
               {payments.map((p) => (
                 <li>
-                  <p class="tnum flex justify-between gap-2 font-medium text-ink-950">
-                    <a href={`/admin/payments/${p.id}`} class="text-brand-600 underline">
-                      {METHOD[p.method] ?? p.method}
+                  <div class="kz-alist__main">
+                    <a href={`/admin/payments/${p.id}`} class="kz-alist__t">
+                      {PAYMENT_METHOD[p.method] ?? p.method}
                     </a>
-                    <span>{money(p.applied_minor)}</span>
-                  </p>
-                  <p class="text-[12px] text-ink-600">
-                    {formatLongDate(p.received_at)} ·{' '}
-                    <a
-                      href={`/api/v1/admin/documents/receipts/${p.id}/pdf`}
-                      download
-                      class="font-mono text-brand-600 hover:underline"
-                    >
-                      {p.receipt_number}
-                    </a>
-                    {p.reference ? ` · ${p.reference}` : ''}
-                    {p.payment_minor > p.applied_minor
-                      ? ` · ${money(p.payment_minor - p.applied_minor)} to credit`
-                      : ''}
-                  </p>
+                    <span class="kz-alist__m">
+                      {formatLongDate(p.received_at)} ·{' '}
+                      <a href={`/api/v1/admin/documents/receipts/${p.id}/pdf`} download class="kz-amono">
+                        {p.receipt_number}
+                      </a>
+                      {p.reference ? ` · ${p.reference}` : ''}
+                      {p.payment_minor > p.applied_minor
+                        ? ` · ${money(p.payment_minor - p.applied_minor)} to credit`
+                        : ''}
+                    </span>
+                  </div>
+                  <span class="kz-alist__r">{money(p.applied_minor)}</span>
                 </li>
               ))}
               {creditsApplied.map((c) => (
                 <li>
-                  <p class="tnum flex justify-between gap-2 font-medium text-ink-950">
-                    <span>Account credit</span>
-                    <span>{money(-c.amount_minor)}</span>
-                  </p>
-                  <p class="text-[12px] text-ink-600">{formatLongDate(c.created_at)}</p>
+                  <div class="kz-alist__main">
+                    <span class="kz-alist__t">Account credit</span>
+                    <span class="kz-alist__m">{formatLongDate(c.created_at)}</span>
+                  </div>
+                  <span class="kz-alist__r">{money(-c.amount_minor)}</span>
                 </li>
               ))}
             </ul>
           )}
           {data.creditAvailable > 0 && open ? (
-            <p class="mt-3 text-[13px] text-info-700">The client has {money(data.creditAvailable)} credit available.</p>
+            <p class="kz-apad kz-apad--b kz-afeed__t">The client has {money(data.creditAvailable)} credit available.</p>
           ) : null}
-        </section>
+        </Pane>
       ) : null}
       {attempts.length ? (
-        <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="att-title">
-          <h2 id="att-title" class="font-sans text-base font-semibold">
-            Online payment attempts
-          </h2>
-          <p class="mt-1 text-[12px] text-ink-600">
+        <Pane title="Online payment attempts" id="att-title" flush>
+          <p class="kz-apad kz-afeed__t">
             Checked with the gateway automatically. Use Check now when a client says they paid.
           </p>
           <PaymentAttempts client:visible initial={attempts} />
-        </section>
+        </Pane>
       ) : null}
       {data.creditNotes.length ? (
-        <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="cn-title">
-          <h2 id="cn-title" class="font-sans text-base font-semibold">
-            Credit notes
-          </h2>
-          <ul class="mt-3 flex flex-col gap-3 text-sm">
+        <Pane title="Credit notes" id="cn-title" flush>
+          <ul class="kz-alist" role="list">
             {data.creditNotes.map((cn) => (
               <li>
-                <p class="tnum flex justify-between gap-2 font-medium text-ink-950">
-                  <a
-                    href={`/api/v1/admin/documents/credit-notes/${cn.id}/pdf`}
-                    download
-                    class="font-mono text-brand-600 hover:underline"
-                  >
+                <div class="kz-alist__main">
+                  <a href={`/api/v1/admin/documents/credit-notes/${cn.id}/pdf`} download class="kz-alist__t kz-amono">
                     {cn.number}
                   </a>
-                  <span>{money(cn.total_minor)}</span>
-                </p>
-                <p class="text-[12px] text-ink-600">
-                  {formatLongDate(cn.issued_at)} · {APPLIED[cn.applied_to]} · {cn.reason}
-                </p>
+                  <span class="kz-alist__m">
+                    {formatLongDate(cn.issued_at)} · {APPLIED[cn.applied_to]} · {cn.reason}
+                  </span>
+                </div>
+                <span class="kz-alist__r">{money(cn.total_minor)}</span>
               </li>
             ))}
           </ul>
-        </section>
+        </Pane>
       ) : null}
-      <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="hist-title">
-        <h2 id="hist-title" class="font-sans text-base font-semibold">
-          History
-        </h2>
-        {history.length === 0 ? <p class="mt-1 text-sm text-ink-600">No status changes recorded.</p> : null}
-        <ol class="mt-3 flex flex-col gap-3 text-sm">
-          {history.map((h) => (
-            <li>
-              <p class="font-medium text-ink-950">
-                {h.from_status ? `${label(h.from_status)} → ${label(h.to_status)}` : label(h.to_status)}
-              </p>
-              <p class="text-[12px] text-ink-600">
-                {when(h.created_at)}
-                {h.actor ? ` · ${h.actor}` : ''}
-                {h.reason ? ` · ${h.reason}` : ''}
-              </p>
-            </li>
-          ))}
-        </ol>
-      </section>
+      <Pane title="History" id="hist-title" flush>
+        {history.length === 0 ? (
+          <p class="kz-anone">
+            <span class="kz-anone__code">0 changes</span>No status changes recorded.
+          </p>
+        ) : (
+          <ol class="kz-afeed">
+            {history.map((h) => (
+              <li>
+                <p class="kz-afeed__k">
+                  {h.from_status ? `${label(h.from_status)} → ${label(h.to_status)}` : label(h.to_status)}
+                </p>
+                <p class="kz-afeed__t">
+                  {when(h.created_at)}
+                  {h.actor ? ` · ${h.actor}` : ''}
+                  {h.reason ? ` · ${h.reason}` : ''}
+                </p>
+              </li>
+            ))}
+          </ol>
+        )}
+      </Pane>
       {reminders.length ? (
-        <section class="rounded-lg border border-line bg-surface p-5" aria-labelledby="rem-title">
-          <h2 id="rem-title" class="font-sans text-base font-semibold">
-            Reminders sent
-          </h2>
-          <ul class="mt-3 flex flex-col gap-2 text-sm">
+        <Pane title="Reminders sent" id="rem-title" flush>
+          <ol class="kz-afeed">
             {reminders.map((r) => (
               <li>
-                {REMINDER(r.kind)} <span class="text-[12px] text-ink-600">· {when(r.sent_at)}</span>
+                <p class="kz-afeed__k">{reminderLabel(r.kind)}</p>
+                <p class="kz-afeed__t">{when(r.sent_at)}</p>
               </li>
             ))}
-          </ul>
-        </section>
+          </ol>
+        </Pane>
       ) : null}
     </aside>
   </div>

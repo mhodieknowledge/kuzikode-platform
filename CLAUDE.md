@@ -105,8 +105,29 @@ you to choose the effort level):
 Rules: default to the **cheapest tier that can do the job well**; escalate only after a real failure or when the table says so. Give
 subagents precise, self-contained briefs (files, the pattern to follow, acceptance checks) so the cheap tier succeeds first time.
 **Always review Sonnet output yourself** (screenshots + diff) before pushing; quality bars don't drop. Don't run several heavy subagents in
-parallel unless it clearly saves total work. When you hand off, start the successor with `model` unset (Opus) unless the remaining
-roadmap is purely mechanical, in which case pass `model: "claude-sonnet-5-5"`. Note in PROGRESS.md which tiers you used for each task.
+parallel unless it clearly saves total work. When you hand off, start the successor with `model: "claude-sonnet-5-5"` (see §2c). Note in PROGRESS.md which tiers you used for each task.
+
+## 2c. Token diet (owner, 2026-11-13: "my weekly limit will exhaust before the agent is done")
+
+Measured: a build session uses ~170M **cache-read** tokens vs ~0.6M output. The cost is re-reading your own context on every step, not
+thinking. So the levers are (1) a smaller context, (2) fewer, cheaper turns, (3) the cheaper model. Mandatory from now on:
+
+1. **Run on Sonnet.** The remaining work is mostly applying established patterns. **Hand off to a Sonnet successor**
+   (`create_session` with `model: "claude-sonnet-5-5"`) and keep doing so. Use Opus only inside a **fresh** subagent
+   (`model: "opus"`) for critical judgement (BRIEF B.0d reviewer on public pages, payments/auth/pricing, a bug that failed twice, final audit).
+2. **Never delegate with a fork.** A fork inherits your whole context (re-reading 250k+ tokens) and ignores the `model` setting, which is why
+   "sonnet" briefs ran on Opus. Delegate only with a **fresh subagent** (omit `subagent_type` or use `general-purpose`) with `model` and `effort`
+   set and a **self-contained brief** (files, pattern to copy, acceptance checks, "reply with ≤ 15 lines"). Check which model actually ran.
+3. **Small start-up reads.** Read CLAUDE.md, the roadmap, the **top status block + latest 5 entries** of `docs/PROGRESS.md` (use `head`/`tail`/`sed`),
+   and BRIEF **section B only** (skip section A, the verbatim brief, unless you need a quote). Don't read DECISIONS.md or old PROGRESS entries
+   unless a task needs them; `grep` for what you need.
+4. **Keep the docs small.** At every hand-off: move all but the latest 6 entries of `docs/PROGRESS.md` into `docs/PROGRESS-ARCHIVE.md`; keep DECISIONS.md
+   as is but never read it whole. New entries: ≤ 8 lines. Heartbeat commits only every ~60 minutes.
+5. **Hand off earlier.** When your context passes **~220k tokens**, finish the sub-step and hand off. A fresh session should start near 60k.
+6. **Cheaper verification.** Reading screenshots costs tokens: for **admin** pages use only 390 and 1440 (the automated sweep covers the other
+   sizes), no B.0d reviewer rounds for admin; for **public** pages keep the full loop. Run `verify` once per task, not after every small edit; use
+   targeted tests while iterating and the full suite before push. Batch a group of similar admin modules into one subagent job.
+7. **Don't re-derive.** Reuse the established admin patterns (`src/ui/admin/*`) as-is. Don't re-open settled design decisions.
 
 ## 3. Autonomy rules
 

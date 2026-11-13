@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   canRequestQuote,
+  isComparable,
   packagePrice,
   pricingLabel,
   quotationHref,
@@ -82,5 +83,15 @@ describe('WhatsApp link (docs/12 §C.9)', () => {
     expect(whatsappHref('', 'x')).toBeNull();
     expect(whatsappHref(undefined, 'x')).toBeNull();
     expect(whatsappHref('12345', 'x')).toBeNull();
+  });
+});
+
+describe('isComparable', () => {
+  const f = (...labels: string[]) => ({ features: labels.map((label) => ({ label })) });
+  it('needs two or more packages that all list features and share a row', () => {
+    expect(isComparable([f('Pages'), f('Pages', 'SSL')])).toBe(true);
+    expect(isComparable([f('Pages')])).toBe(false);
+    expect(isComparable([f('Pages'), f()])).toBe(false);
+    expect(isComparable([f('Pages'), f('SSL')])).toBe(false);
   });
 });

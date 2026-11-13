@@ -1,6 +1,6 @@
 /*
- * Pricing page (R4.3): rate-card hero, sticky category control, plan deck (phone selector + swipe track, desktop row with a lifted
- * night plate), "Other services" division ledger, add-ons ledger, note + questions.
+ * Pricing + division pages (R9.2): rate-card hero, one block per division (package carousel on the Rail primitive, comparison table
+ * below, single-offer card), note + questions, the closing quote band.
  * Phone limits (BRIEF B.1a): H1 32 px, H2 24 px, H3 18 px, body 15–16 px, 16 px gutter, buttons one line ≥ 44 px.
  */
 @layer components {
@@ -45,6 +45,15 @@
     color: var(--action);
   }
 
+  /* Phones and tablets: a short hero (title + intro); the rate card index is for desktop, where it sits beside the title. */
+  @media (max-width: 1023px) {
+    .kz-rate {
+      display: none;
+    }
+    .kz-phero {
+      padding-bottom: 8px;
+    }
+  }
   .kz-rate {
     position: relative;
     border-radius: 4px;
@@ -161,138 +170,7 @@
     }
   }
 
-  /* ---------- Sticky category control ---------- */
-  .kz-pnav {
-    position: sticky;
-    top: var(--header-h);
-    z-index: var(--z-sticky);
-    padding-block: 8px;
-    background: color-mix(in oklab, var(--bone-50) 92%, transparent);
-    backdrop-filter: saturate(1.2) blur(10px);
-    border-bottom: 1px solid var(--bone-200);
-  }
-  .kz-pnav .kz-seg {
-    max-width: 100%;
-  }
-
-  /* ---------- Category sections ---------- */
-  .kz-ptab {
-    scroll-margin-top: calc(var(--header-h) + 60px);
-  }
-  /* Phones: 40 px a side keeps band-to-band gaps within B.1a (≤ 72 px of visible space between groups). */
-  @media (max-width: 1023px) {
-    .kz-ptab,
-    .kz-ptab ~ .kz-sec {
-      padding-block: 40px;
-    }
-  }
-  .kz-ptab__head {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: baseline;
-    gap: 2px 12px;
-    margin-bottom: 20px;
-  }
-  .kz-ptab__n {
-    font-family: var(--font-mono);
-    font-variant-ligatures: none;
-    font-size: 0.8125rem;
-    color: var(--kz-fg-2);
-  }
-  .kz-ptab__count {
-    grid-column: 2;
-    font-size: 0.875rem;
-    color: var(--kz-fg-2);
-  }
-  .kz-ptab__compare {
-    display: none;
-  }
-  .kz-ptab__sub {
-    font-size: 1.125rem;
-    font-weight: 700;
-    letter-spacing: -0.015em;
-    margin-bottom: 8px;
-    color: var(--kz-fg);
-  }
-
   /* ---------- Plan deck ---------- */
-  .kz-plans__pick {
-    display: flex;
-    gap: 6px;
-    margin: 0 calc(-1 * var(--gutter)) 14px;
-    padding: 2px var(--gutter);
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .kz-plans__pick::-webkit-scrollbar {
-    display: none;
-  }
-  .kz-plans__opt {
-    flex: none;
-    min-height: 44px;
-    padding-inline: 14px;
-    border: 0;
-    border-radius: var(--radius-plate);
-    background: none;
-    box-shadow: inset 0 0 0 1px var(--bone-300);
-    color: var(--ink-700);
-    font: inherit;
-    font-weight: 700;
-    font-size: 0.9375rem;
-    white-space: nowrap;
-    cursor: pointer;
-    transition:
-      background-color var(--dur-state) var(--ease-out),
-      color var(--dur-state) var(--ease-out),
-      box-shadow var(--dur-state) var(--ease-out);
-  }
-  .kz-plans__opt.is-rec::after {
-    content: '';
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    margin-left: 8px;
-    border-radius: 50%;
-    background: var(--action);
-    vertical-align: 2px;
-  }
-  .kz-plans__opt[aria-pressed='true'] {
-    background: var(--ink-900);
-    color: var(--paper);
-    box-shadow: none;
-  }
-  .kz-plans__opt:active {
-    transform: scale(0.97);
-  }
-  .kz-plans__track {
-    position: relative; /* offsetParent for the plates, so the selector can scroll to them */
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: 86%;
-    gap: 12px;
-    margin: 0 calc(-1 * var(--gutter));
-    padding: 12px var(--gutter) 8px;
-    list-style: none;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--gutter);
-    scrollbar-width: none;
-    overscroll-behavior-x: contain;
-    align-items: start;
-  }
-  .kz-plans__track::-webkit-scrollbar {
-    display: none;
-  }
-  .kz-plans[data-count='1'] .kz-plans__track {
-    grid-auto-columns: 100%;
-  }
-  @media (max-width: 1199px) {
-    .kz-plans__opt.is-rec,
-    .kz-plan.is-rec {
-      order: -1;
-    }
-  }
-
   .kz-plan {
     position: relative;
     display: flex;
@@ -485,169 +363,6 @@
     color: var(--kz-fg-2, var(--ink-600));
   }
 
-  /* ---------- Price ledgers: grouped by division (night band) or flat (paper) ---------- */
-  .kz-rates {
-    display: grid;
-    gap: 28px;
-  }
-  .kz-rates__div {
-    padding-bottom: 10px;
-    border-bottom: 2px solid var(--kz-div, var(--kz-fg));
-    font-size: 1.0625rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    color: var(--kz-fg);
-  }
-  .kz-rates--flat .kz-rates__list {
-    border-top: 2px solid var(--ink-900);
-  }
-  .kz-rates__list {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .kz-rates__row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 16px;
-    grid-template-areas:
-      'what go'
-      'price go';
-    gap: 6px 14px;
-    align-items: center;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--kz-groove, var(--bone-200));
-    color: var(--kz-fg);
-    text-decoration: none;
-  }
-  .kz-rates__what {
-    grid-area: what;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .kz-rates__name {
-    font-weight: 700;
-    font-size: 0.9375rem;
-    line-height: 1.3;
-    color: var(--kz-fg);
-  }
-  .kz-rates__tag {
-    font-size: 0.875rem;
-    line-height: 1.4;
-    color: var(--kz-fg-2);
-  }
-  .kz-rates__feats {
-    margin-top: 4px;
-    font-size: 0.8125rem;
-    line-height: 1.5;
-    color: var(--kz-fg-2);
-  }
-  .kz-rates__sep {
-    margin-inline: 0.45em;
-  }
-  .kz-rates__feats b {
-    font-weight: 700;
-    color: var(--kz-fg);
-  }
-  .kz-rates__feats .is-no {
-    text-decoration: line-through;
-    text-decoration-color: currentColor;
-    opacity: 0.7;
-  }
-  .kz-rates__price {
-    grid-area: price;
-    font-size: 0.8125rem;
-    color: var(--kz-fg-2);
-  }
-  .kz-rates__price b {
-    font-size: 1rem;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    color: var(--kz-fg);
-    font-variant-numeric: tabular-nums;
-  }
-  .kz-rates__term {
-    display: block;
-    font-size: 0.75rem;
-    line-height: 1.45;
-  }
-  .kz-rates__go,
-  .kz-rates__soon {
-    grid-area: go;
-  }
-  .kz-rates__go {
-    display: inline-flex;
-    color: var(--kz-fg-2);
-    transition:
-      transform var(--dur-state) var(--ease-out),
-      color var(--dur-state) var(--ease-out);
-  }
-  .kz-rates__soon {
-    font-size: 0.75rem;
-    color: var(--kz-fg-2);
-    white-space: nowrap;
-  }
-  .kz-rates__row:has(.kz-rates__soon) {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-  @media (hover: hover) {
-    .kz-rates__row:hover .kz-rates__go {
-      transform: translateX(3px);
-      color: var(--kz-div, var(--action));
-    }
-    .kz-rates__row:hover .kz-rates__name {
-      text-decoration: underline;
-      text-underline-offset: 3px;
-      text-decoration-thickness: 1px;
-    }
-  }
-
-  /* ---------- Add-ons ---------- */
-  .kz-addons {
-    display: grid;
-    gap: 20px;
-  }
-  .kz-addons__list {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    border-top: 2px solid var(--ink-900);
-  }
-  .kz-addons__row {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--bone-200);
-  }
-  .kz-addons__name {
-    font-weight: 700;
-    font-size: 0.9375rem;
-    color: var(--ink-900);
-  }
-  .kz-addons__desc {
-    margin-top: 2px;
-    font-size: 0.875rem;
-    line-height: 1.45;
-    color: var(--ink-600);
-  }
-  .kz-addons__price {
-    flex: none;
-    text-align: right;
-    line-height: 1.2;
-  }
-  .kz-addons__price b {
-    display: block;
-    font-weight: 800;
-    font-size: 1rem;
-    color: var(--ink-900);
-    font-variant-numeric: tabular-nums;
-  }
-  .kz-addons__price small {
-    font-size: 0.75rem;
-    color: var(--ink-500);
-  }
-
   /* ---------- Note + questions ---------- */
   .kz-pnote {
     margin-top: 12px;
@@ -659,22 +374,255 @@
     color: var(--ink-600);
   }
 
-  /* ---------- Tablet ---------- */
-  @media (min-width: 640px) {
-    .kz-plans__track {
-      grid-auto-columns: calc(50% - 6px);
+  /* ---------- Division blocks ---------- */
+  .kz-pdiv {
+    scroll-margin-top: var(--header-h);
+  }
+  .kz-pdiv__head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    gap: 2px 12px;
+    margin-bottom: 20px;
+  }
+  .kz-pdiv__n {
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.8125rem;
+    color: var(--kz-div-ink, var(--ink-500));
+  }
+  .kz-pdiv__more {
+    grid-column: 2;
+    justify-self: start;
+    margin-block: -10px;
+  }
+  .kz-pdiv__compare {
+    margin-top: 40px;
+  }
+  .kz-pdiv__sub {
+    margin-bottom: 14px;
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: var(--ink-900);
+  }
+  @media (max-width: 1023px) {
+    .kz-pdiv,
+    .kz-pdiv ~ .kz-sec {
+      padding-block: 40px;
     }
-    .kz-rates--grouped {
+  }
+
+  /* ---------- Package carousel (Rail): cards, the recommended one on night ---------- */
+  .kz-pcar .kz-rail__track {
+    position: relative; /* contains the sr-only labels so they scroll with the cards */
+    align-items: stretch;
+    padding-top: 6px;
+    padding-bottom: 10px;
+    --kz-rail-item: 84%;
+    --kz-rail-item-md: calc((100% - 16px) / 2 - 12px);
+  }
+  .kz-pcar .kz-plan {
+    min-height: 0;
+    transform: none;
+    margin-bottom: 0;
+  }
+  .kz-pcar .kz-plan.is-rec {
+    box-shadow:
+      inset 0 4px 0 var(--saffron),
+      var(--shadow-raise);
+  }
+  .kz-pcar .kz-plan__rec {
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--saffron);
+    color: var(--night-900);
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .kz-pcar .kz-plan__top {
+    align-items: center;
+  }
+  .kz-pcar .kz-rail__nav {
+    margin-top: -4px;
+  }
+  @media (min-width: 1024px) {
+    .kz-pcar {
+      --cols: min(var(--pc), 3);
+    }
+    .kz-pcar .kz-rail__track {
+      grid-auto-columns: calc((100% - (var(--cols) - 1) * 16px) / var(--cols));
+      margin-inline: -4px;
+      padding-inline: 4px;
+      scroll-padding-inline: 4px;
+    }
+  }
+  @media (min-width: 1280px) {
+    .kz-pcar {
+      --cols: min(var(--pc), 4);
+    }
+    .kz-pcar .kz-plan {
+      padding: 24px 22px 22px;
+    }
+  }
+
+  /* ---------- Single offer card ---------- */
+  .kz-offer1 {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .kz-offer1__card {
+    display: grid;
+    gap: 24px;
+    padding: 24px 20px;
+    border-radius: var(--radius-panel);
+    background: var(--night-900);
+    color: var(--on-night-2);
+    box-shadow:
+      inset 0 4px 0 var(--kz-div, var(--saffron)),
+      var(--shadow-raise);
+  }
+  .kz-offer1__name {
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--on-night);
+  }
+  .kz-offer1__tag {
+    margin-top: 6px;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  .kz-offer1__price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    margin-top: 18px;
+    font-size: 0.9375rem;
+  }
+  .kz-offer1__pre {
+    flex-basis: 100%;
+    font-weight: 600;
+  }
+  .kz-offer1__price b {
+    font-size: 2.5rem;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: var(--on-night);
+    font-variant-numeric: tabular-nums;
+  }
+  .kz-offer1__price b.is-quote {
+    font-size: 1.5rem;
+  }
+  .kz-offer1__terms {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 6px;
+    font-size: 0.8125rem;
+  }
+  .kz-offer1__act {
+    margin-top: 22px;
+  }
+  .kz-offer1__h {
+    margin-bottom: 12px;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--on-night-3);
+  }
+  .kz-offer1__list {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--on-night);
+  }
+  .kz-offer1__list li {
+    display: grid;
+    grid-template-columns: 16px minmax(0, 1fr);
+    gap: 10px;
+  }
+  .kz-offer1__list .kz-icon {
+    margin-top: 2px;
+    color: var(--lit);
+  }
+  .kz-offer1__list b {
+    font-weight: 700;
+  }
+  @media (min-width: 768px) {
+    .kz-offer1__card {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: 48px;
+      padding: 36px 40px;
+    }
+    .kz-offer1__list {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 32px 40px;
+      gap: 12px 32px;
+    }
+    .kz-offer1[data-compact] .kz-offer1__card {
+      padding: 28px 32px;
+    }
+  }
+
+  /* ---------- Quote band ---------- */
+  .kz-qband {
+    padding-block: 48px;
+    background: var(--night-900);
+    color: var(--on-night-2);
+  }
+  .kz-qband__grid {
+    display: grid;
+    gap: 20px;
+    align-items: center;
+  }
+  .kz-qband__title {
+    font-size: 1.5rem;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    font-weight: 700;
+    color: var(--on-night);
+    max-width: 22ch;
+  }
+  .kz-qband__body {
+    margin-top: 8px;
+    max-width: 46ch;
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+  .kz-qband .kz-btn {
+    justify-self: start;
+  }
+  @media (max-width: 639px) {
+    .kz-qband .kz-btn {
+      justify-self: stretch;
+    }
+  }
+  @media (min-width: 768px) {
+    .kz-qband {
+      padding-block: 72px;
+    }
+    .kz-qband__grid {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 48px;
+    }
+    .kz-qband__title {
+      font-size: clamp(1.875rem, 1rem + 2vw, 2.5rem);
     }
   }
 
   /* ---------- Desktop ---------- */
   @media (min-width: 1024px) {
-    .kz-plans__track {
-      grid-auto-columns: calc(38% - 8px);
-    }
     .kz-phero {
       padding: 40px 0 64px;
     }
@@ -709,110 +657,16 @@
     .kz-rate__from b {
       font-size: 1.375rem;
     }
-
-    .kz-pnav {
-      padding-block: 10px;
-    }
-    .kz-ptab__head {
+    .kz-pdiv__head {
       grid-template-columns: auto minmax(0, 1fr) auto;
       margin-bottom: 32px;
     }
-    .kz-ptab__count {
+    .kz-pdiv__more {
       grid-column: 3;
+      justify-self: end;
     }
-
-    .kz-rates--grouped {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-    .kz-ptab--flat > .container-wide {
-      display: grid;
-      grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
-      gap: 64px;
-      align-items: start;
-    }
-    .kz-ptab--flat .kz-ptab__head {
-      grid-template-columns: auto minmax(0, 1fr);
-      position: sticky;
-      top: calc(var(--header-h) + 88px);
-    }
-    .kz-ptab--flat .kz-ptab__count {
-      grid-column: 2;
-    }
-    .kz-rates--flat .kz-rates__row {
-      grid-template-columns: minmax(0, 1fr) minmax(180px, auto) 16px;
-      grid-template-areas: 'what price go';
-      gap: 32px;
-      padding-block: 20px;
-    }
-    .kz-rates--flat .kz-rates__price {
-      text-align: right;
-    }
-    .kz-rates--flat .kz-rates__price b {
-      font-size: 1.375rem;
-    }
-
-    .kz-addons {
-      grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
-      gap: 64px;
-    }
-    .kz-addons__list {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      column-gap: 40px;
-    }
-  }
-
-  /* ---------- Wide desktop: plates in one row, comparison table below (tablets keep the selector + track) ---------- */
-  @media (min-width: 1200px) {
-    .kz-ptab__compare .kz-cmp__table tbody th {
-      width: 26%;
-    }
-    .kz-plans__pick {
-      display: none;
-    }
-    .kz-plans__track {
-      grid-auto-flow: row;
-      grid-template-columns: repeat(var(--plans, 4), minmax(0, 1fr));
-      margin: 0;
-      padding: 16px 0 0;
-      overflow: visible;
-      gap: 16px;
-      align-items: stretch;
-    }
-    .kz-plans[data-count='1'] .kz-plans__track {
-      --plans: 1;
-      max-width: 420px;
-    }
-    .kz-plans[data-count='2'] .kz-plans__track {
-      --plans: 2;
-      max-width: 860px;
-    }
-    .kz-plans[data-count='3'] .kz-plans__track {
-      --plans: 3;
-    }
-    .kz-plan {
-      padding: 24px 22px 22px;
-    }
-    .kz-plan.is-rec {
-      transform: translateY(-12px);
-      margin-bottom: -12px;
-    }
-    .kz-plan__price b {
-      font-size: 2.5rem;
-    }
-
-    .kz-ptab__compare {
-      display: block;
+    .kz-pdiv__compare {
       margin-top: 56px;
-      padding-top: 32px;
-      border-top: 1px solid var(--kz-groove, var(--bone-200));
-    }
-    .kz-sec .kz-ptab__compare .kz-cmp__table thead .is-rec,
-    .kz-sec .kz-ptab__compare .kz-cmp__table .is-rec {
-      background: var(--paper);
-    }
-    .kz-sec--inset .kz-ptab__compare .kz-cmp__table .is-rec {
-      background: var(--paper);
     }
   }
 }

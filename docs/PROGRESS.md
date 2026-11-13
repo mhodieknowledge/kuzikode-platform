@@ -105,3 +105,8 @@ The **Next step** line must be specific enough that a fresh session can continue
 - verify green (unit 729, integration 308); targeted e2e green. Tier: opus/high subagent; orchestrator checked pricing page at 390.
 - Left: legal copy still mentions care/hosting (existing subscriptions); insights/email-preview/dev.sql use old slugs (harmless).
 - Next step: R9.2 pricing pages (carousel primary, tabs removed, comparison table with every package as a column, one CTA, no duplicate FAQ/process). Pages: src/pages/pricing.astro, services/[slug].astro and src/ui/public/pricing/*.
+
+## 2026-11-13 21:20 UTC · R9.2 ✅ Pricing pages
+- PlanDeck = Rail carousel (arrows, dots, peeking), PackageCompare = all-plans table with pinned feature column (Websites only has features), OfferCard for single offers, QuoteBand single CTA; tabs/duplicate FAQ/process removed. Tests updated + new carousel/table e2e. verify green; e2e 19 passed. Tier: sonnet/high; orchestrator reviewed 390 shot.
+- Left: sparse cards for divisions without inclusions data (AI/Automation/Business software/Add-ons); header nav still shows prices (R9.4).
+- Next step: R9.3 brand + header + typography. Brand mark: opus subagent for 3 explorations (refs in design/brand/references/), then Poppins tokens (@fontsource/poppins, update B.1a guard test), rename to Kuzikode Intelligent Technologies everywhere, header redesign.

@@ -86,7 +86,7 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
 ## R9: Owner refinements (2026-11-13), DO THESE NEXT, before R7.2 and R8. Spec: `docs/redesign/REFINEMENTS.md`
 Scope guard: only these items; don't touch other sections.
 - [x] **R9.1 Service catalogue + pricing data** (REFINEMENTS §1): migration (deactivate old, insert new), seeds, 301s, remove products/Business Suite/care/hosting/email/domains from public pages, update the pricing-accuracy test.
-- [ ] **R9.2 Pricing pages** (§2): carousel primary, tabs removed, all-plans comparison table below, one CTA, no duplicate sections; each division page only its own offers.
+- [x] **R9.2 Pricing pages** (§2): carousel primary, tabs removed, all-plans comparison table below, one CTA, no duplicate sections; each division page only its own offers.
 - [ ] **R9.3 Brand + header + typography** (§8, §9): 3 mark explorations → chosen SVG set; "Kuzikode Intelligent Technologies" everywhere; header redesign; Poppins + webdev type scale in tokens; B.1a guard updated.
 - [ ] **R9.4 Floating side menu** (§5): bug fixes, floating panel, icons, no prices/dividers, Playwright open/close/nav tests.
 - [ ] **R9.5 Footer redesign** (§6) with the exact contact details (settings-backed).

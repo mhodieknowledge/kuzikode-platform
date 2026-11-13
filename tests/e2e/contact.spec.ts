@@ -35,9 +35,9 @@ test('the retired wizard URL 301s to the contact form, keeping the package prese
   const bare = await request.get('/start-a-project', { maxRedirects: 0 });
   expect(bare.headers()['location']).toBe('/contact');
 
-  // "Request this package" on the pricing page → contact form with the package's division and service preselected.
+  // "Get a quote" on a package card on the pricing page → contact form with the package's division and service preselected.
   await page.goto('/pricing');
-  const link = page.locator('li[data-package="business-website"]').getByRole('link', { name: /Request this package/ });
+  const link = page.locator('li[data-package="business-website"]').getByRole('link', { name: /Get a quote/ });
   await link.click();
   await expect(page).toHaveURL(/\/contact\?category=[a-z0-9-]+&package=business-website$/);
   await expect(page.locator('[data-package="business-website"]')).toContainText('Package: Business Website');

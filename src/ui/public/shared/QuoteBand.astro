@@ -1,0 +1,24 @@
+---
+/**
+ * The one closing call to action on pricing and division pages (R9.2): a night band, one line, one "Get a quote" button.
+ * The layout's footer routes are switched off on these pages so this is the only CTA band.
+ */
+interface Props {
+  title: string;
+  body?: string | undefined;
+  href: string;
+}
+const { title, body, href } = Astro.props;
+---
+
+<section class="kz-qband on-night" aria-labelledby="quote-title">
+  <div class="container-wide kz-qband__grid">
+    <div>
+      <h2 id="quote-title" class="kz-qband__title">{title}</h2>
+      {body ? <p class="kz-qband__body">{body}</p> : null}
+    </div>
+    <a class="kz-btn kz-btn--primary kz-btn--lg" href={href}>
+      <span>Get a quote</span>
+    </a>
+  </div>
+</section>

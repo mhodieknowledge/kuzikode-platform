@@ -107,3 +107,13 @@ export function whatsappHref(number: string | undefined | null, message: string)
   if (digits.length < 8 || digits.length > 15) return null;
   return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
 }
+
+/**
+ * A comparison table only helps when there are at least two packages, each lists features, and they share at least one row
+ * (R9.2: a division of separate priced services, or one offer, gets cards only).
+ */
+export function isComparable(pkgs: { features: { label: string }[] }[]): boolean {
+  if (pkgs.length < 2 || pkgs.some((p) => p.features.length === 0)) return false;
+  const [head, ...others] = pkgs;
+  return (head?.features ?? []).some((f) => others.every((o) => o.features.some((g) => g.label === f.label)));
+}

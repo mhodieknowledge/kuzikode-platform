@@ -1,0 +1,88 @@
+---
+/**
+ * One strong offer card for a division with a single priced service (R9.2): name, tagline, the published price, what is included
+ * (the package's own included features, else the division's typical deliverables), and "Get a quote" with the package preselected.
+ * No carousel and no comparison table: there is nothing to compare. `compact` is the /pricing version (smaller, no extra copy).
+ */
+import Icon from '../../icons/Icon.astro';
+import type { PublicPackage } from '../../../server/modules/cms';
+import { packagePrice, packageQuoteHref } from '../../../shared/service-display';
+
+interface Props {
+  pkg: PublicPackage;
+  /** Division-level deliverables, used when the package stores no features of its own. */
+  deliverables?: string[];
+  compact?: boolean;
+  id: string;
+}
+const { pkg: p, deliverables = [], compact = false, id } = Astro.props;
+const price = packagePrice(p);
+const own = p.features.filter((f) => f.value !== 'not_included');
+const items: { text: string; value?: string }[] =
+  own.length > 0
+    ? own.map((f) => ({ text: f.label, ...(f.value === 'text' && f.text ? { value: f.text } : {}) }))
+    : deliverables.map((d) => ({ text: d }));
+const unit = p.priceUnit?.replace(/^per\s+/i, '') ?? 'unit';
+const plural = (u: string) => (/(x|s|ch|sh)$/.test(u) ? `${u}es` : `${u}s`);
+---
+
+<ul class="kz-offer1" role="list" data-compact={compact ? '' : undefined}>
+  <li
+    id={`${id}-${p.slug}`}
+    class="kz-offer1__card on-night"
+    data-package={p.slug}
+    aria-labelledby={`${id}-${p.slug}-name`}
+  >
+    <div class="kz-offer1__main">
+      <h3 class="kz-offer1__name" id={`${id}-${p.slug}-name`}>{p.name}</h3>
+      {p.tagline ? <p class="kz-offer1__tag">{p.tagline}</p> : null}
+      <p class="kz-offer1__price" data-price>
+        {price.prefix ? <small class="kz-offer1__pre">{price.prefix}</small> : null}
+        <b class:list={[!price.hasPrice && 'is-quote']}>{price.amount}</b>
+        {price.suffix ? <small>{price.suffix}</small> : null}
+      </p>
+      {
+        price.annual || p.minQuantity > 1 ? (
+          <p class="kz-offer1__terms">
+            {price.annual ? <span>{price.annual}</span> : null}
+            {p.minQuantity > 1 ? (
+              <span>
+                Minimum {p.minQuantity} {plural(unit)}
+              </span>
+            ) : null}
+          </p>
+        ) : null
+      }
+      <div class="kz-offer1__act">
+        {
+          p.status === 'coming_soon' ? (
+            <span class="kz-plan__soon">Coming soon</span>
+          ) : (
+            <a class="kz-btn kz-btn--primary kz-btn--block" href={packageQuoteHref(p)}>
+              <span>Get a quote</span>
+              <span class="sr-only">: {p.name}</span>
+            </a>
+          )
+        }
+      </div>
+    </div>
+    {
+      items.length > 0 ? (
+        <div class="kz-offer1__inc">
+          <h4 class="kz-offer1__h">What is included</h4>
+          <ul class="kz-offer1__list" role="list">
+            {items.map((i) => (
+              <li>
+                <Icon name="check" size={16} />
+                <span>
+                  {i.text}
+                  {i.value ? <b>: {i.value}</b> : null}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null
+    }
+  </li>
+</ul>

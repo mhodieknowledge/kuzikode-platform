@@ -1,19 +1,20 @@
 ---
 /**
- * Division page (R4.2, clean slate; recomposed after the B.0d board review): header with the division drawing → packages first,
- * as a comparison table on the night band (IMG_5071; "Recommended" from the CMS flag) → what we offer (numbered ledger) → a
- * full-bleed photo band carrying the overview (B.4a) → why it matters + typical deliverables → questions; the footer's routes
- * close the page under "Tell us what you need". Data and URLs unchanged (catalogue, packagesForCategory, quotationHref).
+ * Division page (R9.2, REFINEMENTS §2): header with the division drawing → the division's own packages as a carousel (swipe on phones,
+ * dots + arrows; a full row on desktop when it fits) → directly below, a comparison table with every package as a column (sticky
+ * feature column) → one "Get a quote" band. A division with a single priced offer shows one strong offer card instead (what is
+ * included + the CTA) and no table. Divisions of separate services without comparison features show the carousel only. Data and URLs
+ * unchanged (catalogue, packagesForCategory, quotationHref, packageQuoteHref). A division with no packages yet (e.g. just
+ * created in the CMS) shows its description, services and benefits instead, so its content is never hidden.
  */
 import PublicLayout from '../../layouts/PublicLayout.astro';
 import DivisionHeader from '../../ui/public/services/DivisionHeader.astro';
-import ServiceLedger from '../../ui/public/services/ServiceLedger.astro';
 import PackageCompare from '../../ui/public/services/PackageCompare.astro';
-import PhotoBand from '../../ui/public/shared/PhotoBand.astro';
-import Accordion from '../../ui/primitives/Accordion.astro';
-import AccordionItem from '../../ui/primitives/AccordionItem.astro';
+import PlanDeck from '../../ui/public/pricing/PlanDeck.astro';
+import OfferCard from '../../ui/public/pricing/OfferCard.astro';
+import ServiceLedger from '../../ui/public/services/ServiceLedger.astro';
+import QuoteBand from '../../ui/public/shared/QuoteBand.astro';
 import Icon from '../../ui/icons/Icon.astro';
-import manifest from '../../../design/images/manifest.json';
 import {
   breadcrumbLd,
   getServiceCatalogue,
@@ -22,8 +23,8 @@ import {
   serviceLd,
   settingBool,
 } from '../../server/modules/cms';
-import { canRequestQuote, quotationHref } from '../../shared/service-display';
-import { RETIRED_DIVISIONS, divisionFromPrice, divisionShortName } from '../../shared/directory';
+import { canRequestQuote, isComparable, quotationHref } from '../../shared/service-display';
+import { RETIRED_DIVISIONS, divisionFromPrice } from '../../shared/directory';
 
 const { ctx } = Astro.locals;
 const catalogue = await getServiceCatalogue(ctx);
@@ -38,17 +39,11 @@ if (!cat) {
 const settings = await getSettings(ctx);
 const showPrices = settingBool(settings, 'pricing.show_prices');
 const { packages } = await packagesForCategory(ctx, cat.slug);
+const compare = isComparable(packages);
 const quotable = canRequestQuote(cat.status);
 const n = index + 1;
 const hue = `kz-div-${((n - 1) % 6) + 1}`;
 const from = showPrices ? divisionFromPrice(packages, cat.slug) : null;
-// R9.1 renamed two divisions; their photographs keep the original keys until the owner sends new ones.
-const IMAGE_ALIAS: Record<string, string> = {
-  websites: 'web-development',
-  'cross-platform-apps': 'mobile-desktop-apps',
-};
-const imageKey = `svc-${IMAGE_ALIAS[cat.slug] ?? cat.slug}`;
-const bandImage = imageKey in manifest.images ? imageKey : 'about-workspace';
 const ld = [
   serviceLd(ctx, cat),
   breadcrumbLd(ctx, [
@@ -65,7 +60,7 @@ const ld = [
   description={cat.seoDescription ?? cat.summary}
   whatsappMessage={`Hi Kuzikode, I'm interested in ${cat.name}.`}
   headerTone="bone"
-  footerLead={quotable ? { title: 'Tell us what you need' } : undefined}
+  footerCta={false}
 >
   <DivisionHeader
     slug={cat.slug}
@@ -79,12 +74,12 @@ const ld = [
   />
 
   {packages.length > 0 ? (
-    <section class={`kz-band on-night ${hue}`} aria-labelledby="packages-title">
+    <section class={`kz-sec kz-pdiv ${hue}`} aria-labelledby="packages-title">
       <div class="container-wide">
         <header class="kz-sec__head">
           <div>
             <h2 id="packages-title" class="kz-h2">
-              Packages and prices
+              {packages.length === 1 ? 'Price and what is included' : 'Packages and prices'}
             </h2>
             <p class="kz-lede">Published prices. The written quotation confirms the final amount before work starts.</p>
           </div>
@@ -93,25 +88,34 @@ const ld = [
             <Icon name="arrow-right" size={16} />
           </a>
         </header>
-        <PackageCompare packages={packages} caption={`${cat.name} packages compared`} id="compare" />
+        {packages.length === 1 ? (
+          <OfferCard pkg={packages[0]!} deliverables={cat.deliverables} id="plans" />
+        ) : (
+          <PlanDeck packages={packages} label={cat.name} id="plans" />
+        )}
+        {compare ? (
+          <div class="kz-pdiv__compare">
+            <h3 class="kz-pdiv__sub">Compare every package</h3>
+            <PackageCompare packages={packages} caption={`${cat.name} packages compared`} id="compare" />
+          </div>
+        ) : null}
       </div>
     </section>
   ) : null}
 
-  {cat.services.length > 0 ? <ServiceLedger cat={cat} n={n} showPrices={showPrices} packages={packages} /> : null}
-
-  {cat.description ? (
-    <PhotoBand image={bandImage} label="Overview">
-      <h2 class="kz-pband__title">How we approach {divisionShortName(cat.slug, cat.name).toLowerCase()}</h2>
-      <div class="prose-kz kz-pband__prose" set:html={cat.description} />
-    </PhotoBand>
-  ) : null}
-
-  {cat.benefits.length > 0 || cat.deliverables.length > 0 ? (
-    <section class={`kz-sec kz-gains ${hue}`} aria-label="Benefits and deliverables">
-      <div class="container-wide kz-gains__grid">
-        {cat.benefits.length > 0 ? (
-          <div>
+  {packages.length === 0 && (cat.services.length > 0 || cat.description || cat.benefits.length > 0) ? (
+    <Fragment>
+      {cat.description ? (
+        <section class={`kz-sec ${hue}`} aria-label="Overview">
+          <div class="container-wide kz-overview__grid">
+            <div class="prose-kz" set:html={cat.description} />
+          </div>
+        </section>
+      ) : null}
+      {cat.services.length > 0 ? <ServiceLedger cat={cat} n={n} showPrices={showPrices} packages={packages} /> : null}
+      {cat.benefits.length > 0 ? (
+        <section class={`kz-sec kz-gains ${hue}`} aria-label="Benefits">
+          <div class="container-wide">
             <h2 class="kz-h2">Why it matters</h2>
             <dl class="kz-gains__list" data-reveal-group>
               {cat.benefits.map((b, i) => (
@@ -125,38 +129,16 @@ const ld = [
               ))}
             </dl>
           </div>
-        ) : null}
-        {cat.deliverables.length > 0 ? (
-          <div class="kz-gains__deliver">
-            <h2 class="kz-h2">Typical deliverables</h2>
-            <ul class="kz-gains__checks" role="list">
-              {cat.deliverables.map((d) => (
-                <li>
-                  <Icon name="check" size={16} />
-                  {d}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-      </div>
-    </section>
+        </section>
+      ) : null}
+    </Fragment>
   ) : null}
 
-  {cat.faq.length > 0 ? (
-    <section class="kz-sec kz-sec--inset kz-faq" aria-labelledby="faq-title">
-      <div class="container-wide kz-faq__grid">
-        <h2 id="faq-title" class="kz-h2">
-          Questions
-        </h2>
-        <Accordion>
-          {cat.faq.map((f, i) => (
-            <AccordionItem title={f.q} open={i === 0}>
-              <p>{f.a}</p>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </div>
-    </section>
+  {quotable ? (
+    <QuoteBand
+      title="Tell us what you need"
+      body="We reply with questions or a written quotation."
+      href={quotationHref(cat.slug)}
+    />
   ) : null}
 </PublicLayout>

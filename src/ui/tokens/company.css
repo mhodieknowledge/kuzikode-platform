@@ -1350,7 +1350,7 @@
     }
   }
   /* Sector packages: plates keep their own height (some packages store no features), the action sits under the content. */
-  .kz-ipk .kz-plans__track {
+  .kz-ipk .kz-pcar .kz-rail__track {
     align-items: start;
   }
   .kz-ipk .kz-plan {

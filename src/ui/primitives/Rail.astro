@@ -12,8 +12,10 @@ interface Props {
   /** Hide the dots (e.g. when an external selector mirrors the position). */
   dots?: boolean;
   id?: string;
+  /** Render the track as a `<ul>` (children are `<li>`) instead of a `<div>`. */
+  list?: boolean;
 }
-const { label, class: className, style, dots = true, id } = Astro.props;
+const { label, class: className, style, dots = true, id, list = false } = Astro.props;
 ---
 
 <section
@@ -24,9 +26,15 @@ const { label, class: className, style, dots = true, id } = Astro.props;
   style={style}
   id={id}
 >
-  <div class="kz-rail__track" tabindex="0">
-    <slot />
-  </div>
+  {list ? (
+    <ul class="kz-rail__track" role="list" tabindex="0">
+      <slot />
+    </ul>
+  ) : (
+    <div class="kz-rail__track" tabindex="0">
+      <slot />
+    </div>
+  )}
   <div class="kz-rail__nav">
     {dots ? <div class="kz-rail__dots" /> : <div class="mr-auto" />}
     <button

@@ -1,20 +1,20 @@
 ---
 /**
- * Pricing (R4.3, rebuilt from scratch). Order: rate-card hero → sticky category control → one section per pricing category
- * (tiers: plan deck + comparison table on desktop; separate products: flat ledger; "Other services": division ledger, which
- * includes the Add-ons division since R9.1) → VAT note → questions →
- * footer lead. Every figure comes from `getPricingCatalogue` (BRIEF B.6; the price-accuracy e2e test checks it against D1).
+ * Pricing (R9.2, REFINEMENTS §2): short hero (with the rate card as an index) → one block per division, in catalogue order: a package
+ * carousel and, when the packages share features, a comparison table with every package as a column; a division with a single priced
+ * offer gets one compact offer card → one FAQ + VAT note → one "Get a quote" band. No tabs or segmented controls. Every figure comes
+ * from `getPricingCatalogue` (BRIEF B.6; the price-accuracy e2e test checks it against D1).
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
 import PricingHero, { type RateRow } from '../ui/public/pricing/PricingHero.astro';
 import PlanDeck from '../ui/public/pricing/PlanDeck.astro';
-import ServiceRates from '../ui/public/pricing/ServiceRates.astro';
+import OfferCard from '../ui/public/pricing/OfferCard.astro';
 import PackageCompare from '../ui/public/services/PackageCompare.astro';
-import SegmentedControl from '../ui/primitives/SegmentedControl.astro';
+import QuoteBand from '../ui/public/shared/QuoteBand.astro';
 import Accordion from '../ui/primitives/Accordion.astro';
 import AccordionItem from '../ui/primitives/AccordionItem.astro';
+import Icon from '../ui/icons/Icon.astro';
 import {
-  PRICING_TABS,
   breadcrumbLd,
   faqLd,
   getPage,
@@ -24,7 +24,8 @@ import {
   sectionOf,
   type PublicPackage,
 } from '../server/modules/cms';
-import { packagePrice } from '../shared/service-display';
+import { isComparable, packagePrice } from '../shared/service-display';
+import { divisionShortName } from '../shared/directory';
 
 const { ctx } = Astro.locals;
 const [page, catalogue, services, faqs] = await Promise.all([
@@ -35,19 +36,8 @@ const [page, catalogue, services, faqs] = await Promise.all([
 ]);
 const intro = sectionOf(page, 'intro', 'rich_text');
 const cta = sectionOf(page, 'cta', 'cta');
-const divisions = services.map((c, i) => ({ slug: c.slug, name: c.name, n: i + 1 }));
 
-/** Short labels for the phone category control. */
-const SHORT: Record<string, string> = { websites: 'Websites', care: 'Care', email: 'Email', other: 'Other' };
-/** Packages without feature lists are single priced services: a ledger grouped by division (night band). */
-const isLedger = (pkgs: PublicPackage[]) => pkgs.every((p) => p.features.length === 0);
-/** The comparison table only helps when every package lists features and they share at least one row. */
-const comparable = (pkgs: PublicPackage[]) => {
-  if (pkgs.length < 2 || pkgs.some((p) => p.features.length === 0)) return false;
-  const [head, ...others] = pkgs;
-  return (head?.features ?? []).some((f) => others.every((o) => o.features.some((g) => g.label === f.label)));
-};
-/** Lowest published price in a category (same currency as the first priced package), shown with its own unit. */
+/** Lowest published price in a division (same currency as the first priced package), shown with its own unit. */
 const lowest = (pkgs: PublicPackage[]): RateRow['from'] => {
   if (!catalogue.showPrices) return null;
   const priced = pkgs.filter((p) => p.priceType !== 'custom_quote' && p.priceMinor !== null && p.currency);
@@ -60,14 +50,33 @@ const lowest = (pkgs: PublicPackage[]): RateRow['from'] => {
   return { amount: d.amount, suffix: d.suffix };
 };
 
-const tabs = PRICING_TABS.map((t) => ({ ...t, packages: catalogue.packages.filter((p) => p.tab === t.key) })).filter(
-  (t) => t.packages.length > 0,
-);
-const rows: RateRow[] = tabs.map((t) => ({
-  key: t.key,
-  label: t.label,
-  count: t.packages.length,
-  from: lowest(t.packages),
+// One block per division, in catalogue order. Packages whose division is not in the catalogue still show (never drop a price).
+const known = new Set(services.map((c) => c.slug));
+const blocks = [
+  ...services.map((c, i) => ({
+    key: c.slug,
+    name: c.name,
+    short: divisionShortName(c.slug, c.name),
+    n: i + 1,
+    deliverables: c.deliverables,
+    packages: catalogue.packages.filter((p) => p.categorySlug === c.slug),
+  })),
+  ...[...new Set(catalogue.packages.filter((p) => !known.has(p.categorySlug)).map((p) => p.categorySlug))].map(
+    (slug) => ({
+      key: slug,
+      name: slug,
+      short: slug,
+      n: 0,
+      deliverables: [] as string[],
+      packages: catalogue.packages.filter((p) => p.categorySlug === slug),
+    }),
+  ),
+].filter((b) => b.packages.length > 0);
+const rows: RateRow[] = blocks.map((b) => ({
+  key: b.key,
+  label: b.short,
+  count: b.packages.length,
+  from: lowest(b.packages),
 }));
 const ld = [breadcrumbLd(ctx, [{ name: 'Pricing', path: '/pricing' }]), ...(faqs.length ? [faqLd(faqs)] : [])];
 ---
@@ -78,9 +87,7 @@ const ld = [breadcrumbLd(ctx, [{ name: 'Pricing', path: '/pricing' }]), ...(faqs
   description={page?.seoDescription ?? undefined}
   whatsappMessage="Hi Kuzikode, I have a question about your packages and pricing."
   headerTone="bone"
-  footerLead={
-    cta ? { title: cta.content.title, body: cta.content.body ?? undefined } : { title: 'Not sure which package fits?' }
-  }
+  footerCta={false}
 >
   <PricingHero
     title={intro?.content.title ?? 'Pricing'}
@@ -89,21 +96,7 @@ const ld = [breadcrumbLd(ctx, [{ name: 'Pricing', path: '/pricing' }]), ...(faqs
     showPrices={catalogue.showPrices}
   />
 
-  {tabs.length > 0 ? (
-    <nav class="kz-pnav" aria-label="Pricing categories">
-      <div class="container-wide">
-        <SegmentedControl
-          mode="links"
-          scroll
-          block
-          label="Pricing categories"
-          items={tabs.map((t) => ({ label: t.label, short: SHORT[t.key], href: `#${t.key}`, value: t.key }))}
-        />
-      </div>
-    </nav>
-  ) : null}
-
-  {tabs.length === 0 ? (
+  {blocks.length === 0 ? (
     <section class="kz-sec">
       <div class="container-wide">
         <p class="kz-lede">
@@ -116,55 +109,46 @@ const ld = [breadcrumbLd(ctx, [{ name: 'Pricing', path: '/pricing' }]), ...(faqs
       </div>
     </section>
   ) : (
-    tabs.map((t, i) => {
-      const ledger = isLedger(t.packages);
-      // Tiers of one product (comparable) are plates + table; separate products (email, domains) are a flat ledger.
-      const compare = !ledger && comparable(t.packages);
-      const flat = !ledger && !compare;
-      return (
-        <section
-          id={t.key}
-          class:list={[
-            'kz-ptab',
-            flat && 'kz-ptab--flat',
-            ledger ? 'kz-band on-night' : 'kz-sec',
-            !ledger && i % 2 === 1 && 'kz-sec--inset',
-          ]}
-          aria-labelledby={`tab-${t.key}`}
-        >
-          <div class="container-wide">
-            <header class="kz-ptab__head">
-              <span class="kz-ptab__n" aria-hidden="true">
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <h2 id={`tab-${t.key}`} class="kz-h2">
-                {t.label}
-              </h2>
-              <p class="kz-ptab__count">
-                {t.packages.length} {t.packages.length === 1 ? 'package' : 'packages'}
-              </p>
-            </header>
-            {ledger ? (
-              <ServiceRates packages={t.packages} divisions={divisions} />
-            ) : flat ? (
-              <ServiceRates packages={t.packages} />
-            ) : (
-              <PlanDeck packages={t.packages} label={t.label} id={`plans-${t.key}`} />
-            )}
-            {compare ? (
-              <div class="kz-ptab__compare">
-                <h3 class="kz-ptab__sub">Compare {t.label.toLowerCase()} side by side</h3>
-                <PackageCompare packages={t.packages} caption={`${t.label}: package comparison`} id={`cmp-${t.key}`} />
-              </div>
+    blocks.map((b, i) => (
+      <section
+        id={b.key}
+        class:list={['kz-sec kz-pdiv', b.n > 0 && `kz-div-${((b.n - 1) % 6) + 1}`, i % 2 === 1 && 'kz-sec--inset']}
+        aria-labelledby={`div-${b.key}`}
+      >
+        <div class="container-wide">
+          <header class="kz-pdiv__head">
+            <span class="kz-pdiv__n" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <h2 id={`div-${b.key}`} class="kz-h2">
+              {b.name}
+            </h2>
+            {b.n > 0 ? (
+              <a class="kz-link kz-pdiv__more" href={`/services/${b.key}`}>
+                About this service
+                <span class="sr-only">: {b.name}</span>
+                <Icon name="arrow-right" size={16} />
+              </a>
             ) : null}
-          </div>
-        </section>
-      );
-    })
+          </header>
+          {b.packages.length === 1 ? (
+            <OfferCard pkg={b.packages[0]!} deliverables={b.deliverables} compact id={`plans-${b.key}`} />
+          ) : (
+            <PlanDeck packages={b.packages} label={b.short} id={`plans-${b.key}`} />
+          )}
+          {isComparable(b.packages) ? (
+            <div class="kz-pdiv__compare">
+              <h3 class="kz-pdiv__sub">Compare all packages side by side</h3>
+              <PackageCompare packages={b.packages} caption={`${b.short}: package comparison`} id={`cmp-${b.key}`} />
+            </div>
+          ) : null}
+        </div>
+      </section>
+    ))
   )}
 
   <section
-    class="kz-sec kz-sec--inset kz-faq kz-pfaq"
+    class="kz-sec kz-faq kz-pfaq"
     aria-labelledby={faqs.length > 0 ? 'faq-title' : undefined}
     aria-label={faqs.length > 0 ? undefined : 'Pricing note'}
   >
@@ -190,4 +174,10 @@ const ld = [breadcrumbLd(ctx, [{ name: 'Pricing', path: '/pricing' }]), ...(faqs
       ) : null}
     </div>
   </section>
+
+  <QuoteBand
+    title={cta?.content.title ?? 'Not sure which package fits?'}
+    body={cta?.content.body ?? undefined}
+    href="/contact"
+  />
 </PublicLayout>

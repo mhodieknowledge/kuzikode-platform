@@ -1,15 +1,15 @@
 ---
 /**
- * Package plans for one pricing category (R4.3). IMG_5060 (tinted plates in a row, one filled featured plan), IMG_5058 (inverted
- * recommended plan with ruled feature rows), IMG_5057 (a selector above the plans on phones).
- * Below 1200 px the recommended plate and its selector option come first (CSS `order`; DOM order stays the catalogue order).
- * Desktop: plates in one row; the recommended one (CMS "most popular" flag, presented without a usage claim) is a night plate lifted
- * above the others. Phones and tablets: a package selector (buttons, aria-pressed) above a scroll-snap track with the next plate
- * peeking; the selector and the track stay in sync. A package stored without facts or features says where its scope is set
- * (the written quotation) instead of leaving an empty plate. Each plate: name, tagline, price (from `packagePrice`), minimum quantity,
- * delivery / revisions / support, the first features, and "All features" disclosing the rest, including what is not included.
+ * Package carousel (R9.2, REFINEMENTS §2): the primary view of a division's packages at every size.
+ * Built on the Rail primitive (scroll-snap track, dots, prev/next buttons, arrow keys, off-centre cards dimmed): phones swipe with the next
+ * card peeking; tablets show about two cards; desktop shows the whole row when it fits (up to 4 cards, controls hidden by the rail
+ * controller) and otherwise scrolls with the arrow buttons. There is no selector or tab control: the dots and arrows are the controls.
+ * Each card: name, tagline, price (from `packagePrice`: "From", "one-off", "per page" exactly as stored), minimum quantity, the first four
+ * included features, "All features" disclosing the rest (including what is not included), and "Get a quote", which opens the contact
+ * form with the package preselected (`packageQuoteHref`). The package flagged most popular in the CMS is a night card with a badge.
  */
 import Icon from '../../icons/Icon.astro';
+import Rail from '../../primitives/Rail.astro';
 import type { PublicPackage } from '../../../server/modules/cms';
 import { packagePrice, packageQuoteHref } from '../../../shared/service-display';
 
@@ -19,11 +19,7 @@ interface Props {
   id: string;
 }
 const { packages, label, id } = Astro.props;
-const FIRST = 5;
-const start = Math.max(
-  0,
-  packages.findIndex((p) => p.mostPopular),
-);
+const FIRST = 4;
 const plural = (unit: string) => (/(x|s|ch|sh)$/.test(unit) ? `${unit}es` : `${unit}s`);
 const view = packages.map((p) => {
   const facts = (
@@ -47,179 +43,95 @@ const view = packages.map((p) => {
 });
 ---
 
-<div class="kz-plans" data-kz-plans data-count={packages.length}>
+<Rail label={`${label} packages`} class="kz-pcar" style={`--pc:${packages.length}`} list id={id}>
   {
-    packages.length > 1 ? (
-      <div class="kz-plans__pick" role="group" aria-label={`${label}: choose a package`}>
-        {packages.map((p, i) => (
-          <button
-            type="button"
-            class:list={['kz-plans__opt', p.mostPopular && 'is-rec']}
-            aria-pressed={i === start ? 'true' : 'false'}
-            aria-controls={`${id}-${p.slug}`}
-            data-i={i}
-          >
+    view.map(({ p, price, facts, first, rest, unit }) => (
+      <li
+        id={`${id}-${p.slug}`}
+        class:list={['kz-plan', p.mostPopular && 'is-rec on-night']}
+        data-package={p.slug}
+        aria-labelledby={`${id}-${p.slug}-name`}
+      >
+        <div class="kz-plan__top">
+          <h3 class="kz-plan__name" id={`${id}-${p.slug}-name`}>
             {p.name}
-          </button>
-        ))}
-      </div>
-    ) : null
-  }
-  <ul class="kz-plans__track" role="list" data-start={start}>
-    {
-      view.map(({ p, price, facts, first, rest, unit }) => (
-        <li
-          id={`${id}-${p.slug}`}
-          class:list={['kz-plan', p.mostPopular && 'is-rec on-night']}
-          data-package={p.slug}
-          aria-labelledby={`${id}-${p.slug}-name`}
-        >
-          <div class="kz-plan__top">
-            <h3 class="kz-plan__name" id={`${id}-${p.slug}-name`}>
-              {p.name}
-            </h3>
-            {p.mostPopular ? <span class="kz-plan__rec">Recommended</span> : null}
-          </div>
-          {p.tagline ? <p class="kz-plan__tag">{p.tagline}</p> : null}
-          <p class="kz-plan__price" data-price>
-            {price.prefix ? <small class="kz-plan__pre">{price.prefix}</small> : null}
-            <b class:list={[!price.hasPrice && 'is-quote']}>{price.amount}</b>
-            {price.suffix ? <small>{price.suffix}</small> : null}
+          </h3>
+          {p.mostPopular ? <span class="kz-plan__rec">Most popular</span> : null}
+        </div>
+        {p.tagline ? <p class="kz-plan__tag">{p.tagline}</p> : null}
+        <p class="kz-plan__price" data-price>
+          {price.prefix ? <small class="kz-plan__pre">{price.prefix}</small> : null}
+          <b class:list={[!price.hasPrice && 'is-quote']}>{price.amount}</b>
+          {price.suffix ? <small>{price.suffix}</small> : null}
+        </p>
+        {price.annual || p.minQuantity > 1 ? (
+          <p class="kz-plan__terms">
+            {price.annual ? <span>{price.annual}</span> : null}
+            {p.minQuantity > 1 ? (
+              <span>
+                Minimum {p.minQuantity} {plural(unit)}
+              </span>
+            ) : null}
           </p>
-          {price.annual || p.minQuantity > 1 ? (
-            <p class="kz-plan__terms">
-              {price.annual ? <span>{price.annual}</span> : null}
-              {p.minQuantity > 1 ? (
+        ) : null}
+        {facts.length > 0 ? (
+          <dl class="kz-plan__facts">
+            {facts.map(([k, v]) => (
+              <div>
+                <dt>{k}</dt>
+                <dd>{v}</dd>
+              </div>
+            ))}
+          </dl>
+        ) : null}
+        {first.length > 0 ? (
+          <ul class="kz-plan__feats" role="list">
+            {first.map((f) => (
+              <li>
+                <Icon name="check" size={16} />
                 <span>
-                  Minimum {p.minQuantity} {plural(unit)}
+                  {f.label}
+                  {f.value === 'text' ? <b>: {f.text}</b> : null}
                 </span>
-              ) : null}
-            </p>
-          ) : null}
-          {facts.length > 0 ? (
-            <dl class="kz-plan__facts">
-              {facts.map(([k, v]) => (
-                <div>
-                  <dt>{k}</dt>
-                  <dd>{v}</dd>
-                </div>
-              ))}
-            </dl>
-          ) : null}
-          {first.length > 0 ? (
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {rest.length > 0 ? (
+          <details class="kz-plan__more">
+            <summary>
+              <span>All features</span>
+              <small>+{rest.length}</small>
+              <Icon name="chevron-down" size={16} />
+            </summary>
             <ul class="kz-plan__feats" role="list">
-              {first.map((f) => (
-                <li>
-                  <Icon name="check" size={16} />
+              {rest.map((f) => (
+                <li class:list={[f.value === 'not_included' && 'is-no']}>
+                  <Icon name={f.value === 'not_included' ? 'remove' : 'check'} size={16} />
                   <span>
+                    {f.value === 'not_included' ? <span class="sr-only">Not included: </span> : null}
                     {f.label}
                     {f.value === 'text' ? <b>: {f.text}</b> : null}
                   </span>
                 </li>
               ))}
             </ul>
-          ) : null}
-          {facts.length === 0 && first.length === 0 ? (
-            <p class="kz-plan__scope">
-              <Icon name="quotations" size={16} />
-              <span>Scope and inclusions are set out in your written quotation.</span>
-            </p>
-          ) : null}
-          {rest.length > 0 ? (
-            <details class="kz-plan__more">
-              <summary>
-                <span>All features</span>
-                <small>+{rest.length}</small>
-                <Icon name="chevron-down" size={16} />
-              </summary>
-              <ul class="kz-plan__feats" role="list">
-                {rest.map((f) => (
-                  <li class:list={[f.value === 'not_included' && 'is-no']}>
-                    <Icon name={f.value === 'not_included' ? 'remove' : 'check'} size={16} />
-                    <span>
-                      {f.value === 'not_included' ? <span class="sr-only">Not included: </span> : null}
-                      {f.label}
-                      {f.value === 'text' ? <b>: {f.text}</b> : null}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </details>
-          ) : null}
-          <div class="kz-plan__act">
-            {p.status === 'coming_soon' ? (
-              <span class="kz-plan__soon">Coming soon</span>
-            ) : (
-              <a
-                class:list={['kz-btn kz-btn--block', p.mostPopular ? 'kz-btn--primary' : 'kz-btn--secondary']}
-                href={packageQuoteHref(p)}
-              >
-                <span>{price.hasPrice ? 'Request this package' : 'Ask for a quote'}</span>
-                <span class="sr-only">: {p.name}</span>
-              </a>
-            )}
-          </div>
-        </li>
-      ))
-    }
-  </ul>
-</div>
-
-<script>
-  /*
-   * Phones and tablets: the selector scrolls the track to a plate; scrolling the track updates the selector. On desktop the
-   * track is a grid (no horizontal scroll), so the selector is hidden and nothing here has an effect.
-   */
-  const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
-  for (const box of document.querySelectorAll<HTMLElement>('[data-kz-plans]')) {
-    if (box.dataset.kzReady) continue;
-    box.dataset.kzReady = '1';
-    const track = box.querySelector<HTMLElement>('.kz-plans__track');
-    const opts = Array.from(box.querySelectorAll<HTMLButtonElement>('.kz-plans__opt'));
-    if (!track || opts.length === 0) continue;
-    const items = Array.from(track.children) as HTMLElement[];
-    const pick = box.querySelector<HTMLElement>('.kz-plans__pick');
-    const mark = (n: number) => {
-      opts.forEach((o, i) => o.setAttribute('aria-pressed', String(i === n)));
-      const o = opts[n];
-      if (pick && o && pick.scrollWidth > pick.clientWidth) {
-        pick.scrollTo({ left: o.offsetLeft - 16, behavior: reduced() ? 'auto' : 'smooth' });
-      }
-    };
-    const go = (n: number, smooth: boolean) => {
-      const it = items[n];
-      if (!it) return;
-      const pad = parseFloat(getComputedStyle(track).scrollPaddingInlineStart || '0');
-      track.scrollTo({ left: it.offsetLeft - pad, behavior: smooth && !reduced() ? 'smooth' : 'auto' });
-    };
-    // The recommended plate is first on phones/tablets through CSS `order`, so the track needs no scrolling on load.
-    let lock = 0;
-    for (const o of opts)
-      o.addEventListener('click', () => {
-        const n = Number(o.dataset.i ?? 0);
-        mark(n);
-        lock = window.setTimeout(() => (lock = 0), 450);
-        go(n, true);
-      });
-    let frame = 0;
-    track.addEventListener(
-      'scroll',
-      () => {
-        if (frame) return;
-        frame = requestAnimationFrame(() => {
-          frame = 0;
-          if (lock) return;
-          const left = track.getBoundingClientRect().left;
-          let best = 0;
-          let dist = Infinity;
-          items.forEach((it, i) => {
-            const d = Math.abs(it.getBoundingClientRect().left - left);
-            if (d < dist) [dist, best] = [d, i];
-          });
-          mark(best);
-        });
-      },
-      { passive: true },
-    );
+          </details>
+        ) : null}
+        <div class="kz-plan__act">
+          {p.status === 'coming_soon' ? (
+            <span class="kz-plan__soon">Coming soon</span>
+          ) : (
+            <a
+              class:list={['kz-btn kz-btn--block', p.mostPopular ? 'kz-btn--primary' : 'kz-btn--secondary']}
+              href={packageQuoteHref(p)}
+            >
+              <span>Get a quote</span>
+              <span class="sr-only">: {p.name}</span>
+            </a>
+          )}
+        </div>
+      </li>
+    ))
   }
-</script>
+</Rail>

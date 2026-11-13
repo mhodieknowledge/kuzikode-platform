@@ -1,10 +1,9 @@
 ---
 /**
- * Package comparison (R4.2; the pricing page reuses it in R4.3). IMG_5071: one table, packages as columns, the recommended one
- * (CMS "most popular" flag, no usage claim) lifted on paper with an emerald top rule and "Recommended" set in its header.
- * Rows: price, delivery, revisions, support, then every feature label any package carries (included ✓, not included –, or the
- * package's own text). Phones and tablets: one package column at a time, chosen with a package selector above the table
- * (`[data-kz-compare]`, buttons with aria-pressed); the full table is still in the DOM for assistive technology.
+ * Package comparison table (R9.2, REFINEMENTS §2): every package of the division is a column, side by side (no selector). Rows are the
+ * packages' comparison features (union of labels, in CMS order): included ✓, not included –, or the package's own text. The feature
+ * column is sticky (pinned while the table scrolls sideways on phones); the scroll region is keyboard-focusable and labelled. The head
+ * repeats name, "Most popular" badge and price; the foot carries "Get a quote" per package (contact form, package preselected).
  * Data only from the pricing catalogue (`packagePrice`, features); nothing is computed or rounded here.
  */
 import Icon from '../../icons/Icon.astro';
@@ -17,54 +16,25 @@ interface Props {
   id: string;
 }
 const { packages, caption, id } = Astro.props;
-const start = Math.max(
-  0,
-  packages.findIndex((p) => p.mostPopular),
-);
 const labels: string[] = [];
 for (const p of packages) for (const f of p.features) if (!labels.includes(f.label)) labels.push(f.label);
 const cell = (p: PublicPackage, label: string) => p.features.find((f) => f.label === label) ?? null;
-const facts: [string, (p: PublicPackage) => string | null][] = [
-  ['Delivery', (p) => p.deliveryTime],
-  ['Revision rounds', (p) => p.revisionRounds],
-  ['Support after launch', (p) => p.supportPeriod],
-];
-// The CMS feature lists already carry delivery / revisions / support rows; the package fields fill in only when they don't.
-const shownFacts = labels.length > 0 ? [] : facts.filter(([, get]) => packages.some((p) => get(p)));
-const href = (p: PublicPackage) => packageQuoteHref(p);
-const col = (i: number) => ({ 'data-col': String(i) });
 ---
 
-<div class="kz-cmp" data-kz-compare data-show={start} id={id}>
-  <div class="kz-cmp__pick" role="group" aria-label="Show package">
-    {
-      packages.map((p, i) => (
-        <button
-          type="button"
-          class:list={['kz-cmp__opt', p.mostPopular && 'is-rec']}
-          aria-pressed={i === start ? 'true' : 'false'}
-          aria-controls={`${id}-table`}
-          data-col={i}
-        >
-          {p.name}
-        </button>
-      ))
-    }
-  </div>
-  <div class="kz-cmp__scroll">
-    <table class="kz-cmp__table" id={`${id}-table`} style={`--cols:${packages.length}`}>
+<div class="kz-cmp" id={id} style={`--cols:${packages.length}`}>
+  <div class="kz-cmp__scroll" role="region" aria-label={`${caption} (scrolls sideways on small screens)`} tabindex="0">
+    <table class="kz-cmp__table" id={`${id}-table`}>
       <caption class="sr-only">{caption}</caption>
       <thead>
         <tr>
-          <td class="kz-cmp__corner"></td>
+          <th scope="col" class="kz-cmp__corner"><span class="sr-only">Feature</span></th>
           {
-            packages.map((p, i) => {
+            packages.map((p) => {
               const price = packagePrice(p);
               return (
-                <th scope="col" class:list={['kz-cmp__head', p.mostPopular && 'is-rec']} data-package={p.slug} {...col(i)}>
-                  {p.mostPopular ? <span class="kz-cmp__rec">Recommended</span> : null}
+                <th scope="col" class:list={['kz-cmp__head', p.mostPopular && 'is-rec']} data-package={p.slug}>
+                  {p.mostPopular ? <span class="kz-cmp__rec">Most popular</span> : null}
                   <span class="kz-cmp__name">{p.name}</span>
-                  {p.tagline ? <span class="kz-cmp__tag">{p.tagline}</span> : null}
                   <span class="kz-cmp__price" data-price>
                     {price.prefix ? <small>{price.prefix} </small> : null}
                     <b class:list={[!price.hasPrice && 'is-quote']}>{price.amount}</b>
@@ -80,25 +50,13 @@ const col = (i: number) => ({ 'data-col': String(i) });
       </thead>
       <tbody>
         {
-          shownFacts.map(([label, get]) => (
-            <tr class="is-fact">
-              <th scope="row">{label}</th>
-              {packages.map((p, i) => (
-                <td class:list={[p.mostPopular && 'is-rec']} {...col(i)}>
-                  {get(p) ?? '–'}
-                </td>
-              ))}
-            </tr>
-          ))
-        }
-        {
           labels.map((label) => (
             <tr>
               <th scope="row">{label}</th>
-              {packages.map((p, i) => {
+              {packages.map((p) => {
                 const f = cell(p, label);
                 return (
-                  <td class:list={[p.mostPopular && 'is-rec']} {...col(i)}>
+                  <td class:list={[p.mostPopular && 'is-rec']}>
                     {!f || f.value === 'not_included' ? (
                       <span class="kz-cmp__no">
                         <Icon name="remove" size={16} />
@@ -121,18 +79,18 @@ const col = (i: number) => ({ 'data-col': String(i) });
       </tbody>
       <tfoot>
         <tr>
-          <td class="kz-cmp__corner"></td>
+          <th scope="row" class="kz-cmp__corner"><span class="sr-only">Get a quote</span></th>
           {
-            packages.map((p, i) => (
-              <td class:list={[p.mostPopular && 'is-rec']} {...col(i)}>
+            packages.map((p) => (
+              <td class:list={[p.mostPopular && 'is-rec']}>
                 {p.status === 'coming_soon' ? (
                   <span class="kz-cmp__soon">Coming soon</span>
                 ) : (
                   <a
                     class:list={['kz-btn kz-btn--block', p.mostPopular ? 'kz-btn--primary' : 'kz-btn--secondary']}
-                    href={href(p)}
+                    href={packageQuoteHref(p)}
                   >
-                    <span>{packagePrice(p).hasPrice ? 'Request this package' : 'Ask for a quote'}</span>
+                    <span>Get a quote</span>
                     <span class="sr-only">: {p.name}</span>
                   </a>
                 )}
@@ -143,37 +101,4 @@ const col = (i: number) => ({ 'data-col': String(i) });
       </tfoot>
     </table>
   </div>
-  <div class="kz-cmp__acts">
-    {
-      packages.map((p, i) =>
-        p.status === 'coming_soon' ? (
-          <p class="kz-cmp__soon" {...col(i)}>
-            {p.name}: coming soon
-          </p>
-        ) : (
-          <a
-            class:list={['kz-btn kz-btn--block', p.mostPopular ? 'kz-btn--primary' : 'kz-btn--secondary']}
-            href={href(p)}
-            {...col(i)}
-          >
-            <span>{packagePrice(p).hasPrice ? `Request ${p.name}` : `Ask about ${p.name}`}</span>
-          </a>
-        ),
-      )
-    }
-  </div>
 </div>
-
-<script>
-  /* Package selector (phones and tablets): shows one column; the table stays complete for assistive technology. */
-  for (const box of document.querySelectorAll<HTMLElement>('[data-kz-compare]')) {
-    if (box.dataset.kzReady) continue;
-    box.dataset.kzReady = '1';
-    const opts = Array.from(box.querySelectorAll<HTMLButtonElement>('.kz-cmp__opt'));
-    for (const o of opts)
-      o.addEventListener('click', () => {
-        box.dataset.show = o.dataset.col ?? '0';
-        for (const x of opts) x.setAttribute('aria-pressed', String(x === o));
-      });
-  }
-</script>

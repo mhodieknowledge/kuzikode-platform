@@ -73,7 +73,7 @@ const text = async (l: Locator) => ((await l.textContent()) ?? '').replace(/\s+/
 async function checkPage(page: Page) {
   expect(packages.length).toBeGreaterThan(0);
   for (const p of packages) {
-    const item = page.locator(`#${String(p.pricing_tab)} li[data-package="${String(p.slug)}"]`);
+    const item = page.locator(`#${String(p.division)} li[data-package="${String(p.slug)}"]`);
     await expect(item, String(p.slug)).toHaveCount(1);
     const t = await text(item);
     expect(t).toContain(String(p.name));
@@ -117,7 +117,7 @@ for (const width of [390, 1440]) {
     if (width === 1440 && showPrices) {
       // The comparison table repeats the prices: they must match too.
       for (const p of packages.filter((x) => x.price_type !== 'custom_quote' && x.price_minor !== null)) {
-        const head = page.locator(`#${String(p.pricing_tab)} th[data-package="${String(p.slug)}"] [data-price]`);
+        const head = page.locator(`#${String(p.division)} th[data-package="${String(p.slug)}"] [data-price]`);
         if ((await head.count()) === 0) continue;
         expect(await text(head)).toContain(formatPriceTag(Number(p.price_minor), String(p.currency)));
       }

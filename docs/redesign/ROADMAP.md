@@ -88,6 +88,10 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
 - [ ] **R7.2 Motion pass** with `find-animation-opportunities`, `improve-animations`, `review-animations` and `animation-performance`, then `remove-animations` for excess.
 
 ## R8: QA and finish
-- [ ] **R8.1 Full visual QA** at all 10 viewports for every page, the workspace and admin. `break-ui` on key components. `web-design-guidelines` + `impeccable` audit + `design-taste-frontend` finish gate. Fix everything found. AC: `QA_REPORT.md` with results.
+- [ ] **R8.1 Visual QA, lean version (owner approved trimming, 2026-11-13).** (1) A `sonnet`/`low` subagent runs the automated sweep over every page, the
+  workspace and admin at all 10 viewports: horizontal overflow, B.1a type limits, tap targets (≥44 px), broken or missing images, console errors,
+  `prefers-reduced-motion`. (2) Read screenshots only for flagged pages plus the key pages (home, pricing, contact, checkout, workspace overview,
+  admin dashboard) at 390 first, then 1440. (3) One `impeccable` audit and one `web-design-guidelines` pass over the whole site. (4) Fix what's found.
+  Skip further per-page deep reviews. AC: `QA_REPORT.md` with the sweep results and fixes; no overflow/limit violations remain.
 - [ ] **R8.2 Functional regression:** full unit, integration and e2e suites green. Payments, auth, portal isolation and pricing accuracy verified. Lighthouse mobile ≥ 90 perf / ≥ 95 a11y on key pages.
 - [ ] **R8.3 Docs:** update README/ADMIN-GUIDE screenshots and remove any remaining outdated design text. `REDESIGN-REPORT.md` (what changed, before/after, skills used, image traceability summary, known limitations). Deploy to **staging** and smoke test.

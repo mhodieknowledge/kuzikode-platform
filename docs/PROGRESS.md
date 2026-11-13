@@ -1243,3 +1243,4 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Next step: R6.2 group 3 Delivery (projects `ProjectsAdmin.tsx`, time `TimeAdmin.tsx`, support `SupportAdmin.tsx`), then Website (pages/CmsAdmin, services,
   packages, content, media, careers; rebuild `components/ui/RichTextEditor` into `src/ui/`), then Administration (users, settings + SettingsNav/Sections,
   audit, notifications, account `AccountActions.tsx`). Then delete `components/admin/actions.tsx` and the rest of `components/`.
+- 17:33 UTC heartbeat: group 3 (Delivery + Administration) builder running.

@@ -1881,6 +1881,52 @@
   .kz-fsvc + .kz-fsvc {
     margin-top: 28px;
   }
+  .kz-fsvc__side {
+    display: grid;
+    gap: 16px;
+    align-content: start;
+    min-width: 0;
+  }
+  .kz-fsvc__main + .kz-fsvc__side {
+    margin-top: 24px;
+  }
+  .kz-fsvc__help {
+    font-size: 0.9375rem;
+    color: var(--ink-600);
+  }
+  .kz-fsvc__help a {
+    font-weight: 600;
+    color: var(--ink-900);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  @media (min-width: 1024px) {
+    .kz-fsvc {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 0 20px;
+      align-items: start;
+    }
+    .kz-fsvc__client {
+      grid-column: 1 / -1;
+    }
+    .kz-fsvc__main {
+      grid-column: 1 / span 8;
+      min-width: 0;
+    }
+    .kz-fsvc__main + .kz-fsvc__side {
+      margin-top: 0;
+      grid-column: 9 / -1;
+      position: sticky;
+      top: 72px;
+    }
+    .kz-fsvc__side {
+      grid-column: 1 / span 8;
+    }
+    .kz-fsvc__side .kz-fsvc__label {
+      margin-top: 0;
+    }
+  }
   .kz-fsvc__client {
     margin-bottom: 12px;
     font-size: 1.25rem;

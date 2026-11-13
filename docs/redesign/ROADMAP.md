@@ -76,7 +76,7 @@ and the change is pushed to `main`. The previous build roadmap (`docs/10-ROADMAP
 - [x] **R5.1 Workspace shell:** side navigation, top status bar, window/panel pattern, command palette, mobile shell (bottom bar or sheet nav), light/dark surfaces.
   - Dark surfaces: the theme toggle ships with R5.4 (legacy page bodies are unreadable on night until R5.2–R5.4 rebuild them).
 - [x] **R5.2 Overview, projects (milestones, updates, deliverables, messages).** (2026-11-13: master/detail projects, milestone rail, boards PASS)
-- [ ] **R5.3 Quotations, invoices, payments and receipts, saved cards, subscriptions/services.**
+- [x] **R5.3 Quotations, invoices, payments and receipts, saved cards, subscriptions/services.** (2026-11-13: boards 5/5 PASS after fixes)
 - [ ] **R5.4 Support, profile, devices, auth screens** (sign-in, reset, invite, verify). Also: enable the workspace dark theme toggle (night desk, night-800 windows; remembered per device via cookie so the server renders `data-theme`).
 
 ## R6: Admin interface

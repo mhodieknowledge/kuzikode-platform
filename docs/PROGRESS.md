@@ -1172,3 +1172,17 @@ The **Next step** line must be specific enough that a fresh session can continue
   and `services.astro` with PageHead + Window + list/detail (reuse `.kz-wlist/.kz-wrow`, `.kz-pview` master/detail pattern); documents already use
   `src/ui/documents/*`; replace `components/portal/{StatusPill.astro,AttemptStatus.tsx,SavedCards.tsx}` (extract logic to hooks); keep testids
   `portal-how-to-pay`, `assets` and e2e labels (see tests/e2e/portal-auth.spec.ts, checkout, subscriptions, invoices, quotations specs).
+
+## 2026-11-13 08:10 UTC · R5.3 ✅ Workspace quotations, invoices, payments, services
+- New `src/ui/workspace/finance/` (DocSummary, FilterNav, SavedCards + useSavedCards, AutoCharge + useAutoCharge, tone.ts) and a "Workspace finance
+  (R5.3)" CSS section. Rewritten: portal quotations (list, detail), invoices (list, detail, pay), payments (list, attempt), services; support pages
+  switched to the new StatusPill. Deleted `components/portal/{StatusPill.astro,AttemptStatus.tsx,SavedCards.tsx}`. Paper-sheet figures now mono.
+  Site-wide: U+00B7 from Overpass Mono (base.css).
+- verify green (unit 533, integration 308); e2e green (see QA_REPORT). Boards 5/5 PASS (two review rounds).
+- Tiers: build subagent opus/medium (two rounds); review impeccable-finish-reviewer opus/medium (two rounds); services fix + review by orchestrator.
+- Tip: restart `wrangler dev` after `npm run verify` before running e2e (the rebuild swaps chunk hashes under the server).
+- Next step: R5.4 support, profile, devices, auth screens + dark theme. Pages: `src/pages/portal/support/{index,new,[id]}.astro`,
+  `account/{index,sessions}.astro`, `mfa/{index,setup}.astro`, `login`, `register`, `forgot-password`, `reset-password`, `accept-invite`,
+  `verify-email`, `password`; legacy `components/portal/{PortalAccount.tsx,SupportForms.tsx}` and `components/auth/*` (check admin auth uses them:
+  admin auth screens may share; PANEL_DESIGN_SPEC §4 split layout, IMG_5017). Dark theme: cookie-remembered `data-theme` rendered by the server in
+  PortalLayout, toggle in the account menu/More sheet; night-900 desk, night-800 windows; check every workspace page for contrast in dark (axe).

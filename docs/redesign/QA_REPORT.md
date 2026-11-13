@@ -150,3 +150,15 @@ Harness: `playwright.visual.config.ts` (`SHOOT=… SHOOT_SET=all|core|quick SHOO
 - Second review: all three boards PASS. Follow-ups applied: composer shorter (min-height 5.25 rem), "← Projects" hidden from 1024 px where the
   list window is on screen; rail checked with three local milestones (done / current / later, temporary local rows removed after the shot);
   e2e message residue cleared from the local DB before the board capture.
+
+## R5.3 Workspace quotations, invoices, payments, services (2026-11-13)
+- Built by a subagent (opus/medium) to the R5.2 pattern; reviewed by the orchestrator from screenshots + diff. References: IMG_5013, IMG_5014,
+  IMG_5018 (documents/payments), IMG_5072 (surface ladder).
+- Viewports core set for quotations (list + QUO-E2E-P001), invoices (list, credit notes, INV-E2E-P001/P002), payments, the failed attempt, services,
+  plus public /q/ and /i/ at 390/1440 after the paper-sheet numeral change. No overflow; sub-44 px targets only the skip link and a label-wrapped checkbox.
+- Board review round 1: invoices list, invoice, quotation PASS; payments FAIL (single strip), services off-spec → grid tables, side stripe removed,
+  one emerald action, PDF in the title bar, mono sheet numerals, payments 8/4 with "Received", per-service windows, trimmed phone quotation summary.
+  Round 2: 4/5 PASS; services → 8/4 with a "Need a change?" window. Billing-period bar declined (no period start in data).
+- Found in the loop: Overpass middle-dot spacing ("·due") fixed site-wide; `npm run verify` rebuilding `dist/` under a running `wrangler dev`
+  breaks island hydration in e2e until the server restarts (not a code fault).
+- e2e: portal-auth, checkout, subscriptions, invoices, quotations, full-journey, security, sweep, public-documents, mobile-limits green.

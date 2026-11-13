@@ -51,17 +51,11 @@ const GroupLabel = multiClient ? 'p' : 'h2';
         {multiClient ? <h2 class="kz-fsvc__client">{g.client.name}</h2> : null}
 
         {g.subscriptions.length ? (
-          <Fragment>
+          <div class="kz-fsvc__main">
             <GroupLabel class="kz-fsvc__label">Subscriptions</GroupLabel>
             <div class="kz-wgrid" data-testid="subscriptions">
               {g.subscriptions.map((s, si) => (
-                <Window
-                  title={s.description}
-                  icon="subscriptions"
-                  level={level}
-                  span={g.subscriptions.length > 1 ? 6 : 8}
-                  id={`sub-${gi}-${si}`}
-                >
+                <Window title={s.description} icon="subscriptions" level={level} span={12} id={`sub-${gi}-${si}`}>
                   <StatusPill slot="actions" tone={s.paused ? 'warn' : 'lit'}>
                     {s.paused ? 'Paused' : 'Active'}
                   </StatusPill>
@@ -107,78 +101,88 @@ const GroupLabel = multiClient ? 'p' : 'h2';
                 </Window>
               ))}
             </div>
-          </Fragment>
+          </div>
         ) : null}
-
-        {g.assets.length ? (
-          <Fragment>
-            <GroupLabel class="kz-fsvc__label">Domains, hosting and accounts</GroupLabel>
-            {g.assets.length > 4 ? (
-              <div class="kz-wgrid">
-                <Window
-                  title="Domains, hosting and accounts"
-                  icon="managed-services"
-                  level={level}
-                  id={`assets-${gi}`}
-                  meta={String(g.assets.length)}
-                  flush
-                  data-testid="assets"
-                >
-                  <ul class="kz-wlist">
-                    {g.assets.map((a) => (
-                      <li class="kz-wrow">
-                        <div class="kz-wrow__main">
-                          <p class="kz-wrow__title">{a.name}</p>
-                          <p class="kz-wrow__meta">
-                            {a.typeLabel}
-                            {a.provider ? ` · ${a.provider}` : ''}
-                          </p>
-                        </div>
-                        <p class="kz-fasset__when">
-                          {a.renewalDate ? (
-                            <Fragment>
-                              <span>{a.autoRenew ? 'Renews' : 'Expires'}</span>
-                              <span class="kz-wmono">{formatLongDate(a.renewalDate)}</span>
-                            </Fragment>
-                          ) : (
-                            'No renewal date'
-                          )}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
-                </Window>
-              </div>
-            ) : (
-              <div class="kz-wgrid" data-testid="assets">
-                {g.assets.map((a, ai) => (
+        <div class="kz-fsvc__side">
+          {g.assets.length ? (
+            <Fragment>
+              <GroupLabel class="kz-fsvc__label">Domains, hosting and accounts</GroupLabel>
+              {g.assets.length > 4 ? (
+                <div class="kz-wgrid">
                   <Window
-                    title={a.name}
+                    title="Domains, hosting and accounts"
                     icon="managed-services"
                     level={level}
-                    span={4}
-                    id={`asset-${gi}-${ai}`}
-                    meta={a.renewalDate ? formatLongDate(a.renewalDate) : undefined}
+                    id={`assets-${gi}`}
+                    meta={String(g.assets.length)}
+                    flush
+                    data-testid="assets"
                   >
-                    <p class="kz-fasset__type">
-                      {a.typeLabel}
-                      {a.provider ? ` · ${a.provider}` : ''}
-                    </p>
-                    <p class="kz-fasset__renew">
-                      {a.renewalDate
-                        ? `${a.autoRenew ? 'Renews' : 'Expires'} ${formatLongDate(a.renewalDate)}`
-                        : 'No renewal date'}
-                    </p>
+                    <ul class="kz-wlist">
+                      {g.assets.map((a) => (
+                        <li class="kz-wrow">
+                          <div class="kz-wrow__main">
+                            <p class="kz-wrow__title">{a.name}</p>
+                            <p class="kz-wrow__meta">
+                              {a.typeLabel}
+                              {a.provider ? ` · ${a.provider}` : ''}
+                            </p>
+                          </div>
+                          <p class="kz-fasset__when">
+                            {a.renewalDate ? (
+                              <Fragment>
+                                <span>{a.autoRenew ? 'Renews' : 'Expires'}</span>
+                                <span class="kz-wmono">{formatLongDate(a.renewalDate)}</span>
+                              </Fragment>
+                            ) : (
+                              'No renewal date'
+                            )}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
                   </Window>
-                ))}
-              </div>
-            )}
-          </Fragment>
-        ) : null}
+                </div>
+              ) : (
+                <div class="kz-wgrid" data-testid="assets">
+                  {g.assets.map((a, ai) => (
+                    <Window
+                      title={a.name}
+                      icon="managed-services"
+                      level={level}
+                      span={12}
+                      id={`asset-${gi}-${ai}`}
+                      meta={a.renewalDate ? formatLongDate(a.renewalDate) : undefined}
+                    >
+                      <p class="kz-fasset__type">
+                        {a.typeLabel}
+                        {a.provider ? ` · ${a.provider}` : ''}
+                      </p>
+                      <p class="kz-fasset__renew">
+                        {a.renewalDate
+                          ? `${a.autoRenew ? 'Renews' : 'Expires'} ${formatLongDate(a.renewalDate)}`
+                          : 'No renewal date'}
+                      </p>
+                    </Window>
+                  ))}
+                </div>
+              )}
+            </Fragment>
+          ) : null}
+          {gi === groups.length - 1 ? (
+            <Window title="Need a change?" icon="support" level={level} id="svc-help">
+              <p class="kz-fsvc__help">
+                Questions about a service, a renewal or a new domain? <a href="/portal/support/new">Ask our team</a>.
+              </p>
+            </Window>
+          ) : null}
+        </div>
       </section>
     ))
   )}
-  <p class="kz-wsfoot">
-    Questions about a service? <a href="/portal/support/new">Ask our team</a>.
-  </p>
+  {empty ? (
+    <p class="kz-wsfoot">
+      Questions about a service? <a href="/portal/support/new">Ask our team</a>.
+    </p>
+  ) : null}
 </PortalLayout>

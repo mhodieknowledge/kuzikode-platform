@@ -1,0 +1,72 @@
+---
+/**
+ * Projects list window (R5.2). Full width below 1024 px; inside `.kz-pview` on wider screens it is the left 4 columns of the
+ * master/detail view (rows stack there) and `current` marks the open project.
+ */
+import Window from '../Window.astro';
+import Progress from '../Progress.astro';
+import StatusPill from '../../primitives/StatusPill.astro';
+import Icon from '../../icons/Icon.astro';
+import type { PortalProjectListItem } from '../../../server/modules/projects';
+import { PROJECT_STATUS_LABEL } from '../../../shared/projects';
+import { formatLongDate } from '../../../shared/service-display';
+
+interface Props {
+  projects: PortalProjectListItem[];
+  multiClient: boolean;
+  current?: string | undefined;
+  class?: string;
+}
+const { projects, multiClient, current, class: className } = Astro.props;
+const finishedStates = new Set(['completed', 'cancelled']);
+const TONE = { planning: 'neutral', active: 'lit', on_hold: 'warn', completed: 'ok', cancelled: 'neutral' } as const;
+const when = (p: PortalProjectListItem) =>
+  p.completedAt
+    ? `Completed ${formatLongDate(p.completedAt)}`
+    : p.targetDate
+      ? `Target ${formatLongDate(p.targetDate)}`
+      : 'No target date';
+const groups = [
+  { key: 'running', title: 'In progress', items: projects.filter((p) => !finishedStates.has(p.status)) },
+  { key: 'finished', title: 'Finished', items: projects.filter((p) => finishedStates.has(p.status)) },
+].filter((g) => g.items.length > 0);
+---
+
+<Window title="Projects" icon="projects" meta={String(projects.length)} id="plist" class={className} flush>
+  {groups.map((g) => (
+    <div class="kz-plist__group">
+      {groups.length > 1 ? <p class="kz-plist__label">{g.title}</p> : null}
+      <ul class="kz-wlist" aria-label={g.key === 'running' ? 'Projects' : 'Finished projects'}>
+        {g.items.map((p) => (
+          <li class:list={['kz-prow', p.id === current && 'is-current']}>
+            <div class="kz-prow__name">
+              <a
+                class="kz-wrow__title kz-wrow__link kz-prow__link"
+                href={`/portal/projects/${p.id}`}
+                aria-current={p.id === current ? 'page' : undefined}
+              >
+                {p.name}
+              </a>
+              <p class="kz-wrow__meta">
+                <span class="kz-wmono">{p.reference}</span>
+                {multiClient ? ` · ${p.clientName}` : ''}
+              </p>
+            </div>
+            <Progress class="kz-prow__prog" label={`${p.name} progress`} pct={p.progressPct} />
+            <p class="kz-prow__when">{when(p)}</p>
+            <div class="kz-prow__state">
+              <StatusPill tone={TONE[p.status]}>{PROJECT_STATUS_LABEL[p.status]}</StatusPill>
+              {p.unreadMessages > 0 ? (
+                <span class="kz-prow__unread">
+                  {p.unreadMessages} new
+                  <span class="sr-only">{p.unreadMessages === 1 ? ' message' : ' messages'}</span>
+                </span>
+              ) : null}
+            </div>
+            <Icon name="chevron-right" size={16} class="kz-prow__go" />
+          </li>
+        ))}
+      </ul>
+    </div>
+  ))}
+</Window>

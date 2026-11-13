@@ -1,5 +1,13 @@
 ---
+/**
+ * Workspace projects (R5.2, PANEL_DESIGN_SPEC §2). Phones and tablets: the list window. From 1024 px: master/detail, the list in
+ * the left 4 columns and a "Schedule" window in the right 8 (counts, upcoming targets by date). Opening a project keeps the list
+ * beside it (see [id].astro).
+ */
 import PortalLayout from '../../../layouts/PortalLayout.astro';
+import PageHead from '../../../ui/workspace/PageHead.astro';
+import Window from '../../../ui/workspace/Window.astro';
+import ProjectList from '../../../ui/workspace/projects/ProjectList.astro';
 import { loadPortalPage } from '../../../server/lib/portal-page';
 import { listPortalProjects } from '../../../server/modules/projects';
 import { PROJECT_STATUS_LABEL } from '../../../shared/projects';
@@ -10,58 +18,68 @@ const page = await loadPortalPage(ctx, Astro.request, { area: 'projects' });
 if (page instanceof Response) return page;
 const projects = await listPortalProjects(ctx);
 const multiClient = page.clients.length > 1;
+const finishedStates = new Set(['completed', 'cancelled']);
+const running = projects.filter((p) => !finishedStates.has(p.status));
+const unread = projects.reduce((n, p) => n + p.unreadMessages, 0);
+const upcoming = running
+  .filter((p) => p.targetDate)
+  .sort((a, b) => (a.targetDate ?? '').localeCompare(b.targetDate ?? ''));
+const undated = running.filter((p) => !p.targetDate);
+const stats = [
+  { label: 'In progress', value: running.length },
+  { label: 'Finished', value: projects.length - running.length },
+  { label: 'New messages', value: unread },
+];
 ---
 
 <PortalLayout title="Projects" page={page} active="projects">
-  <h1 class="text-2xl font-bold tracking-display md:text-3xl">Projects</h1>
+  <PageHead
+    title="Projects"
+    sub={projects.length ? 'Follow milestones, updates and files for each piece of work.' : undefined}
+  />
   {projects.length === 0 ? (
-    <p class="mt-6 max-w-2xl rounded-lg border border-line bg-surface p-6 text-ink-600">
-      There are no projects yet. Once work starts, you can follow it here.
-    </p>
+    <div class="kz-wgrid">
+      <Window title="Projects" icon="projects" span={8} id="none">
+        <div class="kz-wnote">
+          <p class="kz-wnote__code">no projects yet</p>
+          <p>There are no projects yet. Once work starts, you can follow it here.</p>
+        </div>
+      </Window>
+    </div>
   ) : (
-    <ul class="mt-6 grid gap-4 md:grid-cols-2" aria-label="Projects">
-      {projects.map((p) => (
-        <li class="relative rounded-lg border border-line bg-surface p-5 hover:border-ink-400">
-          <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-            <a
-              href={`/portal/projects/${p.id}`}
-              class="font-semibold text-ink-950 after:absolute after:inset-0 hover:underline"
-            >
-              {p.name}
-            </a>
-            <span class="text-sm text-ink-600">{PROJECT_STATUS_LABEL[p.status]}</span>
-          </div>
-          <p class="mt-0.5 text-sm text-ink-600">
-            <span class="font-mono">{p.reference}</span>
-            {multiClient ? ` · ${p.clientName}` : ''}
-          </p>
-          <div class="mt-3 flex items-center gap-3">
-            <div
-              class="h-2 flex-1 overflow-hidden rounded-full bg-ink-950/10"
-              role="progressbar"
-              aria-label={`${p.name} progress`}
-              aria-valuemin="0"
-              aria-valuemax="100"
-              aria-valuenow={p.progressPct}
-            >
-              <div class="h-full rounded-full bg-brand-600" style={`width:${p.progressPct}%`} />
+    <div class="kz-pview">
+      <ProjectList projects={projects} multiClient={multiClient} class="kz-pview__list" />
+      <Window title="Schedule" icon="calendar" id="schedule" class="kz-pview__aside">
+        <dl class="kz-pstats">
+          {stats.map((s) => (
+            <div>
+              <dt>{s.label}</dt>
+              <dd>{s.value}</dd>
             </div>
-            <span class="w-10 text-right font-mono text-sm tabular-nums text-ink-800">{p.progressPct}%</span>
-          </div>
-          <p class="mt-2 text-sm text-ink-600">
-            {p.completedAt
-              ? `Completed ${formatLongDate(p.completedAt)}`
-              : p.targetDate
-                ? `Target date ${formatLongDate(p.targetDate)}`
-                : ''}
-            {p.unreadMessages > 0 ? (
-              <span class="ml-2 rounded-full bg-brand-600 px-2 py-0.5 text-[12px] font-semibold text-white">
-                {p.unreadMessages} new {p.unreadMessages === 1 ? 'message' : 'messages'}
-              </span>
-            ) : null}
-          </p>
-        </li>
-      ))}
-    </ul>
+          ))}
+        </dl>
+        {upcoming.length || undated.length ? (
+          <ol class="kz-sched" aria-label="Target dates">
+            {upcoming.map((p) => (
+              <li>
+                <span class="kz-sched__at">{formatLongDate(p.targetDate ?? '')}</span>
+                <span class="kz-sched__name">{p.name}</span>
+                <span class="kz-sched__state">{PROJECT_STATUS_LABEL[p.status]}</span>
+              </li>
+            ))}
+            {undated.map((p) => (
+              <li>
+                <span class="kz-sched__at">no target date</span>
+                <span class="kz-sched__name">{p.name}</span>
+                <span class="kz-sched__state">{PROJECT_STATUS_LABEL[p.status]}</span>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p class="kz-wnote">Every project is finished. Their files and messages stay here.</p>
+        )}
+        <p class="kz-sched__hint">Open a project on the left for its milestones, updates, files and messages.</p>
+      </Window>
+    </div>
   )}
 </PortalLayout>

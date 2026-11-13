@@ -112,7 +112,7 @@ Ticked when the file is deleted (or, for the logic-only files marked *logic*, mo
 | forms/InterestForm, ApplicationForm | ui/public/forms ApplicationForm + useApplication, InterestForm (useEnquiry) | [x] R4.7 (deleted) |
 | forms/QuotationResponse, documents/QuotationDocument, InvoiceDocument | ui/documents (DocumentSheet + Quotation/InvoiceSheet, DocAside, QuotationResponse + useQuotationResponse) | [x] R4.8 (deleted) |
 | payments/CheckoutPage, CheckoutSummary, CardReturn | ui/public/checkout (useCheckout, useAttemptStatus, Checkout, CheckoutSummary, CardReturn, AttemptResult) | [x] R4.8 (deleted) |
-| portal/StatusPill, AttemptStatus, PortalAccount, ProjectMessageForm, SavedCards, SupportForms | workspace | [ ] R5.2–R5.4 |
+| portal/StatusPill, AttemptStatus, PortalAccount, SavedCards, SupportForms (ProjectMessageForm removed R5.2) | workspace | [ ] R5.3–R5.4 |
 | auth/AuthForms | workspace/admin auth | [ ] R5.4 |
 | admin/UserMenu, NotificationsBell, CommandPalette, actions | admin shell | [ ] R6.1 |
 | admin/*Admin.tsx (22 modules), LineItemEditor, BarChart, CmsTabs, ContentTabs, SettingsNav, SettingsSections, PaymentGateways, AccountActions | admin modules | [ ] R6.2 |

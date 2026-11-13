@@ -1,0 +1,36 @@
+---
+/**
+ * Segmented progress meter (R5.2): ten cells like a workspace indicator, the percentage in mono beside it. The track is the
+ * accessible progressbar; the cells are decoration.
+ */
+interface Props {
+  label: string;
+  pct: number;
+  size?: 'sm' | 'lg';
+  class?: string;
+}
+const { label, pct, size = 'sm', class: className } = Astro.props;
+const value = Math.max(0, Math.min(100, Math.round(pct)));
+const full = Math.floor(value / 10);
+const part = value % 10;
+---
+
+<div class:list={['kz-prog', `kz-prog--${size}`, value === 100 && 'is-done', className]}>
+  <div
+    class="kz-prog__track"
+    role="progressbar"
+    aria-label={label}
+    aria-valuemin="0"
+    aria-valuemax="100"
+    aria-valuenow={value}
+  >
+    {Array.from({ length: 10 }, (_, i) => (
+      <span
+        class:list={['kz-prog__cell', i < full && 'is-on']}
+        style={i === full && part > 0 ? `--part:${part * 10}%` : undefined}
+        data-part={i === full && part > 0 ? '' : undefined}
+      />
+    ))}
+  </div>
+  <span class="kz-prog__pct">{value}%</span>
+</div>

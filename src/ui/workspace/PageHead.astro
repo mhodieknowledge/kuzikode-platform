@@ -1,0 +1,36 @@
+---
+/**
+ * Workspace page head (R5.2): optional back link, the page H1, a quiet sub line and an aside slot (status, references, actions).
+ * Sits above the window grid; the H1 is the page's only top-level heading.
+ */
+import Icon from '../icons/Icon.astro';
+
+interface Props {
+  title: string;
+  sub?: string | undefined;
+  back?: { href: string; label: string } | undefined;
+  class?: string;
+}
+const { title, sub, back, class: className } = Astro.props;
+---
+
+<header class:list={['kz-wshead', className]}>
+  {back ? (
+    <a class="kz-wshead__back" href={back.href}>
+      <Icon name="arrow-left" size={16} />
+      {back.label}
+    </a>
+  ) : null}
+  <div class="kz-wshead__row">
+    <div class="kz-wshead__text">
+      <h1 class="kz-wshead__title">{title}</h1>
+      {sub ? <p class="kz-wshead__sub">{sub}</p> : null}
+      <slot name="meta" />
+    </div>
+    {Astro.slots.has('aside') ? (
+      <div class="kz-wshead__aside">
+        <slot name="aside" />
+      </div>
+    ) : null}
+  </div>
+</header>

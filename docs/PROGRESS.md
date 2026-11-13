@@ -1157,3 +1157,18 @@ The **Next step** line must be specific enough that a fresh session can continue
   Window (`src/ui/workspace/Window.astro`) in `.kz-wgrid` (PANEL_DESIGN_SPEC §2: Balance 8 / Waiting 4, Active projects 6 / Activity 6;
   projects list 4 + project 8, milestones as a road strip, updates feed, deliverables, message composer → extract ProjectMessageForm logic).
   Keep `data-testid="portal-unlinked"` and the e2e headings ("Hello, Kuda", etc.).
+
+## 2026-11-13 06:30 UTC · R5.2 ✅ Workspace overview + projects
+- Session session_01LWwAAW9DLLvVL6SY9oRFYR (hand-off). Connectors Figma/Canva/Cloudflare present; R2 `images/incoming/` empty; no `design/inbox/`; skills present.
+- New: `src/ui/workspace/{PageHead.astro,Progress.astro}`, `src/ui/workspace/projects/{ProjectList.astro,MessageComposer.tsx,useProjectMessage.ts}`;
+  R5.2 section in `src/ui/tokens/workspace.css`. Rewritten: `/portal` (Balance 8 / Waiting 4, Active projects 6 / Activity 6, phone sticky Pay bar),
+  `/portal/projects` (list; from 1024 px list 4 + Schedule 8), `/portal/projects/[id]` (list 4 + Progress/Deliverables, milestone rail, updates log,
+  thread + composer). Deleted `components/portal/ProjectMessageForm.tsx`. Test hooks unchanged.
+- Boards portal, portal_projects, portal_project: first review Projects FAIL → master/detail etc.; second review 3/3 PASS.
+- verify green (unit 526, integration 308); e2e portal-auth, full-journey, security, sweep 14/14.
+- Tiers (CLAUDE.md §2b): build by the orchestrator; B.0d review impeccable-finish-reviewer opus/medium (2 rounds).
+- Note: `.kz-*` class names are global; check `grep -rn "\.kz-<name>" src/ui/tokens` before adding one (four collisions found this task).
+- Next step: R5.3 quotations, invoices, payments/receipts, saved cards, subscriptions/services: rebuild `src/pages/portal/{quotations,invoices,payments}/*`
+  and `services.astro` with PageHead + Window + list/detail (reuse `.kz-wlist/.kz-wrow`, `.kz-pview` master/detail pattern); documents already use
+  `src/ui/documents/*`; replace `components/portal/{StatusPill.astro,AttemptStatus.tsx,SavedCards.tsx}` (extract logic to hooks); keep testids
+  `portal-how-to-pay`, `assets` and e2e labels (see tests/e2e/portal-auth.spec.ts, checkout, subscriptions, invoices, quotations specs).

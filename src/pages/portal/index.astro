@@ -1,5 +1,15 @@
 ---
+/**
+ * Workspace overview (R5.2, PANEL_DESIGN_SPEC §2): Balance 8 / Waiting for you 4, Active projects 6 / Activity 6. Windows only for
+ * the areas the client's role can see; spans widen when a neighbour is hidden.
+ */
 import PortalLayout from '../../layouts/PortalLayout.astro';
+import PageHead from '../../ui/workspace/PageHead.astro';
+import Window from '../../ui/workspace/Window.astro';
+import Progress from '../../ui/workspace/Progress.astro';
+import Button from '../../ui/primitives/Button.astro';
+import StatusPill from '../../ui/primitives/StatusPill.astro';
+import Icon from '../../ui/icons/Icon.astro';
 import { loadPortalPage } from '../../server/lib/portal-page';
 import { getSettings, settingText } from '../../server/modules/cms';
 import { portalOverview, type PortalActivityKind } from '../../server/modules/portal';
@@ -18,210 +28,231 @@ const overview = linked ? await portalOverview(ctx) : null;
 const dateFmt = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeZone: 'Africa/Harare' });
 /** Calendar dates (YYYY-MM-DD) are shown as they are; timestamps in Harare time. */
 const day = (value: string) => dateFmt.format(new Date(value.length === 10 ? `${value}T12:00:00Z` : value));
-const KIND_LABEL: Record<PortalActivityKind, string> = {
-  invoice: 'Invoice',
-  quotation: 'Quotation',
-  payment: 'Payment',
-  project_update: 'Project update',
+const stamp = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', timeZone: 'Africa/Harare' });
+const short = (value: string) => stamp.format(new Date(value.length === 10 ? `${value}T12:00:00Z` : value));
+const today = new Intl.DateTimeFormat('en-GB', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  timeZone: 'Africa/Harare',
+}).format(new Date());
+
+const KIND: Record<PortalActivityKind, { label: string; href: (id: string) => string }> = {
+  invoice: { label: 'Invoice', href: (id) => `/portal/invoices/${id}` },
+  quotation: { label: 'Quotation', href: (id) => `/portal/quotations/${id}` },
+  payment: { label: 'Payment', href: () => '/portal/payments' },
+  project_update: { label: 'Project update', href: (id) => `/portal/projects/${id}` },
 };
-const card = 'rounded-lg border border-line bg-surface p-5 md:p-6';
-/** Every activity item opens its record. */
-const ACTIVITY_PATH: Record<PortalActivityKind, (id: string) => string> = {
-  quotation: (id) => `/portal/quotations/${id}`,
-  invoice: (id) => `/portal/invoices/${id}`,
-  payment: () => '/portal/payments',
-  project_update: (id) => `/portal/projects/${id}`,
-};
-const activityHref = (a: { kind: PortalActivityKind; targetId: string }) => ACTIVITY_PATH[a.kind](a.targetId);
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+const STATUS_TONE = { planning: 'neutral', active: 'lit', on_hold: 'warn' } as const;
+
+const areas = overview?.areas;
+const balanceSpan = areas?.quotations ? 8 : 12;
+const quoteSpan = areas?.finance ? 4 : 12;
+const activitySpan = areas?.projects ? 6 : 12;
 ---
 
 <PortalLayout title="Overview" page={page} active="overview">
-  <h1 class="text-2xl font-bold tracking-display md:text-3xl">Hello, {firstName}</h1>
-  {!linked || !overview ? (
-    <section
-      class="mt-6 max-w-2xl rounded-lg border border-line bg-canvas p-6 md:p-8"
-      aria-labelledby="pending-title"
-      data-testid="portal-unlinked"
-    >
-      <h2 id="pending-title" class="font-sans text-lg font-semibold">
-        Your account is waiting to be linked
-      </h2>
-      <p class="mt-2 text-ink-600">
-        Our team links each portal account to the right company before any documents are shown. We will let you know
-        when that is done. You can already update your details and security settings.
-      </p>
-      <p class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
-        <a href="/portal/account" class="font-semibold text-brand-600 underline underline-offset-2">
-          Your account
-        </a>
-        {contactEmail ? (
-          <a href={`mailto:${contactEmail}`} class="font-semibold text-brand-600 underline underline-offset-2">
-            Email {contactEmail}
-          </a>
-        ) : null}
-      </p>
-    </section>
-  ) : (
-    <>
-      <p class="mt-1 text-ink-600">{page.clients.map((c) => c.name).join(', ')}</p>
+  <PageHead title={`Hello, ${firstName}`} sub={linked ? page.clients.map((c) => c.name).join(', ') : undefined}>
+    <p slot="aside" class="kz-wshead__date">
+      {today}
+    </p>
+  </PageHead>
 
+  {!linked || !overview ? (
+    <div class="kz-wgrid">
+      <Window title="Account waiting to be linked" icon="lock" span={8} id="pending" data-testid="portal-unlinked">
+        <div class="kz-wnote">
+          <p class="kz-wnote__code">account not linked yet</p>
+          <p>
+            Our team links each portal account to the right company before any documents are shown. We will let you know
+            when that is done. You can already update your details and security settings.
+          </p>
+          <p class="kz-wnote__acts">
+            <Button href="/portal/account" variant="secondary" lead="account">
+              Your account
+            </Button>
+            {contactEmail ? (
+              <Button href={`mailto:${contactEmail}`} variant="quiet" lead="email">
+                Email {contactEmail}
+              </Button>
+            ) : null}
+          </p>
+        </div>
+      </Window>
+    </div>
+  ) : (
+    <div class="kz-wgrid">
       {overview.areas.finance ? (
-        <section class="mt-8" aria-labelledby="balance-title">
-          <h2 id="balance-title" class="font-sans text-lg font-semibold">
-            Balance
-          </h2>
+        <Window title="Balance" icon="wallet" span={balanceSpan} id="balance">
           {overview.balances.length === 0 ? (
-            <p class={`mt-3 ${card} text-ink-600`} data-testid="portal-paid-up">
-              You have nothing to pay right now.
-            </p>
+            <div class="kz-wnote" data-testid="portal-paid-up">
+              <p class="kz-wnote__code">nothing outstanding</p>
+              <p>You have nothing to pay right now.</p>
+            </div>
           ) : (
-            <ul class="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Outstanding balance by currency">
-              {overview.balances.map((b) => (
-                <li class={card} data-testid={`portal-balance-${b.currency}`}>
-                  <p class="text-sm font-medium text-ink-600">Outstanding · {b.currency}</p>
-                  <p class="mt-1 font-mono text-2xl font-semibold tabular-nums text-ink-950">
-                    {formatMoney(b.outstandingMinor, b.currency)}
-                  </p>
-                  <p class="mt-2 text-sm text-ink-600">
-                    <a href="/portal/invoices" class="underline underline-offset-2 hover:text-ink-950">
-                      {b.openInvoices} open {b.openInvoices === 1 ? 'invoice' : 'invoices'}
-                    </a>
-                  </p>
-                  {b.overdueMinor > 0 ? (
-                    <p class="mt-1 text-sm font-semibold text-danger-700">
-                      {formatMoney(b.overdueMinor, b.currency)} overdue ({b.overdueInvoices}{' '}
-                      {b.overdueInvoices === 1 ? 'invoice' : 'invoices'})
+            <ul class="kz-bal" aria-label="Outstanding balance by currency">
+              {overview.balances.map((b) => {
+                const overduePct = b.outstandingMinor > 0 ? Math.round((b.overdueMinor / b.outstandingMinor) * 100) : 0;
+                return (
+                  <li class="kz-bal__item" data-testid={`portal-balance-${b.currency}`}>
+                    <p class="kz-bal__label">Outstanding · {b.currency}</p>
+                    <p class="kz-bal__fig">{formatMoney(b.outstandingMinor, b.currency)}</p>
+                    {b.overdueMinor > 0 ? (
+                      <div class="kz-bal__split" aria-hidden="true">
+                        <div class="kz-bal__bar">
+                          <span style={`width:${overduePct}%`} />
+                        </div>
+                        <p class="kz-bal__key">
+                          <span class="is-over">overdue</span>
+                          <span>not yet due</span>
+                        </p>
+                      </div>
+                    ) : null}
+                    <p class="kz-bal__meta">
+                      <a href="/portal/invoices">{plural(b.openInvoices, 'open invoice', 'open invoices')}</a>
+                      {b.overdueMinor > 0 ? (
+                        <span class="kz-bal__over">
+                          <Icon name="status-warn" size={16} />
+                          {`${formatMoney(b.overdueMinor, b.currency)} overdue (${plural(b.overdueInvoices, 'invoice', 'invoices')})`}
+                        </span>
+                      ) : null}
                     </p>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          {overview.balances.length > 0 ? (
+            <div class="kz-wfoot">
+              <Button href="/portal/invoices" lead="pay" class="kz-wfoot__pay">
+                Pay an invoice
+              </Button>
+              <Button href="/portal/payments" variant="quiet" lead="receipt">
+                Payments and receipts
+              </Button>
+            </div>
+          ) : null}
+        </Window>
+      ) : null}
+
+      {overview.areas.quotations ? (
+        <Window
+          title="Waiting for you"
+          icon="quotations"
+          span={quoteSpan}
+          id="waiting"
+          meta={overview.quotations.total ? String(overview.quotations.total) : undefined}
+          flush={overview.quotations.items.length > 0}
+        >
+          {overview.quotations.items.length === 0 ? (
+            <div class="kz-wnote">
+              <p class="kz-wnote__code">no open quotations</p>
+              <p>No quotations are waiting for your answer.</p>
+            </div>
+          ) : (
+            <ul class="kz-wlist" aria-label="Quotations waiting for your answer">
+              {overview.quotations.items.map((q) => (
+                <li class="kz-wrow">
+                  <div class="kz-wrow__main">
+                    <a class="kz-wrow__title kz-wrow__link" href={`/portal/quotations/${q.id}`}>
+                      {q.title}
+                    </a>
+                    <p class="kz-wrow__meta">
+                      <span class="kz-wmono">{q.number}</span>
+                      {q.validUntil ? ` · valid until ${day(q.validUntil)}` : ''}
+                    </p>
+                  </div>
+                  <p class="kz-wrow__fig">{formatMoney(q.totalMinor, q.currency)}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Window>
+      ) : null}
+
+      {overview.areas.projects ? (
+        <Window
+          title="Active projects"
+          icon="projects"
+          span={6}
+          id="active"
+          meta={overview.projects.total ? String(overview.projects.total) : undefined}
+          flush={overview.projects.items.length > 0}
+        >
+          {overview.projects.items.length === 0 ? (
+            <div class="kz-wnote">
+              <p class="kz-wnote__code">no projects running</p>
+              <p>No projects are in progress.</p>
+            </div>
+          ) : (
+            <ul class="kz-wlist" aria-label="Active projects">
+              {overview.projects.items.map((p) => (
+                <li class="kz-wrow kz-wrow--stack">
+                  <div class="kz-wrow__head">
+                    <a class="kz-wrow__title kz-wrow__link" href={`/portal/projects/${p.id}`}>
+                      {p.name}
+                    </a>
+                    <StatusPill tone={STATUS_TONE[p.status]}>{PROJECT_STATUS_LABEL[p.status]}</StatusPill>
+                  </div>
+                  <Progress label={`${p.name} progress`} pct={p.progressPct} />
+                  {p.nextMilestone ? (
+                    <p class="kz-wrow__meta">
+                      Next: {p.nextMilestone.title}
+                      {p.nextMilestone.dueDate ? `, due ${day(p.nextMilestone.dueDate)}` : ''}
+                    </p>
+                  ) : p.targetDate ? (
+                    <p class="kz-wrow__meta">Target date {day(p.targetDate)}</p>
                   ) : null}
                 </li>
               ))}
             </ul>
           )}
-        </section>
+        </Window>
       ) : null}
 
-      <div class="mt-8 grid gap-8 lg:grid-cols-2">
-        {overview.areas.quotations ? (
-          <section aria-labelledby="quotes-title">
-            <h2 id="quotes-title" class="font-sans text-lg font-semibold">
-              Quotations waiting for you{overview.quotations.total ? ` (${overview.quotations.total})` : ''}
-            </h2>
-            {overview.quotations.items.length === 0 ? (
-              <p class={`mt-3 ${card} text-ink-600`}>No quotations are waiting for your answer.</p>
-            ) : (
-              <ul class="mt-3 divide-y divide-line rounded-lg border border-line bg-surface">
-                {overview.quotations.items.map((q) => (
-                  <li class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1 px-5 py-4">
-                    <div class="min-w-0">
-                      <a
-                        href={`/portal/quotations/${q.id}`}
-                        class="font-semibold text-ink-950 underline-offset-2 hover:underline"
-                      >
-                        {q.title}
-                      </a>
-                      <p class="text-sm text-ink-600">
-                        <span class="font-mono">{q.number}</span>
-                        {q.validUntil ? ` · valid until ${day(q.validUntil)}` : ''}
-                      </p>
-                    </div>
-                    <p class="font-mono font-semibold tabular-nums text-ink-950">
-                      {formatMoney(q.totalMinor, q.currency)}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        ) : null}
-
-        {overview.areas.projects ? (
-          <section aria-labelledby="projects-title">
-            <h2 id="projects-title" class="font-sans text-lg font-semibold">
-              Active projects{overview.projects.total ? ` (${overview.projects.total})` : ''}
-            </h2>
-            {overview.projects.items.length === 0 ? (
-              <p class={`mt-3 ${card} text-ink-600`}>No projects are in progress.</p>
-            ) : (
-              <ul class="mt-3 divide-y divide-line rounded-lg border border-line bg-surface">
-                {overview.projects.items.map((p) => (
-                  <li class="px-5 py-4">
-                    <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                      <a
-                        href={`/portal/projects/${p.id}`}
-                        class="font-semibold text-ink-950 underline-offset-2 hover:underline"
-                      >
-                        {p.name}
-                      </a>
-                      <p class="text-sm text-ink-600">{PROJECT_STATUS_LABEL[p.status]}</p>
-                    </div>
-                    <div class="mt-2 flex items-center gap-3">
-                      <div
-                        class="h-2 flex-1 overflow-hidden rounded-full bg-ink-950/10"
-                        role="progressbar"
-                        aria-label={`${p.name} progress`}
-                        aria-valuemin="0"
-                        aria-valuemax="100"
-                        aria-valuenow={p.progressPct}
-                      >
-                        <div class="h-full rounded-full bg-brand-600" style={`width: ${p.progressPct}%`} />
-                      </div>
-                      <span class="w-10 text-right font-mono text-sm tabular-nums text-ink-800">{p.progressPct}%</span>
-                    </div>
-                    {p.nextMilestone ? (
-                      <p class="mt-2 text-sm text-ink-600">
-                        Next: {p.nextMilestone.title}
-                        {p.nextMilestone.dueDate ? `, due ${day(p.nextMilestone.dueDate)}` : ''}
-                      </p>
-                    ) : p.targetDate ? (
-                      <p class="mt-2 text-sm text-ink-600">Target date {day(p.targetDate)}</p>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        ) : null}
-      </div>
-
-      <section class="mt-8 max-w-3xl" aria-labelledby="activity-title">
-        <h2 id="activity-title" class="font-sans text-lg font-semibold">
-          Recent activity
-        </h2>
+      <Window title="Activity" icon="activity" span={activitySpan} id="activity" flush={overview.activity.length > 0}>
         {overview.activity.length === 0 ? (
-          <p class={`mt-3 ${card} text-ink-600`}>Nothing yet. New documents, payments and project updates show here.</p>
+          <div class="kz-wnote">
+            <p class="kz-wnote__code">no activity yet</p>
+            <p>Nothing yet. New documents, payments and project updates show here.</p>
+          </div>
         ) : (
-          <ol class="mt-3 divide-y divide-line rounded-lg border border-line bg-surface" data-testid="portal-activity">
+          <ol class="kz-feed" data-testid="portal-activity" aria-label="Recent activity">
             {overview.activity.map((a) => (
-              <li class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1 px-5 py-4">
-                <div class="min-w-0">
-                  <p class="text-[13px] font-semibold uppercase tracking-wide text-ink-600">
-                    {KIND_LABEL[a.kind]} · <time datetime={a.at}>{day(a.at)}</time>
-                  </p>
-                  <p class="mt-0.5 font-medium text-ink-950">
-                    <a href={activityHref(a)} class="underline-offset-2 hover:underline">
-                      {a.title}
-                    </a>
-                  </p>
-                  {a.detail ? <p class="mt-0.5 line-clamp-2 text-sm text-ink-600">{a.detail}</p> : null}
+              <li class="kz-feed__item">
+                <p class="kz-feed__at">
+                  <time datetime={a.at}>{short(a.at)}</time>
+                  <span>{KIND[a.kind].label.toLowerCase()}</span>
+                </p>
+                <div class="kz-feed__main">
+                  <a class="kz-feed__title" href={KIND[a.kind].href(a.targetId)}>
+                    {a.title}
+                  </a>
+                  {a.detail ? <p class="kz-feed__detail">{a.detail}</p> : null}
                 </div>
                 {a.amountMinor !== null && a.currency ? (
-                  <p class="font-mono tabular-nums text-ink-950">{formatMoney(a.amountMinor, a.currency)}</p>
+                  <p class="kz-feed__fig">{formatMoney(a.amountMinor, a.currency)}</p>
                 ) : null}
               </li>
             ))}
           </ol>
         )}
-      </section>
-
-      {contactEmail ? (
-        <p class="mt-8 text-sm text-ink-600">
-          Questions? Email{' '}
-          <a href={`mailto:${contactEmail}`} class="font-semibold text-brand-600 underline underline-offset-2">
-            {contactEmail}
-          </a>
-          .
-        </p>
-      ) : null}
-    </>
+      </Window>
+    </div>
   )}
+
+  {overview?.areas.finance && overview.balances.length > 0 ? (
+    <div class="kz-wsact">
+      <Button href="/portal/invoices" lead="pay" block>
+        Pay an invoice
+      </Button>
+    </div>
+  ) : null}
+
+  {linked && contactEmail ? (
+    <p class="kz-wsfoot">
+      Questions? Email <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
+    </p>
+  ) : null}
 </PortalLayout>

@@ -1,9 +1,19 @@
 ---
+/**
+ * Workspace project (R5.2, PANEL_DESIGN_SPEC §2). From 1024 px: master/detail, the projects list in the left 4 columns (this
+ * project marked current) and the project in the right 8: Progress + Deliverables side by side, then the milestone track, the
+ * updates log (mono timestamps) and the message thread + composer. Below 1024 px the list is left out and "Projects" goes back.
+ */
 import PortalLayout from '../../../layouts/PortalLayout.astro';
-import StatusPill from '../../../components/portal/StatusPill.astro';
-import { ProjectMessageForm } from '../../../components/portal/ProjectMessageForm';
+import PageHead from '../../../ui/workspace/PageHead.astro';
+import Window from '../../../ui/workspace/Window.astro';
+import Progress from '../../../ui/workspace/Progress.astro';
+import ProjectList from '../../../ui/workspace/projects/ProjectList.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
+import Icon from '../../../ui/icons/Icon.astro';
+import { MessageComposer } from '../../../ui/workspace/projects/MessageComposer';
 import { loadPortalPage } from '../../../server/lib/portal-page';
-import { getPortalProject } from '../../../server/modules/projects';
+import { getPortalProject, listPortalProjects } from '../../../server/modules/projects';
 import { AppError } from '../../../server/lib/errors';
 import { MILESTONE_STATUS_LABEL, PROJECT_STATUS_LABEL } from '../../../shared/projects';
 import { formatLongDate } from '../../../shared/service-display';
@@ -19,145 +29,177 @@ try {
   if (err instanceof AppError && err.code === 'NOT_FOUND') return new Response(null, { status: 404 });
   throw err;
 }
+const projects = await listPortalProjects(ctx);
 const p = data.project;
 const size = (b: number) =>
   b >= 1_048_576 ? `${(b / 1_048_576).toFixed(1)} MB` : `${Math.max(1, Math.round(b / 1024))} KB`;
-const MILESTONE_TONE = { pending: 'neutral', in_progress: 'info', completed: 'success', cancelled: 'neutral' } as const;
-const section = 'rounded-lg border border-line bg-surface p-5 md:p-6';
+const PROJECT_TONE = {
+  planning: 'neutral',
+  active: 'lit',
+  on_hold: 'warn',
+  completed: 'ok',
+  cancelled: 'neutral',
+} as const;
+const done = data.milestones.filter((m) => m.status === 'completed').length;
+const counted = data.milestones.filter((m) => m.status !== 'cancelled').length;
+const milestoneWhen = (m: (typeof data.milestones)[number]) =>
+  m.status === 'completed' && m.completedAt
+    ? `done ${formatLongDate(m.completedAt)}`
+    : m.dueDate
+      ? `due ${formatLongDate(m.dueDate)}`
+      : null;
 ---
 
 <PortalLayout title={p.name} page={page} active="projects">
-  <p class="text-sm">
-    <a href="/portal/projects" class="font-semibold text-brand-600 underline underline-offset-2">
-      Projects
-    </a>
-  </p>
-  <div class="mt-2 flex flex-wrap items-baseline justify-between gap-3">
-    <h1 class="text-2xl font-bold tracking-display md:text-3xl">{p.name}</h1>
-    <p class="text-sm text-ink-600">
-      <span class="font-mono">{p.reference}</span> · {PROJECT_STATUS_LABEL[p.status]}
+  <PageHead title={p.name} back={{ href: '/portal/projects', label: 'Projects' }}>
+    <p slot="meta" class="kz-wshead__tags">
+      <span class="kz-wmono">{p.reference}</span>
+      <StatusPill tone={PROJECT_TONE[p.status]}>{PROJECT_STATUS_LABEL[p.status]}</StatusPill>
     </p>
-  </div>
+  </PageHead>
 
-  <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
-    <div class="flex min-w-0 flex-col gap-6">
-      <section class={section} aria-labelledby="progress-title">
-        <h2 id="progress-title" class="font-sans text-lg font-semibold">
-          Progress
-        </h2>
-        <div class="mt-3 flex items-center gap-3">
-          <div
-            class="h-3 flex-1 overflow-hidden rounded-full bg-ink-950/10"
-            role="progressbar"
-            aria-label={`${p.name} progress`}
-            aria-valuemin="0"
-            aria-valuemax="100"
-            aria-valuenow={p.progressPct}
-          >
-            <div class="h-full rounded-full bg-brand-600" style={`width:${p.progressPct}%`} />
-          </div>
-          <span class="w-12 text-right font-mono tabular-nums text-ink-950">{p.progressPct}%</span>
-        </div>
-        <p class="mt-2 text-sm text-ink-600">
-          {p.startDate ? `Started ${formatLongDate(p.startDate)}` : ''}
-          {p.startDate && (p.targetDate || p.completedAt) ? ' · ' : ''}
-          {p.completedAt
-            ? `Completed ${formatLongDate(p.completedAt)}`
-            : p.targetDate
-              ? `Target ${formatLongDate(p.targetDate)}`
-              : ''}
-        </p>
-        {data.milestones.length ? (
-          <ol class="mt-4 divide-y divide-line border-t border-line" aria-label="Milestones">
-            {data.milestones.map((m) => (
-              <li class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1 py-3">
-                <div class="min-w-0">
-                  <p class="font-medium text-ink-950">{m.title}</p>
-                  {m.description ? <p class="text-sm text-ink-600">{m.description}</p> : null}
-                  {m.dueDate ? <p class="text-sm text-ink-600">Due {formatLongDate(m.dueDate)}</p> : null}
+  <div class="kz-pview">
+    <ProjectList
+      projects={projects}
+      multiClient={page.clients.length > 1}
+      current={p.id}
+      class="kz-pview__list is-side"
+    />
+
+    <div class="kz-pview__main">
+      <div class="kz-pdetail__top">
+        <Window
+          title="Progress"
+          icon="gauge"
+          id="progress"
+          meta={counted ? `${done}/${counted} milestones` : undefined}
+        >
+          <p class="kz-psum__fig">
+            {p.progressPct}
+            <span>%</span>
+          </p>
+          <Progress label={`${p.name} progress`} pct={p.progressPct} size="lg" />
+          <dl class="kz-psum__dates">
+            {p.startDate ? (
+              <div>
+                <dt>Started</dt>
+                <dd>{formatLongDate(p.startDate)}</dd>
+              </div>
+            ) : null}
+            {p.completedAt ? (
+              <div>
+                <dt>Completed</dt>
+                <dd>{formatLongDate(p.completedAt)}</dd>
+              </div>
+            ) : p.targetDate ? (
+              <div>
+                <dt>Target</dt>
+                <dd>{formatLongDate(p.targetDate)}</dd>
+              </div>
+            ) : null}
+          </dl>
+        </Window>
+
+        <Window
+          title="Deliverables"
+          icon="download"
+          id="files"
+          meta={data.deliverables.length ? String(data.deliverables.length) : undefined}
+          flush={data.deliverables.length > 0}
+        >
+          {data.deliverables.length === 0 ? (
+            <div class="kz-wnote">
+              <p class="kz-wnote__code">no files shared yet</p>
+              <p>Files the team shares with you appear here.</p>
+            </div>
+          ) : (
+            <ul class="kz-wlist" aria-label="Deliverables">
+              {data.deliverables.map((f) => (
+                <li class="kz-dfile">
+                  <span class="kz-dfile__icon" aria-hidden="true">
+                    <Icon name="download" size={16} />
+                  </span>
+                  <div class="kz-dfile__main">
+                    <a class="kz-dfile__name" href={`/api/v1/portal/files/${f.fileId}`} download>
+                      {f.label}
+                    </a>
+                    <p class="kz-dfile__meta">
+                      {f.name} · {size(f.size)} · {formatLongDate(f.createdAt)}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Window>
+      </div>
+
+      {data.milestones.length ? (
+        <Window title="Milestones" icon="list-checks" id="milestones">
+          <ol class="kz-mtrack" aria-label="Milestones">
+            {data.milestones.map((m, i) => (
+              <li class:list={['kz-mtrack__stop', `is-${m.status}`]}>
+                <span class="kz-mtrack__node" aria-hidden="true">
+                  {m.status === 'completed' ? <Icon name="check" size={16} /> : <span>{i + 1}</span>}
+                </span>
+                <div class="kz-mtrack__body">
+                  <p class="kz-mtrack__title">{m.title}</p>
+                  <p class="kz-mtrack__due">
+                    <span class="kz-mtrack__state">{MILESTONE_STATUS_LABEL[m.status]}</span>
+                    {milestoneWhen(m) ? ` · ${milestoneWhen(m)}` : ''}
+                  </p>
+                  {m.description ? <p class="kz-mtrack__desc">{m.description}</p> : null}
                 </div>
-                <StatusPill label={MILESTONE_STATUS_LABEL[m.status]} tone={MILESTONE_TONE[m.status]} />
               </li>
             ))}
           </ol>
-        ) : null}
-      </section>
+        </Window>
+      ) : null}
 
-      <section class={section} aria-labelledby="updates-title">
-        <h2 id="updates-title" class="font-sans text-lg font-semibold">
-          Updates
-        </h2>
+      <Window
+        title="Updates"
+        icon="activity"
+        id="updates"
+        meta={data.updates.length ? String(data.updates.length) : undefined}
+      >
         {data.updates.length === 0 ? (
-          <p class="mt-2 text-sm text-ink-600">No updates yet.</p>
+          <div class="kz-wnote">
+            <p class="kz-wnote__code">no updates yet</p>
+            <p>The team posts progress notes here.</p>
+          </div>
         ) : (
-          <ol class="mt-3 flex flex-col gap-4" data-testid="project-updates">
+          <ol class="kz-log" data-testid="project-updates">
             {data.updates.map((u) => (
-              <li class="border-l-2 border-brand-600 pl-4">
-                <p class="text-[13px] text-ink-600">
-                  {u.author} · <time datetime={u.createdAt}>{harareDateTime(u.createdAt)}</time>
+              <li class="kz-log__item">
+                <p class="kz-log__head">
+                  <time datetime={u.createdAt}>{harareDateTime(u.createdAt)}</time>
+                  <span>{u.author}</span>
                 </p>
-                <p class="mt-1 whitespace-pre-line text-ink-950">{u.body}</p>
+                <p class="kz-log__body">{u.body}</p>
               </li>
             ))}
           </ol>
         )}
-      </section>
+      </Window>
 
-      <section class={section} aria-labelledby="messages-title">
-        <h2 id="messages-title" class="font-sans text-lg font-semibold">
-          Messages
-        </h2>
-        <p class="mt-1 text-sm text-ink-600">Write to the team working on this project.</p>
+      <Window title="Messages" icon="send" id="messages">
         {data.messages.length ? (
-          <ol class="mt-4 flex flex-col gap-3" data-testid="project-messages">
+          <ol class="kz-thread" data-testid="project-messages">
             {data.messages.map((m) => (
-              <li
-                class:list={[
-                  'max-w-[85%] rounded-lg px-4 py-3',
-                  m.mine ? 'self-end bg-brand-600/10' : m.fromTeam ? 'self-start bg-canvas' : 'self-end bg-canvas',
-                ]}
-              >
-                <p class="text-[13px] text-ink-600">
-                  {m.mine ? 'You' : m.fromTeam ? `${m.author} · Kuzikode` : m.author} ·{' '}
+              <li class:list={['kz-msg', m.mine ? 'is-mine' : m.fromTeam ? 'is-team' : 'is-other']}>
+                <p class="kz-msg__who">
+                  {m.mine ? 'You' : m.fromTeam ? `${m.author} · Kuzikode` : m.author}
                   <time datetime={m.createdAt}>{harareDateTime(m.createdAt)}</time>
                 </p>
-                <p class="mt-1 whitespace-pre-line text-ink-950">{m.body}</p>
+                <p class="kz-msg__body">{m.body}</p>
               </li>
             ))}
           </ol>
         ) : null}
-        <div class="mt-4">
-          <ProjectMessageForm client:visible projectId={p.id} />
+        <div class:list={['kz-compose-wrap', data.messages.length > 0 && 'is-after']}>
+          <MessageComposer client:visible projectId={p.id} />
         </div>
-      </section>
+      </Window>
     </div>
-
-    <aside class="flex min-w-0 flex-col gap-6">
-      <section class={section} aria-labelledby="files-title">
-        <h2 id="files-title" class="font-sans text-lg font-semibold">
-          Deliverables
-        </h2>
-        {data.deliverables.length === 0 ? (
-          <p class="mt-2 text-sm text-ink-600">Files the team shares with you appear here.</p>
-        ) : (
-          <ul class="mt-3 divide-y divide-line" aria-label="Deliverables">
-            {data.deliverables.map((f) => (
-              <li class="py-3">
-                <a
-                  href={`/api/v1/portal/files/${f.fileId}`}
-                  download
-                  class="font-semibold text-brand-600 underline underline-offset-2 [overflow-wrap:anywhere]"
-                >
-                  {f.label}
-                </a>
-                <p class="text-[13px] text-ink-600 [overflow-wrap:anywhere]">
-                  {f.name} · {size(f.size)} · {formatLongDate(f.createdAt)}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </aside>
   </div>
 </PortalLayout>

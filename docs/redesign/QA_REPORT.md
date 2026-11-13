@@ -134,3 +134,19 @@ Harness: `playwright.visual.config.ts` (`SHOOT=… SHOOT_SET=all|core|quick SHOO
   Deferred to R8.1: distinct wallet marks on the method tiles, perforation placement on phones, status-plate contrast, part-paid notice wording.
 - e2e green (31 + 10 re-run): checkout, full-journey, public-documents, payment-gateways, reconciliation, quotations, invoices, subscriptions,
   portal-auth, security, mobile-limits, sweep, links. No payment spec edited.
+
+## R5.2 Workspace overview + projects (2026-11-13)
+- References opened: IMG_5054 (product-UI fragments as the content: mono figures, status fragments), IMG_5066 (numbered process timeline → the
+  milestone rail), IMG_5072 (dark surface ladder → night chrome against bone desk and paper windows). Main source: PANEL_DESIGN_SPEC §1–2.
+- Viewports: /portal, /portal/projects, /portal/projects/prj_e2e_portal at 375/390/430/768/1440 (signed in as the e2e client on local
+  `wrangler dev`). No horizontal overflow; the only sub-44 px targets are the 1×1 skip link (visible on focus) and row title links whose
+  `::after` stretches over the whole row.
+- Found and fixed in the loop: `.kz-whead`, `.kz-track`, `.kz-file`, `.kz-mono` collided with public page classes (renamed `kz-wshead`,
+  `kz-mtrack`, `kz-dfile`, `kz-wmono`); windows inherited `grid-column: 1 / -1` inside the 2-up detail row; the date line failed axe contrast
+  on bone (ink-500 → ink-600); oversized note/body text inside windows.
+- Board review (opus/medium): first pass Overview PASS, Project PASS (marginal), Projects FAIL → master/detail (list 4 + 8), milestone rail without
+  a duplicate gold pill, meta under the H1, one-label composer, plain mono empty lines, activity meta in mono, balance key, phone sticky Pay bar.
+- e2e: portal-auth, full-journey, security, sweep (14/14) green.
+- Second review: all three boards PASS. Follow-ups applied: composer shorter (min-height 5.25 rem), "← Projects" hidden from 1024 px where the
+  list window is on screen; rail checked with three local milestones (done / current / later, temporary local rows removed after the shot);
+  e2e message residue cleared from the local DB before the board capture.

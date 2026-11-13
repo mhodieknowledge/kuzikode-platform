@@ -1,6 +1,12 @@
 ---
+/**
+ * Public invoice (R4.8, rebuilt from scratch). Spec (RESPONSIVE_DESIGN_SPEC "Public documents"; IMG_5018): phones → summary first
+ * (status, amount due, due date, "Pay now" when payable, the PDF), then the paper invoice; desktop → invoice left, sticky panel
+ * right with the payments received below it. "Pay now" only when the invoice is open and a payment route can take it (docs/06 §3b).
+ */
 import DocumentLayout from '../../layouts/DocumentLayout.astro';
-import InvoiceDocument from '../../components/documents/InvoiceDocument.astro';
+import InvoiceSheet from '../../ui/documents/InvoiceSheet.astro';
+import DocAside from '../../ui/documents/DocAside.astro';
 import { getPublicInvoice } from '../../server/modules/invoices';
 import { invoicePaymentOptions } from '../../server/modules/payments';
 import { publicDocumentPageLimit } from '../../server/lib/rate-limit';
@@ -14,7 +20,6 @@ if (limited) return limited;
 const data = await getPublicInvoice(ctx, token);
 if (!data) return new Response(null, { status: 404, statusText: 'Not found' });
 const inv = data.invoice;
-// "Pay now" only when the invoice is open and a payment route can take it (docs/06 §3b).
 const payable = (await invoicePaymentOptions(ctx, inv.id)).payable;
 const money = (m: number) => formatMoney(m, inv.currency, data.minorDigits);
 const notice =
@@ -27,74 +32,75 @@ const notice =
         : inv.status === 'partially_paid'
           ? `Part paid. ${money(inv.balance_minor)} is still due by ${inv.due_date ? formatLongDate(inv.due_date) : 'the due date'}.`
           : null;
+const state =
+  inv.status === 'paid'
+    ? { label: 'Paid', tone: 'ok' as const }
+    : inv.status === 'void'
+      ? { label: 'Cancelled', tone: 'off' as const }
+      : inv.status === 'overdue'
+        ? { label: 'Overdue', tone: 'due' as const }
+        : inv.status === 'partially_paid'
+          ? { label: 'Part paid', tone: 'now' as const }
+          : { label: 'Awaiting payment', tone: 'now' as const };
 ---
 
 <DocumentLayout title={inv.number ?? 'Invoice'}>
-  <div class="mx-auto flex max-w-4xl flex-col gap-6">
-    {notice ? (
-      <p
-        role="status"
-        class={`rounded-sm border px-4 py-3 text-sm ${inv.status === 'overdue' ? 'border-danger-600/30 bg-danger-50 text-danger-700' : 'border-line bg-surface text-ink-800'}`}
-      >
-        {notice}
-      </p>
-    ) : null}
-    <p class="flex flex-wrap justify-end gap-3">
-      {payable ? (
-        <a
-          href={`/pay/${token}`}
-          class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
-        >
-          Pay now
-        </a>
-      ) : null}
-      <a
-        href={`/api/v1/public/invoices/${token}/pdf`}
-        download
-        class="inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
-      >
-        Download PDF
-      </a>
-    </p>
-    <InvoiceDocument
+  <div class="kz-docpage">
+    <DocAside
+      kind="Invoice"
       number={inv.number}
-      currency={inv.currency}
-      minorDigits={data.minorDigits}
-      issueDate={inv.issue_date}
-      dueDate={inv.due_date}
-      notes={inv.notes}
-      terms={inv.terms}
-      issued={true}
-      totals={{
-        subtotal: inv.subtotal_minor,
-        discount: inv.discount_minor,
-        tax: inv.tax_minor,
-        total: inv.total_minor,
-        paid: inv.amount_paid_minor,
-        credited: inv.amount_credited_minor,
-        balance: inv.balance_minor,
-      }}
-      items={data.items}
-      client={data.client}
-      business={data.business}
-    />
-    {data.payments.length ? (
-      <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="paid-h">
-        <h2 id="paid-h" class="font-sans text-base font-semibold">
-          Payments received
-        </h2>
-        <ul class="mt-3 divide-y divide-line text-sm">
-          {data.payments.map((p) => (
-            <li class="tnum flex justify-between gap-3 py-2">
-              <span>
-                {formatLongDate(p.received_at)} · <span class="font-mono">{p.receipt_number}</span>
-              </span>
-              <span class="font-medium">{money(p.applied_minor)}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-    ) : null}
-    <p class="text-center text-[12px] text-ink-600">This page is private to you. Please don't share the link.</p>
+      state={state}
+      amountLabel={inv.status === 'paid' ? 'Total paid' : 'Amount due'}
+      amount={inv.status === 'paid' ? money(inv.total_minor) : money(inv.balance_minor)}
+      facts={[
+        { k: 'Due date', v: inv.due_date ? formatLongDate(inv.due_date) : '—' },
+        { k: 'Invoice total', v: money(inv.total_minor) },
+      ]}
+      primary={payable ? { label: 'Pay now', href: `/pay/${token}` } : undefined}
+      pdfHref={`/api/v1/public/invoices/${token}/pdf`}
+      notice={notice ?? undefined}
+      noticeTone={inv.status === 'overdue' ? 'warn' : 'plain'}
+    >
+      {data.payments.length ? (
+        <section class="kz-docside__paid" aria-labelledby="paid-h">
+          <h2 id="paid-h">Payments received</h2>
+          <ul role="list">
+            {data.payments.map((p) => (
+              <li class="tnum">
+                <span>
+                  {formatLongDate(p.received_at)}
+                  <span class="kz-docside__rcpt">{p.receipt_number}</span>
+                </span>
+                <b>{money(p.applied_minor)}</b>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+    </DocAside>
+    <div class="kz-docpage__doc">
+      <InvoiceSheet
+        number={inv.number}
+        currency={inv.currency}
+        minorDigits={data.minorDigits}
+        issueDate={inv.issue_date}
+        dueDate={inv.due_date}
+        notes={inv.notes}
+        terms={inv.terms}
+        issued={true}
+        totals={{
+          subtotal: inv.subtotal_minor,
+          discount: inv.discount_minor,
+          tax: inv.tax_minor,
+          total: inv.total_minor,
+          paid: inv.amount_paid_minor,
+          credited: inv.amount_credited_minor,
+          balance: inv.balance_minor,
+        }}
+        items={data.items}
+        client={data.client}
+        business={data.business}
+      />
+    </div>
   </div>
 </DocumentLayout>

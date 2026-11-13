@@ -1,0 +1,887 @@
+/*
+ * R4.8 checkout: /pay/:token, /portal/invoices/:id/pay, /pay/return, /pay/card-return (src/ui/public/checkout).
+ * Phones: the bill strip on top (IMG_5013), method tiles as a 2-column icon-over-label grid (IMG_5018), phone number first with
+ * the fee on its own line (IMG_5016), progress as a road strip (done / now in gold / next), the summary as a receipt ticket with
+ * a perforated edge below the form (IMG_5014). From 1024 px: form left, sticky ticket right (IMG_5018).
+ * Perforations are CSS masks (half-circle notches + a dashed seam), so they show whatever ground the page sits on.
+ */
+@layer components {
+  .kz-mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Page grid ---------- */
+  .kz-co {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'strip' 'pay' 'ticket';
+    gap: 12px;
+    max-width: 1080px;
+    margin-inline: auto;
+  }
+  .kz-co--portal {
+    margin-inline: 0;
+    margin-top: 16px;
+  }
+  .kz-co__pay {
+    grid-area: pay;
+    min-width: 0;
+  }
+  .kz-cosum {
+    display: contents;
+  }
+
+  /* ---------- Bill strip + receipt ticket (CheckoutSummary.astro) ---------- */
+  .kz-cosum__strip,
+  .kz-cosum__ticket {
+    position: relative;
+    background: var(--paper);
+    box-shadow: inset 0 0 0 1px var(--bone-200); /* inside the box, so the notch masks cut it too */
+    color: var(--ink-700);
+  }
+  .kz-cosum__strip {
+    grid-area: strip;
+    padding: 18px 16px 20px;
+    border-radius: 12px;
+    -webkit-mask:
+      radial-gradient(circle 10px at 0 100%, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 10px at 100% 100%, #0000 98%, #000) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle 10px at 0 100%, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 10px at 100% 100%, #0000 98%, #000) right / 51% 100% no-repeat;
+  }
+  .kz-cosum__num {
+    font-family: var(--font-mono);
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink-900);
+    overflow-wrap: anywhere;
+  }
+  .kz-cosum__client {
+    margin-top: 4px;
+    font-size: 0.9375rem;
+    color: var(--ink-600);
+    overflow-wrap: anywhere;
+  }
+  .kz-cosum__due {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2px 12px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--bone-200);
+  }
+  .kz-cosum__due-k {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--ink-700);
+  }
+  .kz-cosum__due-v {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--ink-900);
+  }
+  .kz-cosum__noscript {
+    display: grid;
+    gap: 8px;
+    margin-top: 16px;
+    font-size: 0.9375rem;
+  }
+  .kz-cosum__ticket {
+    grid-area: ticket;
+    padding: 24px 16px 18px;
+    border-radius: 12px;
+    -webkit-mask:
+      radial-gradient(circle 10px at 0 0, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 10px at 100% 0, #0000 98%, #000) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle 10px at 0 0, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 10px at 100% 0, #0000 98%, #000) right / 51% 100% no-repeat;
+  }
+  .kz-cosum__ticket::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 18px;
+    right: 18px;
+    border-top: 2px dashed var(--bone-300);
+  }
+  .kz-cosum__h {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--ink-900);
+  }
+  .kz-cosum__lines {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .kz-cosum__lines li {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--bone-300);
+    font-size: 0.9375rem;
+    line-height: 1.45;
+  }
+  .kz-cosum__lines .kz-mono {
+    flex: none;
+    color: var(--ink-900);
+  }
+  .kz-cosum__desc {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .kz-cosum__more {
+    color: var(--ink-600);
+  }
+  .kz-cosum__totals {
+    display: grid;
+    gap: 2px;
+    margin-top: 10px;
+  }
+  .kz-cosum__totals div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 3px 0;
+    font-size: 0.9375rem;
+  }
+  .kz-cosum__totals dt {
+    color: var(--ink-600);
+  }
+  .kz-cosum__totals dd {
+    color: var(--ink-900);
+  }
+  .kz-cosum__totals .kz-cosum__total {
+    margin-top: 6px;
+    padding-top: 10px;
+    border-top: 2px solid var(--ink-900);
+    align-items: baseline;
+  }
+  .kz-cosum__total dt {
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .kz-cosum__total dd {
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+  .kz-cosum__cur {
+    margin-top: 8px;
+    text-align: right;
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+  }
+
+  /* ---------- Payment column (Checkout.tsx) ---------- */
+  .kz-copay {
+    display: grid;
+    gap: 12px;
+    align-content: start;
+    min-width: 0;
+  }
+  .kz-cotest {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: var(--radius-plate);
+    background: var(--warn-50);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--warn-600) 45%, transparent);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--warn-700);
+  }
+  .kz-cotest--info {
+    background: var(--paper);
+    box-shadow: inset 0 0 0 1px var(--bone-300);
+    font-weight: 600;
+    color: var(--ink-900);
+  }
+  .kz-copanel {
+    min-width: 0;
+    padding: 20px 16px 24px;
+    border-radius: 12px;
+    background: var(--paper);
+    box-shadow: 0 0 0 1px var(--bone-200);
+    color: var(--ink-700);
+  }
+  .kz-copanel--quiet {
+    display: grid;
+    justify-items: start;
+    gap: 4px;
+  }
+  .kz-copanel__icon {
+    margin-bottom: 6px;
+    color: var(--ink-900);
+  }
+  .kz-copanel__h {
+    font-size: 1.375rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--ink-900);
+  }
+  .kz-cotext {
+    margin-top: 6px;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--ink-700);
+  }
+  .kz-cometa {
+    margin-top: 6px;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--ink-600);
+  }
+  .kz-coback {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--ink-900);
+    text-decoration: underline;
+    text-decoration-color: var(--bone-300);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.3em;
+    overflow-wrap: anywhere;
+  }
+  .kz-copanel--quiet .kz-coback {
+    margin-top: 10px;
+  }
+  @media (hover: hover) {
+    .kz-coback:hover {
+      text-decoration-color: currentColor;
+    }
+  }
+  .kz-cosafe {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 4px 8px 0;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--ink-600);
+  }
+  .kz-cosafe .kz-icon {
+    margin-top: 1px;
+  }
+
+  /* Method tiles: icon over label (IMG_5018); the chosen tile inverts to night with a gold mark (the lit thing). */
+  .kz-cotiles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    min-width: 0;
+    margin: 16px 0 0;
+    padding: 0;
+    border: 0;
+  }
+  .kz-cotile {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 2px;
+    min-width: 0;
+    min-height: 96px;
+    padding: 14px 14px 12px;
+    border-radius: var(--radius-plate);
+    background: var(--paper);
+    box-shadow: inset 0 0 0 1px var(--bone-300);
+    color: var(--ink-900);
+    cursor: pointer;
+    transition:
+      background-color var(--dur-press) var(--ease-out),
+      box-shadow var(--dur-press) var(--ease-out),
+      color var(--dur-press) var(--ease-out),
+      transform var(--dur-press) var(--ease-out);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .kz-cotiles .kz-cotile:last-of-type:nth-of-type(odd) {
+    grid-column: 1 / -1;
+  }
+  /* Kept in the accessibility tree and focusable; the whole label is the hit area. */
+  .kz-cotile__input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .kz-cotile__icon {
+    margin-bottom: 8px;
+    color: var(--ink-900);
+  }
+  .kz-cotile__name {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+  .kz-cotile__tag {
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    color: var(--ink-600);
+  }
+  .kz-cotile__tick {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: none;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    background: var(--lit);
+    color: var(--night-950);
+  }
+  .kz-cotile:has(input:checked) {
+    background: var(--night-900);
+    box-shadow: inset 0 0 0 1px var(--night-900);
+    color: var(--on-night);
+  }
+  .kz-cotile:has(input:checked) .kz-cotile__icon {
+    color: var(--lit);
+  }
+  .kz-cotile:has(input:checked) .kz-cotile__tag {
+    color: var(--on-night-2);
+  }
+  .kz-cotile:has(input:checked) .kz-cotile__tick {
+    display: grid;
+  }
+  .kz-cotile:has(input:focus-visible) {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  .kz-cotile:active {
+    transform: scale(0.985);
+  }
+  @media (hover: hover) {
+    .kz-cotile:not(:has(input:checked)):hover {
+      box-shadow: inset 0 0 0 1px var(--ink-500);
+    }
+  }
+
+  /* The selected method's step. */
+  .kz-costep {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--bone-200);
+  }
+  .kz-costep__head {
+    display: grid;
+    gap: 4px;
+  }
+  .kz-costep__h {
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--ink-900);
+  }
+  .kz-costep__hint {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--ink-600);
+  }
+  .kz-costep__hint strong {
+    color: var(--ink-900);
+    white-space: nowrap;
+  }
+  .kz-coinput-phone {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    letter-spacing: 0.02em;
+  }
+  .kz-costep__ledger {
+    padding: 2px 14px;
+    border-radius: var(--radius-plate);
+    background: var(--bone-50);
+  }
+  .kz-costep__pay {
+    width: 100%;
+  }
+  .kz-costep__note {
+    display: flex;
+    gap: 8px;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--ink-600);
+  }
+  .kz-costep__note .kz-icon {
+    margin-top: 1px;
+  }
+  .kz-costep__empty {
+    margin-top: 16px;
+    padding: 14px;
+    border-radius: var(--radius-plate);
+    box-shadow: inset 0 0 0 1px var(--bone-200);
+    background: var(--bone-50);
+    font-size: 0.9375rem;
+    color: var(--ink-600);
+  }
+  .kz-cocards {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .kz-cocards legend {
+    margin-bottom: 8px;
+  }
+  .kz-coalert {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    border-radius: var(--radius-xs);
+    background: var(--danger-50);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger-600) 35%, transparent);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--danger-700);
+  }
+
+  /* Ledger rows: the fee on its own line, then the total (IMG_5016). */
+  .kz-coledger {
+    display: grid;
+    margin: 0;
+  }
+  .kz-coledger__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--bone-300);
+    font-size: 0.9375rem;
+  }
+  .kz-coledger__row:last-child {
+    border-bottom: 0;
+  }
+  .kz-coledger dt {
+    color: var(--ink-600);
+  }
+  .kz-coledger dd {
+    min-width: 0;
+    text-align: right;
+    overflow-wrap: anywhere;
+    font-weight: 600;
+    color: var(--ink-900);
+  }
+  .kz-coledger__row--total dt {
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .kz-coledger__row--total dd {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  /* Road strip: three stops, done (night) → now (gold) → next (outline). */
+  .kz-coroad {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0 0 20px;
+    padding: 0 0 18px;
+    list-style: none;
+    border-bottom: 1px solid var(--bone-200);
+  }
+  .kz-coroad__stop {
+    position: relative;
+    display: grid;
+    justify-items: start;
+    align-content: start;
+    gap: 8px;
+    min-width: 0;
+  }
+  .kz-coroad__stop:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 40px;
+    right: 8px;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, var(--bone-300) 0 6px, transparent 6px 11px);
+  }
+  .kz-coroad__stop[data-state='done']:not(:last-child)::after {
+    background: var(--ink-900);
+  }
+  .kz-coroad__mark {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-plate);
+    background: var(--paper);
+    box-shadow: inset 0 0 0 1.5px var(--bone-300);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ink-600);
+  }
+  .kz-coroad__stop[data-state='done'] .kz-coroad__mark {
+    background: var(--night-900);
+    box-shadow: none;
+    color: var(--on-night);
+  }
+  .kz-coroad__stop[data-state='now'] .kz-coroad__mark {
+    background: var(--lit);
+    box-shadow: 0 0 0 4px var(--gold-100);
+    color: var(--night-950);
+    animation: kz-co-lit 1.8s var(--ease-out) infinite;
+  }
+  .kz-coroad__stop[data-state='failed'] .kz-coroad__mark {
+    background: var(--danger-600);
+    box-shadow: none;
+    color: var(--on-action);
+  }
+  .kz-coroad__label {
+    padding-right: 8px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--ink-900);
+  }
+  .kz-coroad__stop[data-state='next'] .kz-coroad__label {
+    color: var(--ink-600);
+  }
+  @keyframes kz-co-lit {
+    0%,
+    100% {
+      box-shadow: 0 0 0 4px var(--gold-100);
+    }
+    50% {
+      box-shadow: 0 0 0 7px var(--gold-50);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .kz-coroad__stop[data-state='now'] .kz-coroad__mark {
+      animation: none;
+    }
+    .kz-cotile,
+    .kz-cotile:active {
+      transition: none;
+      transform: none;
+    }
+  }
+
+  /* Outcome head and the receipt slip. */
+  .kz-coresult {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+  }
+  .kz-coresult__icon--ok {
+    color: var(--ok-700);
+  }
+  .kz-coresult__icon--danger {
+    color: var(--danger-600);
+  }
+  .kz-coresult__icon--wait {
+    color: var(--ink-700);
+  }
+  .kz-coresult__text .kz-copanel__h {
+    padding-top: 3px;
+  }
+  .kz-coslip {
+    position: relative;
+    margin-top: 20px;
+    padding: 10px 16px 6px;
+    border-radius: 10px;
+    background: var(--bone-50);
+    -webkit-mask:
+      radial-gradient(circle 9px at 0 0, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 9px at 100% 0, #0000 98%, #000) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle 9px at 0 0, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle 9px at 100% 0, #0000 98%, #000) right / 51% 100% no-repeat;
+  }
+  .kz-coslip::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 16px;
+    right: 16px;
+    border-top: 2px dashed var(--bone-300);
+  }
+  .kz-coactions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+    margin-top: 20px;
+  }
+  .kz-coactions .kz-btn {
+    flex: 1 1 100%;
+  }
+
+  /* Wallet code (InnBucks): QR + code. */
+  .kz-cocode {
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    margin-top: 18px;
+    padding: 18px 16px;
+    border-radius: 10px;
+    background: var(--bone-50);
+    text-align: center;
+  }
+  .kz-cocode__qr svg {
+    display: block;
+    border-radius: 6px;
+  }
+  .kz-cocode__body {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+  .kz-cocode__k {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ink-600);
+  }
+  .kz-cocode__v {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: 0.08em;
+    color: var(--ink-900);
+  }
+  .kz-cocode__app {
+    margin-top: 10px;
+  }
+
+  /* One-time code boxes. */
+  .kz-cootp {
+    display: grid;
+    gap: 12px;
+    margin-top: 18px;
+  }
+  .kz-cootp__set {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .kz-cootp__boxes {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .kz-cootp__box {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 52px;
+    height: 56px;
+    border: 1px solid var(--bone-300);
+    border-radius: 6px;
+    background: var(--paper);
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 1.375rem;
+    color: var(--ink-900);
+  }
+  .kz-cootp__box:focus-visible {
+    border-color: var(--ink-900);
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+  }
+  .kz-cootp__box[aria-invalid='true'] {
+    border-color: var(--danger-600);
+  }
+  .kz-cootp__go {
+    justify-self: start;
+  }
+
+  /* Bank transfer. */
+  .kz-cobank__slip {
+    padding: 14px 16px;
+    border-radius: var(--radius-plate);
+    background: var(--bone-50);
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--ink-900);
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+  .kz-cobank__sent {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    border-radius: var(--radius-plate);
+    background: var(--ok-50);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ok-600) 30%, transparent);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--ink-900);
+  }
+  .kz-cobank__sent .kz-icon {
+    color: var(--ok-700);
+  }
+  .kz-cobank__form {
+    display: grid;
+    gap: 16px;
+  }
+  .kz-cobank__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .kz-cobank__go {
+    width: 100%;
+  }
+
+  /* ---------- Return pages (/pay/return, /pay/card-return) ---------- */
+  .kz-coreturn {
+    display: grid;
+    gap: 12px;
+    max-width: 560px;
+    margin-inline: auto;
+  }
+  .kz-coattempt-wrap {
+    display: grid;
+    gap: 16px;
+  }
+
+  @media (min-width: 560px) {
+    .kz-cotiles {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .kz-cotiles .kz-cotile:last-of-type:nth-of-type(odd) {
+      grid-column: auto;
+    }
+    .kz-cocode {
+      grid-template-columns: auto minmax(0, 1fr);
+      justify-items: start;
+      align-items: center;
+      gap: 24px;
+      padding: 20px 24px;
+      text-align: left;
+    }
+    .kz-cocode__body {
+      justify-items: start;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .kz-co,
+    .kz-coreturn {
+      max-width: 640px;
+    }
+    .kz-co--portal {
+      max-width: 680px;
+    }
+    .kz-copanel {
+      padding: 28px 32px 32px;
+    }
+    .kz-cosum__strip {
+      padding: 22px 28px 24px;
+    }
+    .kz-cosum__ticket {
+      padding: 28px 28px 22px;
+    }
+    .kz-copanel__h {
+      font-size: 1.5rem;
+    }
+    .kz-cosum__num {
+      font-size: 2rem;
+    }
+    .kz-cosum__due-v {
+      font-size: 2rem;
+    }
+    .kz-costep__pay,
+    .kz-cobank__go {
+      width: auto;
+      min-width: 240px;
+      justify-self: start;
+    }
+    .kz-cobank__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .kz-coactions .kz-btn {
+      flex: 0 0 auto;
+    }
+    .kz-cosafe {
+      padding-top: 8px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .kz-co,
+    .kz-co--portal {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      grid-template-areas: 'pay sum';
+      column-gap: 40px;
+      align-items: start;
+      max-width: 1080px;
+    }
+    .kz-cosum {
+      display: block;
+      grid-area: sum;
+      position: sticky;
+      top: 24px;
+    }
+    /* One ticket: the hairline runs round the outside only; the dashed seam divides the two parts. */
+    .kz-cosum__strip {
+      border-radius: 12px 12px 0 0;
+      box-shadow:
+        inset 1px 0 0 var(--bone-200),
+        inset -1px 0 0 var(--bone-200),
+        inset 0 1px 0 var(--bone-200);
+    }
+    .kz-cosum__ticket {
+      border-radius: 0 0 12px 12px;
+      box-shadow:
+        inset 1px 0 0 var(--bone-200),
+        inset -1px 0 0 var(--bone-200),
+        inset 0 -1px 0 var(--bone-200);
+    }
+  }
+
+  /* After a successful payment the server-rendered "due" figures are stale: swap them for a paid note (no reload needed). */
+  .kz-cosum__paidnote {
+    display: none;
+  }
+  body:has([data-co-paid]) .kz-cosum__paidnote {
+    display: block;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--emerald-50);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--emerald-700);
+  }
+  body:has([data-co-paid]) :is(.kz-cosum__due, .kz-cosum__total) {
+    display: none;
+  }
+}

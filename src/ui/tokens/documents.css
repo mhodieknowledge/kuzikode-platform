@@ -1,0 +1,644 @@
+/* R4.8 documents (see the component files for the spec). */
+@layer components {
+  /* ---------- Shell (DocumentLayout) ---------- */
+  .kz-docbody {
+    min-height: 100vh;
+    background: var(--bone-100);
+    color: var(--ink-700);
+  }
+  .kz-docbar {
+    background: var(--bone-50);
+    border-bottom: 1px solid var(--bone-200);
+  }
+  .kz-docbar__in {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 60px;
+  }
+  .kz-docbar__note {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ink-600);
+  }
+  .kz-docmain {
+    padding: 20px 0 56px;
+  }
+  .kz-docmain:focus {
+    outline: none;
+  }
+  @media (min-width: 1024px) {
+    .kz-docmain {
+      padding: 40px 0 96px;
+    }
+  }
+
+  /* ---------- Page composition (public /q, /i) ---------- */
+  .kz-docpage {
+    display: grid;
+    gap: 16px;
+    max-width: 76rem;
+    margin-inline: auto;
+  }
+  .kz-docpage > * {
+    min-width: 0;
+  }
+  .kz-docpage__doc {
+    display: grid;
+    gap: 16px;
+  }
+
+  /* ---------- Summary panel ---------- */
+  .kz-docside {
+    display: grid;
+    gap: 12px;
+    align-content: start;
+  }
+  .kz-docside__card {
+    display: grid;
+    padding: 18px 16px 16px;
+    border-radius: var(--radius-panel);
+    background: var(--paper);
+    box-shadow: 0 0 0 1px var(--bone-200);
+  }
+  .kz-docside__kind {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .kz-docside__kind span {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ink-600);
+  }
+  .kz-docside__state {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    justify-self: start;
+    margin-top: 10px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    background: var(--bone-100);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .kz-docside__state span {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--granite);
+  }
+  .kz-docside__state.is-now span {
+    background: var(--gold-400);
+    box-shadow: 0 0 0 1px var(--ink-900);
+  }
+  .kz-docside__state.is-ok {
+    background: var(--emerald-50);
+    color: var(--emerald-700);
+  }
+  .kz-docside__state.is-ok span {
+    background: var(--emerald-500);
+  }
+  .kz-docside__state.is-due {
+    background: color-mix(in oklab, var(--clay) 12%, var(--paper));
+    color: var(--clay-ink);
+  }
+  .kz-docside__state.is-due span {
+    background: var(--clay);
+  }
+  .kz-docside__amt-l {
+    margin-top: 16px;
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+  }
+  .kz-docside__amt {
+    margin-top: 2px;
+    font-family: var(--font-mono);
+    font-size: 1.875rem;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink-900);
+    overflow-wrap: anywhere;
+  }
+  .kz-docside__facts {
+    margin: 14px 0 0;
+    border-top: 1px solid var(--bone-200);
+  }
+  .kz-docside__facts > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--bone-200);
+    font-size: 0.875rem;
+  }
+  .kz-docside__facts dt {
+    color: var(--ink-600);
+  }
+  .kz-docside__facts dd {
+    font-weight: 600;
+    color: var(--ink-900);
+    text-align: right;
+  }
+  .kz-docside__notice {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--bone-100);
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--ink-700);
+  }
+  .kz-docside__notice .kz-icon {
+    margin-top: 2px;
+    color: var(--ink-600);
+  }
+  .kz-docside__notice a {
+    font-weight: 700;
+    color: var(--kz-link);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .kz-docside__notice.is-warn {
+    background: color-mix(in oklab, var(--clay) 12%, var(--paper));
+    color: var(--clay-ink);
+  }
+  .kz-docside__notice.is-warn .kz-icon {
+    color: var(--clay-ink);
+  }
+  .kz-docside__acts {
+    display: grid;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .kz-docside__paid {
+    padding: 16px;
+    border-radius: var(--radius-panel);
+    background: var(--paper);
+    box-shadow: 0 0 0 1px var(--bone-200);
+  }
+  .kz-docside__paid h2 {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .kz-docside__paid ul {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .kz-docside__paid li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-top: 1px solid var(--bone-200);
+    font-size: 0.875rem;
+  }
+  .kz-docside__paid li > span {
+    display: grid;
+  }
+  .kz-docside__rcpt {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-600);
+  }
+  .kz-docside__paid b {
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .kz-docside__private {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+  }
+
+  /* ---------- The paper document ---------- */
+  .kz-doc {
+    min-width: 0;
+    padding: 20px 16px 24px;
+    border-radius: var(--radius-panel);
+    background: var(--paper);
+    box-shadow:
+      0 0 0 1px var(--bone-200),
+      0 1px 2px rgb(20 20 18 / 0.06);
+    color: var(--ink-700);
+  }
+  .kz-doc__head {
+    display: grid;
+    gap: 16px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--ink-900);
+  }
+  .kz-doc__kind {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .kz-doc__no {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ink-600);
+  }
+  .kz-doc__title {
+    margin-top: 6px;
+    font-size: 1.5rem;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    font-weight: 700;
+    color: var(--ink-900);
+    overflow-wrap: anywhere;
+  }
+  .kz-doc__title.is-mono {
+    font-family: var(--font-mono);
+    letter-spacing: -0.02em;
+  }
+  .kz-doc__draft {
+    margin-top: 4px;
+    font-size: 0.875rem;
+    color: var(--ink-600);
+  }
+  .kz-doc__dates {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 0;
+  }
+  .kz-doc__dates dt {
+    font-size: 0.75rem;
+    color: var(--ink-600);
+  }
+  .kz-doc__dates dd {
+    margin-top: 2px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--ink-900);
+  }
+  .kz-doc__parties {
+    display: grid;
+    gap: 16px;
+    padding: 18px 0 0;
+  }
+  .kz-doc__h {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ink-600);
+  }
+  .kz-doc__party {
+    margin-top: 4px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .kz-doc__line {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+  .kz-doc__intro {
+    padding-top: 18px;
+    font-size: 0.9375rem;
+  }
+
+  /* Lines: numbered rows on phones, a table from 640 px. */
+  .kz-doc__rows {
+    margin: 18px 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--ink-900);
+  }
+  .kz-doc__rows li {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    column-gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--bone-200);
+    font-size: 0.875rem;
+  }
+  .kz-doc__rowno {
+    grid-row: span 2;
+    padding-top: 2px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-600);
+  }
+  .kz-doc__desc {
+    font-weight: 600;
+    color: var(--ink-900);
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+  .kz-doc__calc {
+    grid-column: 2 / span 2;
+    margin-top: 4px;
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+  }
+  .kz-doc__amt {
+    grid-column: 3;
+    grid-row: 1;
+    font-weight: 700;
+    color: var(--ink-900);
+    text-align: right;
+    white-space: nowrap;
+  }
+  .kz-doc__table {
+    display: none;
+  }
+
+  .kz-doc__sum {
+    display: grid;
+    justify-items: end;
+    padding-top: 16px;
+  }
+  .kz-doc__totals {
+    width: 100%;
+    max-width: 22rem;
+    margin: 0;
+  }
+  .kz-doc__totals > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 6px 0;
+    font-size: 0.9375rem;
+  }
+  .kz-doc__totals dt {
+    color: var(--ink-600);
+  }
+  .kz-doc__totals dd {
+    color: var(--ink-900);
+    text-align: right;
+  }
+  .kz-doc__totals .is-total {
+    margin-top: 4px;
+    padding-top: 10px;
+    border-top: 1px solid var(--ink-900);
+    font-weight: 700;
+  }
+  .kz-doc__totals .is-total dt {
+    color: var(--ink-900);
+  }
+  .kz-doc__totals .is-key {
+    margin-top: 8px;
+    padding: 12px 14px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--night-900);
+    font-size: 1.0625rem;
+    font-weight: 700;
+  }
+  .kz-doc__totals .is-key :is(dt, dd) {
+    color: var(--on-night);
+  }
+  .kz-doc__totals .is-key dd {
+    font-family: var(--font-mono);
+  }
+  .kz-doc__note {
+    max-width: 22rem;
+    margin-top: 8px;
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+    text-align: right;
+  }
+  .kz-doc__foot {
+    display: grid;
+    gap: 16px;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--bone-200);
+  }
+  .kz-doc__text {
+    margin-top: 4px;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+
+  /* ---------- Quotation response ---------- */
+  .kz-qresp {
+    padding: 18px 16px 20px;
+    border-radius: var(--radius-panel);
+    background: var(--paper);
+    box-shadow: 0 0 0 1px var(--bone-200);
+    scroll-margin-top: 24px;
+  }
+  .kz-qresp__h {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--ink-900);
+  }
+  .kz-qresp__switch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    margin-top: 12px;
+    padding: 4px;
+    border-radius: 9px;
+    background: var(--bone-100);
+  }
+  .kz-qresp__opt {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--ink-700);
+    cursor: pointer;
+    transition:
+      background-color var(--dur-state) var(--ease-out),
+      color var(--dur-state) var(--ease-out);
+  }
+  .kz-qresp__opt[aria-pressed='true'] {
+    background: var(--night-900);
+    color: var(--on-night);
+  }
+  .kz-qresp__form {
+    display: grid;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .kz-qresp__alert {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: color-mix(in oklab, var(--clay) 12%, var(--paper));
+    font-size: 0.875rem;
+    color: var(--clay-ink);
+  }
+  .kz-qresp__fine {
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+  }
+  .kz-qresp__go {
+    width: 100%;
+  }
+  .kz-qresp--done {
+    display: flex;
+    gap: 12px;
+    background: var(--emerald-50);
+    box-shadow: none;
+    color: var(--emerald-700);
+  }
+  .kz-qresp--done .kz-qresp__h {
+    font-size: 1rem;
+    color: var(--emerald-700);
+  }
+  .kz-qresp--done p:not(.kz-qresp__h) {
+    margin-top: 4px;
+    font-size: 0.9375rem;
+  }
+
+  @media (min-width: 640px) {
+    .kz-doc__rows {
+      display: none;
+    }
+    .kz-doc__table {
+      display: block;
+      margin-top: 18px;
+      overflow-x: auto;
+    }
+    .kz-doc__table table {
+      width: 100%;
+      min-width: 560px;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .kz-doc__table th {
+      padding: 8px 12px 8px 0;
+      border-bottom: 1px solid var(--ink-900);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--ink-600);
+      text-align: left;
+    }
+    .kz-doc__table td {
+      padding: 12px 12px 12px 0;
+      border-bottom: 1px solid var(--bone-200);
+      vertical-align: top;
+      color: var(--ink-700);
+    }
+    .kz-doc__table .is-num {
+      text-align: right;
+      white-space: nowrap;
+    }
+    .kz-doc__table :is(th, td):last-child {
+      padding-right: 0;
+    }
+    .kz-doc__table .is-no {
+      width: 32px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--ink-600);
+    }
+    .kz-doc__table .is-desc {
+      font-weight: 600;
+      color: var(--ink-900);
+      white-space: pre-line;
+    }
+    .kz-doc__table .is-amt {
+      font-weight: 700;
+      color: var(--ink-900);
+    }
+    .kz-doc__every {
+      display: block;
+      margin-top: 2px;
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--ink-600);
+    }
+    .kz-doc__parties,
+    .kz-doc__foot {
+      grid-template-columns: 1fr 1fr;
+      column-gap: 32px;
+    }
+    .kz-doc__parties section + section {
+      padding-left: 32px;
+      border-left: 1px solid var(--bone-200);
+    }
+    .kz-doc__foot .is-wide {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .kz-doc {
+      padding: 36px 40px 40px;
+    }
+    .kz-doc__head {
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      gap: 32px;
+    }
+    .kz-doc__title {
+      font-size: 2rem;
+    }
+    .kz-doc__dates {
+      grid-template-columns: auto auto;
+      gap: 24px;
+      text-align: right;
+    }
+    .kz-qresp {
+      padding: 24px;
+    }
+    .kz-qresp__go {
+      width: auto;
+      justify-self: start;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .kz-docpage {
+      grid-template-columns: minmax(0, 1fr) 340px;
+      align-items: start;
+      gap: 32px;
+    }
+    .kz-docside {
+      grid-column: 2;
+      grid-row: 1;
+      position: sticky;
+      top: 24px;
+    }
+    .kz-docpage__doc {
+      grid-column: 1;
+      grid-row: 1;
+      gap: 24px;
+    }
+    .kz-doc {
+      padding: 48px 56px 56px;
+    }
+    .kz-docside__card {
+      padding: 22px 20px 20px;
+    }
+  }
+}

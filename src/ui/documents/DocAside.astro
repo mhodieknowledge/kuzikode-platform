@@ -1,0 +1,89 @@
+---
+/**
+ * Summary + actions beside a public document (R4.8). Phones: first on the page (what it is, its state, the amount that matters,
+ * the one date that matters, the primary action and the PDF). Desktop: a sticky panel on the right of the paper.
+ * The state is a plate with a square (gold = waiting on you, emerald = settled, granite = closed); the amount is set in mono.
+ * Notices (paid, overdue, expired, newer version) are a `status` line inside the panel. A slot takes extra blocks (payments received).
+ */
+import Icon from '../icons/Icon.astro';
+
+interface Props {
+  kind: string;
+  number: string | null;
+  state: { label: string; tone: 'now' | 'ok' | 'off' | 'due' };
+  amountLabel: string;
+  amount: string;
+  facts: { k: string; v: string }[];
+  primary?: { label: string; href: string } | undefined;
+  pdfHref: string;
+  notice?: string | undefined;
+  /** Shown as a warning tone (overdue). */
+  noticeTone?: 'plain' | 'warn';
+  newer?: string | undefined;
+}
+const {
+  kind,
+  number,
+  state,
+  amountLabel,
+  amount,
+  facts,
+  primary,
+  pdfHref,
+  notice,
+  noticeTone = 'plain',
+  newer,
+} = Astro.props;
+---
+
+<aside class="kz-docside" aria-label={`${kind} summary`}>
+  <div class="kz-docside__card">
+    <p class="kz-docside__kind">
+      {kind}
+      {number ? <span>{number}</span> : null}
+    </p>
+    <p class:list={['kz-docside__state', `is-${state.tone}`]}>
+      <span aria-hidden="true"></span>
+      {state.label}
+    </p>
+    <p class="kz-docside__amt-l">{amountLabel}</p>
+    <p class="kz-docside__amt tnum">{amount}</p>
+    <dl class="kz-docside__facts">
+      {facts.map((f) => (
+        <div>
+          <dt>{f.k}</dt>
+          <dd>{f.v}</dd>
+        </div>
+      ))}
+    </dl>
+    {newer ? (
+      <p role="status" class="kz-docside__notice">
+        <Icon name="status-info" size={16} />
+        <span>
+          There is a newer version of this quotation. <a href={newer}>View the latest version</a>
+        </span>
+      </p>
+    ) : notice ? (
+      <p role="status" class:list={['kz-docside__notice', noticeTone === 'warn' && 'is-warn']}>
+        <Icon name={noticeTone === 'warn' ? 'status-warn' : 'status-info'} size={16} />
+        <span>{notice}</span>
+      </p>
+    ) : null}
+    <div class="kz-docside__acts">
+      {primary ? (
+        <a class="kz-btn kz-btn--primary kz-btn--block" href={primary.href}>
+          <span>{primary.label}</span>
+        </a>
+      ) : null}
+      <a class="kz-btn kz-btn--secondary kz-btn--block" href={pdfHref} download>
+        <Icon name="download" size={20} />
+        <span>Download PDF</span>
+      </a>
+    </div>
+  </div>
+  <slot />
+  <p class="kz-docside__private">
+    <Icon name="lock" size={16} />
+    This page is private to you. Please don't share the link.
+  </p>
+</aside>

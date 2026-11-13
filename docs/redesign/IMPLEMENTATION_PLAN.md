@@ -93,7 +93,7 @@ Ticked when the file is deleted (or, for the logic-only files marked *logic*, mo
 | layouts/PortalLayout.astro | WorkspaceLayout | [ ] R5.1 |
 | layouts/AdminLayout.astro | new AdminLayout | [ ] R6.1 |
 | layouts/AuthLayout.astro | new AuthLayout | [ ] R5.4 |
-| layouts/DocumentLayout.astro | new DocumentLayout | [ ] R4.8 |
+| layouts/DocumentLayout.astro | new DocumentLayout (rewritten on layouts/Base.astro) | [x] R4.8 |
 | components/BaseHead.astro | ui/head/Head.astro (new) | [ ] R5.1 (still used by legacy layouts) |
 | components/JsonLd.astro (*logic*) | kept as is (pure structured-data output) | — |
 | components/Logo.astro | ui/brand/Logo.astro (new) | [ ] R5.1 (still used by legacy layouts) |
@@ -109,9 +109,9 @@ Ticked when the file is deleted (or, for the logic-only files marked *logic*, mo
 | forms/StartProjectWizard | removed with the wizard (B.0c); /start-a-project 301 → /contact | [x] R4.6b (deleted) |
 | forms/ContactForm, ConsultationForm, Turnstile | new forms + hooks | [x] R4.6 (deleted) |
 | forms/NewsletterForm | ui/public/forms/Newsletter.tsx + useNewsletter | [x] R3.2 |
-| forms/InterestForm, ApplicationForm | new forms + hooks | [ ] R4.7 |
-| forms/QuotationResponse, documents/QuotationDocument, InvoiceDocument | documents | [ ] R4.8 |
-| payments/CheckoutPage, CheckoutSummary, CardReturn | checkout | [ ] R4.8 |
+| forms/InterestForm, ApplicationForm | ui/public/forms ApplicationForm + useApplication, InterestForm (useEnquiry) | [x] R4.7 (deleted) |
+| forms/QuotationResponse, documents/QuotationDocument, InvoiceDocument | ui/documents (DocumentSheet + Quotation/InvoiceSheet, DocAside, QuotationResponse + useQuotationResponse) | [x] R4.8 (deleted) |
+| payments/CheckoutPage, CheckoutSummary, CardReturn | ui/public/checkout (useCheckout, useAttemptStatus, Checkout, CheckoutSummary, CardReturn, AttemptResult) | [x] R4.8 (deleted) |
 | portal/StatusPill, AttemptStatus, PortalAccount, ProjectMessageForm, SavedCards, SupportForms | workspace | [ ] R5.2–R5.4 |
 | auth/AuthForms | workspace/admin auth | [ ] R5.4 |
 | admin/UserMenu, NotificationsBell, CommandPalette, actions | admin shell | [ ] R6.1 |

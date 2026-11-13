@@ -5,7 +5,8 @@
  * nothing. Private: noindex + no-store (middleware, `/pay` prefix).
  */
 import DocumentLayout from '../../layouts/DocumentLayout.astro';
-import { AttemptStatus } from '../../components/portal/AttemptStatus';
+import Icon from '../../ui/icons/Icon.astro';
+import { AttemptResult } from '../../ui/public/checkout/AttemptResult';
 import { publicDocumentPageLimit } from '../../server/lib/rate-limit';
 import { getPublicAttempt } from '../../server/modules/payments';
 
@@ -19,13 +20,16 @@ if (!attempt) return new Response(null, { status: 404, statusText: 'Not found' }
 ---
 
 <DocumentLayout title="Payment status">
-  <div class="mx-auto flex max-w-xl flex-col gap-6">
+  <div class="kz-coreturn">
     <h1 class="sr-only">Payment status</h1>
-    <div class="rounded-lg border border-line bg-surface p-6 md:p-8">
-      <AttemptStatus client:load initial={attempt} />
+    <div class="kz-copanel">
+      <AttemptResult client:load initial={attempt} />
     </div>
-    <p class="text-center text-[12px] text-ink-600">
-      Payments are processed securely by our payment partner. Kuzikode never sees or stores your PIN or card number.
+    <p class="kz-cosafe">
+      <Icon name="lock" size={16} />
+      <span>
+        Payments are processed securely by our payment partner. Kuzikode never sees or stores your PIN or card number.
+      </span>
     </p>
   </div>
 </DocumentLayout>

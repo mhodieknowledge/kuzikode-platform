@@ -1,0 +1,50 @@
+---
+/**
+ * Dense admin data table (R6.2, PANEL_DESIGN_SPEC §1). One markup, two renderings switched by CSS (no duplicate rows in the
+ * DOM, so e2e text and role queries stay unique):
+ * - ≥ 768 px: a table (15 px body, 44 px rows, mono right-aligned figures, row hover); from 1024 px the header row sticks
+ *   under the top bar.
+ * - < 768 px: every row becomes a list row — the `main` cell (title + sub line), one `meta` cell under it, `amount` and
+ *   `status` cells on the right and a chevron when the row links somewhere. Cells without a phone role are hidden there (the
+ *   detail page carries them).
+ * Rows are written by the page as `<tr>` elements of `Cell` components in the default slot. `count === 0` renders the
+ * `empty` slot instead of the table.
+ */
+export interface DataColumn {
+  label: string;
+  num?: boolean;
+}
+interface Props {
+  caption: string;
+  columns: DataColumn[];
+  count: number;
+  class?: string | undefined;
+}
+const { caption, columns, count, class: className } = Astro.props;
+---
+
+<div class:list={['kz-dt', className]}>
+  {count === 0 ? (
+    <div class="kz-dt__empty">
+      <slot name="empty" />
+    </div>
+  ) : (
+    <div class="kz-dt__scroll">
+      <table class="kz-dt__t">
+        <caption class="sr-only">{caption}</caption>
+        <thead>
+          <tr>
+            {columns.map((c) => (
+              <th scope="col" class={c.num ? 'is-num' : undefined}>
+                {c.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          <slot />
+        </tbody>
+      </table>
+    </div>
+  )}
+</div>

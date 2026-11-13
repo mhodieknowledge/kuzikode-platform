@@ -1,7 +1,8 @@
 ---
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import { QuotationEditor } from '../../../../components/admin/QuotationsAdmin';
-import { fromApiLine } from '../../../../components/admin/LineItemEditor';
+import PageHead from '../../../../ui/admin/PageHead.astro';
+import { QuotationEditor } from '../../../../ui/admin/quotations/QuotationEditor';
+import { fromApiLine } from '../../../../ui/admin/documents/lines';
 import { loadAdminPage } from '../../../../server/lib/admin-page';
 import { AppError } from '../../../../server/lib/errors';
 import { editorProps, getQuotation } from '../../../../server/modules/quotations';
@@ -48,20 +49,13 @@ const label = q.version > 1 ? `${q.title} (version ${q.version})` : q.title;
 ---
 
 <AdminLayout title={`Edit ${q.title}`} page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/quotations" class="hover:text-ink-950 hover:underline">
-      Quotations
-    </a>{' '}
-    /{' '}
-    <a href={`/admin/quotations/${q.id}`} class="hover:text-ink-950 hover:underline">
-      {label}
-    </a>{' '}
-    / <span class="text-ink-950">Edit</span>
-  </nav>
-  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">
-    Edit draft{q.version > 1 ? ` · version ${q.version}` : ''}
-  </h1>
-  <div class="max-w-4xl">
-    <QuotationEditor client:load id={q.id} initial={initial} {...props} />
-  </div>
+  <PageHead
+    title={`Edit draft${q.version > 1 ? ` · version ${q.version}` : ''}`}
+    crumbs={[
+      { label: 'Quotations', href: '/admin/quotations' },
+      { label, href: `/admin/quotations/${q.id}` },
+      { label: 'Edit' },
+    ]}
+  />
+  <QuotationEditor client:load id={q.id} initial={initial} {...props} />
 </AdminLayout>

@@ -1,0 +1,31 @@
+---
+/**
+ * View switch above an admin list (inbox / closed / spam, list / board, client sections): real links (each view is its own
+ * URL) drawn as the segmented control, with an optional mono count. Scrolls sideways inside itself on narrow phones.
+ */
+interface Props {
+  label: string;
+  items: { key: string; label: string; href: string; count?: number | undefined }[];
+  current: string;
+  class?: string | undefined;
+}
+const { label, items, current, class: className } = Astro.props;
+---
+
+<nav class:list={['kz-aviews', className]} aria-label={label}>
+  <ul class="kz-seg kz-seg--scroll" role="list">
+    {items.map((t) => (
+      <li>
+        <a class="kz-seg__opt" href={t.href} aria-current={t.key === current ? 'page' : undefined}>
+          {t.label}
+          {t.count !== undefined ? (
+            <>
+              {' '}
+              <span class="kz-aviews__n">{t.count}</span>
+            </>
+          ) : null}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>

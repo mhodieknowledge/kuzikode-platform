@@ -1,0 +1,32 @@
+---
+/**
+ * Label / value pairs for detail panes. Missing values show a quiet dash. `rows` lays each pair on one line with the value
+ * right-aligned (counts, small figures); `cols={2}` puts pairs side by side from 640 px (`wide` spans both).
+ */
+export interface DetailItem {
+  label: string;
+  value?: string | number | null | undefined;
+  href?: string | undefined;
+  mono?: boolean;
+  wide?: boolean;
+}
+interface Props {
+  items: DetailItem[];
+  cols?: 1 | 2;
+  rows?: boolean;
+  class?: string | undefined;
+}
+const { items, cols = 1, rows = false, class: className } = Astro.props;
+const empty = (v: DetailItem['value']) => v === null || v === undefined || v === '';
+---
+
+<dl class:list={['kz-adl', cols === 2 && 'kz-adl--2', rows && 'kz-adl--rows', className]}>
+  {items.map((i) => (
+    <div class:list={['kz-adl__i', i.wide && 'is-wide']}>
+      <dt>{i.label}</dt>
+      <dd class:list={[i.mono && 'is-mono', empty(i.value) && 'is-none']}>
+        {empty(i.value) ? '—' : i.href ? <a href={i.href}>{i.value}</a> : i.value}
+      </dd>
+    </div>
+  ))}
+</dl>

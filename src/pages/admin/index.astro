@@ -1,9 +1,19 @@
 ---
+/**
+ * Admin dashboard (R6.2): KPI strip (one grooved band of mono figures, per currency), the two charts in panes, then the
+ * working lists (payments, invoices due, renewals, milestones, activity, notifications) and the account pane. Sections a
+ * user may not see are absent (the service returns null for them).
+ */
 import AdminLayout from '../../layouts/AdminLayout.astro';
+import PageHead from '../../ui/admin/PageHead.astro';
+import Pane from '../../ui/admin/Pane.astro';
+import KpiStrip, { type Kpi } from '../../ui/admin/KpiStrip.astro';
+import BarChart from '../../ui/admin/BarChart.astro';
+import Icon from '../../ui/icons/Icon.astro';
+import { adminShellNav } from '../../ui/admin/nav';
 import { loadAdminPage } from '../../server/lib/admin-page';
 import { listNotifications } from '../../server/modules/notifications';
 import { getDashboard, type CurrencyAmount } from '../../server/modules/dashboard';
-import BarChart from '../../components/admin/BarChart.astro';
 import { formatMoney } from '../../shared/money';
 import { MANUAL_PAYMENT_METHODS } from '../../shared/invoices';
 
@@ -39,13 +49,7 @@ const actionLabel = (a: string) => {
   return t.charAt(0).toUpperCase() + t.slice(1);
 };
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
-interface Tile {
-  label: string;
-  values: string[];
-  note?: string;
-  href?: string;
-}
-const tiles: Tile[] = [];
+const tiles: Kpi[] = [];
 if (d.financial) {
   const f = d.financial;
   tiles.push(
@@ -75,16 +79,16 @@ if (d.recurring)
   tiles.push({
     label: 'Recurring revenue (MRR)',
     values: d.recurring.map((r) => `${formatMoney(r.mrrMinor, r.currency)} / mo`),
-    ...(d.recurring.length
-      ? { note: `ARR ${d.recurring.map((r) => formatMoney(r.arrMinor, r.currency)).join(' · ')}` }
-      : {}),
+    note: d.recurring.length
+      ? `ARR ${d.recurring.map((r) => formatMoney(r.arrMinor, r.currency)).join(' · ')}`
+      : undefined,
     href: '/admin/subscriptions',
   });
 if (d.quotations)
   tiles.push({
     label: 'Pending quotations',
     values: [String(d.quotations.pending)],
-    ...(d.quotations.pendingValue.length ? { note: perCurrency(d.quotations.pendingValue).join(' · ') } : {}),
+    note: d.quotations.pendingValue.length ? perCurrency(d.quotations.pendingValue).join(' · ') : undefined,
     href: '/admin/quotations',
   });
 if (d.projects)
@@ -105,324 +109,287 @@ if (d.careers)
     values: [String(d.careers.openRoles)],
     note: `${d.careers.newApplicants7Days} new ${d.careers.newApplicants7Days === 1 ? 'applicant' : 'applicants'} this week`,
   });
-const card = 'rounded-lg border border-line bg-surface p-6';
-const sections = page.nav.flatMap((g) => g.items).filter((i) => i.href !== '/admin');
+const sections = adminShellNav(page.nav)
+  .flatMap((g) => g.items)
+  .filter((i) => i.href !== '/admin');
 const firstName = page.auth.user.name.split(/\s+/)[0] ?? page.auth.user.name;
 const fmt = (iso: string) =>
   new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Harare' }).format(
     new Date(iso),
   );
+const today = new Intl.DateTimeFormat('en-GB', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  timeZone: 'Africa/Harare',
+}).format(ctx.now());
 ---
 
 <AdminLayout title="Dashboard" page={page}>
-  <h1 class="text-2xl font-bold tracking-display">Welcome, {firstName}</h1>
-  <p class="mt-1 text-ink-600">Press ⌘K (Ctrl+K on Windows) to find a client, invoice, quotation or project.</p>
+  <PageHead title={`Welcome, ${firstName}`}>
+    <Fragment slot="meta">
+      {today} · <kbd class="kz-amono">⌘K</kbd> (<kbd class="kz-amono">Ctrl K</kbd> on Windows) finds a client, invoice,
+      quotation or project.
+    </Fragment>
+  </PageHead>
   {d.priceReview ? (
-    <div
-      role="status"
-      class="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-warning-600/30 bg-warning-50 px-5 py-4"
-    >
-      <p class="text-sm text-warning-700">
-        <strong class="font-semibold">
+    <div role="status" class="kz-anotice">
+      <p>
+        <strong>
           {d.priceReview} {d.priceReview === 1 ? 'package price is' : 'package prices are'} awaiting review.
         </strong>{' '}
         Until approved they are suggested launch prices.
       </p>
-      <a href="/admin/packages?review=1" class="text-sm font-semibold text-warning-700 underline underline-offset-2">
-        Review prices
-      </a>
+      <a href="/admin/packages?review=1">Review prices</a>
     </div>
   ) : null}
-  {tiles.length > 0 ? (
-    <section aria-labelledby="kpi-title" class="mt-8">
-      <h2 id="kpi-title" class="sr-only">
-        Key figures
-      </h2>
-      <ul class="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4" data-testid="kpi-tiles">
-        {tiles.map((t) => (
-          <li class="min-w-0 rounded-lg border border-line bg-surface p-4 sm:p-5" data-tile={t.label}>
-            <p class="text-[13px] font-medium text-ink-600">{t.label}</p>
-            {t.values.length === 0 ? (
-              <p class="mt-1 text-xl font-bold text-ink-600">None</p>
-            ) : (
-              t.values.map((v) => <p class="tnum mt-1 text-xl font-bold text-ink-950">{v}</p>)
-            )}
-            {t.note ? <p class="mt-1 text-[13px] text-ink-600">{t.note}</p> : null}
-            {t.href ? (
-              <a href={t.href} class="mt-2 inline-flex text-[13px] font-semibold text-brand-600 hover:underline">
-                View<span class="sr-only"> {t.label.toLowerCase()}</span>
-              </a>
-            ) : null}
-          </li>
-        ))}
-      </ul>
-    </section>
-  ) : null}
+  {tiles.length > 0 ? <KpiStrip items={tiles} testId="kpi-tiles" /> : null}
   {d.financial ? (
-    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <section class={card} aria-label="Monthly revenue received">
+    <div class="kz-agrid kz-agrid--2">
+      <Pane title="Revenue received" meta="last 12 months" id="pane-revenue">
         {d.financial.charts.revenue.length === 0 ? (
           <BarChart
             id="revenue-none"
             title="Revenue received per month"
             months={d.financial.charts.months}
-            series={[{ label: 'Revenue', values: d.financial.charts.months.map(() => 0), color: 'var(--brand-600)' }]}
+            series={[{ label: 'Revenue', values: d.financial.charts.months.map(() => 0) }]}
             format={(v) => String(v)}
           />
         ) : (
-          <div class="flex flex-col gap-8">
+          <div class="kz-astack">
             {d.financial.charts.revenue.map((r) => (
               <BarChart
                 id={`revenue-${r.currency}`}
                 title={`Revenue received per month (${r.currency})`}
                 months={d.financial!.charts.months}
-                series={[{ label: r.currency, values: r.values, color: 'var(--brand-600)' }]}
+                series={[{ label: r.currency, values: r.values }]}
                 format={(v) => formatMoney(v, r.currency)}
                 tick={compact(r.currency)}
               />
             ))}
           </div>
         )}
-      </section>
-      <section class={card} aria-label="Invoices issued and paid">
+      </Pane>
+      <Pane title="Invoices" meta="issued vs paid" id="pane-invoices-chart">
         <BarChart
           id="invoices-issued-paid"
           title="Invoices issued vs paid per month"
           months={d.financial.charts.months}
           series={[
-            { label: 'Issued', values: d.financial.charts.issued, color: 'var(--brand-600)' },
-            { label: 'Paid', values: d.financial.charts.paid, color: 'var(--accent-500)' },
+            { label: 'Issued', values: d.financial.charts.issued, color: 'var(--granite)' },
+            { label: 'Paid', values: d.financial.charts.paid, color: 'var(--teal)' },
           ]}
           format={(v) => `${v} ${v === 1 ? 'invoice' : 'invoices'}`}
           tick={(v) => (Number.isInteger(v) ? String(v) : '')}
         />
-      </section>
+      </Pane>
     </div>
   ) : null}
-  <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+  <div class="kz-agrid kz-agrid--3 kz-agap">
     {d.recentPayments ? (
-      <section class={card} aria-labelledby="payments-title">
-        <div class="flex items-center justify-between">
-          <h2 id="payments-title" class="font-sans text-base font-semibold">
-            Recent payments
-          </h2>
-          <a href="/admin/payments" class="text-sm font-semibold text-brand-600">
-            See all<span class="sr-only"> payments</span>
-          </a>
-        </div>
+      <Pane title="Recent payments" flush>
+        <a slot="actions" href="/admin/payments" class="kz-apane__link">
+          See all<span class="sr-only"> payments</span>
+        </a>
         {d.recentPayments.length === 0 ? (
-          <p class="mt-4 text-sm text-ink-600">No payments recorded yet.</p>
+          <p class="kz-anone">
+            <span class="kz-anone__code">0 payments</span>No payments recorded yet.
+          </p>
         ) : (
-          <ul class="mt-3 divide-y divide-line">
+          <ul class="kz-alist" role="list">
             {d.recentPayments.map((p) => (
-              <li class="flex items-start justify-between gap-3 py-3">
-                <div class="min-w-0">
-                  <a href={`/admin/payments/${p.id}`} class="text-sm font-semibold text-ink-950 hover:underline">
+              <li>
+                <div class="kz-alist__main">
+                  <a href={`/admin/payments/${p.id}`} class="kz-alist__t">
                     {p.client}
                   </a>
-                  <p class="text-[12px] text-ink-600 [overflow-wrap:anywhere]">
-                    {p.receiptNumber} · {methods.get(p.method) ?? p.method} · {fmt(p.receivedAt)}
+                  <span class="kz-alist__m">
+                    <span class="kz-amono">{p.receiptNumber}</span> · {methods.get(p.method) ?? p.method} ·{' '}
+                    {fmt(p.receivedAt)}
                     {p.providerReference ? ` · Ref ${p.providerReference}` : ''}
-                  </p>
+                  </span>
                 </div>
-                <p class="tnum shrink-0 text-sm font-semibold text-ink-950">{formatMoney(p.amountMinor, p.currency)}</p>
+                <span class="kz-alist__r">{formatMoney(p.amountMinor, p.currency)}</span>
               </li>
             ))}
           </ul>
         )}
-      </section>
+      </Pane>
     ) : null}
     {d.dueInvoices ? (
-      <section class={card} aria-labelledby="due-title">
-        <div class="flex items-center justify-between">
-          <h2 id="due-title" class="font-sans text-base font-semibold">
-            Invoices due in the next 14 days
-          </h2>
-          <a href="/admin/invoices" class="text-sm font-semibold text-brand-600">
-            See all<span class="sr-only"> invoices</span>
-          </a>
-        </div>
+      <Pane title="Invoices due in the next 14 days" flush id="pane-due">
+        <a slot="actions" href="/admin/invoices" class="kz-apane__link">
+          See all<span class="sr-only"> invoices</span>
+        </a>
         {d.dueInvoices.length === 0 ? (
-          <p class="mt-4 text-sm text-ink-600">No open invoices fall due in the next two weeks.</p>
+          <p class="kz-anone">
+            <span class="kz-anone__code">0 due</span>No open invoices fall due in the next two weeks.
+          </p>
         ) : (
-          <ul class="mt-3 divide-y divide-line">
+          <ul class="kz-alist" role="list">
             {d.dueInvoices.map((i) => (
-              <li class="flex items-start justify-between gap-3 py-3">
-                <div class="min-w-0">
-                  <a href={`/admin/invoices/${i.id}`} class="text-sm font-semibold text-ink-950 hover:underline">
+              <li>
+                <div class="kz-alist__main">
+                  <a href={`/admin/invoices/${i.id}`} class="kz-alist__t kz-amono">
                     {i.number}
                   </a>
-                  <p class="text-[12px] text-ink-600">
+                  <span class="kz-alist__m">
                     {i.client} · due {dateFmt(i.dueDate)}
-                  </p>
+                  </span>
                 </div>
-                <p class="tnum shrink-0 text-sm font-semibold text-ink-950">
-                  {formatMoney(i.balanceMinor, i.currency)}
-                </p>
+                <span class="kz-alist__r">{formatMoney(i.balanceMinor, i.currency)}</span>
               </li>
             ))}
           </ul>
         )}
-      </section>
+      </Pane>
     ) : null}
     {d.renewals ? (
-      <section class={card} aria-labelledby="renewals-title">
-        <div class="flex items-center justify-between">
-          <h2 id="renewals-title" class="font-sans text-base font-semibold">
-            Upcoming renewals (30 days)
-          </h2>
-          {d.renewals.total > d.renewals.items.length ? (
-            <span class="text-[13px] text-ink-600">{d.renewals.total} in total</span>
-          ) : null}
-        </div>
+      <Pane
+        title="Upcoming renewals (30 days)"
+        flush
+        id="pane-renewals"
+        meta={d.renewals.total > d.renewals.items.length ? `${d.renewals.total} in total` : undefined}
+      >
         {d.renewals.items.length === 0 ? (
-          <p class="mt-4 text-sm text-ink-600">Nothing renews or bills in the next 30 days.</p>
+          <p class="kz-anone">
+            <span class="kz-anone__code">0 renewals</span>Nothing renews or bills in the next 30 days.
+          </p>
         ) : (
-          <ul class="mt-3 divide-y divide-line">
+          <ul class="kz-alist" role="list">
             {d.renewals.items.map((r) => (
-              <li class="flex items-start justify-between gap-3 py-3">
-                <div class="min-w-0">
-                  <a href={r.href} class="text-sm font-semibold text-ink-950 hover:underline">
+              <li>
+                <div class="kz-alist__main">
+                  <a href={r.href} class="kz-alist__t">
                     {r.name}
                   </a>
-                  <p class="text-[12px] text-ink-600">
+                  <span class="kz-alist__m">
                     {r.client} · {r.kind === 'subscription' ? 'next invoice' : 'renewal'}
-                  </p>
+                  </span>
                 </div>
-                <p class="shrink-0 text-[13px] text-ink-800">{dateFmt(r.date)}</p>
+                <span class="kz-alist__r is-date">{dateFmt(r.date)}</span>
               </li>
             ))}
           </ul>
         )}
-      </section>
+      </Pane>
     ) : null}
     {d.projects ? (
-      <section class={card} aria-labelledby="milestones-title">
-        <div class="flex items-center justify-between">
-          <h2 id="milestones-title" class="font-sans text-base font-semibold">
-            Upcoming milestones
-          </h2>
-          <a href="/admin/projects" class="text-sm font-semibold text-brand-600">
-            See all<span class="sr-only"> projects</span>
-          </a>
-        </div>
+      <Pane title="Upcoming milestones" flush>
+        <a slot="actions" href="/admin/projects" class="kz-apane__link">
+          See all<span class="sr-only"> projects</span>
+        </a>
         {d.projects.upcomingMilestones.length === 0 ? (
-          <p class="mt-4 text-sm text-ink-600">No milestones are due in the next 30 days.</p>
+          <p class="kz-anone">
+            <span class="kz-anone__code">0 milestones</span>No milestones are due in the next 30 days.
+          </p>
         ) : (
-          <ul class="mt-3 divide-y divide-line">
+          <ul class="kz-alist" role="list">
             {d.projects.upcomingMilestones.map((m) => (
-              <li class="flex items-start justify-between gap-3 py-3">
-                <div class="min-w-0">
-                  <a href={`/admin/projects/${m.projectId}`} class="text-sm font-semibold text-ink-950 hover:underline">
+              <li>
+                <div class="kz-alist__main">
+                  <a href={`/admin/projects/${m.projectId}`} class="kz-alist__t">
                     {m.title}
                   </a>
-                  <p class="text-[12px] text-ink-600">
-                    {m.reference} · {m.projectName}
-                  </p>
+                  <span class="kz-alist__m">
+                    <span class="kz-amono">{m.reference}</span> · {m.projectName}
+                  </span>
                 </div>
-                <p class="shrink-0 text-[13px] text-ink-800">{dateFmt(m.dueDate)}</p>
+                <span class="kz-alist__r is-date">{dateFmt(m.dueDate)}</span>
               </li>
             ))}
           </ul>
         )}
-      </section>
+      </Pane>
     ) : null}
     {d.activity ? (
-      <section class={card} aria-labelledby="activity-title">
-        <h2 id="activity-title" class="font-sans text-base font-semibold">
-          Recent activity
-        </h2>
+      <Pane title="Recent activity" flush>
         {d.activity.length === 0 ? (
-          <p class="mt-4 text-sm text-ink-600">No activity yet.</p>
+          <p class="kz-anone">
+            <span class="kz-anone__code">0 events</span>No activity yet.
+          </p>
         ) : (
-          <ul class="mt-3 divide-y divide-line">
+          <ol class="kz-afeed">
             {d.activity.map((a) => {
               const link = entityLink(a.entityType, a.entityId);
               return (
-                <li class="py-3">
+                <li>
                   {link ? (
-                    <a href={link} class="text-sm font-semibold text-ink-950 hover:underline">
+                    <a href={link} class="kz-afeed__k">
                       {actionLabel(a.action)}
                     </a>
                   ) : (
-                    <p class="text-sm font-semibold text-ink-950">{actionLabel(a.action)}</p>
+                    <p class="kz-afeed__k">{actionLabel(a.action)}</p>
                   )}
-                  <p class="text-[12px] text-ink-600">
+                  <p class="kz-afeed__t">
                     {a.actor ?? 'System'} · {fmt(a.createdAt)}
                   </p>
                 </li>
               );
             })}
-          </ul>
+          </ol>
         )}
-      </section>
+      </Pane>
     ) : null}
-  </div>
-  <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-    <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="recent-title">
-      <div class="flex items-center justify-between">
-        <h2 id="recent-title" class="font-sans text-base font-semibold">
-          Recent notifications
-        </h2>
-        <a href="/admin/notifications" class="text-sm font-semibold text-brand-600">
-          See all
-        </a>
-      </div>
+    <Pane title="Recent notifications" flush>
+      <a slot="actions" href="/admin/notifications" class="kz-apane__link">
+        See all
+      </a>
       {items.length === 0 ? (
-        <p class="mt-4 text-sm text-ink-600">
-          Nothing new. Notifications about enquiries, applications and payments appear here.
+        <p class="kz-anone">
+          <span class="kz-anone__code">0 unread</span>Nothing new. Notifications about enquiries, applications and
+          payments appear here.
         </p>
       ) : (
-        <ul class="mt-4 divide-y divide-line">
+        <ol class="kz-afeed">
           {items.map((n) => (
-            <li class="py-3">
+            <li data-kind={n.readAt ? undefined : 'lit'}>
               {n.link ? (
-                <a href={n.link} class="text-sm font-semibold text-ink-950 hover:underline">
+                <a href={n.link} class="kz-afeed__k">
                   {n.title}
                 </a>
               ) : (
-                <p class="text-sm font-semibold text-ink-950">{n.title}</p>
+                <p class="kz-afeed__k">{n.title}</p>
               )}
-              <p class="text-[12px] text-ink-600">{fmt(n.createdAt)}</p>
+              <p class="kz-afeed__t">{fmt(n.createdAt)}</p>
             </li>
           ))}
-        </ul>
+        </ol>
       )}
-    </section>
-    <section class="rounded-lg border border-line bg-surface p-6" aria-labelledby="account-title">
-      <h2 id="account-title" class="font-sans text-base font-semibold">
-        Your account
-      </h2>
-      <dl class="mt-4 grid gap-3 text-sm">
-        <div>
-          <dt class="text-ink-600">Signed in as</dt>
-          <dd class="font-medium text-ink-950">{page.auth.user.email}</dd>
+    </Pane>
+    <Pane title="Your account" class="kz-span-all">
+      <div class="kz-aacc">
+        <div class="kz-astack">
+          <dl class="kz-adl kz-adl--rows">
+            <div class="kz-adl__i">
+              <dt>Signed in as</dt>
+              <dd class="is-mono">{page.auth.user.email}</dd>
+            </div>
+            <div class="kz-adl__i">
+              <dt>Two-factor authentication</dt>
+              <dd>{page.auth.mfa.enabled ? 'On' : 'Off'}</dd>
+            </div>
+          </dl>
+          <a href="/admin/account/security" class="kz-apane__link">
+            Security settings
+          </a>
         </div>
-        <div>
-          <dt class="text-ink-600">Two-factor authentication</dt>
-          <dd class="font-medium text-ink-950">{page.auth.mfa.enabled ? 'On' : 'Off'}</dd>
-        </div>
-      </dl>
-      <a href="/admin/account/security" class="mt-4 inline-flex text-sm font-semibold text-brand-600">
-        Security settings
-      </a>
-      {sections.length > 0 ? (
-        <>
-          <h3 class="mt-6 text-sm font-semibold text-ink-950">Your sections</h3>
-          <ul class="mt-2 flex flex-wrap gap-2">
-            {sections.map((s) => (
-              <li>
-                <a
-                  href={s.href}
-                  class="inline-flex h-9 items-center rounded-sm border border-line px-3 text-sm font-medium text-ink-800 hover:border-ink-400"
-                >
-                  {s.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </>
-      ) : null}
-    </section>
+        {sections.length > 0 ? (
+          <div>
+            <h3 class="kz-asub__t">Your sections</h3>
+            <ul class="kz-achips" role="list">
+              {sections.map((s) => (
+                <li>
+                  <a href={s.href}>
+                    <Icon name={s.icon} size={16} />
+                    {s.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
+    </Pane>
   </div>
 </AdminLayout>

@@ -1,0 +1,31 @@
+---
+/**
+ * One DataTable cell. `m` is the cell's role in the phone list row: `main` (title + sub line; give it `href` to make the
+ * whole row a link), `meta` (one per row, the line under the title), `amount` and `status` (right-hand side), or omit it
+ * to hide the cell on phones. `num` sets mono right-aligned figures. Content goes in the default slot (after the title).
+ */
+interface Props {
+  m?: 'main' | 'meta' | 'amount' | 'status' | undefined;
+  num?: boolean;
+  href?: string | undefined;
+  title?: string | undefined;
+  sub?: string | undefined;
+  /** Sub line in body type instead of mono (names rather than references). */
+  subText?: boolean;
+  tone?: 'mute' | 'alert' | undefined;
+  class?: string | undefined;
+}
+const { m, num = false, href, title, sub, subText = false, tone, class: className } = Astro.props;
+---
+
+<td class:list={['kz-dt__td', num && 'is-num', tone && `is-${tone}`, className]} data-m={m}>
+  {href ? (
+    <a class="kz-dt__a" href={href}>
+      {title}
+    </a>
+  ) : title ? (
+    <span class="kz-dt__strong">{title}</span>
+  ) : null}
+  {sub ? <span class:list={['kz-dt__sub', subText && 'is-text']}>{sub}</span> : null}
+  <slot />
+</td>

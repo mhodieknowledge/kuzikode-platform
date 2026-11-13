@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { LeadForm } from '../../../components/admin/LeadsAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import { LeadForm } from '../../../ui/admin/leads/LeadForm';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { leadFormOptions } from '../../../server/modules/leads';
 
@@ -27,14 +28,6 @@ const initial = {
 ---
 
 <AdminLayout title="New lead" page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/leads" class="hover:text-ink-950 hover:underline">
-      Leads
-    </a>{' '}
-    / <span class="text-ink-950">New</span>
-  </nav>
-  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">New lead</h1>
-  <div class="max-w-3xl">
-    <LeadForm client:load initial={initial} {...options} />
-  </div>
+  <PageHead title="New lead" crumbs={[{ label: 'Leads', href: '/admin/leads' }, { label: 'New' }]} />
+  <LeadForm client:load initial={initial} {...options} />
 </AdminLayout>

@@ -1222,3 +1222,13 @@ The **Next step** line must be specific enough that a fresh session can continue
 ## 2026-11-13 11:55 UTC · R6.2 started (heartbeat)
 - Group 1 (shared admin table/list-row, filter sheet, save bar, KPI strip; dashboard, enquiries, leads, clients, quotations) delegated: opus/medium builder.
 - 12:17 UTC heartbeat: group 1 builder still running.
+
+## 2026-11-13 13:00 UTC · R6.2 group 1 ✅ shared admin patterns + dashboard, enquiries, leads, clients, quotations
+- New `src/ui/admin/` PageHead, DataTable+Cell (table ≥768, list rows below), FilterBar (phone bottom sheet), Pager, Views, KpiStrip, BarChart,
+  DetailList, form.tsx (FormSection, SaveBar, CheckItem), action.ts, chart.ts; module hooks/components under `ui/admin/{enquiries,leads,clients,quotations,documents}`.
+  Deleted `components/admin/{LeadsAdmin,ClientsAdmin,QuotationsAdmin}.tsx`, `BarChart.astro`. FilterBar drops empty params (fixes `kind=` dropping search).
+- verify green (unit 611, integration 308); e2e admin-shell, leads, clients, quotations, sweep, invoices, reports, security, full-journey, portal-auth, packages green.
+- Tiers: build opus/medium subagent; review (screenshots 390/1440 + e2e rerun) by orchestrator.
+- Next step: R6.2 group 2 Finance: invoices (move to `ui/admin/documents/LineItemEditor`, delete `components/admin/LineItemEditor.tsx`), payments,
+  subscriptions, managed services, expenses, reports; replace `components/admin/actions.tsx` with `ui/admin/action.ts`. Reuse group 1 APIs (see that subagent report summary in this entry).
+  Known: quotation intro still uses legacy `components/ui/RichTextEditor` (rebuild in Website group).

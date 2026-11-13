@@ -1,0 +1,151 @@
+---
+/**
+ * Server-rendered monthly bar chart for admin panes (R6.2; no client JS). One slot per month, bars grouped when there are two
+ * series. Geometry in percentages so labels keep their pixel size; mono ticks; a full-height hover target per month with a
+ * native tooltip; and "Show as table" with the same numbers (identity never by colour alone: a legend from two series).
+ * Series colours default to the data palette (teal, then granite); emerald stays reserved for actions.
+ */
+interface Series {
+  label: string;
+  values: number[];
+  /** CSS colour; defaults to the data palette by position. */
+  color?: string | undefined;
+}
+interface Props {
+  id: string;
+  title: string;
+  months: string[]; // YYYY-MM
+  series: Series[];
+  format: (v: number) => string;
+  /** Short axis tick text (defaults to `format`). */
+  tick?: (v: number) => string;
+  height?: number;
+}
+const { id, title, months, series: given, format, tick = format, height = 200 } = Astro.props;
+import { chartScale } from './chart';
+
+const PALETTE = ['var(--teal)', 'var(--granite)', 'var(--saffron)', 'var(--clay)'];
+const series = given.map((s, i) => ({ ...s, color: s.color ?? PALETTE[i % PALETTE.length]! }));
+const monthLabel = (m: string, withYear = false) =>
+  new Intl.DateTimeFormat('en-GB', {
+    month: 'short',
+    ...(withYear ? { year: 'numeric' } : {}),
+    timeZone: 'UTC',
+  }).format(new Date(`${m}-01T00:00:00Z`));
+
+const { top, ticks, allZero } = chartScale(series.flatMap((s) => s.values));
+const PAD_TOP = 16;
+const PAD_BOTTOM = 22;
+const plotH = height - PAD_TOP - PAD_BOTTOM;
+const y = (v: number) => PAD_TOP + plotH - (v / top) * plotH;
+const slot = 100 / Math.max(1, months.length);
+const groupW = slot * (series.length > 1 ? 0.66 : 0.52);
+const gap = series.length > 1 ? 0.4 : 0;
+const barW = (groupW - gap * (series.length - 1)) / series.length;
+---
+
+<figure class="kz-achart" aria-labelledby={`${id}-title`}>
+  <figcaption id={`${id}-title`} class="kz-achart__title">
+    {title}
+  </figcaption>
+  {series.length > 1 ? (
+    <ul class="kz-achart__legend" aria-label="Legend">
+      {series.map((s) => (
+        <li>
+          <span class="kz-achart__key" style={`background:${s.color}`} aria-hidden="true" />
+          {s.label}
+        </li>
+      ))}
+    </ul>
+  ) : null}
+  {allZero ? (
+    <p class="kz-achart__none">nothing recorded in the last 12 months</p>
+  ) : (
+    <svg
+      class="kz-achart__svg"
+      height={height}
+      role="img"
+      aria-label={`${title}. Values are listed in the table below.`}
+    >
+      {ticks.map((t, i) => (
+        <g>
+          <line x1="0" x2="100%" y1={y(t)} y2={y(t)} class:list={['kz-achart__grid', i === 0 && 'is-base']} />
+          {i > 0 ? (
+            <text x="0" y={y(t) - 4} class="kz-achart__tick">
+              {tick(t)}
+            </text>
+          ) : null}
+        </g>
+      ))}
+      {months.map((m, i) => {
+        const x0 = i * slot + (slot - groupW) / 2;
+        return (
+          <g class="kz-achart__slot">
+            <rect
+              x={`${i * slot}%`}
+              y={PAD_TOP}
+              width={`${slot}%`}
+              height={plotH}
+              fill="transparent"
+              class="kz-achart__hit"
+            >
+              <title>
+                {`${monthLabel(m, true)}: ${series.map((s) => `${series.length > 1 ? `${s.label} ` : ''}${format(s.values[i] ?? 0)}`).join(' · ')}`}
+              </title>
+            </rect>
+            {series.map((s, k) => {
+              const v = Math.max(0, s.values[i] ?? 0);
+              const h = (v / top) * plotH;
+              return h > 0 ? (
+                <rect
+                  class="kz-achart__bar"
+                  x={`${x0 + k * (barW + gap)}%`}
+                  y={y(v)}
+                  width={`${barW}%`}
+                  height={h}
+                  fill={s.color}
+                  pointer-events="none"
+                />
+              ) : null;
+            })}
+            <text
+              x={`${i * slot + slot / 2}%`}
+              y={height - 6}
+              text-anchor="middle"
+              class:list={['kz-achart__tick', i % 2 === 1 && i !== months.length - 1 && 'is-minor']}
+            >
+              {monthLabel(m)}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  )}
+  <details class="kz-achart__more">
+    <summary>Show as table</summary>
+    <div class="overflow-x-auto">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Month</th>
+            {series.map((s) => (
+              <th scope="col" class="is-num">
+                {s.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {months.map((m, i) => (
+            <tr>
+              <th scope="row">{monthLabel(m, true)}</th>
+              {series.map((s) => (
+                <td class="is-num">{format(s.values[i] ?? 0)}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </details>
+</figure>

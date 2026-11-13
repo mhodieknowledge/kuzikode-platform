@@ -1,6 +1,6 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import BarChart from '../../../components/admin/BarChart.astro';
+import BarChart from '../../../ui/admin/BarChart.astro';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { addMonths } from '../../../server/lib/dates';
 import { reports, resolveRange } from '../../../server/modules/reports';
@@ -84,7 +84,6 @@ const field = 'h-10 rounded-sm border border-line bg-surface px-3 text-sm';
               {
                 label: cur,
                 values: months.map((m) => d.byMonth.find((x) => x.month === m && x.currency === cur)?.netMinor ?? 0),
-                color: 'var(--brand-600)',
               },
             ]}
             format={(v) => formatMoney(v, cur)}

@@ -1,0 +1,57 @@
+---
+/**
+ * Admin page head (R6.2): mono breadcrumb trail, the title (the page's H1 unless the page renders its own, e.g. the document
+ * sheet), a quiet meta line and the page actions on the right (wrapping under the title on phones). Matches Pane's type scale.
+ * Slots: `actions` (buttons / links), `meta` (rich meta line, replaces `meta`), default (anything under the row, e.g. tags).
+ */
+interface Crumb {
+  label: string;
+  href?: string | undefined;
+}
+interface Props {
+  title: string;
+  meta?: string | undefined;
+  crumbs?: Crumb[] | undefined;
+  /** `p` when another element on the page is the H1 (e.g. the quotation sheet). */
+  as?: 'h1' | 'p';
+  class?: string | undefined;
+}
+const { title, meta, crumbs, as = 'h1', class: className } = Astro.props;
+const Title = as;
+---
+
+<header class:list={['kz-ahead', className]}>
+  {crumbs && crumbs.length ? (
+    <nav aria-label="Breadcrumb" class="kz-acrumb">
+      <ol>
+        {crumbs.map((c, i) => (
+          <li>
+            {c.href ? (
+              <a href={c.href}>{c.label}</a>
+            ) : (
+              <span aria-current={i === crumbs.length - 1 ? 'page' : undefined}>{c.label}</span>
+            )}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  ) : null}
+  <div class="kz-ahead__row">
+    <div class="kz-ahead__text">
+      <Title class="kz-ahead__title">{title}</Title>
+      {Astro.slots.has('meta') ? (
+        <p class="kz-ahead__meta">
+          <slot name="meta" />
+        </p>
+      ) : meta ? (
+        <p class="kz-ahead__meta">{meta}</p>
+      ) : null}
+    </div>
+    {Astro.slots.has('actions') ? (
+      <div class="kz-ahead__acts">
+        <slot name="actions" />
+      </div>
+    ) : null}
+  </div>
+  <slot />
+</header>

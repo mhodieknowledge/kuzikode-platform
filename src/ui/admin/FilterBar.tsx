@@ -19,7 +19,8 @@ export type FilterField =
       options: { value: string; label: string }[];
     }
   | { kind: 'check'; name: string; label: string; checked: boolean; value?: string }
-  | { kind: 'date'; name: string; label: string; value: string };
+  | { kind: 'date'; name: string; label: string; value: string }
+  | { kind: 'text'; name: string; label: string; value: string; maxLength?: number };
 
 /** Filters set away from their default (the first option of a select; a ticked check; a filled date). Search is not counted. */
 export function activeFilters(fields: FilterField[]): number {
@@ -28,7 +29,7 @@ export function activeFilters(fields: FilterField[]): number {
       ? f.value !== (f.options[0]?.value ?? '')
       : f.kind === 'check'
         ? f.checked
-        : f.kind === 'date'
+        : f.kind === 'date' || f.kind === 'text'
           ? f.value !== ''
           : false,
   ).length;
@@ -105,6 +106,20 @@ export function FilterBar({
             {f.label}
           </label>
           <input id={`${fid}-${f.name}`} name={f.name} type="date" defaultValue={f.value} className="kz-input" />
+        </div>
+      ) : f.kind === 'text' ? (
+        <div className="kz-field kz-afilter__field" key={f.name}>
+          <label className="kz-label" htmlFor={`${fid}-${f.name}`}>
+            {f.label}
+          </label>
+          <input
+            id={`${fid}-${f.name}`}
+            name={f.name}
+            type="text"
+            defaultValue={f.value}
+            maxLength={f.maxLength ?? 40}
+            className="kz-input"
+          />
         </div>
       ) : f.kind === 'check' ? (
         <label className="kz-afilter__check" key={f.name}>

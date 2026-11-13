@@ -1,7 +1,9 @@
 ---
+/** Website announcements (R6.2): one active announcement at a time, inside its start and end dates. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import CmsTabs from '../../../components/admin/CmsTabs.astro';
-import { AnnouncementsManager } from '../../../components/admin/CmsAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import CmsTabs from '../../../ui/admin/website/CmsTabs.astro';
+import { AnnouncementsManager } from '../../../ui/admin/cms/AnnouncementsManager';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { listAnnouncementsAdmin } from '../../../server/modules/cms/admin';
 
@@ -12,12 +14,9 @@ const announcements = (await listAnnouncementsAdmin(ctx)) as never[];
 ---
 
 <AdminLayout title="Announcements" page={page}>
-  <h1 class="text-2xl font-bold tracking-display">Website</h1>
-  <CmsTabs current="announcements" />
-  <p class="mt-4 mb-4 max-w-3xl text-sm text-ink-600">
-    The site shows one active announcement at a time, inside its start and end dates.
-  </p>
-  <div class="max-w-3xl">
-    <AnnouncementsManager client:load announcements={announcements} />
+  <PageHead title="Website" meta="The site shows one active announcement at a time, inside its start and end dates." />
+  <div class="kz-atools">
+    <CmsTabs current="announcements" />
   </div>
+  <AnnouncementsManager client:load announcements={announcements} />
 </AdminLayout>

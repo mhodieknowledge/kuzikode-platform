@@ -1,7 +1,9 @@
 ---
+/** Technologies (R6.2): the "Technologies we work with" strip. Tools we use, never clients or partners. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import ContentTabs from '../../../components/admin/ContentTabs.astro';
-import { TechnologiesManager } from '../../../components/admin/ContentAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import ContentTabs from '../../../ui/admin/website/ContentTabs.astro';
+import { TechnologiesManager } from '../../../ui/admin/content/Managers';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { listTechnologiesAdmin } from '../../../server/modules/cms/content-admin';
 
@@ -12,12 +14,12 @@ const items = await listTechnologiesAdmin(ctx);
 ---
 
 <AdminLayout title="Technologies" page={page}>
-  <h1 class="text-2xl font-bold tracking-display">Content</h1>
-  <ContentTabs current="technologies" permissions={page.auth.permissions} />
-  <p class="mt-4 mb-4 max-w-3xl text-sm text-ink-600">
-    The "Technologies we work with" strip. These are tools we use, never clients or partners.
-  </p>
-  <div class="max-w-3xl">
-    <TechnologiesManager client:load items={items as never[]} />
+  <PageHead
+    title="Content"
+    meta={'The "Technologies we work with" strip. These are tools we use, never clients or partners.'}
+  />
+  <div class="kz-atools">
+    <ContentTabs current="technologies" permissions={page.auth.permissions} />
   </div>
+  <TechnologiesManager client:load items={items as never[]} />
 </AdminLayout>

@@ -1,6 +1,11 @@
 ---
+/** Website pages (R6.2): every editable page with its path, section count, last publish and unpublished-changes flag. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import CmsTabs from '../../../components/admin/CmsTabs.astro';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import CmsTabs from '../../../ui/admin/website/CmsTabs.astro';
+import DataTable from '../../../ui/admin/DataTable.astro';
+import Cell from '../../../ui/admin/Cell.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { listPages } from '../../../server/modules/cms/admin';
 import { pagePath } from '../../../shared/cms-fields';
@@ -16,30 +21,41 @@ const when = (iso: string | null) =>
 ---
 
 <AdminLayout title="Website pages" page={page}>
-  <h1 class="text-2xl font-bold tracking-display">Website</h1>
-  <CmsTabs current="pages" />
-  <p class="mt-4 max-w-3xl text-sm text-ink-600">
-    Edit a page's sections as drafts, preview them on the real page, then publish. Visitors only ever see published
-    content.
-  </p>
-  <ul class="mt-4 divide-y divide-line rounded-lg border border-line bg-surface">
+  <PageHead
+    title="Website"
+    meta="Edit a page's sections as drafts, preview them on the real page, then publish. Visitors only ever see published content."
+  />
+  <div class="kz-atools">
+    <CmsTabs current="pages" />
+  </div>
+  <DataTable
+    caption="Website pages"
+    count={pages.length}
+    columns={[
+      { label: 'Page' },
+      { label: 'Address' },
+      { label: 'Sections', num: true },
+      { label: 'Published' },
+      { label: 'State' },
+    ]}
+  >
     {pages.map((p) => (
-      <li class="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-        <div>
-          <a href={`/admin/cms/pages/${p.key}`} class="font-semibold text-ink-950 hover:underline">
-            {p.title}
-          </a>
-          <p class="text-[12px] text-ink-600">
-            <span class="font-mono">{pagePath(p.key)}</span> · {p.sections} {p.sections === 1 ? 'section' : 'sections'}{' '}
-            · published {when(p.published_at)}
-          </p>
-        </div>
-        {p.has_changes ? (
-          <span class="rounded-full bg-warning-50 px-2 py-0.5 text-[12px] font-semibold text-warning-700">
-            Unpublished changes
-          </span>
-        ) : null}
-      </li>
+      <tr>
+        <Cell
+          m="main"
+          href={`/admin/cms/pages/${p.key}`}
+          title={p.title}
+          sub={`${pagePath(p.key)} · ${p.sections} ${p.sections === 1 ? 'section' : 'sections'}`}
+        />
+        <Cell tone="mute">
+          <span class="kz-amono">{pagePath(p.key)}</span>
+        </Cell>
+        <Cell num>{p.sections}</Cell>
+        <Cell m="meta" tone="mute">
+          published {when(p.published_at)}
+        </Cell>
+        <Cell m="status">{p.has_changes ? <StatusPill tone="warn">Unpublished changes</StatusPill> : null}</Cell>
+      </tr>
     ))}
-  </ul>
+  </DataTable>
 </AdminLayout>

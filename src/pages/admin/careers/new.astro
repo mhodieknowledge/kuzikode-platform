@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { PostingForm } from '../../../components/admin/CareersAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import { PostingForm } from '../../../ui/admin/careers/PostingForm';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 
 const { ctx } = Astro.locals;
@@ -37,14 +38,6 @@ const initial = {
 ---
 
 <AdminLayout title="New posting" page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/careers" class="hover:text-ink-950 hover:underline">
-      Careers
-    </a>{' '}
-    / <span class="text-ink-950">New posting</span>
-  </nav>
-  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">New posting</h1>
-  <div class="max-w-4xl">
-    <PostingForm client:load initial={initial} currencies={currencies} />
-  </div>
+  <PageHead title="New posting" crumbs={[{ label: 'Careers', href: '/admin/careers' }, { label: 'New posting' }]} />
+  <PostingForm client:load initial={initial} currencies={currencies} />
 </AdminLayout>

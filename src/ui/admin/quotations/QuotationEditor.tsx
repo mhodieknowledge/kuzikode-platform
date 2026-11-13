@@ -4,9 +4,9 @@
  */
 import { useState, type FormEvent } from 'react';
 import type { DiscountType } from '../../../shared/pricing';
-import { RichTextEditor } from '../../../components/ui/RichTextEditor';
 import { Field, SelectField, TextareaField, TextField } from '../../primitives';
 import { Button } from '../../primitives/button';
+import { RichText } from '../../primitives/RichText';
 import { FormSection, SaveBar } from '../form';
 import { LineItemEditor } from '../documents/LineItemEditor';
 import {
@@ -158,7 +158,7 @@ export function QuotationEditor({
           error={a.err('introHtml')}
           className="kz-span-2"
         >
-          {(p) => <RichTextEditor {...p} label="Introduction" value={intro} onChange={setIntro} minHeight={120} />}
+          {(p) => <RichText {...p} label="Introduction" value={intro} onChange={setIntro} minHeight={120} />}
         </Field>
       </FormSection>
       <FormSection

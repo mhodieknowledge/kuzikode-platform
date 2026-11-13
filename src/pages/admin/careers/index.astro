@@ -1,5 +1,11 @@
 ---
+/** Careers (R6.2): job postings with status, closing date and applicant counts, plus general applications. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import DataTable from '../../../ui/admin/DataTable.astro';
+import Cell from '../../../ui/admin/Cell.astro';
+import Button from '../../../ui/primitives/Button.astro';
+import StatusPill from '../../../ui/primitives/StatusPill.astro';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { employmentTypeLabel, listPostingsAdmin } from '../../../server/modules/careers';
 import { formatLongDate } from '../../../shared/service-display';
@@ -9,114 +15,75 @@ const page = await loadAdminPage(ctx, Astro.request, { permission: 'careers.view
 if (page instanceof Response) return page;
 const { postings, general } = await listPostingsAdmin(ctx);
 const canManage = page.auth.permissions.has('careers.manage');
-const STATUS: Record<string, { label: string; cls: string }> = {
-  draft: { label: 'Draft', cls: 'bg-ink-950/5 text-ink-800' },
-  open: { label: 'Open', cls: 'bg-success-50 text-success-700' },
-  closed: { label: 'Closed', cls: 'bg-warning-50 text-warning-700' },
-  archived: { label: 'Archived', cls: 'bg-ink-950/5 text-ink-600' },
+const STATUS: Record<string, { label: string; tone: 'neutral' | 'ok' | 'warn' }> = {
+  draft: { label: 'Draft', tone: 'neutral' },
+  open: { label: 'Open', tone: 'ok' },
+  closed: { label: 'Closed', tone: 'warn' },
+  archived: { label: 'Archived', tone: 'neutral' },
 };
-const link =
-  'inline-flex h-10 items-center rounded-sm border border-line bg-surface px-4 text-sm font-semibold text-ink-950 hover:border-ink-400';
 const scheduled = (p: (typeof postings)[number]) =>
   p.status === 'open' && p.opensAt && p.opensAt > ctx.now().toISOString();
+const count = (n: number, fresh: number) => `${n}${fresh ? ` (${fresh} new)` : ''}`;
 ---
 
 <AdminLayout title="Careers" page={page}>
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-bold tracking-display">Careers</h1>
-      <p class="mt-1 text-sm text-ink-600">
-        Job postings and applicants. Applicant data is deleted after the retention period.
-      </p>
-    </div>
-    <div class="flex flex-wrap gap-2">
-      <a href="/admin/careers/applicants?status=active&view=board" class={link}>
+  <PageHead title="Careers" meta="Job postings and applicants. Applicant data is deleted after the retention period.">
+    <Fragment slot="actions">
+      <Button href="/admin/careers/applicants?status=active&view=board" variant="secondary">
         All applicants
-      </a>
+      </Button>
       {canManage ? (
-        <a href="/admin/careers/templates" class={link}>
+        <Button href="/admin/careers/templates" variant="secondary">
           Email templates
-        </a>
+        </Button>
       ) : null}
       {canManage ? (
-        <a
-          href="/admin/careers/new"
-          class="inline-flex h-10 items-center rounded-sm bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-500"
-        >
+        <Button href="/admin/careers/new" lead="add">
           New posting
-        </a>
+        </Button>
       ) : null}
-    </div>
-  </div>
-  <div class="relative mt-6 overflow-x-auto rounded-lg border border-line bg-surface">
-    <table class="w-full min-w-[720px] text-left text-sm">
-      <caption class="sr-only">Job postings</caption>
-      <thead class="bg-canvas text-[13px] text-ink-600">
-        <tr>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Posting
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Status
-          </th>
-          <th scope="col" class="px-4 py-3 font-semibold">
-            Closes
-          </th>
-          <th scope="col" class="px-4 py-3 text-right font-semibold">
-            Applicants
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {postings.length === 0 ? (
-          <tr>
-            <td colspan="4" class="px-4 py-8 text-center text-ink-600">
-              No postings yet.
-            </td>
-          </tr>
-        ) : (
-          postings.map((p) => (
-            <tr class="border-t border-line">
-              <td class="px-4 py-3">
-                <a href={`/admin/careers/${p.id}`} class="font-semibold text-ink-950 hover:underline">
-                  {p.title}
-                </a>
-                <span class="block text-[12px] text-ink-600">
-                  {p.department} · {employmentTypeLabel(p.employmentType)} · {p.location}
-                </span>
-              </td>
-              <td class="px-4 py-3">
-                <span class={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${STATUS[p.status]?.cls ?? ''}`}>
-                  {scheduled(p) ? 'Scheduled' : (STATUS[p.status]?.label ?? p.status)}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-ink-800">{p.closesAt ? formatLongDate(p.closesAt.slice(0, 10)) : '—'}</td>
-              <td class="px-4 py-3 text-right">
-                <a
-                  href={`/admin/careers/applicants?posting=${p.id}&view=board`}
-                  class="font-semibold text-brand-600 hover:underline"
-                >
-                  {p.applicants}
-                  {p.fresh ? ` (${p.fresh} new)` : ''}
-                  <span class="sr-only"> applicants for {p.title}</span>
-                </a>
-              </td>
-            </tr>
-          ))
-        )}
-        <tr class="border-t border-line">
-          <td class="px-4 py-3 text-ink-950">General applications ("Send us your CV")</td>
-          <td class="px-4 py-3 text-ink-600">—</td>
-          <td class="px-4 py-3 text-ink-600">—</td>
-          <td class="px-4 py-3 text-right">
-            <a href="/admin/careers/applicants?posting=general" class="font-semibold text-brand-600 hover:underline">
-              {general.applicants}
-              {general.fresh ? ` (${general.fresh} new)` : ''}
-              <span class="sr-only"> general applicants</span>
-            </a>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    </Fragment>
+  </PageHead>
+  <DataTable
+    caption="Job postings"
+    count={postings.length + 1}
+    columns={[{ label: 'Posting' }, { label: 'Status' }, { label: 'Closes' }, { label: 'Applicants', num: true }]}
+  >
+    {postings.map((p) => (
+      <tr>
+        <Cell
+          m="main"
+          href={`/admin/careers/${p.id}`}
+          title={p.title}
+          sub={`${p.department} · ${employmentTypeLabel(p.employmentType)} · ${p.location}`}
+          subText
+        />
+        <Cell m="status">
+          <StatusPill tone={scheduled(p) ? 'warn' : (STATUS[p.status]?.tone ?? 'neutral')}>
+            {scheduled(p) ? 'Scheduled' : (STATUS[p.status]?.label ?? p.status)}
+          </StatusPill>
+        </Cell>
+        <Cell tone="mute">{p.closesAt ? formatLongDate(p.closesAt.slice(0, 10)) : '—'}</Cell>
+        <Cell m="amount" num>
+          <a class="kz-wsr__tap" href={`/admin/careers/applicants?posting=${p.id}&view=board`}>
+            {count(p.applicants, p.fresh)}
+            <span class="sr-only"> applicants for {p.title}</span>
+          </a>
+        </Cell>
+      </tr>
+    ))}
+    <tr>
+      <Cell m="main" title={'General applications ("Send us your CV")'} subText />
+      <Cell m="status" tone="mute">
+        —
+      </Cell>
+      <Cell tone="mute">—</Cell>
+      <Cell m="amount" num>
+        <a class="kz-wsr__tap" href="/admin/careers/applicants?posting=general">
+          {count(general.applicants, general.fresh)}
+          <span class="sr-only"> general applicants</span>
+        </a>
+      </Cell>
+    </tr>
+  </DataTable>
 </AdminLayout>

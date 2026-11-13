@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { ServiceForm } from '../../../components/admin/ServicesAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import { ServiceForm } from '../../../ui/admin/services/ServiceForm';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { listCatalogue } from '../../../server/modules/catalogue';
 
@@ -30,14 +31,6 @@ const initial = {
 ---
 
 <AdminLayout title="New service" page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/services" class="hover:text-ink-950 hover:underline">
-      Services
-    </a>{' '}
-    / <span class="text-ink-950">New service</span>
-  </nav>
-  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">New service</h1>
-  <div class="max-w-3xl">
-    <ServiceForm client:load initial={initial} divisions={divisions} currencies={currencies} inUse={false} />
-  </div>
+  <PageHead title="New service" crumbs={[{ label: 'Services', href: '/admin/services' }, { label: 'New service' }]} />
+  <ServiceForm client:load initial={initial} divisions={divisions} currencies={currencies} inUse={false} />
 </AdminLayout>

@@ -4018,3 +4018,396 @@
     position: relative;
   }
 }
+@layer components {
+  /* ---------- Website modules (R6.2 group 4): rich text, repeating rows, sortable lists, media, groups ---------- */
+  .kz-rte {
+    border-radius: 6px;
+    background: var(--paper);
+    border: 1px solid var(--bone-300);
+    overflow: hidden;
+    transition:
+      border-color var(--dur-state) var(--ease-out),
+      box-shadow var(--dur-state) var(--ease-out);
+  }
+  .kz-rte:focus-within {
+    border-color: var(--action);
+    box-shadow: 0 0 0 3px var(--gold-100);
+  }
+  .kz-rte[data-invalid] {
+    border-color: var(--danger-600);
+  }
+  .kz-rte__bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: 4px;
+    background: var(--bone-50);
+    border-bottom: 1px solid var(--bone-200);
+  }
+  .kz-rte__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--ink-800);
+    cursor: pointer;
+  }
+  .kz-rte__btn:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: -2px;
+  }
+  @media (hover: hover) {
+    .kz-rte__btn:hover {
+      background: var(--bone-200);
+    }
+  }
+  @media (max-width: 767px), (pointer: coarse) {
+    .kz-rte__btn {
+      width: 44px;
+      height: 44px;
+    }
+  }
+  .kz-rte__area {
+    padding: 10px 12px;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--ink-900);
+    outline: none;
+    overflow-wrap: anywhere;
+  }
+  .kz-rte__area a {
+    color: var(--link);
+    text-decoration: underline;
+  }
+  .kz-rte__area h2 {
+    margin: 12px 0 4px;
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+  .kz-rte__area h3 {
+    margin: 8px 0 4px;
+    font-weight: 700;
+  }
+  .kz-rte__area p {
+    margin: 8px 0;
+  }
+  .kz-rte__area ul,
+  .kz-rte__area ol {
+    margin: 8px 0;
+    padding-left: 22px;
+  }
+  .kz-rte__area ul {
+    list-style: disc;
+  }
+  .kz-rte__area ol {
+    list-style: decimal;
+  }
+
+  /* Form helpers */
+  .kz-wsf__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+  }
+  .kz-wsf__ok {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ok-700);
+  }
+  .kz-wsf__end {
+    display: flex;
+    align-items: flex-end;
+  }
+  .kz-wsf__empty {
+    padding: 28px 16px;
+    border-radius: 10px;
+    background: var(--paper);
+    box-shadow: 0 0 0 1px var(--bone-200);
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--ink-600);
+  }
+  .kz-anone--pad {
+    padding: 14px 16px;
+  }
+
+  /* Field group (fieldset) and nested items inside a CMS section */
+  .kz-wsg {
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+    margin: 0;
+    padding: 12px;
+    border: 1px solid var(--bone-200);
+    border-radius: 8px;
+  }
+  .kz-wsg > legend {
+    padding: 0 6px;
+    font-size: 0.875rem;
+    font-weight: 650;
+    color: var(--ink-900);
+  }
+  @media (min-width: 640px) {
+    .kz-wsg--2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .kz-wsg__item {
+    display: grid;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--bone-50);
+    box-shadow: inset 0 0 0 1px var(--bone-200);
+  }
+  .kz-wsg__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .kz-wsg__t {
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+    font-size: 0.75rem;
+    color: var(--ink-600);
+  }
+
+  /* Repeating rows (benefits, features, questions…) */
+  .kz-wsr-list {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .kz-wsr {
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--bone-50);
+    box-shadow: inset 0 0 0 1px var(--bone-200);
+  }
+  .kz-wsr__fields {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    min-width: 0;
+  }
+  .kz-wsr__acts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px 12px;
+  }
+  .kz-wsr__btns {
+    display: inline-flex;
+    gap: 4px;
+    margin-left: auto;
+  }
+  .kz-wsr__add {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+  }
+  .kz-wsr__unit {
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+  }
+  .kz-wsr__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .kz-wsr__card {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+  }
+  .kz-wsr__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-800);
+    position: relative;
+    z-index: 1;
+  }
+  .kz-wsr__rating svg {
+    fill: var(--gold-400);
+    color: var(--gold-400);
+  }
+  .kz-wsr__applicants > li {
+    align-items: flex-start;
+  }
+
+  /* Sortable lists: grip, main (name + price), move buttons */
+  .kz-wss > li {
+    align-items: center;
+    gap: 8px;
+  }
+  .kz-wss > li.is-drag {
+    opacity: 0.5;
+  }
+  .kz-wss__grip {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    flex: none;
+    color: var(--ink-500);
+    cursor: grab;
+  }
+  @media (pointer: coarse) {
+    .kz-wss__grip {
+      display: none;
+    }
+  }
+  .kz-wss__main {
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 4px 12px;
+    min-width: 0;
+  }
+  .kz-wss__main > .kz-alist__main {
+    flex: 1 1 200px;
+  }
+  .kz-wss__main .kz-pill {
+    margin-right: 6px;
+  }
+  .kz-alist__m .kz-pill {
+    vertical-align: 1px;
+  }
+
+  /* Media library grid */
+  .kz-wmedia {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  }
+  .kz-wmedia__card {
+    display: grid;
+    align-content: start;
+    min-width: 0;
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--paper);
+    box-shadow: 0 0 0 1px var(--bone-200);
+  }
+  .kz-wmedia__card img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: var(--bone-100);
+  }
+  .kz-wmedia__body {
+    display: grid;
+    gap: 4px;
+    padding: 10px 12px 12px;
+  }
+  .kz-wmedia__alt {
+    font-size: 0.9375rem;
+    font-weight: 650;
+    color: var(--ink-900);
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .kz-wmedia__meta {
+    font-size: 0.8125rem;
+    color: var(--ink-600);
+    overflow-wrap: anywhere;
+  }
+  .kz-wmedia__body .kz-arow-acts {
+    margin-top: 6px;
+  }
+
+  /* The applicant board stays a swipe track at every width (seven stages). */
+  @media (min-width: 1024px) {
+    .kz-aboard--track {
+      grid-auto-flow: column;
+      grid-template-columns: none;
+      grid-auto-columns: minmax(236px, 1fr);
+      align-items: start;
+      margin-inline: -4px;
+      padding: 0 4px 8px;
+      overflow-x: auto;
+    }
+  }
+}
+@layer components {
+  .kz-ahead__meta a {
+    font-weight: 650;
+    color: var(--link);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .kz-aprose-block {
+    display: grid;
+    gap: 6px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--bone-200);
+  }
+  .kz-aprose-block__p {
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+  .kz-adl a {
+    overflow-wrap: anywhere;
+  }
+}
+@layer components {
+  @media (max-width: 767px) {
+    .kz-wsr__tap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      min-width: 44px;
+      min-height: 44px;
+    }
+    .kz-aboard__ctl .kz-input {
+      min-height: 44px;
+    }
+  }
+}
+@layer components {
+  @media (max-width: 639px) {
+    .kz-wss__grip {
+      display: none;
+    }
+    .kz-wss > li {
+      flex-wrap: wrap;
+      row-gap: 0;
+    }
+    .kz-wss__main {
+      flex: 1 1 100%;
+    }
+    .kz-wss > li > .kz-arow-acts {
+      margin-left: auto;
+      flex-direction: row;
+    }
+    .kz-wss > li > .kz-arow-acts > .kz-btn {
+      flex: none;
+    }
+  }
+}

@@ -1,7 +1,9 @@
 ---
+/** FAQ (R6.2): questions by category, shown on /faq and on related service and pricing pages. */
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import ContentTabs from '../../../components/admin/ContentTabs.astro';
-import { FaqManager } from '../../../components/admin/ContentAdmin';
+import PageHead from '../../../ui/admin/PageHead.astro';
+import ContentTabs from '../../../ui/admin/website/ContentTabs.astro';
+import { FaqManager } from '../../../ui/admin/content/Managers';
 import { loadAdminPage } from '../../../server/lib/admin-page';
 import { listFaqsAdmin, serviceOptions } from '../../../server/modules/cms/content-admin';
 
@@ -12,12 +14,9 @@ const [faqs, services] = await Promise.all([listFaqsAdmin(ctx), serviceOptions(c
 ---
 
 <AdminLayout title="FAQ" page={page}>
-  <h1 class="text-2xl font-bold tracking-display">Content</h1>
-  <ContentTabs current="faq" permissions={page.auth.permissions} />
-  <p class="mt-4 mb-4 max-w-3xl text-sm text-ink-600">
-    Questions appear on /faq by category, and on related service and pricing pages.
-  </p>
-  <div class="max-w-3xl">
-    <FaqManager client:load faqs={faqs as never[]} services={services} />
+  <PageHead title="Content" meta="Questions appear on /faq by category, and on related service and pricing pages." />
+  <div class="kz-atools">
+    <ContentTabs current="faq" permissions={page.auth.permissions} />
   </div>
+  <FaqManager client:load faqs={faqs as never[]} services={services} />
 </AdminLayout>

@@ -1,0 +1,17 @@
+---
+/** Sub-navigation of the website CMS area (R6.2): the segmented view switch with real links. */
+import Views from '../Views.astro';
+
+interface Props {
+  current: 'pages' | 'portfolio' | 'products' | 'announcements';
+}
+const { current } = Astro.props;
+const items = [
+  { key: 'pages', label: 'Pages', href: '/admin/cms' },
+  { key: 'portfolio', label: 'Our work', href: '/admin/cms/portfolio' },
+  { key: 'products', label: 'Products', href: '/admin/cms/products' },
+  { key: 'announcements', label: 'Announcements', href: '/admin/cms/announcements' },
+];
+---
+
+<Views label="Website content" items={items} current={current} />

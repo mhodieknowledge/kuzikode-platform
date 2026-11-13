@@ -96,7 +96,7 @@ Ticked when the file is deleted (or, for the logic-only files marked *logic*, mo
 | layouts/DocumentLayout.astro | new DocumentLayout (rewritten on layouts/Base.astro) | [x] R4.8 |
 | components/BaseHead.astro | ui/head/Head.astro (new) | [x] removed R6.1 |
 | components/JsonLd.astro (*logic*) | kept as is (pure structured-data output) | — |
-| components/Logo.astro | ui/brand/Logo.astro (new) | [ ] R5.1 (still used by legacy layouts) |
+| components/Logo.astro | ui/brand/Logo.astro (new) | [x] R6.2 group 4 (deleted; unreferenced) |
 | components/ResponsiveImage.astro | src/ui/primitives/Picture.astro (new) | [x] R4.7 (deleted; products page now uses a drawing) |
 | public/SiteHeader.astro, AnnouncementBar.astro, WhatsAppButton.astro | ui/public/shell Header, Announcement, WhatsApp | [x] R3.1 |
 | public/Icon.astro | ui/icons/Icon.astro | [x] R4.7 (deleted) |
@@ -121,14 +121,20 @@ Ticked when the file is deleted (or, for the logic-only files marked *logic*, mo
 | admin/BarChart.astro | ui/admin/BarChart.astro + chart.ts (dashboard and reports) | [x] R6.2 group 1 (deleted) |
 | admin/LineItemEditor.tsx | ui/admin/documents (lines.ts logic + new LineItemEditor); quotations use it | [x] R6.2 group 2 (deleted) |
 | admin/InvoicesAdmin, PaymentsAdmin (RefundAction, PaymentAttempts), PaymentGateways, SubscriptionsAdmin (incl. AssetForm), ExpensesAdmin | ui/admin/{invoices,payments,subscriptions,expenses} (hooks + InvoiceEditor/Actions, RefundAction, PaymentAttempts, PaymentGateways, SubscriptionForm/Actions, AssetForm, ExpenseForm, VoidExpense, CategoriesManager), ui/admin/finance/labels.ts, PeriodForm.astro, FormSheet in form.tsx | [x] R6.2 group 2 (deleted) |
-| admin/actions.tsx | ui/admin/action.ts (useAdminAction) | [ ] R6.2 Website group (still imported by Cms, Careers, Content islands only) |
+| admin/actions.tsx | ui/admin/action.ts (useAdminAction) | [x] R6.2 group 4 (deleted with `src/components/admin/`) |
 | admin/ProjectsAdmin.tsx | ui/admin/projects (useProjects, labels, ProjectForm, ProjectPanels: Milestones, TaskBoard, UpdateComposer, FileUploader/Actions, MessageComposer, ProgressSettings) | [x] R6.2 group 3 (deleted) |
 | admin/TimeAdmin.tsx | ui/admin/time (useTime, labels, ProjectTaskFields, TimerWidget, EntryDialog, BillTime) | [x] R6.2 group 3 (deleted) |
 | admin/SupportAdmin.tsx | ui/admin/support (useSupport, labels, NewRequestForm, ReplyComposer, RequestControls) | [x] R6.2 group 3 (deleted) |
 | admin/UsersAdmin.tsx | ui/admin/users (useUsers, labels, RoleChecklist, InviteStaff, StaffActions, RoleEditor) | [x] R6.2 group 3 (deleted) |
 | admin/SettingsAdmin.tsx, SettingsNav.astro, SettingsSections.astro | ui/admin/settings (useSettings, SettingsSectionForm, LogoUploader, SettingsParts, NotificationPrefsForm, SettingsNav.astro, SettingsSections.astro) | [x] R6.2 group 3 (deleted) |
 | admin/AccountActions.tsx | ui/admin/account (useAdminAccount, AccountActions: MarkRead, SignOutDevice/Everywhere, MfaManage) | [x] R6.2 group 3 (deleted) |
-| admin/CmsAdmin, CareersAdmin, ContentAdmin, PackagesAdmin, ServicesAdmin, CmsTabs, ContentTabs | admin Website modules | [ ] R6.2 Website group |
-| ui/* (Badge, Button, Card, Choice, DataTable, Dialog, Field, FileUpload, FilterBar, Input, Menu, MoneyInput, Pagination, QrCode, RichTextEditor, Spinner, States, Toast, cn, index; api.ts *logic*) | src/ui/primitives | [ ] R6.2 (last users are admin modules) |
+| admin/CmsAdmin (+ CmsTabs) | ui/admin/cms (useCms, SectionEditor, PublishBar, PageMetaForm, PortfolioForm, ProductsManager, AnnouncementsManager, MediaLibrary), ui/admin/website (lib, parts, useCrud, CmsTabs.astro, ContentTabs.astro, SavedNotice.astro) | [x] R6.2 group 4 (deleted) |
+| admin/ContentAdmin (+ ContentTabs) | ui/admin/content (useContent, PostEditor, IndustryEditor, Managers: categories, FAQ, testimonials, technologies) | [x] R6.2 group 4 (deleted) |
+| admin/ServicesAdmin | ui/admin/services (useServices, CatalogueList, DivisionForm, ServiceForm) | [x] R6.2 group 4 (deleted) |
+| admin/PackagesAdmin | ui/admin/packages (usePackages, PackagesList, PackageForm, AddonsManager) | [x] R6.2 group 4 (deleted) |
+| admin/CareersAdmin | ui/admin/careers (useCareers, PostingForm, PostingActions, ApplicantsPipeline, ApplicantControls, ApplicantPanel, CandidateTemplates) | [x] R6.2 group 4 (deleted) |
+| ui/RichTextEditor | ui/primitives/RichText.tsx (44 px toolbar buttons on touch; quotation intro uses it) | [x] R6.2 group 4 (deleted) |
+| ui/QrCode | ui/auth/QrCode.tsx (checkout wallet code switched to it) | [x] R6.2 group 4 (deleted) |
+| ui/* (Badge, Button, Card, Choice, DataTable, Dialog, Field, FileUpload, FilterBar, Input, Menu, MoneyInput, Pagination, QrCode, RichTextEditor, Spinner, States, Toast, cn, index; api.ts *logic*) | src/ui/primitives (+ ui/lib/api.ts) | [x] R6.2 group 4 (whole `src/components/ui/` deleted; unreferenced) |
 | dev/KitchenSink.tsx, pages/dev/ui.astro | new dev gallery | [x] R2.4 |
 | Token aliases in tokens.css / global.css | — | [ ] R6.2 exit |

@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../../../layouts/AdminLayout.astro';
-import { DivisionForm } from '../../../../components/admin/ServicesAdmin';
+import PageHead from '../../../../ui/admin/PageHead.astro';
+import { DivisionForm } from '../../../../ui/admin/services/DivisionForm';
 import { loadAdminPage } from '../../../../server/lib/admin-page';
 
 const { ctx } = Astro.locals;
@@ -23,14 +24,6 @@ const initial = {
 ---
 
 <AdminLayout title="New division" page={page}>
-  <nav aria-label="Breadcrumb" class="text-[13px] text-ink-600">
-    <a href="/admin/services" class="hover:text-ink-950 hover:underline">
-      Services
-    </a>{' '}
-    / <span class="text-ink-950">New division</span>
-  </nav>
-  <h1 class="mt-2 mb-6 text-2xl font-bold tracking-display">New division</h1>
-  <div class="max-w-3xl">
-    <DivisionForm client:load initial={initial} />
-  </div>
+  <PageHead title="New division" crumbs={[{ label: 'Services', href: '/admin/services' }, { label: 'New division' }]} />
+  <DivisionForm client:load initial={initial} />
 </AdminLayout>

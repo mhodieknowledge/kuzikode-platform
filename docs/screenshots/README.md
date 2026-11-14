@@ -1,4 +1,6 @@
-# Final screens (P8.6)
+# Final screens (P8.6) and redesign refresh (R8.3)
+
+**The 375 px and 1440 px files below date from 2026-11-11 and show the pre-redesign UI.** Three current phone shots (390 px, deviceScaleFactor 1, taken 2026-11-14 from staging): [home](public-home-390.webp), [pricing](public-pricing-390.webp), [contact](public-contact-390.webp). Admin and portal shots were not refreshed (they need signed-in fixtures); see docs/redesign/ for the current design.
 
 Captured 2026-11-11 with Playwright from a local production build with the fictional local demo data (`seeds/dev.sql` and
 the e2e fixtures; every name, company and amount is made up). Desktop 1440 px and phone 375 px.

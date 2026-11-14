@@ -1,6 +1,6 @@
 # Kuzikode platform
 
-The website, admin back office and client portal for **Kuzikode Technologies**: public marketing site with pricing,
+The website, admin back office and client portal for **Kuzikode Intelligent Technologies**: public marketing site with pricing,
 careers and insights; CRM (enquiries, leads, clients); quotations, invoices, credit notes, subscriptions; payments through
 Paynow (EcoCash, OneMoney, InnBucks, O'mari, cards) behind a gateway-independent payments package; projects, time, support,
 expenses and reports; transactional email through an outbox and a queue.
@@ -55,7 +55,11 @@ migrates and deploys staging and runs `scripts/smoke.mjs` against it. Production
 ```
 src/pages/            Astro pages (public site, /admin, /portal, /pay, /q, /i) and API mounts
 src/server/           Hono app, modules/*/service.ts (all business logic), repositories, jobs (outbox, queue, cron)
-src/components/       React islands and Astro components (ui/ is the design-system kit)
+src/ui/               The UI tree (rebuilt from scratch in the 2026 redesign): tokens/ (CSS design tokens, Poppins type scale),
+                      primitives/, brand/ (logo set), icons/, public/ (site shell + pages, home2/ is the home page), workspace/
+                      (client portal shell), admin/ (admin shell + modules), motion/, documents/, auth/
+src/components/       JsonLd.astro only (legacy component kit removed)
+src/layouts/          Page layouts
 packages/payments/    @kuzikode/payments: gateway adapters (Paynow, PesePay, mock), conformance kit
 migrations/           D1 migrations (append-only)
 seeds/                base.sql (all envs), nonprod.sql (dev + staging), dev.sql (local demo data)

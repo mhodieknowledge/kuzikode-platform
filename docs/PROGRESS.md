@@ -153,3 +153,9 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Fixes: checkbox rows with help text are one 44px label target; admin inputs min-width 0 (careers 1024 overflow); contact quick buttons padding.
 - Key pages read at 390 + 1440; web-design-guidelines + impeccable detect passes clean.
 - Tiers: sonnet/low. Next: R8.2 functional regression.
+
+## 2026-11-14 R8.3 docs and staging smoke
+- README layout (src/ui tree, brand) and ADMIN-GUIDE (brand, shell note) updated; stale-design grep of docs/*.md clean except PRD legal-name text (flagged).
+- 3 phone shots (390, dpr 1) refreshed under docs/screenshots/; admin/portal ones still pre-redesign.
+- `docs/redesign/REDESIGN-REPORT.md` written. Staging run 99 green for 1b7b2de; smoke `/ /pricing /contact /api/health /admin` ok.
+- Tier: sonnet/low. Next: R8.2 sign-off (functional regression), then finish per CLAUDE.md §2.

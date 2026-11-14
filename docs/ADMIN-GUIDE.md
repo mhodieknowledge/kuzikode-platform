@@ -1,9 +1,10 @@
 # Admin guide
 
-For the owner and staff of Kuzikode Technologies. It covers the first sign-in, the settings to fill in before you invoice
+For the owner and staff of Kuzikode Intelligent Technologies. It covers the first sign-in, the settings to fill in before you invoice
 anyone, inviting staff and clients, the quotation → invoice → payment cycle, and payment gateways. Everything here happens in
 the admin at `/admin` (staging: https://kuzikode-staging.mhodieknowledge.workers.dev/admin). Press **Ctrl K** / **⌘ K**
-anywhere in the admin to jump to a page or record.
+anywhere in the admin to jump to a page or record. On a phone the navigation opens from the menu button in the top bar;
+on wider screens it is the side navigation. Only the modules your role may use are listed.
 
 ## 1. First sign-in
 

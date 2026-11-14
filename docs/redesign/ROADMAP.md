@@ -91,7 +91,7 @@ Scope guard: only these items; don't touch other sections.
 - [x] **R9.4 Floating side menu** (§5): bug fixes, floating panel, icons, no prices/dividers, Playwright open/close/nav tests.
 - [x] **R9.5 Footer redesign** (§6) with the exact contact details (settings-backed).
 - [x] **R9.6 Home page + hero redesign** (§7): background-image hero with overlay widgets, mid-page bands, division widgets with starting prices only, home image batch written + owner notified.
-- [ ] **R9.7 Image integration audit + tech-stack removal** (§3, §4) on all public pages; 301 `/technologies*`.
+- [x] **R9.7 Image integration audit + tech-stack removal** (§3, §4) on all public pages; 301 `/technologies*`.
 
 ## R7: Imagery and motion polish
 - [x] **R7.1 Process delivered owner images** (B.4) and replace interim treatments. Further prompt batches as needed.

@@ -130,3 +130,8 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Home rebuilt: photo hero with overlay widgets (HeroWidgets), 5 division widgets with illustrations + "from" price only (DivisionWidgets, swipe track on phones), WhyBand and ClosingBand image bands, HowStrip. Old Approach/CompanyBand/RoadStrip/RouteIndex/ServicesBand/WorkspaceWindow deleted. `docs/redesign/IMAGE-REQUESTS.md` recreated with home batch (home-hero-wide/tall, home-band-tall, home-closing-wide/tall); interim photos used until delivered. OWNER TO BE NOTIFIED of the requests.
 - Migration 0016 shortens home SEO title (<=70). verify green; e2e home, public, mobile-limits, sweep, pricing-accuracy, links green. Tier: opus/medium subagent, orchestrator reviewed 390/1440 shots.
 - Next step: R9.7 image integration audit (PhotoStrip in how/Quality.astro and other bare photos → background+overlay/widgets), remove remaining tech-stack mentions on public pages, 301 /technologies* (check it exists), then R7.2, R8.
+
+## 2026-11-14 UTC · R9.7 ✅ Image audit + tech-stack removal
+- Only bare photo left (PhotoStrip under How-we-work quality list) is now the background of `how/Quality.astro` with an even night shade (`.kz-qual__shade`); PhotoStrip deleted. Tech stack already gone from public pages; `/technologies*` 301 verified by removed-offers e2e. Screens read at 390/1440, no overflow.
+- Tier: sonnet orchestrator, no subagents.
+- Next step: R7.2 trimmed motion pass (fresh sonnet/medium subagent with review-animations + animation-performance), then R8.1-R8.3.

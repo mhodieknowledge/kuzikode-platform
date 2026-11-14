@@ -4,7 +4,7 @@
  * practices right as a two-column ticked list under hairlines. Phones: heading, then the ticked list (single sentences, one rule each).
  * The tick is the only icon; it is the list's meaning (each practice is standard on every project).
  */
-import PhotoStrip from '../shared/PhotoStrip.astro';
+import Picture from '../../primitives/Picture.astro';
 import Icon from '../../icons/Icon.astro';
 import type { SectionContent } from '../../../shared/schemas/cms';
 
@@ -15,7 +15,9 @@ interface Props {
 const { content: c, anchor } = Astro.props;
 ---
 
-<section class="kz-sec kz-qual on-night" id={anchor} aria-labelledby={`${anchor}-title`}>
+<section class="kz-sec kz-iband kz-qual on-night" id={anchor} aria-labelledby={`${anchor}-title`}>
+  <Picture id="how-we-work-editorial" alt="" tone="warm" class="kz-iband__img" sizes="100vw" />
+  <div class="kz-iband__shade kz-qual__shade" aria-hidden="true"></div>
   <div class="container-wide kz-qual__grid">
     <header>
       <h2 id={`${anchor}-title`} class="kz-h2">{c.title}</h2>
@@ -32,5 +34,4 @@ const { content: c, anchor } = Astro.props;
       }
     </ul>
   </div>
-  <PhotoStrip image="how-we-work-editorial" contained />
 </section>

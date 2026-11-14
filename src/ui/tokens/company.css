@@ -831,6 +831,16 @@
     padding-bottom: 0;
   }
 
+  /* Quality checklist: photo behind, even dark shade */
+  .kz-qual .kz-iband__img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .kz-qual .kz-qual__shade {
+    background: rgb(14 13 12 / 0.86);
+  }
+
   /* Quality checklist */
   .kz-qual__grid {
     display: grid;

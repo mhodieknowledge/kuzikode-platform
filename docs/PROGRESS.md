@@ -141,3 +141,9 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Removed infinite decorative box-shadow pulse on checkout road "now" stop (paint every frame; static ring stays) + its reduced-motion override.
 - Removed width transitions on track/rail dots (layout); indicators (absolute) left as-is. No copy/data/admin changes.
 - verify green; e2e home/sweep/public/motion/checkout/pricing 19 passed. Tier: sonnet/low.
+
+## 2026-11-14 UTC · R10 ✅ Home rebuilt from scratch
+- R10.1 `HOME_COMPONENT_MAP.md` (29 images, 5 sonnet/low subagents); R10.2 `HOME_COMPOSITION.md`; R10.3 new `src/ui/public/home2/*` + `tokens/home2.css`, section icons (no division SVGs), photo hero + glass widgets, marquee, services track, why, how, pricing band, closing photo band. Opus/low review -> 8 fixes applied (sonnet/medium). verify green (unit 743, integration 308); home/sweep/public/mobile-limits/links/site-content/floating-menu e2e green per subagent.
+- Left: Work/Voices only moved (hidden without data); new home photos not requested (existing HOME_IMAGES reused).
+- Open: CI e2e red on main (legal footer links, users-admin axe, sweep admin) -> fix in worktree branch `worktree-agent-a5b550a603e2c585e`, merge when done.
+- Next step: merge the e2e fix, confirm full e2e green, then R8.1 (sweep subagent), R8.2, R8.3.

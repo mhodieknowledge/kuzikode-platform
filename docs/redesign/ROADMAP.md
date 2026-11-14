@@ -98,15 +98,15 @@ The owner: *"The home page is still not the UI I'm looking for… remove all tho
 the home screen, maybe section icons would be best. Tear down the home screen and start afresh. Refer to the images I sent one by one
 and get ideas of a UI component from each image… start the home screen afresh with all the information necessary. It's not redesigning
 the home screen but starting it afresh, just the home screen."* **Scope: only `/` (home). Don't touch any other page.**
-- [ ] **R10.1 Home component map from all 29 images.** Open (Read) **every** image in `/inspiration-images` one at a time and, for each, write the
+- [x] **R10.1 Home component map from all 29 images.** Open (Read) **every** image in `/inspiration-images` one at a time and, for each, write the
   single most useful **home-page UI component** it suggests (hero composition, floating widget, service section layout, price chip, carousel,
   CTA band, navigation band, image-overlay card, proof-free trust element, etc.), with how it would carry Kuzikode content.
   Output `docs/redesign/HOME_COMPONENT_MAP.md`: 29 rows (image → component → home section → adopt/adapt/skip + reason). Use fresh `sonnet`
   subagents in batches of ~6 images (each subagent Reads its images and replies with ≤ 6 lines per image); you merge.
-- [ ] **R10.2 Home content inventory + composition.** List the information the home page must carry (positioning; the 5 divisions with a
+- [x] **R10.2 Home content inventory + composition.** List the information the home page must carry (positioning; the 5 divisions with a
   one-line value + **starting price only**; why Kuzikode; a short how-we-work; pricing entry point; contact/WhatsApp/quote CTA) and compose
   the new page section by section **from the component map** (name the source image per section). Mobile composition first (390), then 1440.
-- [ ] **R10.3 Tear down + rebuild `/`.** Delete the current home sections and their home-only components (including the division SVG
+- [x] **R10.3 Tear down + rebuild `/`.** Delete the current home sections and their home-only components (including the division SVG
   illustrations **on the home page**; the drawings may stay on the service pages). Build the new home **from zero** in `src/ui/public/home2/`
   (or replace the folder). **Services use section icons** (the site's single icon family, one accent colour per division), **never the SVG
   illustrations**. Photos only as hero background / mid-page bands / overlay cards (REFINEMENTS §3). Keep the hero premium, with a background

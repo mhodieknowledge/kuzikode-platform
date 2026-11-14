@@ -585,7 +585,8 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 20px 0;
+    /* Bottom room so the fixed WhatsApp button never covers the legal links at the end of the page. */
+    padding: 20px 0 88px;
     border-top: 1px solid var(--night-700);
     font-size: 0.875rem;
     color: var(--on-night-3);

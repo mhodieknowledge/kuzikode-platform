@@ -62,7 +62,7 @@ test.describe('public layout', () => {
     }
   });
 
-  test('skip link, footer legal links and no blank contact placeholders', async ({ page }) => {
+  test('skip link, footer legal links and the Settings-backed contact lines', async ({ page }) => {
     await page.goto('/');
     await page.keyboard.press('Tab');
     const skip = page.getByRole('link', { name: 'Skip to content' });
@@ -71,8 +71,11 @@ test.describe('public layout', () => {
     for (const l of ['Privacy Policy', 'Terms of Use', 'Service Terms', 'Cookie notice', 'Accessibility']) {
       await expect(footer.getByRole('link', { name: l })).toBeVisible();
     }
-    // Phone/email are blank in the seed, so nothing but the contact form link is shown.
-    await expect(footer.locator('a[href^="tel:"], a[href^="mailto:"]')).toHaveCount(0);
+    // The three contact lines come from Settings (REFINEMENTS §6).
+    await expect(footer.locator('a[href="mailto:info@kuzikode.com"]')).toBeVisible();
+    await expect(footer.locator('a[href="tel:+263882946290"]')).toBeVisible();
+    await expect(footer.locator('a[href^="https://wa.me/263778825898"]')).toBeVisible();
+    await expect(footer.locator('a[href="tel:+263778825898"]')).toBeVisible();
     await expect(footer).toContainText(`© ${new Date().getFullYear()} Kuzikode Intelligent Technologies`);
     await expect(footer).not.toContainText('(Private) Limited');
   });

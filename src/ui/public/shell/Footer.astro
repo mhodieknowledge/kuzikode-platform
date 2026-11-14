@@ -1,9 +1,8 @@
 ---
 /**
- * Public footer (R3.2, DESIGN_DIRECTION §3): on night. Opens with "Where next": three routes as large rows (get a quote,
- * book a consultation, see all prices) instead of the generic closing band; then the brand and contact channels, the link
- * directories, the newsletter and the legal line. Contact lines left blank in Settings are not rendered. No oversized
- * wordmark (it covered the links and read as a 2024 trend).
+ * Public footer (R9.5, REFINEMENTS §6): on night, calm and stacked on phones. A short closing band (one primary action, one
+ * quiet link), the brand with its three contact lines (email, telephone, WhatsApp & calls; all from Settings, blank ones are
+ * not rendered), two compact link lists, the newsletter and the legal line. No oversized wordmark, no link columns on phones.
  */
 import Logo from '../../brand/Logo.astro';
 import Icon from '../../icons/Icon.astro';
@@ -22,11 +21,11 @@ const { nav, cta = true, lead } = Astro.props;
 const { footer } = nav;
 const year = new Date().getFullYear();
 const c = footer.contact;
-const routes = [
-  { href: '/contact', title: 'Get a quote', body: 'Tell us what you need. We reply with questions or a written quotation.' },
-  { href: '/consultation', title: 'Book a consultation', body: 'Pick a time to talk it through before you decide.' },
-  { href: '/pricing', title: 'See all prices', body: 'Every published package, side by side.' },
-].filter((r) => r.href !== Astro.url.pathname); // never link a page to itself
+const digits = (v: string) => v.replace(/[^\d+]/g, '');
+const quiet =
+  Astro.url.pathname === '/consultation'
+    ? { href: '/pricing', label: 'See all prices' }
+    : { href: '/consultation', label: 'Book a consultation' };
 ---
 
 <footer class="kz-footer on-night" aria-labelledby="footer-heading">
@@ -36,21 +35,17 @@ const routes = [
     cta ? (
       <div class="container-wide kz-footer__next">
         <div>
-          <h2 class="kz-footer__lead">{lead?.title ?? 'Where next'}</h2>
-          {lead?.body ? <p class="kz-footer__lead-body">{lead.body}</p> : null}
+          <h2 class="kz-footer__lead">{lead?.title ?? 'Tell us what you need'}</h2>
+          <p class="kz-footer__lead-body">
+            {lead?.body ?? 'We reply with questions or a written quotation, usually within one business day.'}
+          </p>
         </div>
-        <ol class="kz-footer__routes" role="list">
-          {routes.map((r, i) => (
-            <li>
-              <a href={r.href} class="kz-footer__route">
-                <span class="kz-footer__route-n">{String(i + 1).padStart(2, '0')}</span>
-                <span class="kz-footer__route-title">{r.title}</span>
-                <span class="kz-footer__route-body">{r.body}</span>
-                <Icon name="arrow-right" class="kz-footer__route-arrow" />
-              </a>
-            </li>
-          ))}
-        </ol>
+        <div class="kz-footer__actions">
+          {Astro.url.pathname !== '/contact' ? (
+            <a href="/contact" class="kz-btn kz-btn--primary kz-btn--lg"><span>Get a quote</span></a>
+          ) : null}
+          <a href={quiet.href} class="kz-btn kz-btn--secondary kz-btn--lg"><span>{quiet.label}</span></a>
+        </div>
       </div>
     ) : null
   }
@@ -59,40 +54,6 @@ const routes = [
     <div class="kz-footer__brand">
       <Logo height={26} />
       {footer.blurb ? <p class="kz-footer__blurb">{footer.blurb}</p> : null}
-      <ul class="kz-footer__channels" aria-label="Contact" role="list">
-        {
-          c.whatsapp ? (
-            <li>
-              <a href={c.whatsapp} rel="noopener noreferrer" target="_blank" class="kz-channel">
-                <Icon name="whatsapp" /> WhatsApp<span class="sr-only"> (opens in a new tab)</span>
-              </a>
-            </li>
-          ) : null
-        }
-        {
-          c.phone ? (
-            <li>
-              <a href={`tel:${c.phone.replace(/[^\d+]/g, '')}`} class="kz-channel">
-                <Icon name="phone" /> {c.phone}
-              </a>
-            </li>
-          ) : null
-        }
-        {
-          c.email ? (
-            <li>
-              <a href={`mailto:${c.email}`} class="kz-channel">
-                <Icon name="email" /> {c.email}
-              </a>
-            </li>
-          ) : null
-        }
-        <li>
-          <a href="/contact" class="kz-channel">
-            <Icon name="send" /> {c.email || c.phone || c.whatsapp ? 'Contact form' : 'Send us a message'}
-          </a>
-        </li>
-      </ul>
       {
         c.address || c.location ? (
           <p class="kz-footer__place">
@@ -102,6 +63,43 @@ const routes = [
         ) : null
       }
     </div>
+
+    <ul class="kz-footer__contact" aria-label="Contact" role="list">
+      {
+        c.email ? (
+          <li>
+            <Icon name="email" size={20} />
+            <span class="kz-footer__label">Email</span>
+            <a href={`mailto:${c.email}`} class="kz-footer__value">{c.email}</a>
+          </li>
+        ) : null
+      }
+      {
+        c.phone ? (
+          <li>
+            <Icon name="phone" size={20} />
+            <span class="kz-footer__label">Tel</span>
+            <a href={`tel:${digits(c.phone)}`} class="kz-footer__value">{c.phone}</a>
+          </li>
+        ) : null
+      }
+      {
+        c.whatsapp && c.whatsappNumber ? (
+          <li>
+            <Icon name="whatsapp" size={20} />
+            <span class="kz-footer__label">WhatsApp &amp; calls</span>
+            <span class="kz-footer__value kz-footer__value--pair">
+              <a href={c.whatsapp} rel="noopener noreferrer" target="_blank">
+                {c.whatsappNumber}<span class="sr-only"> on WhatsApp (opens in a new tab)</span>
+              </a>
+              <a href={`tel:${digits(c.whatsappNumber)}`} class="kz-footer__call">
+                Call<span class="sr-only"> {c.whatsappNumber}</span>
+              </a>
+            </span>
+          </li>
+        ) : null
+      }
+    </ul>
 
     <nav aria-labelledby="footer-services" class="kz-footer__col">
       <h3 id="footer-services" class="kz-footer__h">Services</h3>

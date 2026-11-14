@@ -3,10 +3,10 @@ import { expectAccessible, screenshots, ownIp } from './helpers';
 
 test.use(ownIp('engagement'));
 
-test('WhatsApp button is hidden when no number is configured', async ({ page }) => {
-  for (const path of ['/', '/pricing', '/contact']) {
+test('WhatsApp button uses the configured WhatsApp & calls number', async ({ page }) => {
+  for (const path of ['/', '/pricing']) {
     await page.goto(path);
-    await expect(page.locator('[data-whatsapp]')).toHaveCount(0);
+    await expect(page.locator('[data-whatsapp]')).toHaveAttribute('href', /^https:\/\/wa\.me\/263778825898/);
   }
 });
 

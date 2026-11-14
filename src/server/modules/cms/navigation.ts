@@ -17,7 +17,14 @@ export interface SiteNavigation {
     services: NavLink[];
     company: NavLink[];
     legal: NavLink[];
-    contact: { email?: string; phone?: string; whatsapp?: string; location?: string; address?: string };
+    contact: {
+      email?: string;
+      phone?: string;
+      whatsapp?: string;
+      whatsappNumber?: string;
+      location?: string;
+      address?: string;
+    };
     social: { label: string; href: string; icon: string }[];
     companyName: string;
     registration?: string;
@@ -92,7 +99,7 @@ export async function siteNavigation(ctx: RequestContext): Promise<SiteNavigatio
       contact: {
         ...(settingText(settings, 'contact.email') ? { email: settingText(settings, 'contact.email')! } : {}),
         ...(settingText(settings, 'contact.phone') ? { phone: settingText(settings, 'contact.phone')! } : {}),
-        ...(whatsapp ? { whatsapp: `https://wa.me/${whatsapp.replace(/\D/g, '')}` } : {}),
+        ...(whatsapp ? { whatsapp: `https://wa.me/${whatsapp.replace(/\D/g, '')}`, whatsappNumber: whatsapp } : {}),
         ...(settingText(settings, 'contact.location') ? { location: settingText(settings, 'contact.location')! } : {}),
         ...(settingText(settings, 'contact.address') ? { address: settingText(settings, 'contact.address')! } : {}),
       },

@@ -17,6 +17,15 @@ export async function organizationLd(ctx: RequestContext): Promise<Record<string
     .filter((v): v is string => !!v && v.startsWith('https://'));
   const email = settingText(s, 'contact.email');
   const phone = settingText(s, 'contact.phone');
+  const whatsapp = settingText(s, 'contact.whatsapp_number');
+  const points = [
+    ...(phone
+      ? [{ '@type': 'ContactPoint', telephone: phone, contactType: 'customer service', areaServed: 'ZW' }]
+      : []),
+    ...(whatsapp
+      ? [{ '@type': 'ContactPoint', telephone: whatsapp, contactType: 'sales', availableLanguage: 'English' }]
+      : []),
+  ];
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -29,6 +38,7 @@ export async function organizationLd(ctx: RequestContext): Promise<Record<string
     address: { '@type': 'PostalAddress', addressCountry: 'ZW' },
     ...(email ? { email } : {}),
     ...(phone ? { telephone: phone } : {}),
+    ...(points.length ? { contactPoint: points } : {}),
     ...(sameAs.length ? { sameAs } : {}),
   };
 }

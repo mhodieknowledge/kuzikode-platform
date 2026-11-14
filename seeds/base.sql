@@ -262,10 +262,10 @@ INSERT OR IGNORE INTO application_settings (key, value) VALUES ('company.registr
 INSERT OR IGNORE INTO application_settings (key, value) VALUES ('company.tax_number', '""');
 INSERT OR IGNORE INTO application_settings (key, value) VALUES ('company.tagline', '"Building intelligent digital solutions."');
 INSERT OR IGNORE INTO application_settings (key, value) VALUES ('company.blurb', '"Kuzikode Intelligent Technologies designs, builds and runs websites, apps and business software for organisations in Zimbabwe and across Africa."');
-INSERT OR IGNORE INTO application_settings (key, value) VALUES ('contact.email', '""');
+INSERT OR IGNORE INTO application_settings (key, value) VALUES ('contact.email', '"info@kuzikode.com"');
 INSERT OR IGNORE INTO application_settings (key, value) VALUES ('contact.billing_email', '""');
-INSERT OR IGNORE INTO application_settings (key, value) VALUES ('contact.phone', '""');
-INSERT OR IGNORE INTO application_settings (key, value) VALUES ('contact.whatsapp_number', '""');
+INSERT OR IGNORE INTO application_settings (key, value) VALUES ('contact.phone', '"+263 88 294 6290"');
+INSERT OR IGNORE INTO application_settings (key, value) VALUES ('contact.whatsapp_number', '"+263 77 882 5898"');
 INSERT OR IGNORE INTO application_settings (key, value) VALUES ('contact.whatsapp_message', '"Hi Kuzikode, I would like to talk about a project."');
 INSERT OR IGNORE INTO application_settings (key, value) VALUES ('contact.location', '"Zimbabwe"');
 INSERT OR IGNORE INTO application_settings (key, value) VALUES ('contact.address', '""');

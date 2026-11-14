@@ -526,10 +526,10 @@ export const SETTINGS: Record<string, unknown> = {
   'company.tagline': 'Building intelligent digital solutions.',
   'company.blurb':
     'Kuzikode Intelligent Technologies designs, builds and runs websites, apps and business software for organisations in Zimbabwe and across Africa.',
-  'contact.email': '',
+  'contact.email': 'info@kuzikode.com',
   'contact.billing_email': '',
-  'contact.phone': '',
-  'contact.whatsapp_number': '',
+  'contact.phone': '+263 88 294 6290',
+  'contact.whatsapp_number': '+263 77 882 5898',
   'contact.whatsapp_message': 'Hi Kuzikode, I would like to talk about a project.',
   'contact.location': 'Zimbabwe',
   'contact.address': '',

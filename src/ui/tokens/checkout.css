@@ -556,7 +556,6 @@
     background: var(--lit);
     box-shadow: 0 0 0 4px var(--gold-100);
     color: var(--night-950);
-    animation: kz-co-lit 1.8s var(--ease-out) infinite;
   }
   .kz-coroad__stop[data-state='failed'] .kz-coroad__mark {
     background: var(--danger-600);
@@ -573,19 +572,7 @@
   .kz-coroad__stop[data-state='next'] .kz-coroad__label {
     color: var(--ink-600);
   }
-  @keyframes kz-co-lit {
-    0%,
-    100% {
-      box-shadow: 0 0 0 4px var(--gold-100);
-    }
-    50% {
-      box-shadow: 0 0 0 7px var(--gold-50);
-    }
-  }
   @media (prefers-reduced-motion: reduce) {
-    .kz-coroad__stop[data-state='now'] .kz-coroad__mark {
-      animation: none;
-    }
     .kz-cotile,
     .kz-cotile:active {
       transition: none;

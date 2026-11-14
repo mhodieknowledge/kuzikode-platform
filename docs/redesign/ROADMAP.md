@@ -95,7 +95,7 @@ Scope guard: only these items; don't touch other sections.
 
 ## R7: Imagery and motion polish
 - [x] **R7.1 Process delivered owner images** (B.4) and replace interim treatments. Further prompt batches as needed.
-- [ ] **R7.2 Motion pass (trimmed 2026-11-13 to save usage).** One pass on the public pages only: `review-animations` + `animation-performance` on the home, services, pricing and checkout flows; fix what they flag; `remove-animations` where motion is excessive. Skip `find-animation-opportunities` and `improve-animations`. Run as a fresh `sonnet`/`medium` subagent; you review.
+- [x] **R7.2 Motion pass (trimmed 2026-11-13 to save usage).** One pass on the public pages only: `review-animations` + `animation-performance` on the home, services, pricing and checkout flows; fix what they flag; `remove-animations` where motion is excessive. Skip `find-animation-opportunities` and `improve-animations`. Run as a fresh `sonnet`/`medium` subagent; you review.
 
 ## R8: QA and finish
 - [ ] **R8.1 Visual QA, lean version (owner approved trimming, 2026-11-13).** (1) A `sonnet`/`low` subagent runs the automated sweep over every page, the

@@ -135,3 +135,9 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Only bare photo left (PhotoStrip under How-we-work quality list) is now the background of `how/Quality.astro` with an even night shade (`.kz-qual__shade`); PhotoStrip deleted. Tech stack already gone from public pages; `/technologies*` 301 verified by removed-offers e2e. Screens read at 390/1440, no overflow.
 - Tier: sonnet orchestrator, no subagents.
 - Next step: R7.2 trimmed motion pass (fresh sonnet/medium subagent with review-animations + animation-performance), then R8.1-R8.3.
+
+## 2026-11-14 UTC · R7.2 ✅ Motion pass
+- Public pages audited (reveal, header/mega/pop, rails, checkout, view transition): all composite (transform/opacity/translate) and reduced-motion safe.
+- Removed infinite decorative box-shadow pulse on checkout road "now" stop (paint every frame; static ring stays) + its reduced-motion override.
+- Removed width transitions on track/rail dots (layout); indicators (absolute) left as-is. No copy/data/admin changes.
+- verify green; e2e home/sweep/public/motion/checkout/pricing 19 passed. Tier: sonnet/low.

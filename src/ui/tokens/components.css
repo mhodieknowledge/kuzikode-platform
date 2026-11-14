@@ -683,9 +683,7 @@
     height: 8px;
     border-radius: 1px;
     background: var(--kz-groove);
-    transition:
-      width var(--dur-state) var(--ease-in-out),
-      background-color var(--dur-state) var(--ease-out);
+    transition: background-color var(--dur-state) var(--ease-out);
   }
   .kz-rail__dot[aria-current='true']::before {
     width: 20px;

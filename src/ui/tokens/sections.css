@@ -68,9 +68,7 @@
     height: 3px;
     border-radius: 2px;
     background: var(--bone-300);
-    transition:
-      width var(--dur-state) var(--ease-out),
-      background-color var(--dur-state) var(--ease-out);
+    transition: background-color var(--dur-state) var(--ease-out);
   }
   .kz-track__dots i.is-on {
     width: 28px;

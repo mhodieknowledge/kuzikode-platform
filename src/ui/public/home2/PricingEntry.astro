@@ -27,10 +27,12 @@ const rows = Astro.props.divisions.filter((d) => d.from);
             {rows.map((d) => (
               <li>
                 <span class="hm-pe__ic" aria-hidden="true"><Icon name={divisionIcon(d.slug)} size={20} /></span>
-                <span class="hm-pe__name">{divisionShortName(d.slug, d.name)}</span>
+                <span class="hm-pe__name">
+                  {divisionShortName(d.slug, d.name)}
+                  {fromSuffix(d.from!) ? <span class="hm-pe__sub">{fromSuffix(d.from!).replace('/ ', 'per ')}</span> : null}
+                </span>
                 <span class="hm-pe__from">
                   From <b>{d.from!.amount}</b>
-                  {fromSuffix(d.from!)}
                 </span>
               </li>
             ))}

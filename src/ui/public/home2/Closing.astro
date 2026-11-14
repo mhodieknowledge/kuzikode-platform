@@ -73,3 +73,14 @@ const options = [
     }
   </div>
 </section>
+
+<script>
+  // Hide the floating WhatsApp button while this band is in view (it offers WhatsApp itself).
+  const band = document.querySelector('.hm-close');
+  if (band && 'IntersectionObserver' in window) {
+    new IntersectionObserver(
+      ([e]) => document.documentElement.toggleAttribute('data-hm-close', !!e && e.isIntersecting),
+      { threshold: 0.15 },
+    ).observe(band);
+  }
+</script>

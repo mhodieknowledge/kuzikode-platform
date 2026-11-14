@@ -9,7 +9,7 @@ const DIVISIONS = [
   { slug: 'business-software', name: 'Business software', from: 'from $600' },
   { slug: 'cross-platform-apps', name: 'Cross-platform apps', from: 'from $1,200' },
   { slug: 'ai-data', name: 'AI, data & intelligence', from: 'from $500' },
-  { slug: 'automation-integration', name: 'Automation & integration', from: 'from $50 / local method' },
+  { slug: 'automation-integration', name: 'Automation & integration', from: 'from $50' },
 ];
 
 test.describe('home page (R10.3 rebuild)', () => {

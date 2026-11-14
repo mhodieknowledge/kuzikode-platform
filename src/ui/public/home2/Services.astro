@@ -32,7 +32,6 @@ const { content: c, divisions } = Astro.props;
             {d.from ? (
               <span class="hm-card__tab">
                 From <b>{d.from.amount}</b>
-                {fromSuffix(d.from)}
               </span>
             ) : null}
             <h3 class="hm-card__name">
@@ -41,6 +40,7 @@ const { content: c, divisions } = Astro.props;
               </a>
             </h3>
             <p class="hm-card__value">{d.summary}</p>
+            {d.from && fromSuffix(d.from) ? <p class="hm-card__note">{`Price ${fromSuffix(d.from).trim()}`}</p> : null}
             <span class="hm-card__go" aria-hidden="true">
               <Icon name="arrow-right" size={20} />
             </span>

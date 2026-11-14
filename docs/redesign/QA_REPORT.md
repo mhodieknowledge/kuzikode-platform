@@ -249,3 +249,21 @@ Full sweep re-run (130 routes x 10 viewports): overflow 0 (was 2), button-label 
 Fixes: `.kz-acheck.has-d` rows (checkbox + description lists, e.g. 378 on `/admin/projects/new`) now have the name label stretched over the whole row (one 44 px+ hit target, no visual change); admin `.kz-input` gets `min-width: 0` (the 3 px overflow of the careers forms at 1024); contact quick-action buttons get inline padding so the label no longer touches the edge at 390. Sweep checker accepts a label stretched over its `.kz-acheck` row.
 Remaining 19 taps: desktop "On this page" summary at 1024 (3), portal stretched-link row title (7 phones/tablet, whole row is the target), others singular; accepted.
 Key pages (home, pricing, contact, checkout, portal overview, admin dashboard) read at 390 and 1440: no clipping, spacing or contrast defects beyond the contact buttons. `web-design-guidelines` grep pass over src/ui and src/pages (transition: all, outline removal without replacement, zoom lock, images without dimensions, click handlers on non-interactive elements): none. `impeccable detect` over src/ui/public + src/pages: no findings (regex rules only).
+
+## 2026-11-14 · R8.2 Lighthouse
+
+Lighthouse (mobile preset, default throttling, chromium-1243 headless `--no-sandbox`) against the **local `wrangler dev` server on :8787** (built `dist/`; local-dev numbers, no CDN or edge caching). Targets: performance >= 90, accessibility >= 95. No fixes were needed, so before = after (single run, no code change).
+
+| Page | Perf | A11y | Best practices | SEO | LCP |
+|---|---|---|---|---|---|
+| `/` | 99 | 100 | 100 | 69 | 2.0 s |
+| `/pricing` | 100 | 97 | 100 | 66 | 1.1 s |
+| `/services/websites` | 100 | 97 | 100 | 66 | 1.1 s |
+| `/contact` | 100 | 100 | 96 | 66 | 1.1 s |
+| `/how-we-work` | 100 | 100 | 100 | 69 | 1.1 s |
+| `/insights` | 100 | 100 | 100 | 66 | 1.1 s |
+
+Notes:
+- SEO 66-69: the only failing audit is `is-crawlable` (page blocked from indexing). The local host is non-production, so the site emits noindex there. Expected, and not a defect on the production domain.
+- A11y 97 on `/pricing` and `/services/websites`: one `color-contrast` finding on the recommended-plan badge (`.kz-plan__rec`). Above target; flagged for a later token tweak, not changed (no design changes in this task).
+- Best practices 96 on `/contact`: a CSP `inspector-issues` entry (no console errors). Dev-server only; revisit when auditing against staging.

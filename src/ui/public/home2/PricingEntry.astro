@@ -1,0 +1,42 @@
+---
+/** Pricing entry (R10.3, HOME_COMPOSITION §6): one dark rounded band, the five "from" prices as compact rows, a pill to /pricing. */
+import Icon from '../../icons/Icon.astro';
+import { divisionIcon } from '../../icons/registry';
+import { divisionShortName, fromSuffix, type FromPrice } from '../../../shared/directory';
+
+interface Props {
+  divisions: { slug: string; name: string; from: FromPrice | null }[];
+}
+const rows = Astro.props.divisions.filter((d) => d.from);
+---
+
+{
+  rows.length > 0 ? (
+    <section class="hm-sec hm-pe" aria-labelledby="pe-title">
+      <div class="container-wide">
+        <div class="hm-pe__band on-night">
+          <div class="hm-pe__copy">
+            <h2 id="pe-title" class="hm-h2">See every package</h2>
+            <p class="hm-lede">Each area has packages with a clear starting price. Compare them, then ask for a written quotation.</p>
+            <a class="hm-cta hm-pe__cta" href="/pricing">
+              <span>See pricing</span>
+              <span class="hm-cta__dot" aria-hidden="true"><Icon name="arrow-right" size={20} /></span>
+            </a>
+          </div>
+          <ul class="hm-pe__rows" role="list">
+            {rows.map((d) => (
+              <li>
+                <span class="hm-pe__ic" aria-hidden="true"><Icon name={divisionIcon(d.slug)} size={20} /></span>
+                <span class="hm-pe__name">{divisionShortName(d.slug, d.name)}</span>
+                <span class="hm-pe__from">
+                  From <b>{d.from!.amount}</b>
+                  {fromSuffix(d.from!)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  ) : null
+}

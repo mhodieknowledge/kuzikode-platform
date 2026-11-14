@@ -1,0 +1,18 @@
+---
+/** Division-name marquee (R10.3, HOME_COMPOSITION §2): CSS-only drift, static and wrapping under reduced motion. */
+import { divisionShortName } from '../../../shared/directory';
+
+interface Props {
+  divisions: { slug: string; name: string }[];
+}
+const names = Astro.props.divisions.map((d) => divisionShortName(d.slug, d.name));
+---
+
+<div class="hm-marquee on-night" role="presentation">
+  <ul class="hm-marquee__row" role="list">
+    {names.map((n) => <li>{n}</li>)}
+  </ul>
+  <ul class="hm-marquee__row hm-marquee__row--dup" role="list" aria-hidden="true">
+    {names.map((n) => <li>{n}</li>)}
+  </ul>
+</div>

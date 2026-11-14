@@ -1,0 +1,56 @@
+---
+/**
+ * Services (R10.3, HOME_COMPOSITION §3): one card per featured division with a section icon (Lucide, the division's hue) in a corner
+ * circle, the name, one-line value, a notched "From $X" tab and an arrow. Phones: swipe track with the next card peeking + dots.
+ * Desktop: five across. Prices only through divisionFromPrice; no illustrations.
+ */
+import Icon from '../../icons/Icon.astro';
+import { divisionIcon } from '../../icons/registry';
+import type { SectionContent } from '../../../shared/schemas/cms';
+import { divisionShortName, fromSuffix, type FromPrice } from '../../../shared/directory';
+
+interface Props {
+  content: SectionContent<'services_grid'>;
+  divisions: { slug: string; name: string; summary: string; href: string; from: FromPrice | null }[];
+}
+const { content: c, divisions } = Astro.props;
+---
+
+<section class="hm-sec hm-services" id="services" aria-labelledby="services-title">
+  <div class="container-wide">
+    <header class="hm-head">
+      <h2 id="services-title" class="hm-h2">{c.title}</h2>
+      {c.intro ? <p class="hm-lede">{c.intro}</p> : null}
+    </header>
+    <ol class="hm-track" role="list" data-kz-track>
+      {
+        divisions.map((d, i) => (
+          <li class={`hm-card kz-div-${(i % 6) + 1}`} data-service={d.slug}>
+            <span class="hm-card__icon" aria-hidden="true">
+              <Icon name={divisionIcon(d.slug)} size={24} />
+            </span>
+            {d.from ? (
+              <span class="hm-card__tab">
+                From <b>{d.from.amount}</b>
+                {fromSuffix(d.from)}
+              </span>
+            ) : null}
+            <h3 class="hm-card__name">
+              <a href={d.href} class="hm-card__link">
+                {divisionShortName(d.slug, d.name)}
+              </a>
+            </h3>
+            <p class="hm-card__value">{d.summary}</p>
+            <span class="hm-card__go" aria-hidden="true">
+              <Icon name="arrow-right" size={20} />
+            </span>
+          </li>
+        ))
+      }
+    </ol>
+    <div class="hm-dots" aria-hidden="true" data-kz-track-dots>
+      {divisions.map((_, i) => <i class:list={[i === 0 && 'is-on']} />)}
+    </div>
+    <p class="hm-more"><a class="hm-outline" href="/services">See all services</a></p>
+  </div>
+</section>

@@ -115,8 +115,8 @@ test('home first screen shows the headline, a primary action and a visual (B.1a,
         }, height);
     expect(await inView('h1'), `h1 in first screen @ ${width}`).toBe(true);
     expect(await inView('[data-hero-cta]'), `primary action in first screen @ ${width}`).toBe(true);
-    expect(await inView('.kz-hw, main img'), `visual in first screen @ ${width}`).toBe(true);
-    const hero = await page.locator('.kz-hero__grid').evaluate((el) => el.getBoundingClientRect().height);
+    expect(await inView('.hm-hero .hm-glass, .hm-hero .hm-bg img'), `visual in first screen @ ${width}`).toBe(true);
+    const hero = await page.locator('.hm-hero__grid').evaluate((el) => el.getBoundingClientRect().height);
     expect(hero, `hero height ≤ 85svh @ ${width}`).toBeLessThanOrEqual(height * 0.85);
   }
 });

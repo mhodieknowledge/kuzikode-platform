@@ -12,51 +12,60 @@ const DIVISIONS = [
   { slug: 'automation-integration', name: 'Automation & integration', from: 'from $50 / local method' },
 ];
 
-test.describe('home page (R9.6)', () => {
-  test('hero, division widgets, image bands and closing band', async ({ page }) => {
+test.describe('home page (R10.3 rebuild)', () => {
+  test('hero, service cards with section icons, bands and closing band', async ({ page }) => {
     const res = await page.goto('/');
     expect(res!.status()).toBe(200);
-    // Hero: the CMS headline, one primary and one secondary action, a photograph and the overlay widgets.
+    // Hero: the CMS headline, the quote action, WhatsApp, a photograph background and the glass widgets.
     const hero = page.locator('section[aria-labelledby="hero-title"]');
     await expect(page.locator('h1')).toHaveCount(1);
     await expect(
       hero.getByRole('heading', { level: 1, name: 'Building intelligent digital solutions.' }),
     ).toBeVisible();
     await expect(hero.getByRole('link', { name: 'Get a quote' })).toHaveAttribute('href', '/contact');
-    await expect(hero.getByRole('link', { name: 'See pricing' })).toHaveAttribute('href', '/pricing');
-    await expect(hero.locator('.kz-hero__img img')).toHaveCount(1);
-    await expect(hero.getByRole('img', { name: /Illustration of the Kuzikode client workspace/ })).toBeVisible();
+    await expect(hero.locator('a[href^="https://wa.me/263778825898"]').first()).toBeVisible();
+    await expect(hero.locator('.hm-bg img')).toHaveCount(1);
+    await expect(hero.locator('.hm-chips a')).toHaveCount(5);
+    await expect(hero.locator('.hm-glass--price')).toContainText('$150');
 
-    // Five division widgets (Add-ons excluded), each with its drawing, a "from" price only, its link and a jump anchor.
-    const widgets = page.locator('.kz-area');
-    await expect(widgets).toHaveCount(5);
-    await expect(page.locator('.kz-areas')).not.toContainText('Add-ons');
-    const jump = page.getByRole('navigation', { name: 'Jump to an area of work' });
+    // No division illustrations on the home page; section icons only.
+    await expect(page.locator('svg[data-ill]')).toHaveCount(0);
+
+    // Five service cards (Add-ons excluded): aria-hidden icon, "from" price only, link to the division page.
+    const cards = page.locator('.hm-card');
+    await expect(cards).toHaveCount(5);
+    await expect(page.locator('.hm-services')).not.toContainText('Add-ons');
     for (const d of DIVISIONS) {
-      const w = page.locator(`#area-${d.slug}`);
-      await expect(w.locator('.kz-area__from')).toHaveText(d.from);
-      await expect(w.getByRole('link', { name: d.name })).toHaveAttribute('href', `/services/${d.slug}`);
-      await expect(w.locator('svg[data-ill]')).toHaveCount(1);
-      await expect(jump.getByRole('link', { name: d.name })).toHaveAttribute('href', `#area-${d.slug}`);
+      const c = page.locator(`.hm-card[data-service="${d.slug}"]`);
+      await expect(c.locator('.hm-card__tab')).toHaveText(
+        new RegExp(d.from.replace('from', 'From').replace('$', '\\$')),
+      );
+      await expect(c.getByRole('link', { name: d.name })).toHaveAttribute('href', `/services/${d.slug}`);
+      await expect(c.locator('.hm-card__icon[aria-hidden="true"] svg')).toHaveCount(1);
     }
-    // No price lists on the home page: one price per widget, no package names.
+    await expect(page.locator('.hm-services').getByRole('link', { name: 'See all services' })).toHaveAttribute(
+      'href',
+      '/services',
+    );
     await expect(page.locator('main')).not.toContainText('Starter Website');
-    await expect(page.locator('.kz-areas img')).toHaveCount(0);
+    await expect(page.locator('.hm-services img')).toHaveCount(0);
 
-    // Image bands: photographs only under an overlay with content and widgets on top (REFINEMENTS §3).
-    for (const band of ['.kz-hero', '.kz-why', '.kz-close']) {
+    // Photographs only as backgrounds under an overlay (REFINEMENTS §3).
+    for (const band of ['.hm-hero', '.hm-close']) {
       await expect(page.locator(`${band} > .kz-pic`)).toHaveCount(1);
     }
     await expect(page.locator('.kz-pstrip')).toHaveCount(0);
     await expect(page.getByRole('heading', { level: 2, name: 'Why Kuzikode' })).toBeVisible();
-    await expect(page.getByRole('img', { name: /payment of \$250\.00/ })).toBeAttached();
     await expect(page.getByRole('heading', { level: 2, name: 'How we work' })).toBeVisible();
+    const pe = page.locator('section[aria-labelledby="pe-title"]');
+    await expect(pe.getByRole('link', { name: 'See pricing' })).toHaveAttribute('href', '/pricing');
+    await expect(pe.locator('.hm-pe__rows li')).toHaveCount(5);
 
     // Closing band: one quote action and the Settings contact options; the footer's own band is off on the home page.
     const close = page.locator('section[aria-labelledby="close-title"]');
     await expect(close.getByRole('heading', { name: 'Have a project in mind?' })).toBeVisible();
     await expect(close.getByRole('link', { name: 'Get a quote' })).toHaveAttribute('href', '/contact');
-    await expect(close.locator('a[href^="https://wa.me/263778825898"]')).toBeVisible();
+    await expect(close.locator('a[href^="https://wa.me/263778825898"]').first()).toBeVisible();
     await expect(close.locator('a[href="tel:+263882946290"]')).toBeVisible();
     await expect(close.locator('a[href="mailto:info@kuzikode.com"]')).toBeVisible();
     await expect(page.locator('.kz-footer__next')).toHaveCount(0);
@@ -82,16 +91,13 @@ test.describe('home page (R9.6)', () => {
     await screenshots(page, 'home');
   });
 
-  test('jump row anchors to a division widget and the widget opens its page', async ({ page }) => {
+  test('a service card opens its division page', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/');
     await page
-      .getByRole('navigation', { name: 'Jump to an area of work' })
+      .locator('.hm-card[data-service="ai-data"]')
       .getByRole('link', { name: 'AI, data & intelligence' })
       .click();
-    await expect(page).toHaveURL(/#area-ai-data$/);
-    await expect(page.locator('#area-ai-data')).toBeInViewport();
-    await page.locator('#area-ai-data').getByRole('link', { name: 'AI, data & intelligence' }).click();
     await expect(page).toHaveURL(/\/services\/ai-data$/);
   });
 
@@ -109,9 +115,13 @@ test.describe('home page (R9.6)', () => {
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       );
       expect(overflow, `overflow @ ${width}`).toBeLessThanOrEqual(0);
-      // Tap targets: the jump links, widget links and contact options are at least 44 px tall.
+      // Tap targets: chips, buttons and contact rows are at least 44 px tall.
       const short = await page.evaluate(() =>
-        Array.from(document.querySelectorAll<HTMLElement>('.kz-areas__jump a, .kz-close__option, .kz-hero .kz-btn'))
+        Array.from(
+          document.querySelectorAll<HTMLElement>(
+            '.hm-chips a, .hm-close__rows a, .hm-hero .hm-cta, .hm-hero .hm-ghost, .hm-more a, .hm-pe__cta',
+          ),
+        )
           .filter((a) => a.getBoundingClientRect().height < 44)
           .map((a) => a.textContent?.trim()),
       );

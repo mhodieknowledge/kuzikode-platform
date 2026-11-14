@@ -1,0 +1,813 @@
+/*
+ * Home rebuild (R10.3, docs/redesign/HOME_COMPOSITION.md). All classes are `hm-*`. Mobile first; Poppins scale from tokens
+ * (--kz-h1 38px phone, --kz-h2 30px phone, body 16px). Motion is transform/opacity only and off under prefers-reduced-motion.
+ * Photographs are only ever backgrounds under an overlay.
+ */
+@layer components {
+  /* ---------- Shared pieces ---------- */
+  .hm-hero > .hm-bg,
+  .hm-close > .hm-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    background: var(--night-950);
+  }
+  .hm-sec {
+    padding-block: var(--section-y);
+  }
+  .hm-head {
+    margin-bottom: 24px;
+  }
+  .hm-h2 {
+    font-size: var(--kz-h2);
+    line-height: 1.18;
+    letter-spacing: -0.015em;
+    font-weight: 700;
+    max-width: 22ch;
+    text-wrap: balance;
+  }
+  .hm-lede {
+    margin-top: 12px;
+    max-width: 52ch;
+    font-size: var(--kz-body);
+    line-height: 1.55;
+    color: var(--ink-600);
+  }
+  .on-night .hm-lede {
+    color: var(--on-night-2);
+  }
+  .hm-pilltag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 4px 14px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.12);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.22);
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    color: var(--on-night);
+    backdrop-filter: blur(8px);
+  }
+  /* Pill CTA with a circular arrow (IMG_5052) */
+  .hm-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 4px 4px 4px 22px;
+    border-radius: 999px;
+    background: var(--action);
+    color: var(--on-action);
+    font-weight: 500;
+    font-size: 1rem;
+    line-height: 1.1;
+    white-space: nowrap;
+    text-decoration: none;
+    transition:
+      background-color var(--dur-state) var(--ease-out),
+      transform var(--dur-press) var(--ease-out);
+  }
+  .hm-cta__dot {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--emerald-700);
+    transition: transform var(--dur-state) var(--ease-out);
+  }
+  .hm-cta:active {
+    transform: translateY(1px);
+  }
+  .hm-ghost,
+  .hm-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 52px;
+    padding-inline: 22px;
+    border-radius: 999px;
+    font-weight: 500;
+    font-size: 1rem;
+    line-height: 1.1;
+    white-space: nowrap;
+    text-decoration: none;
+    transition:
+      background-color var(--dur-state) var(--ease-out),
+      transform var(--dur-press) var(--ease-out);
+  }
+  .hm-ghost {
+    color: var(--on-night);
+    box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.55);
+    background: rgb(255 255 255 / 0.06);
+  }
+  .hm-outline {
+    color: var(--ink-900);
+    box-shadow: inset 0 0 0 1.5px var(--ink-900);
+  }
+  .hm-ghost:active,
+  .hm-outline:active {
+    transform: translateY(1px);
+  }
+  @media (hover: hover) {
+    .hm-cta:hover {
+      background: var(--action-hover);
+    }
+    .hm-cta:hover .hm-cta__dot {
+      transform: translateX(3px);
+    }
+    .hm-ghost:hover {
+      background: rgb(255 255 255 / 0.14);
+    }
+    .hm-outline:hover {
+      background: var(--ink-900);
+      color: #fff;
+    }
+  }
+
+  /* ---------- 1. Hero ---------- */
+  .hm-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 84svh;
+    background: var(--night-950);
+  }
+  .hm-hero .hm-bg img {
+    object-position: 62% 40%;
+  }
+  .hm-hero__shade {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      180deg,
+      rgb(14 13 12 / 0.3) 0%,
+      rgb(14 13 12 / 0.45) 30%,
+      rgb(14 13 12 / 0.86) 68%,
+      rgb(14 13 12 / 0.94) 100%
+    );
+  }
+  .hm-hero__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    padding-block: 24px 20px;
+  }
+  .hm-hero__copy {
+    display: grid;
+    justify-items: start;
+    gap: 12px;
+  }
+  .hm-hero__title {
+    font-size: var(--kz-h1);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    font-weight: 700;
+    color: var(--on-night);
+    max-width: 15ch;
+    text-wrap: balance;
+  }
+  .hm-hero__sub {
+    font-size: var(--kz-body);
+    line-height: 1.5;
+    color: var(--on-night-2);
+    max-width: 44ch;
+  }
+  .hm-hero__acts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 6px;
+  }
+  .hm-chips {
+    display: flex;
+    gap: 8px;
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-padding-inline: var(--gutter);
+  }
+  .hm-chips::-webkit-scrollbar {
+    display: none;
+  }
+  .hm-chips a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding-inline: 14px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.12);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.2);
+    backdrop-filter: blur(10px);
+    color: var(--on-night);
+    font-size: 0.875rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: background-color var(--dur-state) var(--ease-out);
+  }
+  .hm-chips .kz-icon {
+    color: var(--kz-div);
+  }
+  .hm-chips li:first-child a {
+    background: rgb(255 255 255 / 0.22);
+  }
+  .hm-widgets {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .hm-glass {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-height: 72px;
+    padding: 12px 52px 12px 14px;
+    border-radius: 20px;
+    background: rgb(255 255 255 / 0.14);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.22),
+      0 12px 32px rgb(0 0 0 / 0.25);
+    backdrop-filter: blur(14px);
+    color: var(--on-night);
+    text-decoration: none;
+  }
+  .hm-glass__k {
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    color: var(--on-night-2);
+  }
+  .hm-glass__v {
+    font-size: 1.5rem;
+    line-height: 1.1;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .hm-glass__go,
+  .hm-glass__ic {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    margin-top: -18px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--night-900);
+  }
+  .hm-glass__ic {
+    background: var(--action);
+    color: #fff;
+  }
+  .hm-glass--wa {
+    justify-content: center;
+  }
+
+  /* ---------- 2. Marquee ---------- */
+  .hm-marquee {
+    display: flex;
+    overflow: hidden;
+    background: var(--night-900);
+    border-top: 1px solid var(--night-700);
+    padding-block: 14px;
+  }
+  .hm-marquee__row {
+    display: flex;
+    flex: none;
+    align-items: center;
+    min-width: 100%;
+    justify-content: space-around;
+    gap: 0;
+    animation: hm-drift 36s linear infinite;
+  }
+  .hm-marquee__row li {
+    flex: none;
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--on-night-2);
+    white-space: nowrap;
+  }
+  .hm-marquee__row li::after {
+    content: '\2726';
+    margin-inline: 28px;
+    color: var(--gold-400);
+  }
+  @keyframes hm-drift {
+    to {
+      transform: translateX(-100%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hm-marquee {
+      overflow: visible;
+    }
+    .hm-marquee__row {
+      animation: none;
+      flex-wrap: wrap;
+      row-gap: 6px;
+      padding-inline: var(--gutter);
+    }
+    .hm-marquee__row--dup {
+      display: none;
+    }
+  }
+
+  /* ---------- 3. Services ---------- */
+  .hm-services {
+    background: var(--paper);
+  }
+  .hm-track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 82%;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+    padding-block: 4px 6px;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .hm-track::-webkit-scrollbar {
+    display: none;
+  }
+  .hm-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 260px;
+    padding: 20px 20px 76px;
+    border-radius: 24px;
+    background: var(--bone-50);
+    box-shadow: inset 0 0 0 1px var(--bone-200);
+    scroll-snap-align: start;
+    transition:
+      transform var(--dur-state) var(--ease-out),
+      box-shadow var(--dur-state) var(--ease-out);
+  }
+  .hm-card__icon {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 14px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--kz-div) 18%, var(--paper));
+    color: var(--kz-div-ink);
+  }
+  .hm-card__tab {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 18px 0 16px;
+    border-radius: 0 24px 0 20px;
+    background: var(--kz-div-ink);
+    color: #fff;
+    font-size: 0.8125rem;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  .hm-card__tab b {
+    margin-left: 5px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Notch: concave corners where the tab meets the card edges */
+  .hm-card__tab::before,
+  .hm-card__tab::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: radial-gradient(circle at 0 100%, transparent 13.5px, var(--kz-div-ink) 14px);
+    pointer-events: none;
+  }
+  .hm-card__tab::before {
+    top: 0;
+    left: -14px;
+  }
+  .hm-card__tab::after {
+    right: 0;
+    bottom: -14px;
+  }
+  .hm-card__name {
+    font-size: var(--kz-h3);
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .hm-card__link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .hm-card__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+  .hm-card:has(.hm-card__link:focus-visible) {
+    outline: 2px solid var(--ink-900);
+    outline-offset: 2px;
+  }
+  .hm-card__value {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--ink-600);
+  }
+  .hm-card__go {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--ink-900);
+    color: #fff;
+    transition: transform var(--dur-state) var(--ease-out);
+  }
+  .hm-dots {
+    display: flex;
+    gap: 6px;
+    margin-top: 14px;
+  }
+  .hm-dots i {
+    width: 14px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--bone-300);
+    transition: background-color var(--dur-state) var(--ease-out);
+  }
+  .hm-dots i.is-on {
+    width: 28px;
+    background: var(--ink-900);
+  }
+  .hm-more {
+    margin-top: 20px;
+  }
+  @media (hover: hover) {
+    .hm-card:hover {
+      transform: translateY(-3px);
+      box-shadow: inset 0 0 0 1px var(--kz-div-ink);
+    }
+    .hm-card:hover .hm-card__go {
+      transform: translateX(4px);
+    }
+  }
+
+  /* ---------- 4. Why ---------- */
+  .hm-why__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    border-top: 1px solid var(--bone-300);
+  }
+  .hm-why__grid li {
+    display: grid;
+    gap: 6px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--bone-300);
+  }
+  .hm-why__icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 8px;
+    border-radius: 50%;
+    background: var(--emerald-50);
+    color: var(--emerald-700);
+  }
+  .hm-why__grid h3 {
+    font-size: 1.125rem;
+    line-height: 1.3;
+    font-weight: 600;
+  }
+  .hm-why__grid p {
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--ink-600);
+    max-width: 44ch;
+  }
+
+  /* ---------- 5. How ---------- */
+  .hm-how {
+    background: var(--bone-100);
+  }
+  .hm-steps {
+    position: relative;
+    display: grid;
+    gap: 28px;
+  }
+  .hm-steps::before {
+    content: '';
+    position: absolute;
+    left: 23px;
+    top: 24px;
+    bottom: 24px;
+    border-left: 2px dashed var(--bone-300);
+  }
+  .hm-steps li {
+    position: relative;
+    display: grid;
+    gap: 4px;
+    padding-left: 68px;
+  }
+  .hm-steps__n {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--ink-900);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.125rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .hm-steps h3 {
+    padding-top: 10px;
+    font-size: 1.125rem;
+    line-height: 1.3;
+    font-weight: 600;
+  }
+  .hm-steps p {
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--ink-600);
+    max-width: 40ch;
+  }
+  .hm-how__more {
+    margin-top: 24px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* ---------- 6. Pricing entry ---------- */
+  .hm-pe__band {
+    display: grid;
+    gap: 24px;
+    padding: 28px 20px;
+    border-radius: 28px;
+    background: var(--night-900);
+    color: var(--on-night);
+  }
+  .hm-pe__copy {
+    display: grid;
+    justify-items: start;
+    gap: 4px;
+  }
+  .hm-pe__cta {
+    margin-top: 18px;
+  }
+  .hm-pe__rows {
+    display: grid;
+    gap: 8px;
+  }
+  .hm-pe__rows li {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    padding: 8px 16px 8px 8px;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--night-600);
+  }
+  .hm-pe__ic {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--night-700);
+    color: var(--gold-400);
+  }
+  .hm-pe__name {
+    font-size: 0.9375rem;
+    line-height: 1.25;
+    font-weight: 500;
+  }
+  .hm-pe__from {
+    font-size: 0.8125rem;
+    line-height: 1.2;
+    color: var(--on-night-2);
+    text-align: right;
+  }
+  .hm-pe__from b {
+    display: block;
+    font-size: 1rem;
+    color: var(--on-night);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- 8. Closing ---------- */
+  .hm-close {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    background: var(--night-950);
+  }
+  .hm-close__shade {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, rgb(14 13 12 / 0.7) 0%, rgb(14 13 12 / 0.9) 100%);
+  }
+  .hm-close__grid {
+    display: grid;
+    gap: 28px;
+    padding-block: var(--section-y);
+  }
+  .hm-close__copy {
+    display: grid;
+    justify-items: start;
+    gap: 12px;
+  }
+  .hm-close__body {
+    max-width: 48ch;
+    font-size: var(--kz-body);
+    line-height: 1.55;
+    color: var(--on-night-2);
+  }
+  .hm-close__rows {
+    display: grid;
+    gap: 8px;
+  }
+  .hm-close__rows a {
+    display: grid;
+    grid-template-columns: 40px auto minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    padding: 8px 16px 8px 8px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.1);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18);
+    backdrop-filter: blur(10px);
+    color: var(--on-night);
+    text-decoration: none;
+  }
+  .hm-close__ic {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--night-900);
+  }
+  .hm-close__label {
+    font-size: 0.8125rem;
+    color: var(--on-night-2);
+  }
+  .hm-close__value {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    text-align: right;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
+  /* ---------- Tablet ---------- */
+  @media (min-width: 640px) {
+    .hm-track {
+      grid-auto-columns: 44%;
+    }
+    .hm-why__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .hm-why__grid li {
+      padding: 28px 28px 28px 0;
+    }
+    .hm-why__grid li:nth-child(even) {
+      padding-left: 28px;
+      padding-right: 0;
+      border-left: 1px solid var(--bone-300);
+    }
+    .hm-pe__band {
+      padding: 36px 32px;
+    }
+  }
+
+  /* ---------- Desktop ---------- */
+  @media (min-width: 1024px) {
+    .hm-hero {
+      min-height: min(86svh, 820px);
+    }
+    .hm-hero__grid {
+      grid-template-columns: minmax(0, 1fr) 340px;
+      grid-template-areas:
+        'copy widgets'
+        'chips chips';
+      align-items: end;
+      gap: 28px 48px;
+      padding-block: 56px 40px;
+    }
+    .hm-hero__copy {
+      grid-area: copy;
+      gap: 16px;
+    }
+    .hm-hero__sub {
+      font-size: 1.125rem;
+    }
+    .hm-chips {
+      grid-area: chips;
+      margin-inline: 0;
+      padding-inline: 0;
+      overflow: visible;
+      flex-wrap: wrap;
+    }
+    .hm-widgets {
+      grid-area: widgets;
+      grid-template-columns: 1fr;
+    }
+    .hm-glass {
+      min-height: 92px;
+      padding-left: 20px;
+    }
+    .hm-glass__v {
+      font-size: 2rem;
+    }
+    .hm-track {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-auto-columns: auto;
+      overflow: visible;
+      margin-inline: 0;
+      padding-inline: 0;
+    }
+    .hm-card {
+      min-height: 320px;
+    }
+    .hm-dots {
+      display: none;
+    }
+    .hm-why__grid {
+      grid-template-columns: repeat(2, 1fr);
+      max-width: 980px;
+    }
+    .hm-steps {
+      grid-template-columns: repeat(var(--steps), minmax(0, 1fr));
+      gap: 32px;
+    }
+    .hm-steps::before {
+      left: 24px;
+      right: 24px;
+      top: 23px;
+      bottom: auto;
+      border-left: 0;
+      border-top: 2px dashed var(--bone-300);
+    }
+    .hm-steps li {
+      padding-left: 0;
+      padding-top: 68px;
+    }
+    .hm-steps h3 {
+      padding-top: 0;
+    }
+    .hm-pe__band {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      align-items: center;
+      gap: 56px;
+      padding: 56px;
+    }
+    .hm-close__grid {
+      grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+      align-items: center;
+      gap: 64px;
+    }
+  }
+}

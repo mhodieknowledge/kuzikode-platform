@@ -1,0 +1,32 @@
+---
+/** Why Kuzikode (R10.3, HOME_COMPOSITION §4): the CMS claims as a hairline-divided grid with section icons, no numbers. */
+import Icon from '../../icons/Icon.astro';
+import { cmsIcon } from '../../icons/registry';
+import type { SectionContent } from '../../../shared/schemas/cms';
+
+interface Props {
+  content: SectionContent<'features'>;
+  anchor: string;
+}
+const { content: c, anchor } = Astro.props;
+---
+
+<section class="hm-sec hm-why" id={anchor} aria-labelledby={`${anchor}-title`}>
+  <div class="container-wide">
+    <header class="hm-head">
+      <h2 id={`${anchor}-title`} class="hm-h2">{c.title}</h2>
+      {c.intro ? <p class="hm-lede">{c.intro}</p> : null}
+    </header>
+    <ul class="hm-why__grid" role="list">
+      {
+        c.items.map((it) => (
+          <li>
+            <span class="hm-why__icon" aria-hidden="true"><Icon name={cmsIcon(it.icon)} size={24} /></span>
+            <h3>{it.title}</h3>
+            <p>{it.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

@@ -1,18 +1,19 @@
 ---
 /**
- * Home (R9.6, REFINEMENTS §7: sell, be easy to navigate, be beautiful). Section order:
- * photo hero with overlay widgets → the five divisions as widgets (jump row, "from" prices only) → "Why Kuzikode" image band
- * with a payment widget → how we work (one short strip) → selected work (only when published) → client words (only real,
- * consented) → closing image band with "Get a quote" and the Settings contact options. Copy comes from the CMS `home` page.
+ * Home (R10.3 rebuild, docs/redesign/HOME_COMPOSITION.md). Order: photo hero (glass widgets, division chips) → marquee →
+ * services cards with section icons ("from" prices only) → why → how we work → pricing entry → selected work and client words
+ * (only when published / consented) → closing photo band with the Settings contact options. Copy comes from the CMS `home` page.
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
-import Hero from '../ui/public/home/Hero.astro';
-import DivisionWidgets from '../ui/public/home/DivisionWidgets.astro';
-import WhyBand from '../ui/public/home/WhyBand.astro';
-import HowStrip from '../ui/public/home/HowStrip.astro';
-import WorkRail from '../ui/public/home/WorkRail.astro';
-import Voices from '../ui/public/home/Voices.astro';
-import ClosingBand from '../ui/public/home/ClosingBand.astro';
+import Hero from '../ui/public/home2/Hero.astro';
+import Marquee from '../ui/public/home2/Marquee.astro';
+import Services from '../ui/public/home2/Services.astro';
+import Why from '../ui/public/home2/Why.astro';
+import How from '../ui/public/home2/How.astro';
+import PricingEntry from '../ui/public/home2/PricingEntry.astro';
+import Work from '../ui/public/home2/Work.astro';
+import Voices from '../ui/public/home2/Voices.astro';
+import Closing from '../ui/public/home2/Closing.astro';
 import { divisionFromPrice } from '../shared/directory';
 import {
   getPage,
@@ -66,17 +67,21 @@ const closing = byType('cta')?.content as Section<'cta'>['content'] | undefined;
   {hero ? (
     <Hero
       content={hero.content as Section<'hero'>['content']}
+      divisions={divisions}
       websitesFrom={divisions.find((d) => d.slug === 'websites')?.from ?? null}
+      whatsapp={nav.footer.contact.whatsapp}
     />
   ) : null}
+  <Marquee divisions={divisions} />
   {services ? (
-    <DivisionWidgets content={services.content as Section<'services_grid'>['content']} divisions={divisions} />
+    <Services content={services.content as Section<'services_grid'>['content']} divisions={divisions} />
   ) : null}
-  {why ? <WhyBand content={why.content as Section<'features'>['content']} anchor={why.key} /> : null}
-  {process ? <HowStrip content={process.content as Section<'process'>['content']} anchor={process.key} /> : null}
-  {work ? <WorkRail content={work.content as Section<'work_grid'>['content']} items={featured} /> : null}
+  {why ? <Why content={why.content as Section<'features'>['content']} anchor={why.key} /> : null}
+  {process ? <How content={process.content as Section<'process'>['content']} anchor={process.key} /> : null}
+  <PricingEntry divisions={divisions} />
+  {work ? <Work content={work.content as Section<'work_grid'>['content']} items={featured} /> : null}
   <Voices testimonials={testimonials} />
-  <ClosingBand
+  <Closing
     title={closing?.title ?? 'Tell us what you need'}
     body={closing?.body ?? 'We reply with questions or a written quotation, usually within one business day.'}
     contact={nav.footer.contact}

@@ -1,0 +1,38 @@
+---
+/** How we work (R10.3, HOME_COMPOSITION §5): the CMS steps as numbered circles joined by a dashed line (vertical on phones). */
+import Icon from '../../icons/Icon.astro';
+import type { SectionContent } from '../../../shared/schemas/cms';
+
+interface Props {
+  content: SectionContent<'process'>;
+  anchor: string;
+}
+const { content: c, anchor } = Astro.props;
+---
+
+<section class="hm-sec hm-how" id={anchor} aria-labelledby={`${anchor}-title`}>
+  <div class="container-wide">
+    <header class="hm-head">
+      <h2 id={`${anchor}-title`} class="hm-h2">{c.title}</h2>
+    </header>
+    <ol class="hm-steps" role="list" style={`--steps:${c.steps.length}`}>
+      {
+        c.steps.map((s, i) => (
+          <li>
+            <span class="hm-steps__n" aria-hidden="true">{i + 1}</span>
+            <h3>{s.title}</h3>
+            <p>{s.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+    {
+      c.link ? (
+        <a class="kz-link hm-how__more" href={c.link.href}>
+          {c.link.label}
+          <Icon name="arrow-right" size={16} />
+        </a>
+      ) : null
+    }
+  </div>
+</section>

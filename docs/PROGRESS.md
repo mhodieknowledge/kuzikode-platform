@@ -159,3 +159,7 @@ The **Next step** line must be specific enough that a fresh session can continue
 - 3 phone shots (390, dpr 1) refreshed under docs/screenshots/; admin/portal ones still pre-redesign.
 - `docs/redesign/REDESIGN-REPORT.md` written. Staging run 99 green for 1b7b2de; smoke `/ /pricing /contact /api/health /admin` ok.
 - Tier: sonnet/low. Next: R8.2 sign-off (functional regression), then finish per CLAUDE.md §2.
+
+## 2026-11-14 UTC · R8.2 ✅ Functional regression
+- Unit 743, integration 308, e2e green on CI (run 175, 1b7b2de); users-admin/sweep axe fix (`.kz-rscroll` focusable regions). Lighthouse mobile local: perf 99-100, a11y 97-100. Tier: sonnet/medium, orchestrator reviewed.
+- Redesign roadmap complete: REDESIGN-REPORT.md written.

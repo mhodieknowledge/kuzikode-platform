@@ -124,5 +124,5 @@ the home screen but starting it afresh, just the home screen."* **Scope: only `/
   `prefers-reduced-motion`. (2) Read screenshots only for flagged pages plus the key pages (home, pricing, contact, checkout, workspace overview,
   admin dashboard) at 390 first, then 1440. (3) One `impeccable` audit and one `web-design-guidelines` pass over the whole site. (4) Fix what's found.
   Skip further per-page deep reviews. AC: `QA_REPORT.md` with the sweep results and fixes; no overflow/limit violations remain.
-- [ ] **R8.2 Functional regression:** full unit, integration and e2e suites green. Payments, auth, portal isolation and pricing accuracy verified. Lighthouse mobile ≥ 90 perf / ≥ 95 a11y on key pages.
+- [x] **R8.2 Functional regression:** full unit, integration and e2e suites green. Payments, auth, portal isolation and pricing accuracy verified. Lighthouse mobile ≥ 90 perf / ≥ 95 a11y on key pages.
 - [x] **R8.3 Docs:** update README/ADMIN-GUIDE screenshots and remove any remaining outdated design text. `REDESIGN-REPORT.md` (what changed, before/after, skills used, image traceability summary, known limitations). Deploy to **staging** and smoke test.

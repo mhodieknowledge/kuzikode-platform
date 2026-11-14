@@ -99,8 +99,8 @@ you to choose the effort level):
 |---|---|---|
 | **Basic** | `sonnet` / `low` | Running Playwright screenshot batches and reporting the numbers (overflow, font sizes, tap targets); grep and inventory work; renaming and moving files; deleting legacy components once replaced; lint/type fixes; updating PROGRESS/ROADMAP/IMAGE-REQUESTS; image processing with the existing scripts; simple copy edits |
 | **Standard** | `sonnet` / `medium` | Applying an **established** component or pattern to more pages or admin modules; writing unit/integration/e2e tests from a clear spec; converting a list to the agreed swipe-track pattern; routine bug fixes with a known cause; documentation sections |
-| **Design / integration** | `opus` / `medium` | Composing a **new** page or section from the design direction; reviewing subagent output before you push it; the B.0d board review (`impeccable-finish-reviewer`); motion choreography; non-trivial refactors |
-| **Critical** | `opus` / `high` (rarely higher) | Design-direction decisions, payments/auth/pricing-accuracy changes, hard bugs after a failed attempt, final QA judgement |
+| **Design / integration** | `sonnet` / `medium`, or `opus` / `low` for reviews (see §2d) | Composing a **new** page or section from the design direction; reviewing subagent output before you push it; the B.0d board review (`impeccable-finish-reviewer`); motion choreography; non-trivial refactors |
+| **Critical** | `opus` / `low` (owner: never high, see §2d) | Design-direction decisions, payments/auth/pricing-accuracy changes, hard bugs after a failed attempt, final QA judgement |
 
 Rules: default to the **cheapest tier that can do the job well**; escalate only after a real failure or when the table says so. Give
 subagents precise, self-contained briefs (files, the pattern to follow, acceptance checks) so the cheap tier succeeds first time.
@@ -128,6 +128,13 @@ thinking. So the levers are (1) a smaller context, (2) fewer, cheaper turns, (3)
    sizes), no B.0d reviewer rounds for admin; for **public** pages keep the full loop. Run `verify` once per task, not after every small edit; use
    targeted tests while iterating and the full suite before push. Batch a group of similar admin modules into one subagent job.
 7. **Don't re-derive.** Reuse the established admin patterns (`src/ui/admin/*`) as-is. Don't re-open settled design decisions.
+
+## 2d. Model rule: never Opus high (owner, 2026-11-14)
+The owner: *"Never use Opus high, always use Opus low and Sonnet."* This overrides the §2b table:
+- **Default for everything: Sonnet** (main sessions via hand-off `model: "claude-sonnet-5-5"`; subagents `model: "sonnet"` with `effort`
+  `low` or `medium`).
+- **Opus only at `effort: "low"`**, and only in a fresh subagent for real judgement calls (design reviews, payments/auth/pricing checks, a bug
+  that failed twice). **Never `high`, `xhigh` or `max`**, and never Opus as the main session.
 
 ## 3. Autonomy rules
 

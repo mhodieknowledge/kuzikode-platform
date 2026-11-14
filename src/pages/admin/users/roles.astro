@@ -54,7 +54,7 @@ const has = (role: (typeof roles)[number], p: Permission) => role.key === 'super
   </h2>
   <section class="kz-apane kz-amwrap" aria-label="Permission matrix">
     <div class="kz-apane__body is-flush">
-      <div class="kz-rscroll">
+      <div class="kz-rscroll" tabindex="0" role="region" aria-label="Scrollable table">
         <table class="kz-amatrix">
           <caption class="sr-only">Which roles hold each permission</caption>
           <thead>

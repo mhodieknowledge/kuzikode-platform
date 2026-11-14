@@ -505,7 +505,7 @@
   }
   .kz-footer__blurb {
     max-width: 44ch;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     color: var(--on-night-2);
   }
   .kz-footer__channels {
@@ -548,6 +548,23 @@
       color: var(--on-night);
       text-decoration: underline;
       text-underline-offset: 0.25em;
+    }
+  }
+  /* Touch widths: every footer link keeps a 44 px target (desktop above 1024 is unchanged). */
+  @media (max-width: 1024px) {
+    a.kz-footer__value,
+    .kz-footer__value a,
+    .kz-footer__call,
+    .kz-footer__legal a,
+    .kz-footer__place a,
+    .kz-footer__channels a,
+    .kz-footer__contact a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+    .kz-footer__link {
+      min-width: 44px;
     }
   }
   .kz-news {

@@ -483,7 +483,16 @@
   }
   .kz-lost__grid {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 24px;
+  }
+  .kz-lost__grid > *,
+  .kz-lost__search input {
+    min-width: 0;
+  }
+  .kz-lost__code,
+  .kz-lost__text h1 {
+    overflow-wrap: anywhere;
   }
   .kz-lost__art {
     order: -1;

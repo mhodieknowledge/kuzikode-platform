@@ -939,6 +939,7 @@
     border-top: 2px solid var(--ink-900);
   }
   .kz-iidx__list li {
+    min-width: 0;
     border-bottom: 1px solid var(--bone-300);
   }
   .kz-irow {
@@ -1036,7 +1037,7 @@
     }
     .kz-iidx__list {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       column-gap: 56px;
     }
     .kz-irow {

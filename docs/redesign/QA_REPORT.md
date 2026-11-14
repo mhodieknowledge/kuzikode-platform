@@ -232,3 +232,14 @@ Tool: `node scripts/qa-sweep.mjs` (standalone Playwright/chromium, reduced-motio
 **E. Overflow culprits** as listed above (home hero chips/marquee, 404 page, industries index at 1024).
 
 Skipped (no record): /work/<slug>, /insights/tag/<slug>, /admin/time/bill/<id>, /admin/support/sup_<id>, /admin/careers/applications/app_<id>, /portal/support/sup_<id>.
+
+### R8.1 fix pass (2026-11-14, shared-token level)
+Re-measured with the same sweep (130 routes x 10 viewports).
+| Check | Before | After |
+|---|---|---|
+| Horizontal overflow | 18 | 2 (`/admin/careers/new` and `/admin/careers/job_dev_1` at 1024, 3 px, a form label; left open) |
+| Button label wraps (phones) | 689 | 0 (plan CTAs and account menu were `.sr-only` text counted by the checker; checker now skips `.sr-only`; the account menu already truncates with ellipsis) |
+| Body text < 16 px (phones) | 725 | 580 (footer blurb and workspace subtitle now 16 px; remaining are captions/hints by decision, see DECISIONS.md) |
+| Interactive < 44x44 (touch <= 1024) | 3381 | 397 (378 of them native 18 px checkboxes on `/admin/projects/new`; rest: settings checkbox switches, portal stretched-link row title, desktop "On this page" index at 1024) |
+
+Changes: admin touch floor now applies up to 1024 px (pointer-fine 40 px sizing starts at 1025), admin chrome (home, find, bell, aside toggle, account, nav, authform bar), footer link lists (<= 1024), rail dots (44 px target, layout footprint unchanged), crumbs/summary widths; overflow fixes for home reduced-motion marquee, 404 grid, industries index grid, expenses/invoices tables, plan name.

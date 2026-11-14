@@ -30,73 +30,162 @@ const HMAC = 'dev-only-hmac-secret-not-for-production-use-0001';
 const docToken = (kind, id) => createHmac('sha256', HMAC).update(`${kind}:${id}`).digest('base64url');
 
 const VIEWPORTS = [
-  [360, 740], [375, 667], [390, 844], [412, 915], [430, 932],
-  [768, 1024], [1024, 1366], [1280, 800], [1440, 900], [1920, 1080],
+  [360, 740],
+  [375, 667],
+  [390, 844],
+  [412, 915],
+  [430, 932],
+  [768, 1024],
+  [1024, 1366],
+  [1280, 800],
+  [1440, 900],
+  [1920, 1080],
 ];
 const isPhone = (w) => w >= 360 && w <= 430;
 const isTouch = (w) => w <= 1024;
 
 const list = (l, re, suffix) => ({ list: l, pattern: new RegExp(`^${re}$`), suffix });
 const PUBLIC = [
-  '/', '/about', '/how-we-work', '/services/',
+  '/',
+  '/about',
+  '/how-we-work',
+  '/services/',
   { list: '/services/', pattern: /^\/services\/[a-z0-9-]+$/ },
-  '/pricing', '/industries/',
+  '/pricing',
+  '/industries/',
   { list: '/industries/', pattern: /^\/industries\/[a-z0-9-]+$/ },
-  '/work/', { list: '/work/', pattern: /^\/work\/[a-z0-9-]+$/ },
+  '/work/',
+  { list: '/work/', pattern: /^\/work\/[a-z0-9-]+$/ },
   '/insights/',
   { list: '/insights/', pattern: /^\/insights\/(?!category|tag)[a-z0-9-]+$/ },
   { list: '/insights/', pattern: /^\/insights\/category\/[a-z0-9-]+$/ },
   { list: '/insights/', pattern: /^\/insights\/tag\/[a-z0-9-]+$/ },
-  '/careers/', { list: '/careers/', pattern: /^\/careers\/(?!apply)[a-z0-9-]+$/ },
-  '/faq', '/contact', '/consultation', '/search?q=website', '/legal/privacy', '/legal/terms',
-  `/i/${docToken('invoice', 'inv_e2e_portal_2')}`, '/newsletter/unsubscribe',
-  '/admin/login', '/admin/forgot-password', '/admin/reset-password', '/admin/accept-invite',
-  '/portal/login', '/portal/forgot-password', '/portal/reset-password', '/portal/accept-invite',
+  '/careers/',
+  { list: '/careers/', pattern: /^\/careers\/(?!apply)[a-z0-9-]+$/ },
+  '/faq',
+  '/contact',
+  '/consultation',
+  '/search?q=website',
+  '/legal/privacy',
+  '/legal/terms',
+  `/i/${docToken('invoice', 'inv_e2e_portal_2')}`,
+  '/newsletter/unsubscribe',
+  '/admin/login',
+  '/admin/forgot-password',
+  '/admin/reset-password',
+  '/admin/accept-invite',
+  '/portal/login',
+  '/portal/forgot-password',
+  '/portal/reset-password',
+  '/portal/accept-invite',
   '/no-such-page-for-the-sweep',
 ];
 const ADMIN = [
-  '/admin/', '/admin/notifications', '/admin/account/notifications', '/admin/account/security', '/admin/account/sessions',
-  '/admin/enquiries/', list('/admin/enquiries/', '/admin/enquiries/enq_[A-Za-z0-9_]+'),
-  '/admin/leads/', '/admin/leads/?view=board', '/admin/leads/new',
-  list('/admin/leads/', '/admin/leads/led_[A-Za-z0-9_]+'), list('/admin/leads/', '/admin/leads/led_[A-Za-z0-9_]+', '/edit'),
-  '/admin/clients/', '/admin/clients/new', '/admin/clients/portal-signups', '/admin/clients/cli_e2e_portal',
+  '/admin/',
+  '/admin/notifications',
+  '/admin/account/notifications',
+  '/admin/account/security',
+  '/admin/account/sessions',
+  '/admin/enquiries/',
+  list('/admin/enquiries/', '/admin/enquiries/enq_[A-Za-z0-9_]+'),
+  '/admin/leads/',
+  '/admin/leads/?view=board',
+  '/admin/leads/new',
+  list('/admin/leads/', '/admin/leads/led_[A-Za-z0-9_]+'),
+  list('/admin/leads/', '/admin/leads/led_[A-Za-z0-9_]+', '/edit'),
+  '/admin/clients/',
+  '/admin/clients/new',
+  '/admin/clients/portal-signups',
+  '/admin/clients/cli_e2e_portal',
   '/admin/clients/cli_e2e_portal/edit',
-  '/admin/quotations/', '/admin/quotations/new', '/admin/quotations/quo_e2e_portal_1',
-  '/admin/invoices/', '/admin/invoices/new', '/admin/invoices/inv_e2e_portal_1', '/admin/invoices/inv_e2e_recon',
-  '/admin/payments/', '/admin/payments/pay_e2e_portal_1',
-  '/admin/subscriptions/', '/admin/subscriptions/new',
+  '/admin/quotations/',
+  '/admin/quotations/new',
+  '/admin/quotations/quo_e2e_portal_1',
+  '/admin/invoices/',
+  '/admin/invoices/new',
+  '/admin/invoices/inv_e2e_portal_1',
+  '/admin/invoices/inv_e2e_recon',
+  '/admin/payments/',
+  '/admin/payments/pay_e2e_portal_1',
+  '/admin/subscriptions/',
+  '/admin/subscriptions/new',
   list('/admin/subscriptions/', '/admin/subscriptions/sub_[A-Za-z0-9_]+'),
   list('/admin/subscriptions/', '/admin/subscriptions/sub_[A-Za-z0-9_]+', '/edit'),
-  '/admin/assets/', '/admin/assets/new', list('/admin/assets/', '/admin/assets/ast_[A-Za-z0-9_]+'),
-  '/admin/expenses/', '/admin/expenses/new', '/admin/expenses/categories', '/admin/expenses/report',
+  '/admin/assets/',
+  '/admin/assets/new',
+  list('/admin/assets/', '/admin/assets/ast_[A-Za-z0-9_]+'),
+  '/admin/expenses/',
+  '/admin/expenses/new',
+  '/admin/expenses/categories',
+  '/admin/expenses/report',
   list('/admin/expenses/', '/admin/expenses/exp_[A-Za-z0-9_]+'),
-  '/admin/reports/', '/admin/projects/', '/admin/projects/new', '/admin/projects/prj_e2e_portal',
-  '/admin/projects/prj_e2e_portal/edit', '/admin/time/', list('/admin/time/', '/admin/time/bill/[A-Za-z0-9_]+'),
-  '/admin/support/', '/admin/support/new', list('/admin/support/', '/admin/support/sup_[A-Za-z0-9_]+'),
-  '/admin/cms/', list('/admin/cms/', '/admin/cms/pages/[a-z0-9_.-]+'), '/admin/cms/announcements', '/admin/cms/products',
-  '/admin/cms/portfolio/', list('/admin/cms/portfolio/', '/admin/cms/portfolio/[A-Za-z0-9_]+'),
-  '/admin/services/', '/admin/services/new', '/admin/services/divisions/new',
+  '/admin/reports/',
+  '/admin/projects/',
+  '/admin/projects/new',
+  '/admin/projects/prj_e2e_portal',
+  '/admin/projects/prj_e2e_portal/edit',
+  '/admin/time/',
+  list('/admin/time/', '/admin/time/bill/[A-Za-z0-9_]+'),
+  '/admin/support/',
+  '/admin/support/new',
+  list('/admin/support/', '/admin/support/sup_[A-Za-z0-9_]+'),
+  '/admin/cms/',
+  list('/admin/cms/', '/admin/cms/pages/[a-z0-9_.-]+'),
+  '/admin/cms/announcements',
+  '/admin/cms/products',
+  '/admin/cms/portfolio/',
+  list('/admin/cms/portfolio/', '/admin/cms/portfolio/[A-Za-z0-9_]+'),
+  '/admin/services/',
+  '/admin/services/new',
+  '/admin/services/divisions/new',
   list('/admin/services/', '/admin/services/svc_[A-Za-z0-9_]+'),
   list('/admin/services/', '/admin/services/divisions/[A-Za-z0-9_]+'),
-  '/admin/packages/', '/admin/packages/new', list('/admin/packages/', '/admin/packages/pkg_[A-Za-z0-9_]+'),
-  '/admin/content/', '/admin/content/faq', '/admin/content/technologies', '/admin/content/testimonials',
-  '/admin/content/newsletter', '/admin/content/industries/',
+  '/admin/packages/',
+  '/admin/packages/new',
+  list('/admin/packages/', '/admin/packages/pkg_[A-Za-z0-9_]+'),
+  '/admin/content/',
+  '/admin/content/faq',
+  '/admin/content/technologies',
+  '/admin/content/testimonials',
+  '/admin/content/newsletter',
+  '/admin/content/industries/',
   list('/admin/content/industries/', '/admin/content/industries/[A-Za-z0-9_]+'),
-  '/admin/content/insights/', list('/admin/content/insights/', '/admin/content/insights/[A-Za-z0-9_]+'),
-  '/admin/media/', '/admin/careers/', '/admin/careers/new', '/admin/careers/applicants', '/admin/careers/templates',
+  '/admin/content/insights/',
+  list('/admin/content/insights/', '/admin/content/insights/[A-Za-z0-9_]+'),
+  '/admin/media/',
+  '/admin/careers/',
+  '/admin/careers/new',
+  '/admin/careers/applicants',
+  '/admin/careers/templates',
   list('/admin/careers/', '/admin/careers/job_[A-Za-z0-9_]+'),
   list('/admin/careers/applicants', '/admin/careers/applications/app_[A-Za-z0-9_]+'),
-  '/admin/users/', '/admin/users/roles', '/admin/users/usr_e2e_admin',
-  '/admin/settings/', '/admin/settings/billing', '/admin/settings/numbering', '/admin/settings/website',
-  '/admin/settings/integrations', '/admin/audit/',
+  '/admin/users/',
+  '/admin/users/roles',
+  '/admin/users/usr_e2e_admin',
+  '/admin/settings/',
+  '/admin/settings/billing',
+  '/admin/settings/numbering',
+  '/admin/settings/website',
+  '/admin/settings/integrations',
+  '/admin/audit/',
 ];
 const PORTAL = [
-  '/portal/', '/portal/quotations/', '/portal/quotations/quo_e2e_portal_1', '/portal/invoices/',
-  '/portal/invoices/inv_e2e_portal_1', '/portal/invoices/inv_e2e_portal_1/pay', '/portal/payments/',
-  '/portal/payments/attempts/pat_e2e_portal_failed', '/portal/projects/', '/portal/projects/prj_e2e_portal',
-  '/portal/services', '/portal/support/', '/portal/support/new',
+  '/portal/',
+  '/portal/quotations/',
+  '/portal/quotations/quo_e2e_portal_1',
+  '/portal/invoices/',
+  '/portal/invoices/inv_e2e_portal_1',
+  '/portal/invoices/inv_e2e_portal_1/pay',
+  '/portal/payments/',
+  '/portal/payments/attempts/pat_e2e_portal_failed',
+  '/portal/projects/',
+  '/portal/projects/prj_e2e_portal',
+  '/portal/services',
+  '/portal/support/',
+  '/portal/support/new',
   { list: '/portal/support/', pattern: /^\/portal\/support\/sup_[A-Za-z0-9_]+$/ },
-  '/portal/account/', '/portal/account/sessions',
+  '/portal/account/',
+  '/portal/account/sessions',
 ];
 
 /** Runs inside the page. Returns raw findings for one viewport. */
@@ -121,7 +210,11 @@ function measure({ phone, touch }) {
     }
     return parts.join(' > ');
   };
-  const txt = (el) => (el.textContent || el.getAttribute('aria-label') || el.getAttribute('title') || '').trim().replace(/\s+/g, ' ').slice(0, 30);
+  const txt = (el) =>
+    (el.textContent || el.getAttribute('aria-label') || el.getAttribute('title') || '')
+      .trim()
+      .replace(/\s+/g, ' ')
+      .slice(0, 30);
   const out = { overflow: null, type: [], tap: [], images: [], anims: [] };
   const sw = document.documentElement.scrollWidth - document.documentElement.clientWidth;
   if (sw > 0) {
@@ -131,7 +224,8 @@ function measure({ phone, touch }) {
       .map(sel);
     out.overflow = { px: sw, culprits };
   }
-  const lines = (el, s) => Math.round(el.getBoundingClientRect().height / (parseFloat(s.lineHeight) || parseFloat(s.fontSize) * 1.2));
+  const lines = (el, s) =>
+    Math.round(el.getBoundingClientRect().height / (parseFloat(s.lineHeight) || parseFloat(s.fontSize) * 1.2));
   if (phone) {
     for (const el of document.querySelectorAll('h1, h2')) {
       const v = vis(el);
@@ -140,13 +234,24 @@ function measure({ phone, touch }) {
       const n = lines(el, v.s);
       const max = el.tagName === 'H1' ? 38 : 30;
       const maxLines = el.tagName === 'H1' ? 4 : 3;
-      if (fs > max) out.type.push({ kind: `${el.tagName.toLowerCase()}>${max}px`, sel: sel(el), val: `${fs}px`, text: txt(el) });
-      if (n > maxLines) out.type.push({ kind: `${el.tagName.toLowerCase()} lines>${maxLines}`, sel: sel(el), val: `${n} lines`, text: txt(el) });
+      if (fs > max)
+        out.type.push({ kind: `${el.tagName.toLowerCase()}>${max}px`, sel: sel(el), val: `${fs}px`, text: txt(el) });
+      if (n > maxLines)
+        out.type.push({
+          kind: `${el.tagName.toLowerCase()} lines>${maxLines}`,
+          sel: sel(el),
+          val: `${n} lines`,
+          text: txt(el),
+        });
     }
     for (const el of document.querySelectorAll('p, li')) {
       const v = vis(el);
       if (!v) continue;
-      const own = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim();
+      const own = [...el.childNodes]
+        .filter((n) => n.nodeType === 3)
+        .map((n) => n.textContent)
+        .join('')
+        .trim();
       if (own.length < 60) continue;
       const fs = parseFloat(v.s.fontSize);
       if (fs < 12) out.type.push({ kind: 'text<12px', sel: sel(el), val: `${fs}px`, text: txt(el) });
@@ -159,24 +264,30 @@ function measure({ phone, touch }) {
       const tops = new Set();
       const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
       for (let n = tw.nextNode(); n; n = tw.nextNode()) {
-        if (!n.textContent.trim()) continue;
+        if (!n.textContent.trim() || n.parentElement?.closest('.sr-only')) continue;
         const rg = document.createRange();
         rg.selectNodeContents(n);
-        for (const q of rg.getClientRects()) if (q.width > 0) tops.add(Math.round(q.top / 6));
+        for (const q of rg.getClientRects()) if (q.width > 2) tops.add(Math.round(q.top / 6));
       }
-      if (tops.size > 1) out.type.push({ kind: 'button label wraps', sel: sel(el), val: `${tops.size} lines`, text: txt(el) });
+      if (tops.size > 1)
+        out.type.push({ kind: 'button label wraps', sel: sel(el), val: `${tops.size} lines`, text: txt(el) });
     }
   }
   if (touch) {
     const seen = new Set();
-    for (const el of document.querySelectorAll('a[href], button, input:not([type=hidden]), select, textarea, summary, [role=button], [role=tab], [role=switch]')) {
+    for (const el of document.querySelectorAll(
+      'a[href], button, input:not([type=hidden]), select, textarea, summary, [role=button], [role=tab], [role=switch]',
+    )) {
       const v = vis(el);
       if (!v || el.disabled) continue;
       if (v.s.display === 'inline' && el.tagName === 'A') continue; // inline text link: WCAG 2.5.8 inline exception
       if (el.classList.contains('skip-link') || (v.r.width <= 2 && v.r.height <= 2)) continue; // visually hidden until focused
       if (el.type === 'checkbox' || el.type === 'radio') {
         const lab = el.closest('label') || (el.id && document.querySelector(`label[for="${el.id}"]`));
-        if (lab) { const lr = lab.getBoundingClientRect(); if (lr.width >= 44 && lr.height >= 44) continue; }
+        if (lab) {
+          const lr = lab.getBoundingClientRect();
+          if (lr.width >= 44 && lr.height >= 44) continue;
+        }
       }
       if (v.r.width < 44 || v.r.height < 44) {
         const key = sel(el);
@@ -190,7 +301,8 @@ function measure({ phone, touch }) {
     const r = img.getBoundingClientRect();
     const src = img.currentSrc || img.src;
     if (!src) continue;
-    if (img.complete && img.naturalWidth === 0) out.images.push({ sel: sel(img), why: 'naturalWidth 0', src: src.slice(0, 80) });
+    if (img.complete && img.naturalWidth === 0)
+      out.images.push({ sel: sel(img), why: 'naturalWidth 0', src: src.slice(0, 80) });
     else if ((r.width === 0 || r.height === 0) && img.offsetParent !== null && getComputedStyle(img).display !== 'none')
       out.images.push({ sel: sel(img), why: 'zero-size', src: src.slice(0, 80) });
   }
@@ -204,21 +316,30 @@ function measure({ phone, touch }) {
 }
 
 async function healthy() {
-  try { return (await fetch(`${BASE}/api/health`)).ok; } catch { return false; }
+  try {
+    return (await fetch(`${BASE}/api/health`)).ok;
+  } catch {
+    return false;
+  }
 }
 
 let server = null;
 async function ensureServer() {
   if (await healthy()) return;
   if (!existsSync('dist/server')) throw new Error('No dist/: run `npm run build` first');
-  server = spawn('npx', ['wrangler', 'dev', '--port', String(PORT), '--var', `PUBLIC_SITE_URL:${BASE}`], { stdio: 'ignore', detached: true });
+  server = spawn('npx', ['wrangler', 'dev', '--port', String(PORT), '--var', `PUBLIC_SITE_URL:${BASE}`], {
+    stdio: 'ignore',
+    detached: true,
+  });
   for (let i = 0; i < 120 && !(await healthy()); i++) await new Promise((r) => setTimeout(r, 2000));
   if (!(await healthy())) throw new Error('server did not start');
 }
 
 async function signIn(page, area, email) {
   await page.goto(`${BASE}/${area}/login`);
-  await page.waitForFunction(() => !document.querySelector('astro-island[ssr]'), null, { timeout: 15000 }).catch(() => {});
+  await page
+    .waitForFunction(() => !document.querySelector('astro-island[ssr]'), null, { timeout: 15000 })
+    .catch(() => {});
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(PASSWORD);
   await page.getByRole('button', { name: 'Sign in' }).click();
@@ -244,12 +365,17 @@ async function sweepArea(browser, area, targets, login) {
   });
   const page = await ctx.newPage();
   let errors = [];
-  page.on('console', (m) => { if (m.type() === 'error') errors.push(`console: ${m.text().slice(0, 160)}`); });
+  page.on('console', (m) => {
+    if (m.type() === 'error') errors.push(`console: ${m.text().slice(0, 160)}`);
+  });
   page.on('pageerror', (e) => errors.push(`pageerror: ${String(e.message).slice(0, 160)}`));
   if (login) await signIn(page, login.area, login.email);
   for (const t of targets) {
     const path = await resolveTarget(page, t);
-    if (!path) { skipped.push(typeof t === 'string' ? t : t.pattern.source); continue; }
+    if (!path) {
+      skipped.push(typeof t === 'string' ? t : t.pattern.source);
+      continue;
+    }
     errors = [];
     const rec = { area, path, status: 0, viewports: {}, errors: [] };
     try {
@@ -259,7 +385,10 @@ async function sweepArea(browser, area, targets, login) {
       await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
       // trigger lazy images
       await page.evaluate(async () => {
-        for (let y = 0; y < document.body.scrollHeight; y += innerHeight) { scrollTo(0, y); await new Promise((r) => setTimeout(r, 40)); }
+        for (let y = 0; y < document.body.scrollHeight; y += innerHeight) {
+          scrollTo(0, y);
+          await new Promise((r) => setTimeout(r, 40));
+        }
         scrollTo(0, 0);
       });
       await page.waitForTimeout(200);
@@ -288,7 +417,21 @@ const main = async () => {
   await browser.close();
   writeFileSync(OUT, JSON.stringify({ viewports: VIEWPORTS, skipped, results }, null, 1));
   console.log(`\nwrote ${OUT}: ${results.length} routes, ${skipped.length} skipped (no record)`);
-  if (server) try { process.kill(-server.pid); } catch {}
+  if (server)
+    try {
+      process.kill(-server.pid);
+    } catch {
+      /* already stopped */
+    }
   process.exit(0);
 };
-main().catch((e) => { console.error(e); if (server) try { process.kill(-server.pid); } catch {} process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  if (server)
+    try {
+      process.kill(-server.pid);
+    } catch {
+      /* already stopped */
+    }
+  process.exit(1);
+});

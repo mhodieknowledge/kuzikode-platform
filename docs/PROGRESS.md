@@ -115,3 +115,8 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Poppins + webdev type scale in tokens, B.1a guard H1<=38/H2<=30. Brace K mark (board in design/brand/logo-explorations), brand SVG/favicon/OG/email-header set in public/brand, Logo.astro variants, new header. Name = Kuzikode Intelligent Technologies everywhere (migration 0014). PDF mark redrawn (not visually inspected: check a generated PDF in R8.1).
 - verify green (unit 742, integration 308). Tiers: sonnet/high type, opus/medium brand, sonnet/medium rename.
 - Next step: R9.4 floating side menu (Header drawer in src/ui/public/shell/*): fix bugs, inset floating panel, icons+labels, no prices/dividers, tests at 360/390/430 incl. back button.
+
+## 2026-11-14 04:10 UTC · R9.4 ✅ Floating side menu
+- `Header.astro` mobile dialog rebuilt as an inset rounded floating panel (`.kz-fm__*` in public.css; the old `kz-menu__head/item` names clash with the Menu primitive): icon + label rows, no prices/dividers, headings "What we build"/"Explore", Get a quote + WhatsApp/Client workspace pinned at the bottom. `header.ts`: closes on link tap and on bfcache restore (back button).
+- New `tests/e2e/floating-menu.spec.ts` (360/390/430: inset, no prices, icons, scroll lock, Esc, outside tap, navigate + back); public-layout test updated. verify green (unit 742, integration 308). Screenshot read at 390. Tier: sonnet orchestrator, no subagents.
+- Next step: R9.5 footer redesign (REFINEMENTS §6, src/ui/public/shell/Footer.astro, exact contact details from settings).

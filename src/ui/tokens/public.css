@@ -270,19 +270,93 @@
     background: var(--on-night-3);
   }
   .kz-menu__h {
-    margin-top: 28px;
+    margin-top: 20px;
+    padding-inline: 12px;
     font-size: 0.8125rem;
     font-weight: 700;
     color: var(--on-night-3);
   }
 
-  /* ---------- Mobile menu sheet ---------- */
+  /* ---------- Mobile menu: floating panel ---------- */
   .kz-menu .kz-sheet__panel {
+    inset: max(10px, env(safe-area-inset-top)) 10px auto 10px;
+    height: auto;
+    max-height: calc(100dvh - 20px - env(safe-area-inset-top));
+    border-radius: 24px;
     background: var(--night-900);
+    box-shadow: 0 24px 60px rgb(0 0 0 / 0.45);
+    transform: translateY(-10px) scale(0.98);
+    transform-origin: top center;
+  }
+  .kz-menu[data-open] .kz-sheet__panel {
+    transform: none;
+  }
+  @media (min-width: 640px) {
+    .kz-menu .kz-sheet__panel {
+      inset: 12px 12px auto auto;
+      width: min(400px, calc(100% - 24px));
+    }
+  }
+  .kz-fm__head {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 12px 4px 20px;
   }
   .kz-menu .kz-sheet__body {
-    padding-top: 8px;
-    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+    padding: 8px 12px 12px;
+  }
+  .kz-fm__list {
+    display: grid;
+    gap: 2px;
+    margin-top: 6px;
+  }
+  .kz-fm__item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 48px;
+    padding-inline: 12px;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 560;
+    color: #fff;
+    text-decoration: none;
+    transition: background-color var(--dur-state) var(--ease-out);
+  }
+  .kz-fm__item .kz-icon {
+    color: var(--on-night-3);
+    flex: none;
+  }
+  .kz-fm__item[aria-current] {
+    color: var(--gold-400);
+    background: var(--night-800);
+  }
+  .kz-fm__item[aria-current] .kz-icon {
+    color: var(--gold-400);
+  }
+  .kz-fm__item:active {
+    background: var(--night-800);
+  }
+  @media (hover: hover) {
+    .kz-fm__item:hover {
+      background: var(--night-800);
+    }
+  }
+  .kz-fm__foot {
+    display: grid;
+    flex: none;
+    gap: 8px;
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom) * 0);
+    background: var(--night-900);
+    border-radius: 0 0 24px 24px;
+  }
+  .kz-fm__aux {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 8px;
   }
   .kz-menu__search {
     width: 100%;
@@ -300,23 +374,6 @@
   .kz-menu__search:focus-visible {
     outline: 2px solid var(--gold-400);
     outline-offset: 2px;
-  }
-  .kz-menu__link {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 52px;
-    border-bottom: 1px solid var(--night-700);
-    font-size: 1.125rem;
-    font-weight: 560;
-    color: #fff;
-    text-decoration: none;
-  }
-  .kz-menu__link .kz-icon {
-    color: var(--on-night-3);
-  }
-  .kz-menu__link[aria-current] {
-    color: var(--gold-400);
   }
   .kz-channel {
     display: flex;

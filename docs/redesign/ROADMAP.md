@@ -88,7 +88,7 @@ Scope guard: only these items; don't touch other sections.
 - [x] **R9.1 Service catalogue + pricing data** (REFINEMENTS §1): migration (deactivate old, insert new), seeds, 301s, remove products/Business Suite/care/hosting/email/domains from public pages, update the pricing-accuracy test.
 - [x] **R9.2 Pricing pages** (§2): carousel primary, tabs removed, all-plans comparison table below, one CTA, no duplicate sections; each division page only its own offers.
 - [x] **R9.3 Brand + header + typography** (§8, §9): 3 mark explorations → chosen SVG set; "Kuzikode Intelligent Technologies" everywhere; header redesign; Poppins + webdev type scale in tokens; B.1a guard updated.
-- [ ] **R9.4 Floating side menu** (§5): bug fixes, floating panel, icons, no prices/dividers, Playwright open/close/nav tests.
+- [x] **R9.4 Floating side menu** (§5): bug fixes, floating panel, icons, no prices/dividers, Playwright open/close/nav tests.
 - [ ] **R9.5 Footer redesign** (§6) with the exact contact details (settings-backed).
 - [ ] **R9.6 Home page + hero redesign** (§7): background-image hero with overlay widgets, mid-page bands, division widgets with starting prices only, home image batch written + owner notified.
 - [ ] **R9.7 Image integration audit + tech-stack removal** (§3, §4) on all public pages; 301 `/technologies*`.

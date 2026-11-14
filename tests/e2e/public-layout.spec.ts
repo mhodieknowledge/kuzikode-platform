@@ -48,8 +48,9 @@ test.describe('public layout', () => {
       await page.getByRole('button', { name: 'Open menu' }).click();
       const dialog = page.getByRole('dialog', { name: 'Menu' });
       await expect(dialog).toBeVisible();
-      await expect(dialog.getByRole('link', { name: /^06 Add-ons/ })).toBeVisible();
+      await expect(dialog.getByRole('link', { name: /Add-ons/ })).toBeVisible();
       await expect(dialog.getByRole('link', { name: 'Get a quote' })).toBeVisible();
+      await page.waitForTimeout(450); // let the open transition settle before axe samples colours
       await expectAccessible(page);
       await page.keyboard.press('Escape');
       await expect(dialog).toBeHidden();

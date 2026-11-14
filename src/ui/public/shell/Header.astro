@@ -9,7 +9,7 @@
  */
 import Logo from '../../brand/Logo.astro';
 import Icon from '../../icons/Icon.astro';
-import { divisionIcon } from '../../icons/registry';
+import { divisionIcon, type IconName } from '../../icons/registry';
 import type { SiteNavigation } from '../../../server/modules/cms';
 import { divisionShortName, type FromPrice } from '../../../shared/directory';
 
@@ -42,6 +42,16 @@ const top = [
   ...(nav.careersInNav ? [{ label: 'Careers', href: '/careers' }] : []),
   { label: 'Contact', href: '/contact' },
 ];
+const linkIcons: Record<string, IconName> = {
+  '/pricing': 'pay',
+  '/work': 'projects',
+  '/about': 'users',
+  '/insights': 'content',
+  '/careers': 'careers',
+  '/faq': 'help',
+  '/contact': 'email',
+};
+const linkIcon = (href: string): IconName => linkIcons[href] ?? 'arrow-right';
 const floor = (i: number) => String(i + 1).padStart(2, '0');
 const contact = nav.footer.contact;
 const mobileLinks = [
@@ -200,16 +210,16 @@ const mobileLinks = [
   </div>
 </header>
 
-<!-- Phones and tablets: the directory as a full-height sheet -->
+<!-- Phones and tablets: a floating panel (REFINEMENTS §5): inset, rounded, icon + label rows, no prices, no divider lines -->
 <dialog id="site-menu" class="kz-sheet kz-sheet--top kz-menu" aria-label="Menu">
   <div class="kz-sheet__panel on-night">
-    <div class="container-wide flex h-[var(--header-h)] flex-none items-center justify-between gap-4">
+    <div class="kz-fm__head">
       <Logo height={26} />
       <button type="button" class="kz-btn kz-btn--secondary kz-btn--icon" data-kz-sheet-close aria-label="Close menu">
         <Icon name="close" />
       </button>
     </div>
-    <div class="kz-sheet__body container-wide">
+    <div class="kz-sheet__body">
       <form action="/search" method="get" role="search" class="relative">
         <label for="mobile-search" class="sr-only">Search the site</label>
         <Icon name="search" class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-on-night-3" />
@@ -218,79 +228,56 @@ const mobileLinks = [
           name="q"
           type="search"
           maxlength="100"
-          placeholder="Search services, packages, articles"
+          placeholder="Search the site"
           enterkeyhint="search"
           class="kz-menu__search"
         />
       </form>
 
       <h2 class="kz-menu__h" id="menu-dir-label">What we build</h2>
-      <ul class="kz-dir mt-2" role="list" aria-labelledby="menu-dir-label" data-reveal-group>
+      <ul class="kz-fm__list" role="list" aria-labelledby="menu-dir-label">
         {
-          divisions.map((d, i) => (
-            <li class={`kz-div-${(i % 6) + 1}`}>
-              <a href={d.href} class="kz-dir__row">
-                <span class="kz-dir__floor">{floor(i)}</span>
-                <span class="kz-dir__name">{divisionShortName(d.slug, d.name)}</span>
-                {d.from ? (
-                  <span class="kz-dir__from">
-                    from <b class="tnum text-on-night">{d.from.amount}</b>
-                  </span>
-                ) : null}
+          divisions.map((d) => (
+            <li>
+              <a href={d.href} class="kz-fm__item" aria-current={isActive(d.href) ? 'page' : undefined}>
+                <Icon name={divisionIcon(d.slug, d.icon)} size={20} />
+                <span>{divisionShortName(d.slug, d.name)}</span>
               </a>
             </li>
           ))
         }
       </ul>
 
-      <ul class="mt-8 grid grid-cols-1 sm:grid-cols-2 sm:gap-x-8" role="list">
+      <h2 class="kz-menu__h" id="menu-more-label">Explore</h2>
+      <ul class="kz-fm__list" role="list" aria-labelledby="menu-more-label">
         {
           mobileLinks.map((l) => (
             <li>
-              <a href={l.href} class="kz-menu__link" aria-current={isActive(l.href) ? 'page' : undefined}>
-                {l.label}
-                <Icon name="chevron-right" size={20} />
+              <a href={l.href} class="kz-fm__item" aria-current={isActive(l.href) ? 'page' : undefined}>
+                <Icon name={linkIcon(l.href)} size={20} />
+                <span>{l.label}</span>
               </a>
             </li>
           ))
         }
       </ul>
-
-      <div class="mt-8 grid gap-3 sm:grid-cols-2">
-        <a href="/contact" class="kz-btn kz-btn--primary kz-btn--lg kz-btn--block"><span>Get a quote</span></a>
-        <a href="/portal/login" class="kz-btn kz-btn--secondary kz-btn--lg kz-btn--block">
+    </div>
+    <div class="kz-fm__foot">
+      <a href="/contact" class="kz-btn kz-btn--primary kz-btn--lg kz-btn--block"><span>Get a quote</span></a>
+      <div class="kz-fm__aux">
+        {
+          contact.whatsapp ? (
+            <a href={contact.whatsapp} class="kz-btn kz-btn--secondary kz-btn--block" target="_blank" rel="noopener noreferrer">
+              <Icon name="whatsapp" />
+              <span>WhatsApp<span class="sr-only"> (opens in a new tab)</span></span>
+            </a>
+          ) : null
+        }
+        <a href="/portal/login" class="kz-btn kz-btn--secondary kz-btn--block">
           <Icon name="account" />
           <span>Client workspace</span>
         </a>
       </div>
-
-      {
-        contact.whatsapp || contact.phone || contact.email ? (
-          <ul class="mt-8 grid gap-2 pb-4" role="list" aria-label="Contact">
-            {contact.whatsapp ? (
-              <li>
-                <a href={contact.whatsapp} class="kz-channel" target="_blank" rel="noopener noreferrer">
-                  <Icon name="whatsapp" /> WhatsApp<span class="sr-only"> (opens in a new tab)</span>
-                </a>
-              </li>
-            ) : null}
-            {contact.phone ? (
-              <li>
-                <a href={`tel:${contact.phone.replace(/\s+/g, '')}`} class="kz-channel">
-                  <Icon name="phone" /> {contact.phone}
-                </a>
-              </li>
-            ) : null}
-            {contact.email ? (
-              <li>
-                <a href={`mailto:${contact.email}`} class="kz-channel">
-                  <Icon name="email" /> {contact.email}
-                </a>
-              </li>
-            ) : null}
-          </ul>
-        ) : null
-      }
     </div>
   </div>
 </dialog>

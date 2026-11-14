@@ -137,4 +137,21 @@ export function initHeader() {
   });
   requestAnimationFrame(rest);
   document.fonts?.ready.then(rest);
+
+  /* Mobile menu: close on any link tap, and when the page is restored from the back/forward cache with the menu still open. */
+  const sheet = document.getElementById('site-menu');
+  if (sheet instanceof HTMLDialogElement) {
+    sheet.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a[href]')) {
+        delete sheet.dataset.open;
+        setTimeout(() => sheet.open && sheet.close(), 120);
+      }
+    });
+    addEventListener('pageshow', (e) => {
+      if (e.persisted && sheet.open) {
+        delete sheet.dataset.open;
+        sheet.close();
+      }
+    });
+  }
 }

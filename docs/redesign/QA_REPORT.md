@@ -174,3 +174,18 @@ Harness: `playwright.visual.config.ts` (`SHOOT=… SHOOT_SET=all|core|quick SHOO
   (UI-created requests work). Investigate with the integration tests in R8.2.
 - e2e: portal-auth, security, users-admin, admin-shell, clients, full-journey, checkout, sweep, payment-gateways, subscriptions, services,
   mobile-limits, home, pricing-accuracy green.
+
+## 2026-11-14 · R8.1 automated sweep (raw)
+
+### Sweep results
+Command: `npx playwright test tests/e2e/sweep.spec.ts --trace off` (after `npm ci`). Result: **3 passed, 0 failed** (public 46s, admin 2.3m, portal 22s).
+
+What the existing sweep checks per route: HTTP status, axe serious/critical WCAG 2.1 AA, horizontal overflow at **3 widths only** (375/768/1440, `WIDTHS` in tests/e2e/helpers.ts), skip-link first Tab.
+- Horizontal overflow: none at 375/768/1440.
+- axe serious/critical: none.
+- Routes with no seeded record (not tested): /work/<slug>, /insights/tag/<slug>, /admin/time/bill/<id>, /admin/support/sup_<id>, /admin/careers/applications/app_<id>, /portal/support/sup_<id>.
+
+NOT covered by the existing sweep (no spec exists, so not measured): the 10-viewport matrix, B.1a type-limit violations, tap targets <44px, broken/missing images, console errors, prefers-reduced-motion. These need a new sweep script (not written, per instructions).
+
+### Flagged pages with viewport + selector
+None flagged by the existing sweep.

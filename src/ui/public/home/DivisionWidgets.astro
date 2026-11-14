@@ -1,0 +1,88 @@
+---
+/**
+ * "What we do" (R9.6, REFINEMENTS §7): the five featured divisions (Add-ons excluded) as designed widgets, not cards. Each widget
+ * is an illustration plate on its division tint (Route drawing, BRIEF B.4a) with the numeral, a "from" price tag hung over the
+ * plate's edge, the name and the one-line summary; the whole widget links to the division page. A jump row anchors to each widget.
+ * Phones: a swipe track (next widget peeking, dots). Desktop: a bento (Websites wide, then four).
+ * Prices: only the division's starting price from `divisionFromPrice` (the pricing catalogue); no price lists.
+ */
+import DivisionArt from '../../illustrations/DivisionArt.astro';
+import Icon from '../../icons/Icon.astro';
+import type { SectionContent } from '../../../shared/schemas/cms';
+import { divisionShortName, fromSuffix, type FromPrice } from '../../../shared/directory';
+
+interface Props {
+  content: SectionContent<'services_grid'>;
+  divisions: { slug: string; name: string; summary: string; href: string; from: FromPrice | null }[];
+}
+const { content: c, divisions } = Astro.props;
+const areas = divisions.map((d, i) => ({
+  ...d,
+  n: String(i + 1).padStart(2, '0'),
+  hue: `kz-div-${(i % 6) + 1}`,
+  short: divisionShortName(d.slug, d.name),
+}));
+---
+
+<section class="kz-sec kz-areas" id="services" aria-labelledby="areas-title">
+  <div class="container-wide">
+    <header class="kz-areas__head">
+      <h2 id="areas-title" class="kz-h2">{c.title}</h2>
+      {c.intro ? <p class="kz-lede">{c.intro}</p> : null}
+    </header>
+
+    <nav class="kz-areas__jump" aria-label="Jump to an area of work">
+      <ul role="list">
+        {
+          areas.map((a) => (
+            <li class={a.hue}>
+              <a href={`#area-${a.slug}`}>
+                <span class="kz-areas__swatch" aria-hidden="true" />
+                {a.short}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <ol class="kz-areas__track" role="list" data-kz-track>
+      {
+        areas.map((a) => (
+          <li class:list={['kz-area', a.hue]} id={`area-${a.slug}`} data-area={a.slug}>
+            <div class="kz-area__plate" data-ill-host>
+              <DivisionArt slug={a.slug} class="kz-area__art" />
+              <span class="kz-area__n" aria-hidden="true">
+                {a.n}
+              </span>
+              <span class="kz-area__from">
+                {a.from ? (
+                  <>
+                    from <b>{a.from.amount}</b>
+                    {fromSuffix(a.from)}
+                  </>
+                ) : (
+                  'Quoted'
+                )}
+              </span>
+            </div>
+            <div class="kz-area__text">
+              <h3 class="kz-area__name">
+                <a href={a.href} class="kz-area__link">
+                  {a.short}
+                </a>
+              </h3>
+              <p class="kz-area__value">{a.summary}</p>
+              <span class="kz-area__go" aria-hidden="true">
+                <Icon name="arrow-right" size={20} />
+              </span>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+    <div class="kz-track__dots kz-areas__dots" aria-hidden="true" data-kz-track-dots>
+      {areas.map((_, i) => <i class:list={[i === 0 && 'is-on']} />)}
+    </div>
+  </div>
+</section>

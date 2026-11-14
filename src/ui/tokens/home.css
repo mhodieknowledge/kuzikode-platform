@@ -1,283 +1,331 @@
 /*
- * Home: premium hero (workspace window) and route index. Prototype: design/concepts/b2. Phone limits (BRIEF B.1a):
- * H1 38 px ≤ 4 lines, body ≥ 16 px, buttons on one line, the visual inside the first screen.
+ * Home (R9.6, REFINEMENTS §7): photo hero with overlay widgets, division widgets, the "Why" image band, the how-we-work strip
+ * and the closing image band. Phone limits (BRIEF B.1a): H1 38 px ≤ 4 lines, H2 30 px, body ≥ 16 px, buttons on one line,
+ * the visual inside the first screen, hero ≤ 85svh. Photos are never bare: always under an overlay with content and widgets.
  */
 @layer components {
+  /* ================= Hero ================= */
   .kz-hero {
-    padding: 16px 0 8px;
+    position: relative;
+    isolation: isolate;
     overflow: clip;
+    background: var(--night-950);
+  }
+  .kz-hero > .kz-hero__img,
+  .kz-iband > .kz-iband__img {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    background: var(--night-950);
+  }
+  .kz-hero__img img {
+    object-position: 62% 40%;
+  }
+  .kz-hero__shade {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      180deg,
+      rgb(14 13 12 / 0.9) 0%,
+      rgb(14 13 12 / 0.74) 46%,
+      rgb(14 13 12 / 0.5) 72%,
+      rgb(14 13 12 / 0.82) 100%
+    );
   }
   .kz-hero__grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 16px;
+    gap: 18px;
+    padding-block: 16px 20px;
   }
   .kz-hero__title {
     font-size: var(--kz-h1);
     line-height: 1.08;
     letter-spacing: -0.015em;
     font-weight: 700;
-    color: var(--ink-900);
-    max-width: 16ch;
+    color: var(--on-night);
+    max-width: 15ch;
+    text-wrap: balance;
   }
   .kz-hero__value {
-    font-size: 1rem;
-    line-height: 1.5;
-    color: var(--ink-700);
+    margin-top: 12px;
+    font-size: var(--kz-body);
+    line-height: 1.55;
+    color: var(--on-night-2);
     max-width: 46ch;
   }
   .kz-hero__acts {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 8px 20px;
-    margin-top: 14px;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .kz-hero__acts .kz-btn--lg {
+    padding-inline: 20px;
   }
   .kz-hero__proof {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px 14px;
-    margin-top: 10px;
+    margin-top: 14px;
     font-size: 0.8125rem;
-    color: var(--ink-500);
+    line-height: 1.5;
+    color: var(--on-night-3);
   }
   .kz-hero__proof b {
+    color: var(--lit);
     font-weight: 700;
-    color: var(--ink-900);
     font-variant-numeric: tabular-nums;
   }
 
-  /* The workspace window: four elevations (window · project · note · invoice). */
-  .kz-scene {
+  /* Overlay widgets: window (back) · status card (middle) · payment chips (front). */
+  .kz-hw {
     position: relative;
-    isolation: isolate;
-    padding-bottom: 58px;
+    min-height: 222px;
+    font-size: 0.75rem;
   }
-  .kz-win {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    border-radius: 14px;
+  @media (max-width: 379px) {
+    .kz-hw {
+      min-height: 208px;
+    }
+    .kz-hero__acts {
+      margin-top: 16px;
+    }
+  }
+  .kz-hw__win {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 74%;
+    border-radius: var(--radius-panel);
     overflow: hidden;
     background: var(--night-900);
     color: var(--on-night-2);
     box-shadow:
-      0 0 0 1px var(--night-950),
-      0 30px 60px -28px rgb(0 0 0 / 0.55),
-      0 10px 20px -12px rgb(0 0 0 / 0.3);
+      0 0 0 1px var(--night-700),
+      0 24px 48px -20px rgb(0 0 0 / 0.7);
   }
-  .kz-win__top {
+  .kz-hw__bar {
     display: flex;
-    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--night-700);
+    color: var(--on-night-3);
+  }
+  .kz-hw__bar b {
+    color: var(--on-night);
+    font-weight: 600;
+  }
+  .kz-hw__body {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .kz-hw__dock {
+    display: grid;
+    align-content: start;
+    gap: 2px;
+    padding: 8px;
+    border-right: 1px solid var(--night-700);
+    list-style: none;
+  }
+  .kz-hw__dock li {
+    display: flex;
     justify-content: space-between;
     gap: 10px;
-    padding: 11px 14px;
-    border-bottom: 1px solid var(--night-700);
-    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: var(--radius-xs);
+    white-space: nowrap;
   }
-  .kz-win__top b {
+  .kz-hw__dock li.is-on {
+    background: var(--night-800);
     color: var(--on-night);
-    font-size: 0.8125rem;
+    box-shadow: inset 2px 0 0 var(--lit);
   }
-  .kz-win__status {
+  .kz-hw__dock i {
+    font-style: normal;
+    color: var(--lit);
+    font-variant-numeric: tabular-nums;
+  }
+  .kz-hw__log {
+    display: none;
+    align-content: start;
+    gap: 7px;
+    padding: 10px 12px;
+  }
+  .kz-hw__log span {
+    display: flex;
+    gap: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .kz-hw__log small {
+    flex: none;
+    width: 26px;
+    color: var(--on-night-3);
+    font-size: inherit;
+  }
+  .kz-hw__status {
+    position: absolute;
+    left: 0;
+    top: 58px;
+    z-index: 1;
+    width: 68%;
+    max-width: 300px;
+    padding: 12px 14px;
+    border-radius: var(--radius-panel);
+    background: var(--paper);
+    color: var(--ink-700);
+    box-shadow: var(--shadow-float);
+  }
+  .kz-hw__status-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .kz-hw__ok {
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    color: var(--ok-700);
+    font-weight: 600;
   }
-  .kz-win__status::before {
+  .kz-hw__ok::before {
     content: '';
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: var(--lit);
+    background: var(--ok-600);
+    box-shadow: 0 0 0 3px var(--ok-50);
   }
-  .kz-win__dock {
-    display: none;
-  }
-  .kz-win__main {
-    display: grid;
-    gap: 12px;
-    padding: 14px 14px 66px;
-  }
-  .kz-win__head {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 10px;
-    font-size: 0.75rem;
-  }
-  .kz-win__title {
-    color: var(--on-night);
-    font-size: 1.0625rem;
+  .kz-hw__project {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.9375rem;
     font-weight: 700;
-    letter-spacing: -0.01em;
-  }
-  .kz-strip {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
-    padding: 0;
-    list-style: none;
-  }
-  .kz-strip li {
-    display: grid;
-    gap: 6px;
-    font-size: 0.71875rem;
-    line-height: 1.25;
-  }
-  .kz-strip li::before {
-    content: '';
-    height: 6px;
-    border-radius: 2px;
-    background: var(--night-700);
-  }
-  .kz-strip .is-done::before {
-    background: var(--on-night-2);
-  }
-  .kz-strip .is-now {
-    color: var(--on-night);
-    font-weight: 600;
-  }
-  .kz-strip .is-now::before {
-    background: var(--lit);
-  }
-  .kz-win__row,
-  .kz-win__log {
-    display: none;
-  }
-  .kz-wcard {
-    display: grid;
-    gap: 5px;
-    align-content: start;
-    padding: 14px;
-    border-radius: 10px;
-    background: var(--night-800);
-    box-shadow:
-      inset 0 0 0 1px var(--night-700),
-      0 8px 16px -10px rgb(0 0 0 / 0.5);
-    font-size: 0.8125rem;
-  }
-  .kz-wcard small {
-    font-size: 0.75rem;
-  }
-  .kz-wcard--files span {
-    color: var(--on-night);
-  }
-  .kz-wcard__amt {
-    font-weight: 700;
-    font-size: 1.5rem;
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
-    color: var(--on-night);
-  }
-  .kz-note,
-  .kz-paycard {
-    position: absolute;
-    display: grid;
-    gap: 6px;
-    border-radius: 12px;
-    background: var(--paper);
     color: var(--ink-900);
   }
-  .kz-note {
-    z-index: 2;
-    left: 10px;
-    bottom: 6px;
-    width: 52%;
-    padding: 12px;
-    font-size: 0.78125rem;
-    line-height: 1.35;
-    box-shadow:
-      0 0 0 1px rgb(20 20 18 / 0.08),
-      0 16px 30px -16px rgb(0 0 0 / 0.45);
+  .kz-hw__steps {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+    margin-top: 10px;
+    list-style: none;
+    font-size: 0.6875rem;
   }
-  .kz-note small,
-  .kz-paycard small {
-    font-size: 0.71875rem;
+  .kz-hw__steps li {
+    padding-top: 7px;
+    border-top: 3px solid var(--bone-200);
     color: var(--ink-500);
   }
-  .kz-note b {
-    font-weight: 700;
+  @media (max-width: 639px) {
+    .kz-hw__steps li {
+      padding-top: 0;
+      font-size: 0;
+      line-height: 0;
+    }
+    .kz-hw__steps {
+      margin-top: 12px;
+    }
+    .kz-hw__dock li:nth-child(n + 3) {
+      display: none;
+    }
   }
-  .kz-note span {
-    display: none;
+  .kz-hw__steps li.is-done {
+    border-color: var(--emerald-500);
+    color: var(--ink-700);
   }
-  .kz-paycard {
-    z-index: 3;
+  .kz-hw__steps li.is-now {
+    border-color: var(--saffron);
+    color: var(--ink-900);
+    font-weight: 600;
+  }
+  .kz-hw__pay {
+    position: absolute;
     right: 0;
     bottom: 0;
-    width: 46%;
-    padding: 12px;
-    box-shadow:
-      0 0 0 1px rgb(20 20 18 / 0.1),
-      0 24px 44px -18px rgb(0 0 0 / 0.5),
-      0 6px 12px -6px rgb(0 0 0 / 0.2);
-  }
-  .kz-paycard__amt {
-    font-weight: 700;
-    font-size: 1.375rem;
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
-  }
-  .kz-paycard__methods {
+    z-index: 2;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 9px 10px 10px;
+    border-radius: var(--radius-panel);
+    background: var(--night-800);
+    color: var(--on-night-3);
+    box-shadow:
+      0 0 0 1px var(--night-600),
+      0 18px 36px -16px rgb(0 0 0 / 0.7);
+  }
+  .kz-hw__chips {
+    display: flex;
     gap: 5px;
   }
-  .kz-paycard__methods span {
-    padding: 7px 4px;
-    border-radius: 6px;
-    box-shadow: inset 0 0 0 1px var(--bone-200);
-    font-size: 0.71875rem;
-    font-weight: 600;
-    text-align: center;
+  .kz-hw__chips span {
+    padding: 4px 8px;
+    border-radius: var(--radius-xs);
+    background: var(--night-950);
+    color: var(--on-night);
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: inset 0 0 0 1px var(--night-600);
   }
-  .kz-paycard__methods span:nth-child(n + 3) {
-    display: none;
-  }
-  .kz-paycard__methods span:first-child {
-    background: var(--action);
-    color: var(--on-action);
-    box-shadow: none;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .kz-win {
-      animation: kz-rise 0.9s var(--ease-out) both;
-    }
-    .kz-note {
-      animation: kz-rise 0.9s 0.18s var(--ease-out) both;
-    }
-    .kz-paycard {
-      animation: kz-rise 0.9s 0.32s var(--ease-out) both;
-    }
-    [data-enter] {
-      animation: kz-rise 0.7s var(--ease-out) both;
-    }
-    [data-enter='2'] {
-      animation-delay: 0.08s;
-    }
-    [data-enter='3'] {
-      animation-delay: 0.16s;
-    }
-  }
-  @keyframes kz-rise {
-    from {
-      opacity: 0;
-      transform: translateY(14px);
-    }
+  .kz-hw__chips span:first-child {
+    box-shadow: inset 0 0 0 1px var(--gold-400);
   }
 
-  /* Route index: swipe track on phones, typographic index on desktop. */
-  .kz-routes {
-    padding: 20px 0 48px;
+  /* ================= Division widgets ================= */
+  .kz-areas {
+    background: var(--bone-50);
   }
-  .kz-routes__track {
+  .kz-areas__head {
+    margin-bottom: 20px;
+  }
+  .kz-areas__jump {
+    margin: 0 calc(-1 * var(--gutter)) 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .kz-areas__jump::-webkit-scrollbar {
+    display: none;
+  }
+  .kz-areas__jump ul {
+    display: flex;
+    gap: 8px;
+    width: max-content;
+    padding-inline: var(--gutter);
+    list-style: none;
+  }
+  .kz-areas__jump a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: var(--radius-plate);
+    background: var(--paper);
+    box-shadow: inset 0 0 0 1px var(--bone-200);
+    color: var(--ink-900);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: box-shadow var(--dur-state) var(--ease-out);
+  }
+  .kz-areas__swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: var(--kz-div);
+  }
+  .kz-areas__track {
+    position: relative;
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: 74%;
-    gap: 10px;
+    grid-auto-columns: 84%;
+    gap: 12px;
     margin: 0 calc(-1 * var(--gutter));
-    padding: 2px var(--gutter) 6px;
+    padding: 4px var(--gutter) 8px;
     list-style: none;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
@@ -285,276 +333,611 @@
     scrollbar-width: none;
     overscroll-behavior-x: contain;
   }
-  .kz-routes__track::-webkit-scrollbar {
+  .kz-areas__track::-webkit-scrollbar {
     display: none;
   }
-  .kz-routes__track > li {
+  .kz-area {
+    position: relative; /* the name's stretched link covers the whole widget */
+    isolation: isolate;
+    display: grid;
+    grid-template-rows: auto 1fr;
     scroll-snap-align: start;
-    display: grid;
-  }
-  .kz-route {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: baseline;
-    gap: 2px 12px;
-    min-height: 76px;
-    padding: 16px 14px;
-    border-radius: 10px;
+    scroll-margin-top: calc(var(--header-h) + 72px);
+    border-radius: 14px;
     background: var(--paper);
-    box-shadow: inset 0 0 0 1px var(--bone-200);
-    color: var(--ink-900);
-    text-decoration: none;
+    box-shadow:
+      inset 0 0 0 1px var(--bone-200),
+      inset 0 3px 0 var(--kz-div);
+    overflow: hidden;
     transition:
-      transform var(--dur-state) var(--ease-out),
-      box-shadow var(--dur-state) var(--ease-out);
+      box-shadow var(--dur-state) var(--ease-out),
+      transform var(--dur-state) var(--ease-out);
   }
-  .kz-route__n {
-    font-weight: 800;
-    font-size: 1.25rem;
-    line-height: 1;
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
+  .kz-area__plate {
+    position: relative;
+    margin: 10px 10px 0;
+    padding: 14px 14px 24px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--kz-div) 14%, var(--paper));
+  }
+  .kz-area__art {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    margin-inline: auto;
+  }
+  .kz-area__n {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
     color: var(--kz-div-ink);
+    font-variant-numeric: tabular-nums;
   }
-  .kz-route__name {
+  .kz-area__from {
+    position: absolute;
+    left: 14px;
+    bottom: -14px;
+    z-index: 1;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: var(--radius-plate);
+    background: var(--night-900);
+    color: var(--on-night-2);
+    font-size: 0.8125rem;
+    white-space: nowrap;
+    box-shadow: var(--shadow-raise);
+  }
+  .kz-area__from b {
+    color: var(--on-night);
     font-size: 1.0625rem;
     font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .kz-area__text {
+    display: grid;
+    align-content: start;
+    gap: 8px;
+    padding: 28px 16px 60px;
+  }
+  .kz-area__name {
+    padding-right: 36px;
+    font-size: var(--kz-h3);
     line-height: 1.25;
+    font-weight: 700;
     letter-spacing: -0.01em;
   }
-  .kz-route__from {
-    grid-column: 2;
-    font-size: 0.875rem;
+  .kz-area__link {
+    color: var(--ink-900);
+    text-decoration: none;
+  }
+  .kz-area__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+  .kz-area__link:focus-visible {
+    outline: none;
+  }
+  .kz-area:has(.kz-area__link:focus-visible) {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+  }
+  .kz-area__value {
+    font-size: 1rem;
+    line-height: 1.55;
     color: var(--ink-700);
   }
-  .kz-route__from b {
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: var(--ink-900);
+  .kz-area__go {
+    position: absolute;
+    right: 16px;
+    bottom: 18px;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-plate);
+    color: var(--kz-div-ink);
+    box-shadow: inset 0 0 0 1.5px currentColor;
+    transition: transform var(--dur-state) var(--ease-out);
   }
-  .kz-routes__dots {
-    display: flex;
-    gap: 6px;
-    margin-top: 12px;
-  }
-  .kz-routes__dots i {
-    width: 14px;
-    height: 3px;
-    border-radius: 2px;
-    background: var(--bone-300);
-    transition:
-      width var(--dur-state) var(--ease-out),
-      background-color var(--dur-state) var(--ease-out);
-  }
-  .kz-routes__dots i.is-on {
-    width: 28px;
-    background: var(--ink-900);
+  .kz-areas__dots {
+    margin-top: 16px;
   }
   @media (hover: hover) {
-    .kz-route:hover {
+    .kz-areas__jump a:hover {
+      box-shadow: inset 0 0 0 1.5px var(--kz-div);
+    }
+    .kz-area:hover {
       transform: translateY(-2px);
       box-shadow:
-        inset 0 0 0 1.5px var(--kz-div),
-        0 12px 24px -16px rgb(0 0 0 / 0.35);
+        inset 0 0 0 1px var(--bone-300),
+        inset 0 3px 0 var(--kz-div),
+        var(--shadow-float);
+    }
+    .kz-area:hover .kz-area__go {
+      transform: translateX(3px);
     }
   }
 
-  @media (min-width: 768px) {
-    .kz-hero__value {
-      font-size: 1.125rem;
-    }
-    .kz-routes__track {
-      grid-auto-columns: 40%;
-    }
-    .kz-scene {
-      padding-bottom: 72px;
-    }
-    .kz-win__row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .kz-note span {
-      display: block;
-      color: var(--ink-700);
-    }
-    .kz-paycard__methods span:nth-child(n + 3) {
-      display: block;
+  /* ================= Image bands (Why, closing) ================= */
+  .kz-iband {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    background: var(--night-950);
+    color: var(--on-night);
+  }
+  .kz-iband__shade {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      180deg,
+      rgb(14 13 12 / 0.28) 0%,
+      rgb(14 13 12 / 0.4) 26%,
+      rgb(14 13 12 / 0.9) 46%,
+      rgb(14 13 12 / 0.95) 100%
+    );
+  }
+  .kz-iband__lede {
+    margin-top: 12px;
+    max-width: 48ch;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--on-night-2);
+  }
+  .kz-iband__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    padding-block: 40px var(--section-y);
+  }
+  .kz-why .kz-iband__img img {
+    object-position: 30% 50%;
+  }
+  .kz-why > .kz-iband__img {
+    height: 62%;
+    bottom: auto;
+  }
+  .kz-why__widget {
+    display: flex;
+    justify-content: flex-end;
+    min-height: 210px;
+    align-items: flex-end;
+  }
+  .kz-payok {
+    width: min(100%, 290px);
+    padding: 14px 16px 16px;
+    border-radius: var(--radius-panel);
+    background: var(--paper);
+    color: var(--ink-700);
+    font-size: 0.8125rem;
+    box-shadow: 0 24px 48px -20px rgb(0 0 0 / 0.6);
+  }
+  .kz-payok__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    color: var(--ink-500);
+  }
+  .kz-payok__ok {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ok-700);
+    font-weight: 600;
+  }
+  .kz-payok__amt {
+    display: block;
+    margin-top: 6px;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--ink-900);
+    font-variant-numeric: tabular-nums;
+  }
+  .kz-payok__meta {
+    display: block;
+    color: var(--ink-500);
+  }
+  .kz-payok__steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    margin-top: 12px;
+    list-style: none;
+    font-size: 0.75rem;
+  }
+  .kz-payok__steps li {
+    padding-top: 6px;
+    border-top: 3px solid var(--emerald-500);
+  }
+  .kz-payok__steps li.is-now {
+    border-color: var(--saffron);
+    color: var(--ink-900);
+    font-weight: 600;
+  }
+  .kz-why__claims {
+    position: relative;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 82%;
+    gap: 12px;
+    margin: 24px calc(-1 * var(--gutter)) 0;
+    padding: 2px var(--gutter) 4px;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .kz-why__claims::-webkit-scrollbar {
+    display: none;
+  }
+  .kz-why__claim {
+    scroll-snap-align: start;
+    padding: 16px;
+    border-radius: var(--radius-panel);
+    background: rgb(31 30 27 / 0.92);
+    box-shadow: inset 0 0 0 1px var(--night-700);
+  }
+  .kz-why__claim h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--on-night);
+  }
+  .kz-why__claim h3 svg {
+    flex: none;
+    color: var(--lit);
+  }
+  .kz-why__claim p {
+    margin-top: 8px;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--on-night-2);
+  }
+  .kz-why .kz-why__dots i {
+    background: var(--night-600);
+  }
+  .kz-why .kz-why__dots i.is-on {
+    background: var(--lit);
+  }
+
+  /* ================= How we work strip ================= */
+  .kz-how {
+    padding-block: 48px;
+    background: var(--paper);
+    border-bottom: 1px solid var(--bone-200);
+  }
+  .kz-how__grid {
+    display: grid;
+    gap: 20px;
+  }
+  .kz-how__title {
+    font-size: var(--kz-h3);
+    line-height: 1.25;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .kz-how__steps {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(var(--steps, 5), minmax(0, 1fr));
+    list-style: none;
+  }
+  .kz-how__steps::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 16px;
+    right: 16px;
+    border-top: 2px dashed var(--bone-300);
+  }
+  .kz-how__steps li {
+    position: relative;
+    display: grid;
+    justify-items: start;
+    gap: 8px;
+  }
+  .kz-how__n {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--ink-900);
+    color: var(--on-night);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    box-shadow: 0 0 0 4px var(--paper);
+  }
+  .kz-how__steps li:nth-child(3) .kz-how__n {
+    background: var(--saffron);
+    color: var(--ink-900);
+  }
+  .kz-how__name {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ink-900);
+  }
+  .kz-how__more {
+    justify-self: start;
+  }
+
+  /* ================= Closing band ================= */
+  .kz-close .kz-iband__shade {
+    background: linear-gradient(180deg, rgb(14 13 12 / 0.78) 0%, rgb(14 13 12 / 0.9) 60%, rgb(14 13 12 / 0.96) 100%);
+  }
+  .kz-close__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    padding-block: var(--section-y);
+  }
+  .kz-close__cta {
+    margin-top: 24px;
+  }
+  .kz-close__options {
+    display: grid;
+    gap: 10px;
+    list-style: none;
+  }
+  .kz-close__option {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    column-gap: 14px;
+    align-items: center;
+    min-height: 64px;
+    padding: 10px 14px;
+    border-radius: var(--radius-panel);
+    background: rgb(31 30 27 / 0.9);
+    box-shadow: inset 0 0 0 1px var(--night-700);
+    color: var(--on-night);
+    text-decoration: none;
+    transition: box-shadow var(--dur-state) var(--ease-out);
+  }
+  .kz-close__icon {
+    grid-row: 1 / 3;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-plate);
+    background: var(--night-950);
+    color: var(--lit);
+  }
+  .kz-close__label {
+    font-size: 0.8125rem;
+    color: var(--on-night-3);
+  }
+  .kz-close__value {
+    font-size: 1rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+  @media (hover: hover) {
+    .kz-close__option:hover {
+      box-shadow: inset 0 0 0 1.5px var(--lit);
     }
   }
+
+  /* ================= Tablet ================= */
+  @media (min-width: 640px) {
+    .kz-hero__value,
+    .kz-iband__lede {
+      font-size: 1.125rem;
+    }
+    .kz-hw {
+      max-width: 560px;
+      font-size: 0.8125rem;
+    }
+    .kz-hw {
+      min-height: 262px;
+    }
+    .kz-hw__win {
+      width: 72%;
+    }
+    .kz-hw__status {
+      top: 118px;
+      width: 52%;
+    }
+    .kz-hw__log {
+      display: grid;
+    }
+    .kz-areas__track {
+      grid-auto-columns: 46%;
+    }
+    .kz-why__claims {
+      grid-auto-columns: 46%;
+    }
+    .kz-how__name {
+      font-size: 0.9375rem;
+    }
+    .kz-close__options {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+  }
+
+  /* ================= Desktop ================= */
   @media (min-width: 1024px) {
-    .kz-hero {
-      padding: 48px 0 0;
+    .kz-hero__shade {
+      background:
+        linear-gradient(
+          90deg,
+          rgb(14 13 12 / 0.92) 0%,
+          rgb(14 13 12 / 0.78) 38%,
+          rgb(14 13 12 / 0.3) 70%,
+          rgb(14 13 12 / 0.45) 100%
+        ),
+        linear-gradient(0deg, rgb(14 13 12 / 0.6) 0%, transparent 30%);
+    }
+    .kz-hero__img img {
+      object-position: 50% 50%;
     }
     .kz-hero__grid {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-      grid-template-areas:
-        'title scene'
-        'copy scene';
-      column-gap: 56px;
-      row-gap: 0;
+      grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
       align-items: center;
-    }
-    .kz-hero__title {
-      grid-area: title;
-      align-self: end;
-    }
-    .kz-hero__copy {
-      grid-area: copy;
-      align-self: start;
-      margin-top: 22px;
-    }
-    .kz-hero__value {
-      font-size: 1.1875rem;
+      gap: 48px;
+      min-height: min(720px, calc(88svh - var(--header-h)));
+      padding-block: 64px;
     }
     .kz-hero__acts {
       margin-top: 28px;
     }
-    .kz-hero__proof {
-      margin-top: 18px;
-    }
-    /* The window bleeds past the right edge; the note and the invoice stay on the visible part. */
-    .kz-scene {
-      grid-area: scene;
-      margin-right: calc(-1 * var(--gutter));
-      padding: 24px 0 64px 40px;
-    }
-    .kz-win {
-      grid-template-columns: 176px minmax(0, 1fr);
-      border-radius: 14px 0 0 14px;
-    }
-    .kz-win__top {
-      grid-column: 1 / -1;
-      padding: 14px 20px;
-    }
-    .kz-win__dock {
-      display: grid;
-      grid-template-rows: repeat(5, auto) 1fr;
-      gap: 2px;
-      padding: 14px 10px;
-      border-right: 1px solid var(--night-700);
+    .kz-hw {
+      min-height: 360px;
+      max-width: none;
       font-size: 0.8125rem;
     }
-    .kz-win__dock span {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 10px;
-      border-radius: 6px;
+    .kz-hw__win {
+      top: 0;
+      width: 86%;
     }
-    .kz-win__dock i {
-      font-style: normal;
-      font-size: 0.6875rem;
-      font-weight: 700;
-      min-width: 18px;
-      height: 18px;
+    .kz-hw__status {
+      top: 150px;
+      width: 62%;
+    }
+    .kz-hw__pay {
+      right: 4%;
+      bottom: 6px;
+    }
+
+    .kz-areas__head {
       display: grid;
-      place-items: center;
-      border-radius: 9px;
-      background: var(--night-700);
-      color: var(--on-night);
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: 56px;
+      align-items: end;
+      margin-bottom: 28px;
     }
-    .kz-win__dock .is-on {
-      background: var(--night-800);
-      color: var(--on-night);
-    }
-    .kz-win__dock .kz-win__dockfoot {
-      align-self: end;
-      font-size: 0.71875rem;
-      color: var(--on-night-3);
-    }
-    .kz-win__main {
-      padding: 24px 24px 28px;
-      gap: 18px;
-    }
-    .kz-win__log {
-      display: grid;
-      gap: 8px;
+    .kz-areas__head .kz-lede {
       margin: 0;
-      padding: 12px 0 0;
-      list-style: none;
-      border-top: 1px solid var(--night-700);
-      font-size: 0.8125rem;
-      max-width: 52%;
     }
-    .kz-win__log span {
-      display: inline-block;
-      width: 40px;
-      color: var(--on-night-3);
+    .kz-areas__jump {
+      margin: 0 0 28px;
+      overflow: visible;
     }
-    .kz-strip li {
-      font-size: 0.8125rem;
+    .kz-areas__jump ul {
+      flex-wrap: wrap;
+      width: auto;
+      padding: 0;
     }
-    .kz-wcard__amt {
-      font-size: 1.75rem;
-    }
-    .kz-note {
-      left: 0;
-      bottom: 26px;
-      width: 300px;
-      padding: 16px;
-      font-size: 0.875rem;
-    }
-    .kz-paycard {
-      right: calc(var(--gutter) + 24px);
-      bottom: 0;
-      width: 300px;
-      padding: 18px;
-      gap: 8px;
-    }
-    .kz-paycard__amt {
-      font-size: 2rem;
-    }
-    .kz-paycard__methods span {
-      padding: 8px;
-      font-size: 0.75rem;
-    }
-    .kz-routes {
-      padding: 48px 0 64px;
-    }
-    .kz-routes__track {
+    .kz-areas__track {
       grid-auto-flow: row;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      column-gap: 40px;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-auto-columns: auto;
+      gap: 20px;
       margin: 0;
       padding: 0;
       overflow: visible;
-      border-top: 1px solid var(--bone-200);
     }
-    .kz-route {
-      grid-template-columns: 44px minmax(0, 1fr) auto;
-      border-radius: 0;
-      background: none;
-      box-shadow: none;
-      border-bottom: 1px solid var(--bone-200);
-      padding: 18px 0;
+    .kz-area {
+      grid-column: span 2;
     }
-    .kz-route__from {
-      grid-column: 3;
-      text-align: right;
+    .kz-area:nth-child(1) {
+      grid-column: span 4;
+      grid-template-rows: none;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
-    .kz-routes__dots {
+    .kz-area:nth-child(1) .kz-area__plate {
+      margin: 10px 0 10px 10px;
+      display: grid;
+      align-items: center;
+    }
+    .kz-area:nth-child(1) .kz-area__text {
+      padding: 32px 28px 64px;
+      align-content: center;
+    }
+    .kz-area:nth-child(1) .kz-area__name {
+      font-size: var(--kz-h2);
+      line-height: 1.18;
+    }
+    .kz-area:nth-child(1) .kz-area__value {
+      font-size: 1.0625rem;
+    }
+    .kz-areas .kz-areas__dots {
       display: none;
     }
-  }
-  @media (min-width: 1024px) and (hover: hover) {
-    .kz-route:hover {
-      transform: none;
-      box-shadow: none;
-    }
-    .kz-route:hover .kz-route__name {
-      text-decoration: underline;
-      text-decoration-color: var(--kz-div);
-      text-decoration-thickness: 2px;
-      text-underline-offset: 0.25em;
-    }
-  }
-}
 
-/* The header's copy of the primary action steps back while the hero's own is on screen (phones). */
-@media (max-width: 1023px) {
-  .kz-header[data-hero-cta] .kz-header__cta {
-    opacity: 0;
-    pointer-events: none;
-    visibility: hidden;
+    .kz-iband__grid {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      align-items: center;
+      gap: 56px;
+      padding-block: var(--section-y);
+      min-height: 640px;
+    }
+    .kz-iband__shade {
+      background: linear-gradient(
+        90deg,
+        rgb(14 13 12 / 0.94) 0%,
+        rgb(14 13 12 / 0.86) 50%,
+        rgb(14 13 12 / 0.35) 78%,
+        rgb(14 13 12 / 0.25) 100%
+      );
+    }
+    .kz-why > .kz-iband__img {
+      height: 100%;
+    }
+    .kz-why .kz-iband__img img {
+      object-position: 50% 50%;
+    }
+    .kz-why__widget {
+      order: 2;
+      justify-content: center;
+      align-items: center;
+      min-height: 0;
+    }
+    .kz-why__claims {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-auto-columns: auto;
+      gap: 14px;
+      margin: 32px 0 0;
+      padding: 0;
+      overflow: visible;
+    }
+    .kz-why .kz-why__dots {
+      display: none;
+    }
+
+    .kz-how {
+      padding-block: 56px;
+    }
+    .kz-how__grid {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 48px;
+    }
+    .kz-how__steps li {
+      justify-items: start;
+    }
+    .kz-how__name {
+      font-size: 1rem;
+    }
+
+    .kz-close .kz-iband__shade {
+      background: linear-gradient(90deg, rgb(14 13 12 / 0.93) 0%, rgb(14 13 12 / 0.8) 55%, rgb(14 13 12 / 0.55) 100%);
+    }
+    .kz-close__grid {
+      grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+      align-items: center;
+      gap: 56px;
+    }
+    .kz-close__options {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 }

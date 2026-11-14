@@ -3,68 +3,119 @@ import { expectAccessible, screenshots, ownIp } from './helpers';
 
 test.use(ownIp('home'));
 
-test.describe('home page', () => {
-  test('renders every CMS section, hides Selected Work when empty, and passes the visual QA gate', async ({ page }) => {
+/** Starting prices per featured division, from the 2026-11 catalogue (REFINEMENTS §1) through `divisionFromPrice`. */
+const DIVISIONS = [
+  { slug: 'websites', name: 'Websites & web apps', from: 'from $150' },
+  { slug: 'business-software', name: 'Business software', from: 'from $600' },
+  { slug: 'cross-platform-apps', name: 'Cross-platform apps', from: 'from $1,200' },
+  { slug: 'ai-data', name: 'AI, data & intelligence', from: 'from $500' },
+  { slug: 'automation-integration', name: 'Automation & integration', from: 'from $50 / local method' },
+];
+
+test.describe('home page (R9.6)', () => {
+  test('hero, division widgets, image bands and closing band', async ({ page }) => {
     const res = await page.goto('/');
     expect(res!.status()).toBe(200);
-    await expect(
-      page.getByRole('heading', { level: 1, name: 'Building intelligent digital solutions.' }),
-    ).toBeVisible();
+    // Hero: the CMS headline, one primary and one secondary action, a photograph and the overlay widgets.
+    const hero = page.locator('section[aria-labelledby="hero-title"]');
     await expect(page.locator('h1')).toHaveCount(1);
-    for (const h of ['What we do', 'Why Kuzikode', 'How we work', 'What we value', 'Have a project in mind?']) {
-      await expect(page.getByRole('heading', { level: 2, name: h })).toBeVisible();
+    await expect(
+      hero.getByRole('heading', { level: 1, name: 'Building intelligent digital solutions.' }),
+    ).toBeVisible();
+    await expect(hero.getByRole('link', { name: 'Get a quote' })).toHaveAttribute('href', '/contact');
+    await expect(hero.getByRole('link', { name: 'See pricing' })).toHaveAttribute('href', '/pricing');
+    await expect(hero.locator('.kz-hero__img img')).toHaveCount(1);
+    await expect(hero.getByRole('img', { name: /Illustration of the Kuzikode client workspace/ })).toBeVisible();
+
+    // Five division widgets (Add-ons excluded), each with its drawing, a "from" price only, its link and a jump anchor.
+    const widgets = page.locator('.kz-area');
+    await expect(widgets).toHaveCount(5);
+    await expect(page.locator('.kz-areas')).not.toContainText('Add-ons');
+    const jump = page.getByRole('navigation', { name: 'Jump to an area of work' });
+    for (const d of DIVISIONS) {
+      const w = page.locator(`#area-${d.slug}`);
+      await expect(w.locator('.kz-area__from')).toHaveText(d.from);
+      await expect(w.getByRole('link', { name: d.name })).toHaveAttribute('href', `/services/${d.slug}`);
+      await expect(w.locator('svg[data-ill]')).toHaveCount(1);
+      await expect(jump.getByRole('link', { name: d.name })).toHaveAttribute('href', `#area-${d.slug}`);
     }
+    // No price lists on the home page: one price per widget, no package names.
+    await expect(page.locator('main')).not.toContainText('Starter Website');
+    await expect(page.locator('.kz-areas img')).toHaveCount(0);
+
+    // Image bands: photographs only under an overlay with content and widgets on top (REFINEMENTS §3).
+    for (const band of ['.kz-hero', '.kz-why', '.kz-close']) {
+      await expect(page.locator(`${band} > .kz-pic`)).toHaveCount(1);
+    }
+    await expect(page.locator('.kz-pstrip')).toHaveCount(0);
+    await expect(page.getByRole('heading', { level: 2, name: 'Why Kuzikode' })).toBeVisible();
+    await expect(page.getByRole('img', { name: /payment of \$250\.00/ })).toBeAttached();
+    await expect(page.getByRole('heading', { level: 2, name: 'How we work' })).toBeVisible();
+
+    // Closing band: one quote action and the Settings contact options; the footer's own band is off on the home page.
+    const close = page.locator('section[aria-labelledby="close-title"]');
+    await expect(close.getByRole('heading', { name: 'Have a project in mind?' })).toBeVisible();
+    await expect(close.getByRole('link', { name: 'Get a quote' })).toHaveAttribute('href', '/contact');
+    await expect(close.locator('a[href^="https://wa.me/263778825898"]')).toBeVisible();
+    await expect(close.locator('a[href="tel:+263882946290"]')).toBeVisible();
+    await expect(close.locator('a[href="mailto:info@kuzikode.com"]')).toBeVisible();
+    await expect(page.locator('.kz-footer__next')).toHaveCount(0);
+
+    // No products, no tech stack, no unpublished work, no dead links (REFINEMENTS §1, §4).
     await expect(page.getByRole('heading', { name: 'Selected work' })).toHaveCount(0);
-    // No products and no tech stack on public pages (REFINEMENTS §1, §4).
-    await expect(page.getByRole('heading', { name: 'Our products' })).toHaveCount(0);
-    await expect(page.getByRole('heading', { name: 'Tools we build with' })).toHaveCount(0);
-    await expect(page.locator('a[href^="/products"]')).toHaveCount(0);
-    // Services night band (R4.1): one route tab per featured division (the Add-ons division is not a home widget);
-    // each panel shows the division's published packages and prices.
-    const tabs = page.getByRole('tablist', { name: 'Area of work' }).getByRole('tab');
-    await expect(tabs).toHaveCount(5);
-    await expect(tabs.filter({ hasText: 'Add-ons' })).toHaveCount(0);
-    const web = page.getByRole('tabpanel', { name: /Websites & web apps/ });
-    await expect(web.getByText('Starter Website')).toBeVisible();
-    await expect(web.getByText('$150', { exact: true })).toBeVisible();
-    // Division panels carry their Route drawing (BRIEF B.4a), never a photograph.
-    await expect(web.locator('svg[data-ill="web-development"]')).toHaveCount(1);
-    await expect(page.locator('.kz-band__panel img')).toHaveCount(0);
-    await expect(page.locator('a[href="#"]')).toHaveCount(0);
-    // Premium hero (BRIEF B.0e): the workspace window is one labelled illustration, and the route index lists the five divisions.
-    await expect(page.getByRole('img', { name: /Illustration of the Kuzikode client workspace/ })).toBeVisible();
-    const routes = page.getByRole('navigation', { name: 'Our areas of work' });
-    await expect(routes.getByRole('link')).toHaveCount(5);
-    await expect(routes.getByRole('link', { name: /Websites & web apps\s+from \$150/ })).toHaveAttribute(
-      'href',
-      '/services/websites',
-    );
+    await expect(page.locator('a[href^="/products"], a[href="#"]')).toHaveCount(0);
+    const text = (await page.locator('main').innerText()).toLowerCase();
+    for (const word of [
+      'astro',
+      'react',
+      'cloudflare',
+      'typescript',
+      'node.js',
+      'flutter',
+      'laravel',
+      'tech stack',
+      'tools we build with',
+    ]) {
+      expect(text, `tech-stack word "${word}"`).not.toContain(word);
+    }
     await expectAccessible(page);
     await screenshots(page, 'home');
   });
 
-  test('primary actions point at real destinations', async ({ page }) => {
+  test('jump row anchors to a division widget and the widget opens its page', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/');
-    const hero = page.locator('section[aria-labelledby="hero-title"]');
-    // The CMS call to action still points at the retired wizard; it is presented as a quote request (BRIEF B.0c).
-    await expect(hero.getByRole('link', { name: 'Get a quote' })).toHaveAttribute('href', '/contact');
-    await expect(hero.getByRole('link', { name: 'Explore services' })).toHaveAttribute('href', '/services');
-    // Route tabs switch the panel; the panel's actions preselect the division on the contact form.
-    await page.getByRole('tab', { name: /Automation/ }).click();
-    const auto = page.getByRole('tabpanel', { name: /Automation/ });
-    await expect(auto).toBeVisible();
-    await expect(page.getByRole('tabpanel', { name: /Websites & web apps/ })).toBeHidden();
-    await expect(auto.getByRole('link', { name: 'Get a quote' })).toHaveAttribute(
-      'href',
-      '/contact?category=automation-integration',
-    );
-    await page.keyboard.press('ArrowLeft');
-    await expect(page.getByRole('tab', { name: /AI, data/ })).toHaveAttribute('aria-selected', 'true');
-    await page.getByRole('tab', { name: /Websites & web apps/ }).click();
     await page
-      .getByRole('tabpanel', { name: /Websites & web apps/ })
-      .getByRole('link', { name: /Open Websites & web apps/ })
+      .getByRole('navigation', { name: 'Jump to an area of work' })
+      .getByRole('link', { name: 'AI, data & intelligence' })
       .click();
-    await expect(page).toHaveURL(/\/services\/websites$/);
+    await expect(page).toHaveURL(/#area-ai-data$/);
+    await expect(page.locator('#area-ai-data')).toBeInViewport();
+    await page.locator('#area-ai-data').getByRole('link', { name: 'AI, data & intelligence' }).click();
+    await expect(page).toHaveURL(/\/services\/ai-data$/);
+  });
+
+  test('no horizontal overflow at phone, tablet and desktop widths', async ({ page }) => {
+    for (const [width, height] of [
+      [360, 740],
+      [390, 844],
+      [430, 932],
+      [768, 1024],
+      [1440, 900],
+    ] as const) {
+      await page.setViewportSize({ width, height });
+      await page.goto('/');
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
+      expect(overflow, `overflow @ ${width}`).toBeLessThanOrEqual(0);
+      // Tap targets: the jump links, widget links and contact options are at least 44 px tall.
+      const short = await page.evaluate(() =>
+        Array.from(document.querySelectorAll<HTMLElement>('.kz-areas__jump a, .kz-close__option, .kz-hero .kz-btn'))
+          .filter((a) => a.getBoundingClientRect().height < 44)
+          .map((a) => a.textContent?.trim()),
+      );
+      expect(short, `tap targets under 44 px @ ${width}`).toEqual([]);
+    }
   });
 });

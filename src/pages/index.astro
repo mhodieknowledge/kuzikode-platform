@@ -1,19 +1,18 @@
 ---
 /**
- * Home (R4.1, clean slate). Section order from the Route direction, content from the CMS `home` page:
- * hero (workspace window + route index) → services night band (route tabs) → road strip (how we work) → why (ledger + payment
- * slip) → selected work (only when published) → client words (only real, consented) → company band (values);
- * the CMS closing call to action titles the footer's "Where next" routes.
+ * Home (R9.6, REFINEMENTS §7: sell, be easy to navigate, be beautiful). Section order:
+ * photo hero with overlay widgets → the five divisions as widgets (jump row, "from" prices only) → "Why Kuzikode" image band
+ * with a payment widget → how we work (one short strip) → selected work (only when published) → client words (only real,
+ * consented) → closing image band with "Get a quote" and the Settings contact options. Copy comes from the CMS `home` page.
  */
 import PublicLayout from '../layouts/PublicLayout.astro';
 import Hero from '../ui/public/home/Hero.astro';
-import ServicesBand from '../ui/public/home/ServicesBand.astro';
-import PhotoStrip from '../ui/public/shared/PhotoStrip.astro';
-import Approach from '../ui/public/home/Approach.astro';
+import DivisionWidgets from '../ui/public/home/DivisionWidgets.astro';
+import WhyBand from '../ui/public/home/WhyBand.astro';
+import HowStrip from '../ui/public/home/HowStrip.astro';
 import WorkRail from '../ui/public/home/WorkRail.astro';
-import RoadStrip from '../ui/public/home/RoadStrip.astro';
 import Voices from '../ui/public/home/Voices.astro';
-import CompanyBand from '../ui/public/home/CompanyBand.astro';
+import ClosingBand from '../ui/public/home/ClosingBand.astro';
 import { divisionFromPrice } from '../shared/directory';
 import {
   getPage,
@@ -21,36 +20,39 @@ import {
   getServiceCatalogue,
   listPortfolio,
   listTestimonials,
+  siteNavigation,
 } from '../server/modules/cms';
 import type { Section } from '../shared/schemas/cms';
 
 const { ctx } = Astro.locals;
-const [page, catalogue, pricing, portfolio, testimonials] = await Promise.all([
+const [page, catalogue, pricing, portfolio, testimonials, nav] = await Promise.all([
   getPage(ctx, 'home'),
   getServiceCatalogue(ctx),
   getPricingCatalogue(ctx),
   listPortfolio(ctx),
   listTestimonials(ctx),
+  siteNavigation(ctx),
 ]);
 if (!page) return new Response('Not found', { status: 404 });
-// Home shows the featured divisions only (the Add-ons division is priced but is not a home widget, REFINEMENTS §1).
-const categories = catalogue.filter((c) => c.featured);
+// Home shows the featured divisions only (the Add-ons division is priced but is not a home widget, REFINEMENTS §1, §7).
+const divisions = catalogue
+  .filter((c) => c.featured)
+  .map((c) => ({
+    slug: c.slug,
+    name: c.name,
+    summary: c.summary,
+    href: `/services/${c.slug}`,
+    from: pricing.showPrices ? divisionFromPrice(pricing.packages, c.slug) : null,
+  }));
 const featured = portfolio.filter((p) => p.featured).length ? portfolio.filter((p) => p.featured) : portfolio;
 const sections = page.sections as Section[];
-const divisions = categories.map((c) => ({
-  slug: c.slug,
-  name: c.name,
-  href: `/services/${c.slug}`,
-  from: pricing.showPrices ? divisionFromPrice(pricing.packages, c.slug) : null,
-}));
-// Section order is the design's (RESPONSIVE_DESIGN_SPEC, B.0 clean slate), not the CMS list order; content stays the CMS's.
+// Section order is the design's, not the CMS list order; content stays the CMS's.
 const byType = (t: Section['type']) => sections.find((s) => s.type === t);
 const hero = byType('hero');
 const services = byType('services_grid');
 const process = byType('process');
 const why = byType('features');
 const work = byType('work_grid');
-const values = byType('values');
 const closing = byType('cta')?.content as Section<'cta'>['content'] | undefined;
 ---
 
@@ -58,22 +60,25 @@ const closing = byType('cta')?.content as Section<'cta'>['content'] | undefined;
   title={page.seoTitle ?? 'Kuzikode Intelligent Technologies'}
   description={page.seoDescription ?? undefined}
   canonicalPath="/"
-  headerTone="bone"
-  footerLead={closing ? { title: closing.title } : undefined}
+  headerTone="night"
+  footerCta={false}
 >
-  {hero ? <Hero content={hero.content as Section<'hero'>['content']} divisions={divisions} /> : null}
-  {services ? (
-    <ServicesBand
-      content={services.content as Section<'services_grid'>['content']}
-      categories={categories}
-      packages={pricing.packages}
-      showPrices={pricing.showPrices}
+  {hero ? (
+    <Hero
+      content={hero.content as Section<'hero'>['content']}
+      websitesFrom={divisions.find((d) => d.slug === 'websites')?.from ?? null}
     />
   ) : null}
-  {process ? <RoadStrip content={process.content as Section<'process'>['content']} anchor={process.key} /> : null}
-  {why ? <Approach content={why.content as Section<'features'>['content']} anchor={why.key} /> : null}
-  <PhotoStrip image="home-band" />
+  {services ? (
+    <DivisionWidgets content={services.content as Section<'services_grid'>['content']} divisions={divisions} />
+  ) : null}
+  {why ? <WhyBand content={why.content as Section<'features'>['content']} anchor={why.key} /> : null}
+  {process ? <HowStrip content={process.content as Section<'process'>['content']} anchor={process.key} /> : null}
   {work ? <WorkRail content={work.content as Section<'work_grid'>['content']} items={featured} /> : null}
   <Voices testimonials={testimonials} />
-  <CompanyBand values={values?.content as Section<'values'>['content'] | undefined} anchor={values?.key ?? 'values'} />
+  <ClosingBand
+    title={closing?.title ?? 'Tell us what you need'}
+    body={closing?.body ?? 'We reply with questions or a written quotation, usually within one business day.'}
+    contact={nav.footer.contact}
+  />
 </PublicLayout>

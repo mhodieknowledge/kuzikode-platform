@@ -13,19 +13,29 @@ interface Props {
   alt?: string;
   tone?: 'warm' | 'none';
   class?: string;
+  /** Optional art-directed phone crop (another manifest id), served below 768 px. */
+  mobileId?: string | undefined;
 }
-const { id, sizes = '100vw', priority = false, alt, tone = 'none', class: className } = Astro.props;
+const { id, sizes = '100vw', priority = false, alt, tone = 'none', class: className, mobileId } = Astro.props;
 const entry = (
   manifest as {
     images: Record<string, { alt: string; width: number; height: number; widths: number[]; placeholder: string }>;
   }
 ).images[id];
 if (!entry) throw new Error(`Unknown site image "${id}"`);
-const set = (ext: string) => entry.widths.map((w) => `/images/site/${id}-${w}.${ext} ${w}w`).join(', ');
+const images = (manifest as { images: Record<string, { widths: number[] }> }).images;
+const srcset = (img: string, ext: string) =>
+  images[img]!.widths.map((w) => `/images/site/${img}-${w}.${ext} ${w}w`).join(', ');
+const set = (ext: string) => srcset(id, ext);
+const phone = mobileId && images[mobileId] ? mobileId : null;
+const PHONE = '(max-width: 767px)';
 const fallback = `/images/site/${id}-${entry.widths.at(-1)}.jpg`;
 ---
 
 <picture class={['kz-pic', tone === 'warm' && 'kz-pic--warm', className].filter(Boolean).join(' ')}>
+  {phone ? <source media={PHONE} type="image/avif" srcset={srcset(phone, 'avif')} sizes="100vw" /> : null}
+  {phone ? <source media={PHONE} type="image/webp" srcset={srcset(phone, 'webp')} sizes="100vw" /> : null}
+  {phone ? <source media={PHONE} type="image/jpeg" srcset={srcset(phone, 'jpg')} sizes="100vw" /> : null}
   <source type="image/avif" srcset={set('avif')} sizes={sizes} />
   <source type="image/webp" srcset={set('webp')} sizes={sizes} />
   <img

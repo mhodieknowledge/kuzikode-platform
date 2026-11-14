@@ -1,49 +1,52 @@
 ---
 /**
- * Home hero (BRIEF B.0e premium hero, B.1a phone limits; prototype design/concepts/b2). Copy from the CMS hero section
- * (title, body, calls to action); wizard links are presented as "Get a quote" (B.0c). Phones: headline, then the workspace window
- * (visual-led), then the value line, the primary action + a quiet link and the starting price; the route track peeks below.
+ * Home hero (R9.6, REFINEMENTS §7; BRIEF B.0e premium hero, B.1a phone limits). A full-bleed photograph under a warm night
+ * overlay, the CMS headline and value line, one primary action ("Get a quote") and one secondary ("See pricing"), and three
+ * overlay widgets drawn from the real client workspace: a small workspace window, a project-status card and the payment-method
+ * chip row. Phones: copy first, the widget cluster below it, the photograph behind both (visual-led, ≤ 85svh).
+ * Desktop: copy left, the widgets floating over the photograph on the right.
  */
+import Picture from '../../primitives/Picture.astro';
 import type { SectionContent } from '../../../shared/schemas/cms';
 import type { FromPrice } from '../../../shared/directory';
-import { publicCta } from '../lib/cta';
-import WorkspaceWindow from './WorkspaceWindow.astro';
-import RouteIndex from './RouteIndex.astro';
+import HeroWidgets from './HeroWidgets.astro';
+import { HOME_IMAGES } from './images';
 
 interface Props {
   content: SectionContent<'hero'>;
-  divisions: { slug: string; name: string; href: string; from: FromPrice | null }[];
+  /** Lowest published Websites price ("from $150"), shown in the hero proof line; null when prices are hidden. */
+  websitesFrom: FromPrice | null;
 }
-const { content: c, divisions } = Astro.props;
-const primary = publicCta(c.primaryCta);
-const secondary = publicCta(c.secondaryCta);
-const quiet = secondary && secondary.href !== primary.href ? secondary : { label: 'See all prices', href: '/pricing' };
-const websites = divisions.find((d) => d.slug === 'websites')?.from ?? null;
+const { content: c, websitesFrom } = Astro.props;
+const img = HOME_IMAGES.hero;
 ---
 
-<section class="kz-hero" aria-labelledby="hero-title">
+<section class="kz-hero on-night" aria-labelledby="hero-title">
+  <Picture
+    id={img.id}
+    mobileId={img.mobileId}
+    alt=""
+    priority
+    class="kz-hero__img"
+    sizes="100vw"
+  />
+  <div class="kz-hero__shade" aria-hidden="true"></div>
   <div class="container-wide kz-hero__grid">
-    <h1 id="hero-title" class="kz-hero__title" data-enter>{c.title}</h1>
-    <WorkspaceWindow />
     <div class="kz-hero__copy">
+      <h1 id="hero-title" class="kz-hero__title" data-enter>{c.title}</h1>
       <p class="kz-hero__value" data-enter="2">{c.body}</p>
       <div class="kz-hero__acts" data-enter="2">
-        <a class="kz-btn kz-btn--primary kz-btn--lg" href={primary.href} data-hero-cta><span>{primary.label}</span></a>
-        <a class="kz-link" href={quiet.href}>{quiet.label}</a>
+        <a class="kz-btn kz-btn--primary kz-btn--lg" href="/contact" data-hero-cta><span>Get a quote</span></a>
+        <a class="kz-btn kz-btn--secondary kz-btn--lg" href="/pricing"><span>See pricing</span></a>
       </div>
-      <p class="kz-hero__proof" data-enter="3">
-        {
-          websites ? (
-            <span>
-              Websites from <b class="tnum">{websites.amount}</b>
-            </span>
-          ) : null
-        }
-        <span>Pay with EcoCash, OneMoney, InnBucks or card</span>
-      </p>
+      {
+        websitesFrom ? (
+          <p class="kz-hero__proof" data-enter="3">
+            Websites from <b>{websitesFrom.amount}</b>, written quotation before any work starts
+          </p>
+        ) : null
+      }
     </div>
-  </div>
-  <div class="container-wide">
-    <RouteIndex divisions={divisions} />
+    <HeroWidgets />
   </div>
 </section>

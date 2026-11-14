@@ -1,0 +1,67 @@
+---
+/**
+ * The hero's overlay widgets (R9.6): one labelled illustration made of three layers, each a real client-workspace feature with
+ * fictional demo values: (1) a small workspace window with its dock, (2) the project-status card with the milestone strip,
+ * (3) the payment-method chip row of the invoice. Drawn in code (BRIEF B.4a), decorative children, one accessible label.
+ */
+const steps = [
+  { label: 'Plan', state: 'done' },
+  { label: 'Design', state: 'done' },
+  { label: 'Build', state: 'now' },
+  { label: 'Launch', state: 'next' },
+] as const;
+const dock = [
+  { label: 'Projects', n: '1', on: true },
+  { label: 'Quotations', n: '', on: false },
+  { label: 'Invoices', n: '1', on: false },
+  { label: 'Support', n: '', on: false },
+];
+const methods = ['EcoCash', 'OneMoney', 'InnBucks', 'Card'];
+---
+
+<div
+  class="kz-hw"
+  role="img"
+  aria-label="Illustration of the Kuzikode client workspace: a website project on its build milestone, on track, and an invoice that can be paid with EcoCash, OneMoney, InnBucks or card."
+  data-enter="3"
+>
+  <div class="kz-hw__win" aria-hidden="true">
+    <div class="kz-hw__bar">
+      <b>Client workspace</b>
+      <span>Mon 09:42</span>
+    </div>
+    <div class="kz-hw__body">
+      <ul class="kz-hw__dock">
+        {
+          dock.map((d) => (
+            <li class:list={[d.on && 'is-on']}>
+              {d.label}
+              {d.n ? <i>{d.n}</i> : null}
+            </li>
+          ))
+        }
+      </ul>
+      <div class="kz-hw__log">
+        <span><small>Fri</small>Invoice for milestone 2 issued</span>
+        <span><small>Wed</small>Page designs approved</span>
+        <span><small>Mon</small>Weekly update posted</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="kz-hw__status" aria-hidden="true">
+    <div class="kz-hw__status-top">
+      <span class="kz-hw__ok">On track</span>
+      <span>Milestone 3 of 4</span>
+    </div>
+    <b class="kz-hw__project">Company website</b>
+    <ol class="kz-hw__steps">
+      {steps.map((s) => <li class={`is-${s.state}`}>{s.label}</li>)}
+    </ol>
+  </div>
+
+  <div class="kz-hw__pay" aria-hidden="true">
+    <small>Pay invoice with</small>
+    <span class="kz-hw__chips">{methods.map((m) => <span>{m}</span>)}</span>
+  </div>
+</div>

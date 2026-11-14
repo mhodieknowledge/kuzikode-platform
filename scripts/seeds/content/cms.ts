@@ -20,7 +20,7 @@ export const PAGES: PageSeed[] = [
   {
     key: 'home',
     title: 'Home',
-    seoTitle: 'Kuzikode Intelligent Technologies · Building intelligent digital solutions',
+    seoTitle: 'Kuzikode Intelligent Technologies · Intelligent digital solutions',
     seoDescription:
       'Kuzikode designs, builds and runs websites, apps and business software for organisations in Zimbabwe and across Africa.',
     sections: [

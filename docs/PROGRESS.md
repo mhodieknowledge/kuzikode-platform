@@ -147,3 +147,9 @@ The **Next step** line must be specific enough that a fresh session can continue
 - Left: Work/Voices only moved (hidden without data); new home photos not requested (existing HOME_IMAGES reused).
 - Open: CI e2e red on main (legal footer links, users-admin axe, sweep admin) -> fix in worktree branch `worktree-agent-a5b550a603e2c585e`, merge when done.
 - Next step: merge the e2e fix, confirm full e2e green, then R8.1 (sweep subagent), R8.2, R8.3.
+
+## 2026-11-14 R8.1 visual QA done
+- Sweep: overflow 0, taps 397 -> 19, type hits 580 (captions, by decision). Report in docs/redesign/QA_REPORT.md.
+- Fixes: checkbox rows with help text are one 44px label target; admin inputs min-width 0 (careers 1024 overflow); contact quick buttons padding.
+- Key pages read at 390 + 1440; web-design-guidelines + impeccable detect passes clean.
+- Tiers: sonnet/low. Next: R8.2 functional regression.

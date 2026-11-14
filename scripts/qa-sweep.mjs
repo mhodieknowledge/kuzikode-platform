@@ -287,6 +287,11 @@ function measure({ phone, touch }) {
         if (lab) {
           const lr = lab.getBoundingClientRect();
           if (lr.width >= 44 && lr.height >= 44) continue;
+          const row = lab.closest('.kz-acheck');
+          if (row) {
+            const rr = row.getBoundingClientRect();
+            if (rr.width >= 44 && rr.height >= 44) continue; // label stretched over the whole row
+          }
         }
       }
       if (v.r.width < 44 || v.r.height < 44) {

@@ -119,7 +119,7 @@ the home screen but starting it afresh, just the home screen."* **Scope: only `/
 - [x] **R7.2 Motion pass (trimmed 2026-11-13 to save usage).** One pass on the public pages only: `review-animations` + `animation-performance` on the home, services, pricing and checkout flows; fix what they flag; `remove-animations` where motion is excessive. Skip `find-animation-opportunities` and `improve-animations`. Run as a fresh `sonnet`/`medium` subagent; you review.
 
 ## R8: QA and finish
-- [ ] **R8.1 Visual QA, lean version (owner approved trimming, 2026-11-13).** (1) A `sonnet`/`low` subagent runs the automated sweep over every page, the
+- [x] **R8.1 Visual QA, lean version (owner approved trimming, 2026-11-13).** (1) A `sonnet`/`low` subagent runs the automated sweep over every page, the
   workspace and admin at all 10 viewports: horizontal overflow, B.1a type limits, tap targets (≥44 px), broken or missing images, console errors,
   `prefers-reduced-motion`. (2) Read screenshots only for flagged pages plus the key pages (home, pricing, contact, checkout, workspace overview,
   admin dashboard) at 390 first, then 1440. (3) One `impeccable` audit and one `web-design-guidelines` pass over the whole site. (4) Fix what's found.

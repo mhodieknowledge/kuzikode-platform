@@ -3476,8 +3476,19 @@
 
   /* Role / permission checklists with a description under each name. */
   .kz-acheck.has-d {
+    position: relative;
     align-items: flex-start;
     padding-block: 8px;
+  }
+  /* The name label covers the whole row, so the row is one 44px+ hit target. */
+  .kz-acheck.has-d .kz-acheck__n::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .kz-amain .kz-field .kz-input {
+    min-width: 0;
+    max-width: 100%;
   }
   .kz-acheck.has-d input {
     margin-top: 2px;

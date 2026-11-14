@@ -189,3 +189,46 @@ NOT covered by the existing sweep (no spec exists, so not measured): the 10-view
 
 ### Flagged pages with viewport + selector
 None flagged by the existing sweep.
+
+## 2026-11-14 · R8.1 full sweep
+
+Tool: `node scripts/qa-sweep.mjs` (standalone Playwright/chromium, reduced-motion emulated, 10 BRIEF B.2 viewports, same route list and logins as `tests/e2e/sweep.spec.ts`; prereq: e2e fixtures in local D1). Raw data: `qa-sweep.json` (not committed). **130 routes** (public 36 incl. 404, portal 15, admin 79), 6 skipped (no seeded record), 1300 route-viewport measurements. Phone limits apply at 360-430 px; tap-target check at <=1024 px (inline text links exempt, skip link exempt).
+
+### Totals (hits = route x viewport x element)
+| Check | Hits | Notes |
+|---|---|---|
+| HTTP >= 400 (excluding the intentional 404 page) | 0 | |
+| Horizontal overflow (document scroll) | 18 | 5 routes, see below |
+| H1 > 38px / H2 > 30px / H1 > 4 or H2 > 3 lines | 0 | B.1a headings all pass |
+| Body text < 16px (p/li, phones) | 725 | 44 causes |
+| Button label wraps to 2+ lines (phones) | 689 | 23 causes |
+| Interactive element < 44x44 (touch viewports) | 3381 | 347 selectors |
+| Broken / zero-size images | 0 | |
+| Console / page errors | 1 | the 404 page's own 404 resource line, expected |
+| Infinite animations running under reduced motion | 0 | |
+
+### Overflow (18 hits)
+- `/` hero `ul.hm-chips > li` at 360/375/412 and `div.hm-marquee > ul.hm-marquee__row` at 1024 (scrollWidth over by up to 900 px; check the chips track and marquee need `overflow:hidden`/`contain` on the parent).
+- 404 page `section.kz-lost > div.kz-lost__text` at all 5 phones (113 px over).
+- `/industries/` `ol.kz-iidx__list > li` at 1024 (373 px).
+- `/admin/expenses/report` `form.kz-aperiod label.kz-label` at 360 (5 px).
+
+### Flagged, grouped by cause (batchable)
+**A. Button label wraps on phones (689)**
+- Admin Radix select/trigger buttons `button#radix-*` (every admin list/filter bar, 205+80+40+25+20 hits, e.g. `/admin/leads/` @360, `/admin/account/security` @360): trigger text wraps to 2 lines.
+- `a.kz-btn.kz-btn--block` in the plan cards of `/services/websites` and two other service pages (175 hits, all 5 phones, "2 lines"): plan CTA label too long for the card.
+- Remaining ~170 hits are single `kz-btn` instances (e.g. newsletter submit in footer `/` @360).
+
+**B. Admin chrome tap targets (admin, ~1100 hits on 83 pages)**
+- `a.kz-abar__home` 40x44 (420 hits, phones), `button.kz-afind` 416x40 / 40px high (168), `button.kz-abtn.kz-abell` 36x36 (84), `button.kz-aside__toggle` 227x36 (84), `button.kz-btn.kz-btn--secondary/primary` height 40 in `.kz-authform__bar` at 768/1024 (85).
+- Fix once in the admin shell/button size tokens (min-height 44 on touch).
+
+**C. Public footer and inline-flex links under 44 px (public 154 + admin 206 hits, 105 pages)**
+- Bare `a` in `.kz-footer__value--pair` (WhatsApp/phone line, 148x27) and other footer/link-list `a` (heights 20-28 px). Add padding/min-height to footer link lists.
+
+**D. Body text under 16 px on phones (725)**
+- `p.kz-ahead__meta` 14px (admin, 24 pages, 120), `p.kz-footer__blurb` 15px (public, 22 pages, 110), `p.kz-afsec__desc` 13px (admin, 18 pages, 90), `p.kz-wshead__sub` 15px (portal, 7 pages, 35), `p.kz-hint` 13-14px (consultation + admin forms, 30), `p.kz-apad.kz-hint` 13px (admin settings, 20). Captions/hints may be intentionally 12-13 px per B.1a, so decide per class; footer blurb and workspace subtitle are real body copy.
+
+**E. Overflow culprits** as listed above (home hero chips/marquee, 404 page, industries index at 1024).
+
+Skipped (no record): /work/<slug>, /insights/tag/<slug>, /admin/time/bill/<id>, /admin/support/sup_<id>, /admin/careers/applications/app_<id>, /portal/support/sup_<id>.

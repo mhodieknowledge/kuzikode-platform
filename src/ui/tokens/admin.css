@@ -3491,6 +3491,8 @@
     max-width: 100%;
   }
   .kz-acheck.has-d input {
+    position: relative;
+    z-index: 1;
     margin-top: 2px;
   }
   .kz-acheck__d {
